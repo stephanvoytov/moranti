@@ -28,6 +28,7 @@
 .tmp/
 
 # project instructions (not source code)
+CLAUDE.md
 AGENTS.md
 .opencode/
 
