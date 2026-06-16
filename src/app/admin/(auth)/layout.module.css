@@ -1,0 +1,21 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--card-bg);
+}
+
+.content {
+  flex: 1;
+  padding: var(--space-lg);
+  margin-left: 240px;
+  max-width: calc(100vw - 240px);
+}
+
+@media (max-width: 768px) {
+  .content {
+    margin-left: 0;
+    padding: var(--space-md);
+    max-width: 100%;
+    padding-top: 60px;
+  }
+}

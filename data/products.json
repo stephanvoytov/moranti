@@ -1,0 +1,2607 @@
+{
+  "meta": {
+    "count": 113,
+    "source": "Wildberries (https://www.wildberries.ru/brands/moranti)",
+    "collected": "2026-06-16",
+    "lastModified": "2026-06-16"
+  },
+  "categories": [
+    {
+      "slug": "tote",
+      "name": "Tote",
+      "description": "Просторные сумки из натуральной кожи",
+      "image": "/images/category-tote.jpg",
+      "count": 28
+    },
+    {
+      "slug": "shoulder",
+      "name": "Shoulder",
+      "description": "Сумки через плечо",
+      "image": "/images/category-shoulder.jpg",
+      "count": 40
+    },
+    {
+      "slug": "backpack",
+      "name": "Рюкзаки",
+      "description": "Практичные кожаные рюкзаки",
+      "image": "/images/category-backpack.jpg",
+      "count": 10
+    },
+    {
+      "slug": "baguette",
+      "name": "Багет",
+      "description": "Актуальные сумки-багет",
+      "image": "/images/category-baguette.jpg",
+      "count": 7
+    },
+    {
+      "slug": "mini",
+      "name": "Маленькие",
+      "description": "Компактные и вечерние сумки",
+      "image": "/images/category-mini.jpg",
+      "count": 20
+    },
+    {
+      "slug": "evening",
+      "name": "Вечерние",
+      "description": "Элегантные вечерние модели",
+      "image": "/images/category-evening.jpg",
+      "count": 4
+    },
+    {
+      "slug": "saddle",
+      "name": "Седло",
+      "description": "Сумки формы «седло»",
+      "image": "/images/category-saddle.jpg",
+      "count": 4
+    }
+  ],
+  "products": [
+    {
+      "id": "mor-001",
+      "slug": "wb-969008238",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 9653,
+      "originalPrice": 25000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol9690/part969008/969008238/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9690/part969008/969008238/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/969008238/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 969008238
+    },
+    {
+      "id": "mor-002",
+      "slug": "wb-584878143",
+      "name": "Сумка большая натуральная кожа Италия",
+      "price": 11135,
+      "originalPrice": 25300,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584878/584878143/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584878/584878143/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/584878143/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 584878143
+    },
+    {
+      "id": "mor-003",
+      "slug": "wb-899321020",
+      "name": "Сумка рюкзак большая натуральная кожа Италия",
+      "price": 11120,
+      "originalPrice": 20000,
+      "currency": "₽",
+      "category": "backpack",
+      "description": "Рюкзак из натуральной кожи. Сочетает практичность и стиль.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899321/899321020/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899321/899321020/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/899321020/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 899321020
+    },
+    {
+      "id": "mor-004",
+      "slug": "wb-261294903",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 9691,
+      "originalPrice": 25100,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol2612/part261294/261294903/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2612/part261294/261294903/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/261294903/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 261294903,
+      "rating": 4.8,
+      "reviewsCount": 25
+    },
+    {
+      "id": "mor-005",
+      "slug": "wb-462990511",
+      "name": "Сумка натуральная замша Италия",
+      "price": 9047,
+      "originalPrice": 20200,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/462990511/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 462990511,
+      "rating": 4.8,
+      "reviewsCount": 13
+    },
+    {
+      "id": "mor-006",
+      "slug": "wb-462991980",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 7406,
+      "originalPrice": 20350,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462991/462991980/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462991/462991980/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/462991980/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 462991980
+    },
+    {
+      "id": "mor-007",
+      "slug": "wb-391150373",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 9203,
+      "originalPrice": 20200,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391150/391150373/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391150/391150373/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/391150373/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 391150373,
+      "rating": 4.7,
+      "reviewsCount": 21
+    },
+    {
+      "id": "mor-008",
+      "slug": "wb-253032445",
+      "name": "Cумка багет натуральная кожа",
+      "price": 8833,
+      "originalPrice": 22000,
+      "currency": "₽",
+      "category": "baguette",
+      "description": "Сумка-багет из натуральной кожи. Актуальный силуэт.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol2530/part253032/253032445/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2530/part253032/253032445/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/253032445/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 253032445
+    },
+    {
+      "id": "mor-009",
+      "slug": "wb-969189657",
+      "name": "Сумка через плечо кожаная",
+      "price": 11583,
+      "originalPrice": 25000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Удобная сумка через плечо из натуральной кожи. Регулируемый ремешок.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969189/969189657/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969189/969189657/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/969189657/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 969189657
+    },
+    {
+      "id": "mor-010",
+      "slug": "wb-226025376",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 9920,
+      "originalPrice": 22150,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226025/226025376/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226025/226025376/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/226025376/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 226025376,
+      "rating": 4.8,
+      "reviewsCount": 20
+    },
+    {
+      "id": "mor-011",
+      "slug": "wb-584856106",
+      "name": "Сумка натуральная замша Италия",
+      "price": 10272,
+      "originalPrice": 25100,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584856/584856106/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584856/584856106/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/584856106/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 584856106,
+      "rating": 4.9,
+      "reviewsCount": 7
+    },
+    {
+      "id": "mor-012",
+      "slug": "wb-577159834",
+      "name": "Сумка через плечо кожаная Италия",
+      "price": 7415,
+      "originalPrice": 19200,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Удобная сумка через плечо из натуральной кожи. Регулируемый ремешок.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol5771/part577159/577159834/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5771/part577159/577159834/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/577159834/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 577159834
+    },
+    {
+      "id": "mor-013",
+      "slug": "wb-584864653",
+      "name": "Сумка большая натуральная замша Италия",
+      "price": 12805,
+      "originalPrice": 30150,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной замши. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584864/584864653/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584864/584864653/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/584864653/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 584864653,
+      "rating": 4.5,
+      "reviewsCount": 11
+    },
+    {
+      "id": "mor-014",
+      "slug": "wb-899355983",
+      "name": "Сумка большая натуральная замша Италия",
+      "price": 13436,
+      "originalPrice": 30000,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной замши. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/899355983/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 899355983
+    },
+    {
+      "id": "mor-015",
+      "slug": "wb-584881064",
+      "name": "Сумка большая натуральная кожа Италия",
+      "price": 13870,
+      "originalPrice": 25300,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/584881064/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 584881064
+    },
+    {
+      "id": "mor-016",
+      "slug": "wb-253053689",
+      "name": "Сумка средняя седло натуральная кожа",
+      "price": 9543,
+      "originalPrice": 22470,
+      "currency": "₽",
+      "category": "saddle",
+      "description": "Сумка формы «седло» из натуральной кожи. Универсальный вариант.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol2530/part253053/253053689/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2530/part253053/253053689/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/253053689/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 253053689,
+      "rating": 4.6,
+      "reviewsCount": 15
+    },
+    {
+      "id": "mor-017",
+      "slug": "wb-462993756",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 10867,
+      "originalPrice": 25130,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462993/462993756/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462993/462993756/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/462993756/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 462993756,
+      "rating": 4.7,
+      "reviewsCount": 16
+    },
+    {
+      "id": "mor-018",
+      "slug": "wb-253051367",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 9832,
+      "originalPrice": 23150,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol2530/part253051/253051367/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2530/part253051/253051367/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/253051367/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 253051367,
+      "rating": 4.9,
+      "reviewsCount": 51
+    },
+    {
+      "id": "mor-019",
+      "slug": "wb-462984217",
+      "name": "Сумка багет натуральная кожа",
+      "price": 8648,
+      "originalPrice": 20000,
+      "currency": "₽",
+      "category": "baguette",
+      "description": "Сумка-багет из натуральной кожи. Актуальный силуэт.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462984/462984217/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462984/462984217/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/462984217/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 462984217
+    },
+    {
+      "id": "mor-020",
+      "slug": "wb-584837180",
+      "name": "Сумка маленькая вечерняя натуральная кожа Италия",
+      "price": 9002,
+      "originalPrice": 20100,
+      "currency": "₽",
+      "category": "evening",
+      "description": "Элегантная вечерняя сумка из натуральной кожи. Для особых случаев.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/584837180/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 584837180,
+      "rating": 4.2,
+      "reviewsCount": 6
+    },
+    {
+      "id": "mor-021",
+      "slug": "wb-463001457",
+      "name": "Сумка натуральная замша Италия",
+      "price": 12509,
+      "originalPrice": 30000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/463001457/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 463001457,
+      "rating": 4.5,
+      "reviewsCount": 32
+    },
+    {
+      "id": "mor-022",
+      "slug": "wb-584857819",
+      "name": "Сумка натуральная замша Италия",
+      "price": 10618,
+      "originalPrice": 25000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584857/584857819/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584857/584857819/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/584857819/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 584857819,
+      "rating": 4.7,
+      "reviewsCount": 9
+    },
+    {
+      "id": "mor-023",
+      "slug": "wb-119833702",
+      "name": "Сумка большая натуральная кожа",
+      "price": 10598,
+      "originalPrice": 22500,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol1198/part119833/119833702/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol1198/part119833/119833702/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/119833702/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 119833702,
+      "rating": 4.6,
+      "reviewsCount": 155
+    },
+    {
+      "id": "mor-024",
+      "slug": "wb-185673251",
+      "name": "Сумка через плечо кожаная Италия",
+      "price": 7905,
+      "originalPrice": 19200,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Удобная сумка через плечо из натуральной кожи. Регулируемый ремешок.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol1856/part185673/185673251/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol1856/part185673/185673251/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/185673251/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 185673251,
+      "rating": 4.8,
+      "reviewsCount": 31
+    },
+    {
+      "id": "mor-025",
+      "slug": "wb-899375103",
+      "name": "Сумка маленькая вечерняя натуральная кожа Италия",
+      "price": 10039,
+      "originalPrice": 20000,
+      "currency": "₽",
+      "category": "evening",
+      "description": "Элегантная вечерняя сумка из натуральной кожи. Для особых случаев.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899375/899375103/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899375/899375103/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/899375103/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 899375103
+    },
+    {
+      "id": "mor-026",
+      "slug": "wb-445415947",
+      "name": "Сумка большая натуральная кожа",
+      "price": 10447,
+      "originalPrice": 22550,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol4454/part445415/445415947/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4454/part445415/445415947/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/445415947/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 445415947,
+      "rating": 4.2,
+      "reviewsCount": 19
+    },
+    {
+      "id": "mor-027",
+      "slug": "wb-899303821",
+      "name": "Сумка рюкзак большая натуральная кожа",
+      "price": 10965,
+      "originalPrice": 20000,
+      "currency": "₽",
+      "category": "backpack",
+      "description": "Рюкзак из натуральной кожи. Сочетает практичность и стиль.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899303/899303821/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899303/899303821/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/899303821/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 899303821
+    },
+    {
+      "id": "mor-028",
+      "slug": "wb-391176745",
+      "name": "Сумка маленькая натуральная замша Италия",
+      "price": 9884,
+      "originalPrice": 20000,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной замши. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/391176745/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 391176745,
+      "rating": 4.6,
+      "reviewsCount": 17
+    },
+    {
+      "id": "mor-029",
+      "slug": "wb-969020680",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 9846,
+      "originalPrice": 25000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol9690/part969020/969020680/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9690/part969020/969020680/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/969020680/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 969020680
+    },
+    {
+      "id": "mor-030",
+      "slug": "wb-584882297",
+      "name": "Сумка большая натуральная замша Италия",
+      "price": 13783,
+      "originalPrice": 35000,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной замши. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584882/584882297/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584882/584882297/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/584882297/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 584882297
+    },
+    {
+      "id": "mor-031",
+      "slug": "wb-969265618",
+      "name": "Сумка через плечо натуральная замша Итаия",
+      "price": 12162,
+      "originalPrice": 25000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Удобная сумка через плечо из натуральной замши. Регулируемый ремешок.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/969265618/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 969265618
+    },
+    {
+      "id": "mor-032",
+      "slug": "wb-253033047",
+      "name": "Сумка багет натуральная кожа",
+      "price": 9852,
+      "originalPrice": 22000,
+      "currency": "₽",
+      "category": "baguette",
+      "description": "Сумка-багет из натуральной кожи. Актуальный силуэт.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol2530/part253033/253033047/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2530/part253033/253033047/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/253033047/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 253033047,
+      "rating": 4.9,
+      "reviewsCount": 41
+    },
+    {
+      "id": "mor-033",
+      "slug": "wb-899315968",
+      "name": "Сумка рюкзак большая натуральная кожа",
+      "price": 10965,
+      "originalPrice": 20000,
+      "currency": "₽",
+      "category": "backpack",
+      "description": "Рюкзак из натуральной кожи. Сочетает практичность и стиль.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/899315968/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 899315968
+    },
+    {
+      "id": "mor-034",
+      "slug": "wb-391159701",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 7425,
+      "originalPrice": 24680,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391159/391159701/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391159/391159701/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/391159701/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 391159701,
+      "rating": 3.6,
+      "reviewsCount": 5
+    },
+    {
+      "id": "mor-035",
+      "slug": "wb-584839195",
+      "name": "Сумка маленькая вечерняя натуральная замша Италия",
+      "price": 9575,
+      "originalPrice": 20000,
+      "currency": "₽",
+      "category": "evening",
+      "description": "Элегантная вечерняя сумка из натуральной замши. Для особых случаев.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584839/584839195/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584839/584839195/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/584839195/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 584839195,
+      "rating": 4.8,
+      "reviewsCount": 6
+    },
+    {
+      "id": "mor-036",
+      "slug": "wb-445414843",
+      "name": "Сумка маленькая натуральная замша Италия",
+      "price": 8494,
+      "originalPrice": 20000,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной замши. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol4454/part445414/445414843/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4454/part445414/445414843/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/445414843/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 445414843
+    },
+    {
+      "id": "mor-037",
+      "slug": "wb-328031735",
+      "name": "Сумка натуральная замша Италия",
+      "price": 12741,
+      "originalPrice": 30000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/328031735/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 328031735,
+      "rating": 4.3,
+      "reviewsCount": 9
+    },
+    {
+      "id": "mor-038",
+      "slug": "wb-969025312",
+      "name": "Сумка натуральная замша Италия",
+      "price": 9846,
+      "originalPrice": 25000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol9690/part969025/969025312/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9690/part969025/969025312/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/969025312/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 969025312
+    },
+    {
+      "id": "mor-039",
+      "slug": "wb-969257682",
+      "name": "Сумка через плечо кожаная Италия",
+      "price": 11583,
+      "originalPrice": 25000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Удобная сумка через плечо из натуральной кожи. Регулируемый ремешок.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969257/969257682/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969257/969257682/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/969257682/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 969257682
+    },
+    {
+      "id": "mor-040",
+      "slug": "wb-391198267",
+      "name": "Сумка маленькая натуральная замша Италия",
+      "price": 9884,
+      "originalPrice": 20000,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной замши. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391198/391198267/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391198/391198267/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/391198267/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 391198267,
+      "rating": 4.9,
+      "reviewsCount": 11
+    },
+    {
+      "id": "mor-041",
+      "slug": "wb-462987423",
+      "name": "Сумка большая натуральная кожа",
+      "price": 10763,
+      "originalPrice": 20200,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462987/462987423/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462987/462987423/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/462987423/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 462987423,
+      "rating": 4.6,
+      "reviewsCount": 25
+    },
+    {
+      "id": "mor-042",
+      "slug": "wb-226020314",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 11729,
+      "originalPrice": 24500,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226020/226020314/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226020/226020314/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/226020314/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 226020314,
+      "rating": 4.8,
+      "reviewsCount": 27
+    },
+    {
+      "id": "mor-043",
+      "slug": "wb-165436666",
+      "name": "Сумка через плечо кожаная Италия",
+      "price": 8509,
+      "originalPrice": 19000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Удобная сумка через плечо из натуральной кожи. Регулируемый ремешок.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol1654/part165436/165436666/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol1654/part165436/165436666/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/165436666/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 165436666
+    },
+    {
+      "id": "mor-044",
+      "slug": "wb-165436665",
+      "name": "Сумка через плечо кожаная Италия",
+      "price": 8803,
+      "originalPrice": 19000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Удобная сумка через плечо из натуральной кожи. Регулируемый ремешок.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol1654/part165436/165436665/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol1654/part165436/165436665/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/165436665/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 165436665
+    },
+    {
+      "id": "mor-045",
+      "slug": "wb-226023435",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 10533,
+      "originalPrice": 22000,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226023/226023435/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226023/226023435/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/226023435/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 226023435,
+      "rating": 4.5,
+      "reviewsCount": 16
+    },
+    {
+      "id": "mor-046",
+      "slug": "wb-969253912",
+      "name": "Сумка через плечо кожаная Италия",
+      "price": 11969,
+      "originalPrice": 25000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Удобная сумка через плечо из натуральной кожи. Регулируемый ремешок.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969253/969253912/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969253/969253912/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/969253912/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 969253912
+    },
+    {
+      "id": "mor-047",
+      "slug": "wb-899312868",
+      "name": "Сумка рюкзак большая натуральная кожа",
+      "price": 10656,
+      "originalPrice": 20000,
+      "currency": "₽",
+      "category": "backpack",
+      "description": "Рюкзак из натуральной кожи. Сочетает практичность и стиль.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899312/899312868/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899312/899312868/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/899312868/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 899312868
+    },
+    {
+      "id": "mor-048",
+      "slug": "wb-391171927",
+      "name": "Сумка большая натуральная замша Италия",
+      "price": 13668,
+      "originalPrice": 30000,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной замши. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391171/391171927/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391171/391171927/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/391171927/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 391171927,
+      "rating": 4.9,
+      "reviewsCount": 14
+    },
+    {
+      "id": "mor-049",
+      "slug": "wb-226024975",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 10192,
+      "originalPrice": 22000,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226024/226024975/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226024/226024975/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/226024975/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 226024975,
+      "rating": 4.7,
+      "reviewsCount": 21
+    },
+    {
+      "id": "mor-050",
+      "slug": "wb-584838455",
+      "name": "Сумка маленькая вечерняя натуральная кожа Италия",
+      "price": 7391,
+      "originalPrice": 19900,
+      "currency": "₽",
+      "category": "evening",
+      "description": "Элегантная вечерняя сумка из натуральной кожи. Для особых случаев.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584838/584838455/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584838/584838455/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/584838455/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 584838455,
+      "rating": 3.5,
+      "reviewsCount": 2
+    },
+    {
+      "id": "mor-051",
+      "slug": "wb-144391368",
+      "name": "Сумка большая натуральная кожа",
+      "price": 11011,
+      "originalPrice": 23000,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol1443/part144391/144391368/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol1443/part144391/144391368/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/144391368/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 144391368,
+      "rating": 4.9,
+      "reviewsCount": 34
+    },
+    {
+      "id": "mor-052",
+      "slug": "wb-969260081",
+      "name": "Сумка через плечо замшевая Италия",
+      "price": 12162,
+      "originalPrice": 25000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Удобная сумка через плечо из натуральной кожи. Регулируемый ремешок.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969260/969260081/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969260/969260081/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/969260081/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 969260081
+    },
+    {
+      "id": "mor-053",
+      "slug": "wb-969178673",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 9114,
+      "originalPrice": 20350,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969178/969178673/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969178/969178673/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/969178673/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 969178673
+    },
+    {
+      "id": "mor-054",
+      "slug": "wb-328035699",
+      "name": "Сумка натуральная замша Италия",
+      "price": 12741,
+      "originalPrice": 30000,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328035/328035699/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328035/328035699/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/328035699/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 328035699,
+      "rating": 4.7,
+      "reviewsCount": 25
+    },
+    {
+      "id": "mor-055",
+      "slug": "wb-1123459547",
+      "name": "Сумка большая натуральная кожа Италия",
+      "price": 11004,
+      "originalPrice": 22469,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459547/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459547/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459547/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459547
+    },
+    {
+      "id": "mor-056",
+      "slug": "wb-1123459546",
+      "name": "Сумка большая натуральная замша Италия",
+      "price": 11004,
+      "originalPrice": 22469,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной замши. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459546/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459546/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459546/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459546
+    },
+    {
+      "id": "mor-057",
+      "slug": "wb-1123459657",
+      "name": "Сумка натуральная замша Италия",
+      "price": 10371,
+      "originalPrice": 21176,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459657/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459657/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459657/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459657
+    },
+    {
+      "id": "mor-058",
+      "slug": "wb-1123454843",
+      "name": "Сумка маленькая натуральная замша Италия",
+      "price": 9980,
+      "originalPrice": 20378,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной замши. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454843/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454843/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454843/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454843
+    },
+    {
+      "id": "mor-059",
+      "slug": "wb-1123459548",
+      "name": "Сумка большая натуральная замша Италия",
+      "price": 11004,
+      "originalPrice": 22469,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной замши. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459548/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459548/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459548/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459548
+    },
+    {
+      "id": "mor-060",
+      "slug": "wb-1123454690",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 10080,
+      "originalPrice": 20580,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454690/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454690/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454690/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454690
+    },
+    {
+      "id": "mor-061",
+      "slug": "wb-1123454845",
+      "name": "Сумка маленькая натуральная замша Италия",
+      "price": 9980,
+      "originalPrice": 20378,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной замши. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454845/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454845/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454845/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454845
+    },
+    {
+      "id": "mor-062",
+      "slug": "wb-1123454844",
+      "name": "Сумка маленькая натуральная замша Италия",
+      "price": 8576,
+      "originalPrice": 17512,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной замши. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454844/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454844/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454844/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454844
+    },
+    {
+      "id": "mor-063",
+      "slug": "wb-1123459397",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 10976,
+      "originalPrice": 22412,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459397/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459397/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459397/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459397
+    },
+    {
+      "id": "mor-064",
+      "slug": "wb-1123459613",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 9733,
+      "originalPrice": 19872,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459613/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459613/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459613/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459613
+    },
+    {
+      "id": "mor-065",
+      "slug": "wb-1123459321",
+      "name": "Сумка через плечо кожаная",
+      "price": 7475,
+      "originalPrice": 15264,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Удобная сумка через плечо из натуральной кожи. Регулируемый ремешок.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459321/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459321/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459321/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459321
+    },
+    {
+      "id": "mor-066",
+      "slug": "wb-1123454794",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 10465,
+      "originalPrice": 21367,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454794/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454794/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454794/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454794
+    },
+    {
+      "id": "mor-067",
+      "slug": "wb-1123454888",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 10635,
+      "originalPrice": 21715,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454888/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454888/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454888/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454888
+    },
+    {
+      "id": "mor-068",
+      "slug": "wb-1123459549",
+      "name": "Сумка большая натуральная кожа Италия",
+      "price": 11246,
+      "originalPrice": 22963,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459549/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459549/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459549/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459549
+    },
+    {
+      "id": "mor-069",
+      "slug": "wb-1123459394",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 9788,
+      "originalPrice": 19985,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459394/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459394/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459394/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459394
+    },
+    {
+      "id": "mor-070",
+      "slug": "wb-1123459658",
+      "name": "Сумка натуральная замша Италия",
+      "price": 11115,
+      "originalPrice": 22693,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459658/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459658/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459658/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459658
+    },
+    {
+      "id": "mor-071",
+      "slug": "wb-1123454814",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 11742,
+      "originalPrice": 23975,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454814/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454814/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454814/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454814
+    },
+    {
+      "id": "mor-072",
+      "slug": "wb-1123454813",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 9788,
+      "originalPrice": 19985,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454813/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454813/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454813/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454813
+    },
+    {
+      "id": "mor-073",
+      "slug": "wb-1123459395",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 11742,
+      "originalPrice": 23975,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459395/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459395/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459395/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459395
+    },
+    {
+      "id": "mor-074",
+      "slug": "wb-1123454815",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 10976,
+      "originalPrice": 22412,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454815/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454815/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454815/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454815
+    },
+    {
+      "id": "mor-075",
+      "slug": "wb-1123454792",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 10635,
+      "originalPrice": 21715,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454792/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454792/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454792/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454792
+    },
+    {
+      "id": "mor-076",
+      "slug": "wb-1123454659",
+      "name": "Сумка большая натуральная кожа",
+      "price": 10553,
+      "originalPrice": 21547,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454659/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454659/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454659/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454659
+    },
+    {
+      "id": "mor-077",
+      "slug": "wb-1123454657",
+      "name": "Сумка большая натуральная кожа",
+      "price": 11120,
+      "originalPrice": 22705,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454657/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454657/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454657/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454657
+    },
+    {
+      "id": "mor-078",
+      "slug": "wb-1123454791",
+      "name": "Сумка средняя седло натуральная кожа",
+      "price": 9639,
+      "originalPrice": 19681,
+      "currency": "₽",
+      "category": "saddle",
+      "description": "Сумка формы «седло» из натуральной кожи. Универсальный вариант.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454791/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454791/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454791/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454791
+    },
+    {
+      "id": "mor-079",
+      "slug": "wb-1123459396",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 11847,
+      "originalPrice": 24188,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459396/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459396/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459396/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459396
+    },
+    {
+      "id": "mor-080",
+      "slug": "wb-1123454793",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 10019,
+      "originalPrice": 20457,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454793/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454793/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454793/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454793
+    },
+    {
+      "id": "mor-081",
+      "slug": "wb-1123459612",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 9931,
+      "originalPrice": 20277,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459612/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459612/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459612/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459612
+    },
+    {
+      "id": "mor-082",
+      "slug": "wb-1123459463",
+      "name": "Сумка багет натуральная кожа",
+      "price": 8736,
+      "originalPrice": 17838,
+      "currency": "₽",
+      "category": "baguette",
+      "description": "Сумка-багет из натуральной кожи. Актуальный силуэт.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459463/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459463/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459463/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459463
+    },
+    {
+      "id": "mor-083",
+      "slug": "wb-1123454658",
+      "name": "Сумка большая натуральная кожа",
+      "price": 10701,
+      "originalPrice": 21850,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454658/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454658/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454658/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454658
+    },
+    {
+      "id": "mor-084",
+      "slug": "wb-1123459465",
+      "name": "Сумка багет натуральная кожа",
+      "price": 9204,
+      "originalPrice": 18793,
+      "currency": "₽",
+      "category": "baguette",
+      "description": "Сумка-багет из натуральной кожи. Актуальный силуэт.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459465/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459465/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459465/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459465
+    },
+    {
+      "id": "mor-085",
+      "slug": "wb-1123454660",
+      "name": "Сумка большая натуральная кожа",
+      "price": 10872,
+      "originalPrice": 22199,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454660/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454660/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454660/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454660
+    },
+    {
+      "id": "mor-086",
+      "slug": "wb-1123459462",
+      "name": "Сумка багет натуральная кожа",
+      "price": 9952,
+      "originalPrice": 20322,
+      "currency": "₽",
+      "category": "baguette",
+      "description": "Сумка-багет из натуральной кожи. Актуальный силуэт.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459462/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459462/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459462/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459462
+    },
+    {
+      "id": "mor-087",
+      "slug": "wb-1138608675",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 10276,
+      "originalPrice": 15286,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138608/1138608675/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138608/1138608675/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138608675/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138608675
+    },
+    {
+      "id": "mor-088",
+      "slug": "wb-1138546181",
+      "name": "Сумка рюкзак большая натуральная кожа Италия",
+      "price": 9958,
+      "originalPrice": 14814,
+      "currency": "₽",
+      "category": "backpack",
+      "description": "Рюкзак из натуральной кожи. Сочетает практичность и стиль.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546181/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546181/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138546181/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138546181
+    },
+    {
+      "id": "mor-089",
+      "slug": "wb-1123454812",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 11847,
+      "originalPrice": 24188,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454812/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123454/1123454812/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123454812/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123454812
+    },
+    {
+      "id": "mor-090",
+      "slug": "wb-1123459464",
+      "name": "Cумка багет натуральная кожа",
+      "price": 8923,
+      "originalPrice": 18220,
+      "currency": "₽",
+      "category": "baguette",
+      "description": "Сумка-багет из натуральной кожи. Актуальный силуэт.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459464/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11234/part1123459/1123459464/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1123459464/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1123459464
+    },
+    {
+      "id": "mor-091",
+      "slug": "wb-1138549393",
+      "name": "Сумка рюкзак большая натуральная кожа Италия",
+      "price": 10578,
+      "originalPrice": 15736,
+      "currency": "₽",
+      "category": "backpack",
+      "description": "Рюкзак из натуральной кожи. Сочетает практичность и стиль.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549393/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549393/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138549393/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138549393
+    },
+    {
+      "id": "mor-092",
+      "slug": "wb-1138546180",
+      "name": "Сумка рюкзак большая натуральная кожа",
+      "price": 9815,
+      "originalPrice": 14601,
+      "currency": "₽",
+      "category": "backpack",
+      "description": "Рюкзак из натуральной кожи. Сочетает практичность и стиль.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546180/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546180/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138546180/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138546180
+    },
+    {
+      "id": "mor-093",
+      "slug": "wb-1138546179",
+      "name": "Сумка рюкзак большая натуральная кожа",
+      "price": 9815,
+      "originalPrice": 14601,
+      "currency": "₽",
+      "category": "backpack",
+      "description": "Рюкзак из натуральной кожи. Сочетает практичность и стиль.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546179/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546179/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138546179/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138546179
+    },
+    {
+      "id": "mor-094",
+      "slug": "wb-1138549391",
+      "name": "Сумка рюкзак большая натуральная кожа",
+      "price": 10427,
+      "originalPrice": 15511,
+      "currency": "₽",
+      "category": "backpack",
+      "description": "Рюкзак из натуральной кожи. Сочетает практичность и стиль.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549391/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549391/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138549391/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138549391
+    },
+    {
+      "id": "mor-095",
+      "slug": "wb-1138608673",
+      "name": "Сумка средняя седло натуральная кожа",
+      "price": 10276,
+      "originalPrice": 15286,
+      "currency": "₽",
+      "category": "saddle",
+      "description": "Сумка формы «седло» из натуральной кожи. Универсальный вариант.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138608/1138608673/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138608/1138608673/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138608673/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138608673
+    },
+    {
+      "id": "mor-096",
+      "slug": "wb-1138546177",
+      "name": "Сумка большая натуральная кожа",
+      "price": 9354,
+      "originalPrice": 13915,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546177/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546177/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138546177/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138546177
+    },
+    {
+      "id": "mor-097",
+      "slug": "wb-1138546176",
+      "name": "Сумка большая натуральная кожа",
+      "price": 9641,
+      "originalPrice": 14342,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546176/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546176/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138546176/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138546176
+    },
+    {
+      "id": "mor-098",
+      "slug": "wb-1138549390",
+      "name": "Сумка большая натуральная кожа",
+      "price": 10238,
+      "originalPrice": 15230,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549390/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549390/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138549390/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138549390
+    },
+    {
+      "id": "mor-099",
+      "slug": "wb-1138608676",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 10276,
+      "originalPrice": 15286,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138608/1138608676/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138608/1138608676/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138608676/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138608676
+    },
+    {
+      "id": "mor-100",
+      "slug": "wb-1138549388",
+      "name": "Сумка большая натуральная кожа",
+      "price": 10245,
+      "originalPrice": 15241,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549388/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549388/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138549388/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138549388
+    },
+    {
+      "id": "mor-101",
+      "slug": "wb-1138549392",
+      "name": "Сумка рюкзак большая натуральная кожа",
+      "price": 10427,
+      "originalPrice": 15511,
+      "currency": "₽",
+      "category": "backpack",
+      "description": "Рюкзак из натуральной кожи. Сочетает практичность и стиль.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549392/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549392/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138549392/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138549392
+    },
+    {
+      "id": "mor-102",
+      "slug": "wb-425318100",
+      "name": "Сумка натуральная кожа Италия",
+      "price": 9637,
+      "originalPrice": 19500,
+      "currency": "₽",
+      "category": "shoulder",
+      "description": "Сумка из натуральной кожи итальянского производства. Лаконичный дизайн.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol4253/part425318/425318100/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4253/part425318/425318100/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/425318100/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 425318100,
+      "rating": 4.8,
+      "reviewsCount": 12
+    },
+    {
+      "id": "mor-103",
+      "slug": "wb-1138549389",
+      "name": "Сумка большая натуральная кожа",
+      "price": 9936,
+      "originalPrice": 14780,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549389/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549389/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138549389/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138549389
+    },
+    {
+      "id": "mor-104",
+      "slug": "wb-1138546175",
+      "name": "Сумка большая натуральная кожа",
+      "price": 9490,
+      "originalPrice": 14117,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546175/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546175/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138546175/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138546175
+    },
+    {
+      "id": "mor-105",
+      "slug": "wb-1138546178",
+      "name": "Сумка большая натуральная кожа",
+      "price": 9633,
+      "originalPrice": 14331,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546178/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546178/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138546178/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138546178
+    },
+    {
+      "id": "mor-106",
+      "slug": "wb-1138607570",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 9671,
+      "originalPrice": 14387,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138607/1138607570/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138607/1138607570/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138607570/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138607570
+    },
+    {
+      "id": "mor-107",
+      "slug": "wb-1138546174",
+      "name": "Сумка большая натуральная кожа",
+      "price": 9860,
+      "originalPrice": 14668,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546174/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138546/1138546174/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138546174/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138546174
+    },
+    {
+      "id": "mor-108",
+      "slug": "wb-1138549386",
+      "name": "Сумка большая натуральная кожа",
+      "price": 10472,
+      "originalPrice": 15578,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549386/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549386/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138549386/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138549386
+    },
+    {
+      "id": "mor-109",
+      "slug": "wb-1138549387",
+      "name": "Сумка большая натуральная кожа",
+      "price": 10079,
+      "originalPrice": 14994,
+      "currency": "₽",
+      "category": "tote",
+      "description": "Просторная сумка из натуральной кожи. Подходит для ежедневного использования.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549387/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11385/part1138549/1138549387/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138549387/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138549387
+    },
+    {
+      "id": "mor-110",
+      "slug": "wb-1138607568",
+      "name": "Сумка средняя седло натуральная кожа",
+      "price": 9671,
+      "originalPrice": 14387,
+      "currency": "₽",
+      "category": "saddle",
+      "description": "Сумка формы «седло» из натуральной кожи. Универсальный вариант.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138607/1138607568/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138607/1138607568/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138607568/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138607568
+    },
+    {
+      "id": "mor-111",
+      "slug": "wb-1138608674",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 10276,
+      "originalPrice": 15286,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138608/1138608674/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138608/1138608674/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138608674/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138608674
+    },
+    {
+      "id": "mor-112",
+      "slug": "wb-1138607569",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 9671,
+      "originalPrice": 14387,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138607/1138607569/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138607/1138607569/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138607569/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138607569
+    },
+    {
+      "id": "mor-113",
+      "slug": "wb-1138607571",
+      "name": "Сумка маленькая натуральная кожа Италия",
+      "price": 9671,
+      "originalPrice": 14387,
+      "currency": "₽",
+      "category": "mini",
+      "description": "Компактная сумка из натуральной кожи. Вмещает всё самое необходимое.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138607/1138607571/images/c516x688/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol11386/part1138607/1138607571/images/c516x688/1.webp"
+      ],
+      "marketplaces": [
+        {
+          "name": "Wildberries",
+          "url": "https://www.wildberries.ru/catalog/1138607571/detail.aspx",
+          "icon": "/images/icons/wb.svg"
+        }
+      ],
+      "wbArticle": 1138607571
+    }
+  ]
+}

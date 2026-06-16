@@ -1,0 +1,205 @@
+.page {
+  max-width: 1100px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--dark);
+  margin: 0;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 4px 0 0;
+}
+
+.addBtn {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: var(--dark);
+  color: var(--white);
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.addBtn:hover {
+  opacity: 0.85;
+}
+
+/* ─── Filters ─── */
+.filters {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.searchInput {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  outline: none;
+  background: var(--white);
+}
+
+.searchInput:focus {
+  border-color: var(--dark);
+}
+
+.categorySelect {
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  outline: none;
+  background: var(--white);
+  min-width: 150px;
+}
+
+/* ─── Table ─── */
+.tableWrap {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light-gray);
+}
+
+.table td {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-primary);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-light-gray);
+}
+
+.table tbody tr:hover {
+  background: var(--card-bg);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.thumb {
+  width: 40px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+}
+
+.productName {
+  color: var(--dark);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.productName:hover {
+  text-decoration: underline;
+}
+
+.price {
+  font-variant-numeric: tabular-nums;
+}
+
+.categoryBadge {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--filter-bg);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.article {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: 40px !important;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  color: var(--error);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  opacity: 0.4;
+  transition: opacity var(--transition-fast);
+}
+
+.deleteBtn:hover {
+  opacity: 1;
+}
+
+/* ─── Pagination ─── */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: var(--space-md);
+}
+
+.pageBtn {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.pageBtn:hover {
+  border-color: var(--dark);
+  color: var(--dark);
+}
+
+.pageActive {
+  background: var(--dark);
+  color: var(--white);
+  border-color: var(--dark);
+}

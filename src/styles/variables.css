@@ -1,0 +1,103 @@
+/* =============================================
+   Moranti — Design System Variables
+   Редакция: MASTLE-inspired premium minimalism
+   ============================================= */
+
+:root {
+  /* ——— Colors ——— */
+  --cream: #F8F6F0;
+  --ivory: #F0EDE5;
+  --warm-white: #FAF8F4;
+
+  --taupe: #C4B5A0;
+  --camel: #A68B6B;
+  --brown: #5C4033;
+
+  --dark: #2C2420;
+  --muted: #8B8178;
+  --black-soft: #1A1817;
+
+  --white: #FFFFFF;
+  --error: #C44A4A;
+  --success: #4A7C59;
+
+  /* ——— MASTLE-style additions ——— */
+  --text-primary: #1A1A1A;
+  --text-secondary: #7A7A7A;
+  --card-bg: #F4F4F3;
+  --filter-bg: #EAE3D2;
+  --border-light-gray: #EAEAEA;
+  --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.06);
+
+  /* ——— Typography ——— */
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* ——— Spacing Scale (4px base) ——— */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 32px;
+  --space-xl: 48px;
+  --space-2xl: 64px;
+  --space-3xl: 80px;
+  --space-4xl: 120px;
+
+  /* ——— Border Radius ——— */
+  --radius-none: 0px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-pill: 4px;
+
+  /* ——— Borders ——— */
+  --border-hairline: 1px solid var(--dark);
+  --border-light: 1px solid var(--taupe);
+  --border-gray: 1px solid var(--border-light-gray);
+
+  /* ——— Transitions ——— */
+  --transition-fast: 0.2s ease;
+  --transition-base: 0.3s ease;
+
+  /* ——— Layout ——— */
+  --container-max: 1280px;
+  --container-padding: 32px;
+  --header-height: 86px;
+
+  /* ——— Grid ——— */
+  --grid-gap: 30px;
+
+  /* ——— Z-Index ——— */
+  --z-header: 100;
+}
+
+/* ——— Container ——— */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+}
+
+/* ——— Section spacing ——— */
+.section {
+  padding: var(--space-4xl) 0;
+}
+
+.section--sm {
+  padding: var(--space-2xl) 0;
+}
+
+/* ——— Responsive ——— */
+@media (max-width: 768px) {
+  :root {
+    --container-padding: 16px;
+    --space-4xl: 80px;
+    --space-3xl: 60px;
+    --space-2xl: 48px;
+    --header-height: 94px;
+  }
+}

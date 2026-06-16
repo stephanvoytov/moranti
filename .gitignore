@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# temp session files (task delegation)
+.tmp/
+
 # debug
 npm-debug.log*
 yarn-debug.log*

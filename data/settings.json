@@ -1,0 +1,27 @@
+{
+  "hero": {
+    "title": "Сумки, которые говорят без слов",
+    "subtitle": "Натуральная кожа итальянского производства. Минималистичные формы, ручная работа."
+  },
+  "contacts": {
+    "phone": "+7 (999) 123-45-67",
+    "email": "hello@moranti.ru",
+    "address": "Москва, ул. Примерная, 123"
+  },
+  "social": {
+    "instagram": "https://www.instagram.com/_utrends/",
+    "vk": "https://vk.com/moranti_bags",
+    "telegram": "",
+    "whatsapp": ""
+  },
+  "marketplaces": {
+    "wildberries": "https://www.wildberries.ru/brands/moranti",
+    "ozon": "https://www.ozon.ru/seller/moranti/?miniapp=seller_4205030",
+    "yandexMarket": ""
+  },
+  "seo": {
+    "defaultTitle": "Moranti — Сумки, которые говорят без слов",
+    "defaultDescription": "Moranti — женские сумки из натуральной кожи. Минималистичные формы, ручная работа, никаких кричащих логотипов."
+  },
+  "updatedAt": "2026-06-17T00:00:00Z"
+}

@@ -1,0 +1,410 @@
+/* ============================================
+   DEMO — MASTLE Design System
+   Изолирован от основного сайта
+   ============================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+/* ——— Hide default layout header on demo page ——— */
+
+body > header {
+  display: none;
+}
+
+.demo main {
+  padding: 0;
+}
+
+/* ——— Reset (локальный) ——— */
+
+.demo *,
+.demo *::before,
+.demo *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.demo {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: #1a1a1a;
+  background: #ffffff;
+  max-width: 1440px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.demo a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.demo ul {
+  list-style: none;
+}
+
+.demo button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  background: none;
+}
+
+.demo img {
+  display: block;
+  max-width: 100%;
+}
+
+.demo svg {
+  flex-shrink: 0;
+}
+
+/* =============================================
+   HEADER
+   ============================================= */
+
+/* ——— Top Bar ——— */
+
+.demo-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 32px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.demo-topbar-left {
+  display: flex;
+  gap: 20px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #7a7a7a;
+  min-width: 200px;
+}
+
+.demo-logo {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+}
+
+.demo-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 200px;
+  justify-content: flex-end;
+}
+
+.demo-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.demo-search input {
+  border: none;
+  background: #f4f4f3;
+  border-radius: 20px;
+  padding: 6px 12px 6px 32px;
+  font-size: 12px;
+  font-family: inherit;
+  color: #1a1a1a;
+  width: 140px;
+  outline: none;
+}
+
+.demo-search input::placeholder {
+  color: #7a7a7a;
+}
+
+.demo-search svg {
+  position: absolute;
+  left: 10px;
+  color: #7a7a7a;
+  pointer-events: none;
+}
+
+/* ——— Navigation Bar ——— */
+
+.demo-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 32px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.demo-nav-burger {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+}
+
+.demo-nav-links {
+  display: flex;
+  gap: 28px;
+}
+
+.demo-nav-links a {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 500;
+  color: #1a1a1a;
+  transition: opacity 0.2s;
+}
+
+.demo-nav-links a:hover {
+  opacity: 0.6;
+}
+
+.demo-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #7a7a7a;
+}
+
+/* =============================================
+   HERO
+   ============================================= */
+
+.demo-hero {
+  width: 100%;
+  height: 580px;
+  background-size: cover;
+  background-position: center 30%;
+}
+
+/* =============================================
+   CATALOG
+   ============================================= */
+
+.demo-catalog {
+  padding: 48px 32px 80px;
+}
+
+.demo-catalog-title {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 24px;
+  color: #1a1a1a;
+}
+
+/* ——— Filter pills ——— */
+
+.demo-filters {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.demo-filter {
+  background: #eae3d2;
+  color: #1a1a1a;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  padding: 8px 20px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.demo-filter:hover {
+  background: #d9d0ba;
+}
+
+/* ——— Grid ——— */
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+/* ——— Card ——— */
+
+.demo-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-card-image {
+  position: relative;
+  background: #f4f4f3;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 0;
+}
+
+.demo-card-image img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  transition: transform 0.3s ease;
+}
+
+.demo-card:hover .demo-card-image img {
+  transform: scale(1.04);
+}
+
+/* Lifestyle card fills the whole area */
+.demo-card-image.lifestyle {
+  padding: 0;
+}
+
+.demo-card-image.lifestyle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  mix-blend-mode: normal;
+}
+
+/* ——— Favorite icon ——— */
+
+.demo-card-fav {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  color: #7a7a7a;
+  transition: color 0.2s, background 0.2s;
+  z-index: 1;
+}
+
+.demo-card-fav:hover {
+  color: #c44a4a;
+  background: #fff;
+}
+
+/* ——— Card info ——— */
+
+.demo-card-info {
+  margin-top: 14px;
+  text-align: center;
+}
+
+.demo-card-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+.demo-card-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.4;
+}
+
+.demo-card-top svg {
+  color: #7a7a7a;
+}
+
+.demo-card-desc {
+  font-size: 12px;
+  color: #7a7a7a;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+.demo-card-price {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-top: 8px;
+}
+
+/* ——— Note ——— */
+
+.demo-note {
+  text-align: center;
+  padding: 24px;
+  font-size: 13px;
+  color: #7a7a7a;
+  border-top: 1px solid #eaeaea;
+}
+
+.demo-note a {
+  color: #1a1a1a;
+  text-decoration: underline;
+}
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+
+@media (max-width: 1024px) {
+  .demo-topbar,
+  .demo-nav {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .demo-catalog {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .demo-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .demo-nav-links {
+    display: none;
+  }
+
+  .demo-nav-burger {
+    display: flex;
+  }
+
+  .demo-topbar-left {
+    display: none;
+  }
+
+  .demo-search input {
+    width: 100px;
+  }
+
+  .demo-hero {
+    height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .demo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .demo-catalog-title {
+    font-size: 20px;
+  }
+
+  .demo-hero {
+    height: 300px;
+  }
+}
