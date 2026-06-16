@@ -14,7 +14,7 @@ const SESSION_TTL_MS = 24 * 60 * 60 * 1_000;
 const ALGORITHM = "aes-256-gcm";
 const KEY_ITERATIONS = 100_000;
 const KEY_LENGTH = 32;
-const SALT = "moranti-admin-salt-v1";
+const SALT = process.env.AUTH_SALT || "moranti-admin-salt-v1";
 
 /* ——— Crypto helpers ——— */
 
@@ -88,7 +88,8 @@ export async function getSession(): Promise<{ createdAt: number; expiresAt: numb
 }
 
 export function setSessionCookie(token: string): string {
-  return `${COOKIE_NAME}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_TTL_MS / 1_000}`;
+  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  return `${COOKIE_NAME}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_TTL_MS / 1_000}${secure}`;
 }
 
 export function clearSession(): Response {

@@ -57,8 +57,25 @@ export default function AdminProductsPage() {
   );
 
   useEffect(() => {
-    fetchProducts(1);
-  }, [fetchProducts]);
+    async function load() {
+      const params = new URLSearchParams();
+      params.set("page", "1");
+
+      try {
+        const res = await fetch(`/api/admin/products?${params}`);
+        if (res.status === 401) {
+          router.push("/admin/login");
+          return;
+        }
+        const data = await res.json();
+        setProducts(data.items);
+        setPagination(data.pagination);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [router]);
 
   async function handleDelete(id: string) {
     if (!confirm("Удалить товар?")) return;

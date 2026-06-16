@@ -28,14 +28,13 @@ function HeartIcon({ filled }: { filled: boolean }) {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { livePrice, liveOriginal, loading } = useLivePrice(product.wbArticle);
+  const { livePrice, loading } = useLivePrice(product.wbArticle);
   const slug = `wb-${product.wbArticle}`;
   const link = `/catalog/${slug}`;
   const fav = isFavorite(product.wbArticle);
 
   // Use live price when available, fall back to static data
   const displayPrice = livePrice ?? product.price;
-  const displayOriginal = liveOriginal ?? product.originalPrice;
 
   const handleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();

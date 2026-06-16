@@ -29,7 +29,6 @@ function isFresh(entry: PriceEntry): boolean {
    ========================================================== */
 
 let batchQueue: number[] = [];
-let batchTimer: ReturnType<typeof setTimeout> | null = null;
 let batchResolve: ((map: Map<number, PriceEntry>) => void) | null = null;
 let batchPromise: Promise<Map<number, PriceEntry>> | null = null;
 
@@ -40,11 +39,10 @@ function scheduleBatch(article: number): Promise<Map<number, PriceEntry>> {
       batchResolve = resolve;
     });
 
-    batchTimer = setTimeout(async () => {
+    setTimeout(async () => {
       const articles = [...batchQueue];
       batchQueue = [];
       batchPromise = null;
-      batchTimer = null;
 
       const cacheKey = articles.sort().join(",");
 

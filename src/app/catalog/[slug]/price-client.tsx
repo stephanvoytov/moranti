@@ -16,7 +16,7 @@ export default function PriceClient({
   staticOriginal,
   currency,
 }: PriceClientProps) {
-  const { livePrice, liveOriginal, loading } = useLivePrice(wbArticle);
+  const { livePrice, liveOriginal } = useLivePrice(wbArticle);
 
   const displayPrice = livePrice ?? staticPrice;
   const displayOriginal = liveOriginal ?? staticOriginal;

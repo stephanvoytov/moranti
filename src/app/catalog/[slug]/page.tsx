@@ -19,8 +19,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProduct(slug);
   if (!product) return { title: "Товар не найден" };
 
-  const siteUrl = process.env.SITE_URL || "http://localhost:3001";
-
   return {
     title: product.name,
     description: product.description,
@@ -69,7 +67,7 @@ export default async function ProductPage({ params }: Props) {
         availability: "https://schema.org/InStock",
       };
 
-  const productJsonLd: Record<string, any> = {
+  const productJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useFavorites } from "@/lib/favorites-context";
 import { useProducts } from "@/lib/use-products";
 import ProductCard from "@/components/ui/product-card";
@@ -39,9 +40,9 @@ export default function FavoritesPage() {
         ) : (
           <div className={styles.empty}>
             <p>Добавьте товары в избранное, чтобы не потерять их.</p>
-            <a href="/#catalog" className={styles.catalogLink}>
+            <Link href="/#catalog" className={styles.catalogLink}>
               Перейти в каталог
-            </a>
+            </Link>
           </div>
         )}
       </section>

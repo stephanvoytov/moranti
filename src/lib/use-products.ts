@@ -31,11 +31,9 @@ export function useProducts(): ProductsData {
   );
 
   useEffect(() => {
-    if (globalData) {
-      setData(globalData);
-      return;
+    if (!globalData) {
+      fetchProducts().then(setData);
     }
-    fetchProducts().then(setData);
   }, []);
 
   return data;

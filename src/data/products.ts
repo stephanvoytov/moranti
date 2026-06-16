@@ -19,6 +19,7 @@ export interface Product {
   images: string[];
   marketplaces: MarketplaceLink[];
   wbArticle: number;
+  ozonArticle?: number;
   rating?: number;
   reviewsCount?: number;
 }

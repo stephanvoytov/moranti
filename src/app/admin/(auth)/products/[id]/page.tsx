@@ -134,8 +134,8 @@ export default function ProductEditorPage() {
         ...prev,
         images: [...prev.images, data.url],
       }));
-    } catch (err: any) {
-      setError(err.message || "Ошибка загрузки файла");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Ошибка загрузки файла");
     } finally {
       setUploading(false);
       // Reset file input so same file can be re-selected
@@ -150,7 +150,7 @@ export default function ProductEditorPage() {
     setError("");
     setSaving(true);
 
-    const payload: Record<string, any> = {
+    const payload: Record<string, unknown> = {
       name: form.name,
       price: Number(form.price),
       originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined,

@@ -2,6 +2,7 @@
    DEMO — MASTLE-стиль для Moranti
    Тестовый прототип, не влияет на основной сайт
    ============================================ */
+import Link from "next/link";
 import { getProducts } from "@/data/products";
 import "./demo.css";
 
@@ -129,7 +130,7 @@ export default function DemoPage() {
       <div className="demo-note">
         <p>
           ⚡ Это демонстрация MASTLE-стиля. Основной сайт работает на{" "}
-          <a href="/">localhost:3001</a>
+          <Link href="/">localhost:3001</Link>
         </p>
       </div>
     </div>

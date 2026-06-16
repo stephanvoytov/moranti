@@ -7,6 +7,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { readFileSync, writeFileSync } from "fs";
 import path from "path";
 import { getSession } from "@/lib/admin-auth";
+import { csrfGuard } from "@/lib/csrf";
+import type { Product, MarketplaceLink } from "@/data/products";
+
+interface ProductsFile {
+  products: Product[];
+  categories: { name: string; slug: string }[];
+  meta: { count: number };
+}
 
 const VALID_CATEGORIES = [
   "tote", "shoulder", "backpack", "baguette", "mini", "evening", "saddle",
@@ -16,12 +24,12 @@ function dataPath(): string {
   return path.join(process.cwd(), "data", "products.json");
 }
 
-function readData(): { products: any[]; categories: any[]; meta: any } {
+function readData(): ProductsFile {
   const raw = readFileSync(dataPath(), "utf-8");
   return JSON.parse(raw);
 }
 
-function writeData(data: any): void {
+function writeData(data: ProductsFile): void {
   writeFileSync(dataPath(), JSON.stringify(data, null, 2), "utf-8");
 }
 
@@ -38,7 +46,7 @@ export async function GET(
 
   const { id } = await params;
   const data = readData();
-  const product = data.products.find((p: any) => p.id === id);
+  const product = data.products.find((p: Product) => p.id === id);
 
   if (!product) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
@@ -53,6 +61,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const csrf = csrfGuard(request);
+  if (csrf) return csrf;
+
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -60,7 +71,7 @@ export async function PUT(
 
   const { id } = await params;
   const data = readData();
-  const index = data.products.findIndex((p: any) => p.id === id);
+  const index = data.products.findIndex((p: Product) => p.id === id);
 
   if (index === -1) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
@@ -112,7 +123,7 @@ export async function PUT(
     }
 
     // Rebuild marketplaces from article numbers
-    const marketplaces: { name: string; url: string; icon: string }[] = [];
+    const marketplaces: MarketplaceLink[] = [];
     if (updated.wbArticle && Number(updated.wbArticle) > 0) {
       marketplaces.push({
         name: "Wildberries",
@@ -141,9 +152,12 @@ export async function PUT(
 /* ——— DELETE /api/admin/products/[id] ——— */
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const csrf = csrfGuard(request);
+  if (csrf) return csrf;
+
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -151,7 +165,7 @@ export async function DELETE(
 
   const { id } = await params;
   const data = readData();
-  const index = data.products.findIndex((p: any) => p.id === id);
+  const index = data.products.findIndex((p: Product) => p.id === id);
 
   if (index === -1) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });

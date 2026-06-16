@@ -24,9 +24,9 @@ export default function Header() {
           <span>Контакты</span>
         </div>
 
-        <a href="/" className={styles.logo}>
+        <Link href="/" className={styles.logo}>
           Moranti
-        </a>
+        </Link>
 
         <div className={styles.topbarRight}>
           <div className={styles.search}>
@@ -57,8 +57,8 @@ export default function Header() {
         </button>
 
         <ul className={styles.navLinks}>
-          <li><a href="/">Главная</a></li>
-          <li><a href="/#catalog">Каталог</a></li>
+          <li><Link href="/">Главная</Link></li>
+          <li><Link href="/#catalog">Каталог</Link></li>
           <li><a href="https://www.instagram.com/_utrends/" target="_blank" rel="noopener noreferrer">Instagram</a></li>
           <li><a href="https://www.wildberries.ru/brands/moranti" target="_blank" rel="noopener noreferrer">Wildberries</a></li>
           <li><a href="https://www.ozon.ru/seller/moranti/?miniapp=seller_4205030" target="_blank" rel="noopener noreferrer">Ozon</a></li>
@@ -68,9 +68,9 @@ export default function Header() {
       {/* ——— Mobile Menu Panel ——— */}
       <div className={`${styles.mobileMenu}${menuOpen ? ' ' + styles.mobileMenuOpen : ''}`}>
         <ul className={styles.mobileLinks}>
-            <li><a href="/" onClick={() => setMenuOpen(false)}>Главная</a></li>
-            <li><a href="/#catalog" onClick={() => setMenuOpen(false)}>Каталог</a></li>
-            <li><a href="/favorites" onClick={() => setMenuOpen(false)}>Избранное{count > 0 ? ` (${count})` : ''}</a></li>
+            <li><Link href="/" onClick={() => setMenuOpen(false)}>Главная</Link></li>
+            <li><Link href="/#catalog" onClick={() => setMenuOpen(false)}>Каталог</Link></li>
+            <li><Link href="/favorites" onClick={() => setMenuOpen(false)}>Избранное{count > 0 ? ` (${count})` : ''}</Link></li>
           <li><a href="https://www.instagram.com/_utrends/" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>Instagram</a></li>
           <li><a href="https://www.wildberries.ru/brands/moranti" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>Wildberries</a></li>
           <li><a href="https://www.ozon.ru/seller/moranti/?miniapp=seller_4205030" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>Ozon</a></li>

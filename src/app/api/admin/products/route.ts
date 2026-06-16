@@ -7,6 +7,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { readFileSync, writeFileSync } from "fs";
 import path from "path";
 import { getSession } from "@/lib/admin-auth";
+import { csrfGuard } from "@/lib/csrf";
+import type { Product, MarketplaceLink } from "@/data/products";
+
+/* ——— Типы ——— */
+
+interface ProductsFile {
+  products: Product[];
+  categories: { name: string; slug: string }[];
+  meta: { count: number };
+}
 
 /* ——— Helpers ——— */
 
@@ -14,20 +24,18 @@ function dataPath(): string {
   return path.join(process.cwd(), "data", "products.json");
 }
 
-function readData(): { products: any[]; categories: any[]; meta: any } {
+function readData(): ProductsFile {
   const raw = readFileSync(dataPath(), "utf-8");
   return JSON.parse(raw);
 }
 
-function writeData(data: any): void {
+function writeData(data: ProductsFile): void {
   writeFileSync(dataPath(), JSON.stringify(data, null, 2), "utf-8");
 }
 
 const VALID_CATEGORIES = [
   "tote", "shoulder", "backpack", "baguette", "mini", "evening", "saddle",
 ];
-
-const VALID_MARKETPLACE_NAMES = ["Wildberries", "Ozon", "Yandex Market"];
 
 /* ——— GET /api/admin/products ——— */
 
@@ -48,7 +56,7 @@ export async function GET(request: NextRequest) {
 
   if (search) {
     filtered = filtered.filter(
-      (p: any) =>
+      (p: Product) =>
         p.name.toLowerCase().includes(search) ||
         p.id.toLowerCase().includes(search) ||
         String(p.wbArticle).includes(search),
@@ -56,7 +64,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (category && VALID_CATEGORIES.includes(category)) {
-    filtered = filtered.filter((p: any) => p.category === category);
+    filtered = filtered.filter((p: Product) => p.category === category);
   }
 
   const total = filtered.length;
@@ -79,6 +87,9 @@ export async function GET(request: NextRequest) {
 /* ——— POST /api/admin/products ——— */
 
 export async function POST(request: NextRequest) {
+  const csrf = csrfGuard(request);
+  if (csrf) return csrf;
+
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -106,7 +117,7 @@ export async function POST(request: NextRequest) {
 
     // Generate new ID
     const maxNum = data.products.reduce(
-      (max: number, p: any) => Math.max(max, parseInt(p.id.replace("mor-", ""), 10) || 0),
+      (max: number, p: Product) => Math.max(max, parseInt(p.id.replace("mor-", ""), 10) || 0),
       0,
     );
     const newId = `mor-${String(maxNum + 1).padStart(3, "0")}`;
@@ -119,7 +130,7 @@ export async function POST(request: NextRequest) {
     const slug = body.slug || (hasWbArticle ? `wb-${wbArticleNum}` : `product-${newId}`);
 
     // Auto-generate marketplace links from article numbers
-    const marketplaces: { name: string; url: string; icon: string }[] = [];
+    const marketplaces: MarketplaceLink[] = [];
     if (hasWbArticle) {
       marketplaces.push({
         name: "Wildberries",
@@ -142,7 +153,7 @@ export async function POST(request: NextRequest) {
         ? [body.image]
         : [];
 
-    const newProduct: Record<string, any> = {
+    const newProduct: Omit<Product, "id"> & { id: string } = {
       id: newId,
       slug,
       name: body.name.trim(),
@@ -154,13 +165,11 @@ export async function POST(request: NextRequest) {
       image: images[0] || "",
       images,
       marketplaces,
+      wbArticle: wbArticleNum ?? 0,
+      ozonArticle: ozonArticleNum,
       rating: body.rating ? Number(body.rating) : undefined,
       reviewsCount: body.reviewsCount ? Number(body.reviewsCount) : undefined,
     };
-
-    // Article numbers — only add to object if they exist
-    if (hasWbArticle) newProduct.wbArticle = wbArticleNum;
-    if (hasOzonArticle) newProduct.ozonArticle = ozonArticleNum;
 
     data.products.push(newProduct);
     data.meta.count = data.products.length;

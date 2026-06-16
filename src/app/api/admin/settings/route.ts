@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/admin-auth";
+import { csrfGuard } from "@/lib/csrf";
 import { readSettings, writeSettings } from "@/lib/settings";
 
 export async function GET() {
@@ -18,6 +19,9 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
+  const csrf = csrfGuard(request);
+  if (csrf) return csrf;
+
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
