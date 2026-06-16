@@ -27,6 +27,10 @@
 # temp session files (task delegation)
 .tmp/
 
+# project instructions (not source code)
+AGENTS.md
+.opencode/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
