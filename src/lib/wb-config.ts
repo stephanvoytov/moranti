@@ -1,19 +1,32 @@
 /* =============================================
    WB API Config & Types
    =============================================
-   Когда появится API-ключ от Wildberries:
-   1. Создать .env.local с WB_API_KEY=ваш_ключ
-   2. Раскомментировать официальные эндпоинты
-   3. Готово — цены полетят через официальное API
+   API-ключ можно задать:
+   1. В админке → Настройки (хранится в settings.json)
+   2. В .env.local (WB_API_KEY) — fallback
    ============================================= */
 
+import { readSettings } from "./settings";
+
 /**
- * WB_API_KEY берётся из process.env.
- * Пока ключа нет — используем статические данные.
+ * WB_API_KEY берётся из настроек сайта или process.env.
+ * Приоритет: settings.json > .env.local
  */
 export function getWbApiKey(): string | undefined {
-  if (typeof process === "undefined") return undefined;
-  return process.env.WB_API_KEY;
+  // Сначала проверяем settings.json (редактируется через админку)
+  try {
+    const settings = readSettings();
+    if (settings.wbApiKey) return settings.wbApiKey;
+  } catch {
+    // ignore
+  }
+
+  // Fallback на .env.local
+  if (typeof process !== "undefined") {
+    return process.env.WB_API_KEY;
+  }
+
+  return undefined;
 }
 
 /** Базовый URL Content API Wildberries (для продавцов) */

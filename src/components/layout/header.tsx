@@ -18,16 +18,10 @@ export default function Header() {
     <header className={styles.header}>
       {/* ——— Top Bar ——— */}
       <div className={styles.topbar}>
-        <div className={styles.topbarLeft}>
-          <span>О бренде</span>
-          <span>Магазин</span>
-          <span>Контакты</span>
-        </div>
-
+        <div className={styles.topbarLeft} />
         <Link href="/" className={styles.logo}>
           Moranti
         </Link>
-
         <div className={styles.topbarRight}>
           <div className={styles.search}>
             <input type="text" placeholder="Поиск" readOnly />
@@ -58,10 +52,28 @@ export default function Header() {
 
         <ul className={styles.navLinks}>
           <li><Link href="/">Главная</Link></li>
-          <li><Link href="/#catalog">Каталог</Link></li>
-          <li><a href="https://www.instagram.com/_utrends/" target="_blank" rel="noopener noreferrer">Instagram</a></li>
-          <li><a href="https://www.wildberries.ru/brands/moranti" target="_blank" rel="noopener noreferrer">Wildberries</a></li>
-          <li><a href="https://www.ozon.ru/seller/moranti/?miniapp=seller_4205030" target="_blank" rel="noopener noreferrer">Ozon</a></li>
+          <li><Link href="/about">О бренде</Link></li>
+          <li><Link href="/catalog">Каталог</Link></li>
+          <li className={styles.dropdown}>
+            <button className={styles.dropdownBtn} type="button">
+              Соцсети
+              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 1l4 4 4-4"/></svg>
+            </button>
+            <div className={styles.dropdownMenu}>
+              <a href="https://www.instagram.com/_utrends/" target="_blank" rel="noopener noreferrer">Instagram</a>
+              <a href="https://vk.com/moranti_bags" target="_blank" rel="noopener noreferrer">VK</a>
+            </div>
+          </li>
+          <li className={styles.dropdown}>
+            <button className={styles.dropdownBtn} type="button">
+              Магазины
+              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 1l4 4 4-4"/></svg>
+            </button>
+            <div className={styles.dropdownMenu}>
+              <a href="https://www.wildberries.ru/brands/moranti" target="_blank" rel="noopener noreferrer">Wildberries</a>
+              <a href="https://www.ozon.ru/seller/moranti/?miniapp=seller_4205030" target="_blank" rel="noopener noreferrer">Ozon</a>
+            </div>
+          </li>
         </ul>
       </nav>
 
@@ -69,11 +81,19 @@ export default function Header() {
       <div className={`${styles.mobileMenu}${menuOpen ? ' ' + styles.mobileMenuOpen : ''}`}>
         <ul className={styles.mobileLinks}>
             <li><Link href="/" onClick={() => setMenuOpen(false)}>Главная</Link></li>
-            <li><Link href="/#catalog" onClick={() => setMenuOpen(false)}>Каталог</Link></li>
+            <li><Link href="/about" onClick={() => setMenuOpen(false)}>О бренде</Link></li>
+            <li><Link href="/catalog" onClick={() => setMenuOpen(false)}>Каталог</Link></li>
             <li><Link href="/favorites" onClick={() => setMenuOpen(false)}>Избранное{count > 0 ? ` (${count})` : ''}</Link></li>
-          <li><a href="https://www.instagram.com/_utrends/" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>Instagram</a></li>
-          <li><a href="https://www.wildberries.ru/brands/moranti" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>Wildberries</a></li>
-          <li><a href="https://www.ozon.ru/seller/moranti/?miniapp=seller_4205030" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>Ozon</a></li>
+          </ul>
+          <span className={styles.mobileGroupLabel}>Соцсети</span>
+          <ul className={styles.mobileLinks}>
+            <li><a href="https://www.instagram.com/_utrends/" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>Instagram</a></li>
+            <li><a href="https://vk.com/moranti_bags" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>VK</a></li>
+          </ul>
+          <span className={styles.mobileGroupLabel}>Магазины</span>
+          <ul className={styles.mobileLinks}>
+            <li><a href="https://www.wildberries.ru/brands/moranti" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>Wildberries</a></li>
+            <li><a href="https://www.ozon.ru/seller/moranti/?miniapp=seller_4205030" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>Ozon</a></li>
         </ul>
       </div>
     </header>

@@ -52,7 +52,9 @@ export default function ProductEditorPage() {
   const [error, setError] = useState("");
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [urlInputValue, setUrlInputValue] = useState("");
+  const [imgDragIndex, setImgDragIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imgDragNode = useRef<HTMLDivElement | null>(null);
 
   // Load product data for editing
   useEffect(() => {
@@ -111,34 +113,73 @@ export default function ProductEditorPage() {
     setShowUrlInput(false);
   }
 
+  function moveImage(from: number, to: number) {
+    if (from === to) return;
+    setForm((prev) => {
+      const images = [...prev.images];
+      const [moved] = images.splice(from, 1);
+      images.splice(to, 0, moved);
+      return { ...prev, images };
+    });
+  }
+
+  function handleImgDragStart(e: React.DragEvent, index: number) {
+    imgDragNode.current = e.currentTarget as HTMLDivElement;
+    imgDragNode.current.classList.add(styles.imgDragging);
+    setImgDragIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(index));
+  }
+
+  function handleImgDragOver(e: React.DragEvent, index: number) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (imgDragIndex === null || imgDragIndex === index) return;
+    moveImage(imgDragIndex, index);
+    setImgDragIndex(index);
+  }
+
+  function handleImgDragEnd() {
+    if (imgDragNode.current) {
+      imgDragNode.current.classList.remove(styles.imgDragging);
+    }
+    setImgDragIndex(null);
+  }
+
+  function handleImgDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setImgDragIndex(null);
+  }
+
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     setUploading(true);
     setError("");
 
     try {
-      const body = new FormData();
-      body.append("file", file);
+      for (let i = 0; i < files.length; i++) {
+        const body = new FormData();
+        body.append("file", files[i]);
 
-      const res = await fetch("/api/admin/upload", { method: "POST", body });
+        const res = await fetch("/api/admin/upload", { method: "POST", body });
 
-      if (!res.ok) {
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || "Upload failed");
+        }
+
         const data = await res.json();
-        throw new Error(data.error || "Upload failed");
+        setForm((prev) => ({
+          ...prev,
+          images: [...prev.images, data.url],
+        }));
       }
-
-      const data = await res.json();
-      setForm((prev) => ({
-        ...prev,
-        images: [...prev.images, data.url],
-      }));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Ошибка загрузки файла");
     } finally {
       setUploading(false);
-      // Reset file input so same file can be re-selected
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
@@ -319,74 +360,163 @@ export default function ProductEditorPage() {
             </p>
           </div>
 
-          {/* Right column — images */}
+          {/* Right column — preview + images */}
           <div className={styles.imageCol}>
+            {/* ——— Превью карточки ——— */}
+            <div className={styles.previewSection}>
+              <label className={styles.label}>Превью</label>
+              <div className={styles.previewCard}>
+                <div className={styles.previewImageWrap}>
+                  {form.images[0] ? (
+                    <img
+                      src={form.images[0]}
+                      alt=""
+                      className={styles.previewImage}
+                    />
+                  ) : (
+                    <div className={styles.previewImagePlaceholder}>
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                      </svg>
+                    </div>
+                  )}
+                  <div className={styles.previewHeart}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className={styles.previewInfo}>
+                  <div className={styles.previewName}>
+                    {form.name || "Название товара"}
+                  </div>
+                  <div className={styles.previewDesc}>
+                    {form.description
+                      ? (form.description.length > 60
+                          ? form.description.slice(0, 60) + "…"
+                          : form.description)
+                      : "Описание товара"}
+                  </div>
+                  <div className={styles.previewPrice}>
+                    {form.price
+                      ? `${Number(form.price).toLocaleString("ru-RU")} ₽`
+                      : "Цена"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <label className={styles.label}>Фотографии</label>
 
-            {/* Image list */}
-            <div className={styles.imageList}>
-              {form.images.length === 0 && (
-                <p className={styles.imageEmpty}>
-                  Нет фотографий. Загрузите или вставьте URL.
-                </p>
-              )}
+            {/* Image grid — marketplace style */}
+            {form.images.length === 0 && (
+              <p className={styles.imageEmpty}>
+                Нет фотографий. Загрузите или вставьте URL.
+              </p>
+            )}
 
-              {form.images.map((url, index) => (
-                <div key={index} className={styles.imageItem}>
-                  <div className={styles.imagePreviewWrap}>
+            {form.images.length > 0 && (
+              <div
+                className={styles.imgGrid}
+                onDragOver={(e) => { e.preventDefault(); }}
+                onDrop={handleImgDrop}
+              >
+                {form.images.map((url, index) => (
+                  <div
+                    key={index}
+                    className={`${styles.imgThumb} ${imgDragIndex === index ? styles.imgThumbDrag : ""}`}
+                    draggable
+                    onDragStart={(e) => handleImgDragStart(e, index)}
+                    onDragOver={(e) => handleImgDragOver(e, index)}
+                    onDragEnd={handleImgDragEnd}
+                  >
+                    {/* Drag handle — верхний левый угол, всегда виден */}
+                    <div className={styles.imgDragHandle}>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                        <circle cx="4" cy="2" r="1.2" />
+                        <circle cx="8" cy="2" r="1.2" />
+                        <circle cx="4" cy="6" r="1.2" />
+                        <circle cx="8" cy="6" r="1.2" />
+                        <circle cx="4" cy="10" r="1.2" />
+                        <circle cx="8" cy="10" r="1.2" />
+                      </svg>
+                    </div>
+
+                    {/* Remove — верхний правый угол, только при наведении */}
+                    <button
+                      type="button"
+                      className={styles.imgRemoveBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeImage(index);
+                      }}
+                      title="Удалить фото"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <line x1="2" y1="2" x2="10" y2="10" />
+                        <line x1="10" y1="2" x2="2" y2="10" />
+                      </svg>
+                    </button>
+
+                    {/* Main badge — нижний левый угол */}
                     {index === 0 && (
-                      <span className={styles.imageMainBadge}>Главная</span>
+                      <span className={styles.imgMainBadge}>Главная</span>
                     )}
+
                     <img
                       src={url}
                       alt={`Фото ${index + 1}`}
-                      className={styles.imagePreview}
+                      className={styles.imgThumbImg}
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.border = "2px solid #e74c3c";
                       }}
                     />
                   </div>
-                  <div className={styles.imageMeta}>
-                    <span className={styles.imageUrl}>{url}</span>
-                    <button
-                      type="button"
-                      className={styles.imageRemoveBtn}
-                      onClick={() => removeImage(index)}
-                      title="Удалить фото"
-                    >
-                      ×
-                    </button>
-                  </div>
+                ))}
+
+                {/* Upload tile */}
+                <div
+                  className={styles.imgAddTile}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                    <line x1="10" y1="4" x2="10" y2="16" />
+                    <line x1="4" y1="10" x2="16" y2="10" />
+                  </svg>
+                  <span>Загрузить</span>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif"
+              multiple
+              className={styles.fileInput}
+              onChange={handleFileUpload}
+              hidden
+            />
 
             {/* Upload controls */}
             <div className={styles.imageActions}>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/avif"
-                className={styles.fileInput}
-                onChange={handleFileUpload}
-                hidden
-              />
               <button
                 type="button"
-                className={styles.imageBtn}
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-              >
-                {uploading ? "Загрузка..." : "📷 Загрузить фото"}
-              </button>
-
-              <button
-                type="button"
-                className={styles.imageBtn}
+                className={styles.imageActionBtn}
                 onClick={() => setShowUrlInput(!showUrlInput)}
               >
-                🔗 Вставить URL
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <path d="M7 1v12M1 7h12" />
+                </svg>
+                {showUrlInput ? "Закрыть" : "Вставить URL"}
               </button>
+
+              {uploading && (
+                <span className={styles.uploadStatus}>Загрузка...</span>
+              )}
             </div>
 
             {/* URL input (toggled) */}

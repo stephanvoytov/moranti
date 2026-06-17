@@ -23,6 +23,7 @@ export default function AdminLoginPage() {
       });
 
       if (res.ok) {
+        localStorage.setItem("moranti_admin", "1");
         router.push("/admin");
       } else {
         const data = await res.json();

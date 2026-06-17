@@ -40,7 +40,7 @@ export default function FavoritesPage() {
         ) : (
           <div className={styles.empty}>
             <p>Добавьте товары в избранное, чтобы не потерять их.</p>
-            <Link href="/#catalog" className={styles.catalogLink}>
+            <Link href="/catalog" className={styles.catalogLink}>
               Перейти в каталог
             </Link>
           </div>

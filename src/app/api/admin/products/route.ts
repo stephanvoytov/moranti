@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
   const search = searchParams.get("search")?.toLowerCase() || "";
   const category = searchParams.get("category") || "";
   const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20", 10)));
+  const limit = Math.min(200, Math.max(1, parseInt(searchParams.get("limit") || "20", 10)));
 
   const data = readData();
   let filtered = data.products;

@@ -32,15 +32,15 @@
   display: flex;
   align-items: center;
   gap: 24px;
+  flex: 1;
 }
 
-.topbarLeft span {
-  cursor: pointer;
-  transition: color var(--transition-fast);
+.topbarLeft {
+  justify-content: flex-start;
 }
 
-.topbarLeft span:hover {
-  color: var(--dark);
+.topbarRight {
+  justify-content: flex-end;
 }
 
 .logo {
@@ -154,7 +154,8 @@
   padding: 0;
 }
 
-.navLinks a {
+.navLinks a,
+.navLinks button {
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: 500;
@@ -165,8 +166,75 @@
   transition: color var(--transition-fast);
 }
 
-.navLinks a:hover {
+.navLinks a:hover,
+.navLinks button:hover {
   color: var(--camel);
+}
+
+/* ——— Dropdown ——— */
+
+.dropdown {
+  position: relative;
+}
+
+.dropdownBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+}
+
+.dropdownBtn svg {
+  transition: transform var(--transition-fast);
+}
+
+.dropdown:hover .dropdownBtn svg {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 150px;
+  background: var(--white);
+  border: 1px solid var(--border-light-gray);
+  border-radius: 0;
+  padding: 6px 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+
+.dropdown:hover .dropdownMenu {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dropdownMenu a {
+  display: block;
+  padding: 8px 20px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
+}
+
+.dropdownMenu a:hover {
+  opacity: 0.55;
+  color: var(--dark);
 }
 
 /* ——— Responsive Mobile ——— */
@@ -282,4 +350,17 @@
 
 .mobileLinks a:hover {
   color: var(--camel);
+}
+
+.mobileGroupLabel {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 16px 0 4px;
+  border-top: var(--border-gray);
+  margin-top: 4px;
 }

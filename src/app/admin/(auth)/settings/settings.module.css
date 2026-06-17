@@ -139,3 +139,110 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ——— Image upload ——— */
+
+.imageRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uploadBtn {
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 6px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background var(--transition-fast);
+}
+
+.uploadBtn:hover:not(:disabled) {
+  background: var(--filter-bg);
+}
+
+.uploadBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.imageName {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.imagePreview {
+  margin-top: 8px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  max-width: 400px;
+}
+
+.imagePreview img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hint {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: none;
+  letter-spacing: 0;
+  margin-top: 2px;
+}
+
+/* ——— JSON editor ——— */
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.modeToggle {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: background var(--transition-fast);
+}
+
+.modeToggle:hover {
+  background: var(--filter-bg);
+}
+
+.jsonEditor {
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  width: 100%;
+  min-height: 400px;
+  padding: 12px;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  outline: none;
+  resize: vertical;
+  background: #FAFAF8;
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.jsonEditor:focus {
+  border-color: var(--dark);
+}

@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Playfair_Display, Montserrat, Inter } from "next/font/google";
 import { FavoritesProvider } from "@/lib/favorites-context";
+import { readSettings } from "@/lib/settings";
 import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
 import "./globals.css";
 
 /* ——— Google Fonts (next/font — self-hosted, optimized) ——— */
@@ -37,28 +39,29 @@ const siteUrl = process.env.SITE_URL || "http://localhost:3001";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Moranti — Сумки, которые говорят без слов",
+    default: "Moranti — сумки из натуральной итальянской кожи",
     template: "%s — Moranti",
   },
   description:
-    "Moranti — женские сумки из натуральной кожи. Минималистичные формы, ручная работа, никаких кричащих логотипов.",
+    "Moranti — женские сумки из натуральной итальянской кожи. Минималистичные формы, ручная работа, никаких кричащих логотипов.",
   keywords: [
     "сумки",
-    "брендовые сумки",
-    "женские сумки",
     "Moranti",
-    "премиальные сумки",
+    "итальянские сумки",
+    "натуральная итальянская кожа",
+    "женские сумки",
     "кожаные сумки",
-    "сумки ручной работы",
-    "тихая роскошь",
+    "сумки через плечо",
+    "сумки из замши",
+    "классические сумки",
   ],
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Moranti — Сумки, которые говорят без слов",
+    title: "Moranti — сумки из натуральной итальянской кожи",
     description:
-      "Женские сумки из натуральной кожи. Минимализм, ручная работа, никаких кричащих логотипов.",
+      "Женские сумки из натуральной итальянской кожи. Минималистичные формы, ручная работа.",
     url: "/",
     siteName: "Moranti",
     type: "website",
@@ -68,7 +71,14 @@ export const metadata: Metadata = {
 
 /* ——— Yandex Metrika ID ——— */
 
-const ymId = process.env.YANDEX_METRIKA_ID;
+// Из админки (settings.json) или .env.local
+let ymId: string | undefined;
+try {
+  const settings = readSettings();
+  ymId = settings.yandexMetrikaId || process.env.YANDEX_METRIKA_ID;
+} catch {
+  ymId = process.env.YANDEX_METRIKA_ID;
+}
 
 /* ——— Root Layout ——— */
 
@@ -93,7 +103,7 @@ export default function RootLayout({
               name: "Moranti",
               url: siteUrl,
               description:
-                "Женские сумки из натуральной кожи. Минималистичные формы, ручная работа.",
+                "Женские сумки из натуральной итальянской кожи. Минималистичные формы, ручная работа.",
               contactPoint: {
                 "@type": "ContactPoint",
                 contactType: "sales",
@@ -140,6 +150,7 @@ export default function RootLayout({
         <FavoritesProvider>
           <Header />
           <main>{children}</main>
+          <Footer />
         </FavoritesProvider>
       </body>
     </html>

@@ -1,189 +1,120 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import Hero from "@/components/sections/hero";
 import ProductCard from "@/components/ui/product-card";
 import { useProducts } from "@/lib/use-products";
 import styles from "./page.module.css";
 
-const ITEMS_PER_PAGE = 24;
+interface HeroSettings {
+  title: string;
+  tagline: string;
+  subtitle: string;
+  image: string;
+}
+
+const defaultHero: HeroSettings = {
+  title: "Moranti",
+  tagline: "Сумки, которые сочетают эстетику, удобство и качество натуральных материалов.",
+  subtitle: "Натуральная кожа итальянского производства. Минималистичные формы, ручная работа.",
+  image: "",
+};
 
 export default function Home() {
   const { products, categories } = useProducts();
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
+  const [hero, setHero] = useState<HeroSettings>(defaultHero);
+  const [featuredIds, setFeaturedIds] = useState<string[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Filter products
-  const filtered = selectedCategory
-    ? products.filter((p) => p.category === selectedCategory)
-    : products;
+  useEffect(() => {
+    setIsAdmin(localStorage.getItem("moranti_admin") === "1");
+  }, []);
 
-  // Paginate
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const safePage = Math.min(page, Math.max(totalPages, 1));
-  const paginated = filtered.slice(
-    (safePage - 1) * ITEMS_PER_PAGE,
-    safePage * ITEMS_PER_PAGE
-  );
+  useEffect(() => {
+    fetch("/api/data/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.hero) setHero(data.hero);
+        if (Array.isArray(data.featuredIds)) setFeaturedIds(data.featuredIds);
+      })
+      .catch(() => {});
+  }, []);
 
-  const handleFilter = (cat: string | null) => {
-    setSelectedCategory(cat);
-    setPage(1);
-  };
+  const featured =
+    featuredIds.length > 0
+      ? products.filter((p) => featuredIds.includes(p.id))
+      : products.slice(0, 6);
 
   return (
     <>
       {/* ——— Hero ——— */}
-      <Hero />
+      <Hero settings={hero} />
 
-      {/* ——— Catalog ——— */}
-      <section className={styles.catalog} id="catalog">
-        <div className={styles.catalogHeader}>
-          <span className={styles.catalogLabel}>Каталог</span>
-          <h2 className={styles.catalogTitle}>Наши сумки</h2>
+      {/* ——— Коллекции ——— */}
+      <section className={styles.collections}>
+        <div className={`container ${styles.sectionHeader}`}>
+          <span className={styles.sectionLabel}>Коллекции</span>
+          <h2 className={styles.sectionTitle}>Категории</h2>
         </div>
-
-        {/* Filter pills */}
-        <div className={styles.filterRow}>
-          <button
-            className={`${styles.filterPill} ${selectedCategory === null ? styles.pillActive : ""}`}
-            onClick={() => handleFilter(null)}
-          >
-            Все
-          </button>
+        <div className={`container ${styles.collectionsGrid}`}>
           {categories.map((cat) => (
-            <button
+            <Link
               key={cat.slug}
-              className={`${styles.filterPill} ${selectedCategory === cat.slug ? styles.pillActive : ""}`}
-              onClick={() => handleFilter(cat.slug)}
+              href={`/catalog?category=${cat.slug}`}
+              className={styles.collectionCard}
             >
-              {cat.name}
-            </button>
+              <span className={styles.collectionName}>{cat.name}</span>
+              <span className={styles.collectionCount}>
+                {cat.count}{" "}
+                {cat.count === 1
+                  ? "модель"
+                  : cat.count < 5
+                    ? "модели"
+                    : "моделей"}
+              </span>
+            </Link>
           ))}
         </div>
+      </section>
 
-        {/* Product grid */}
-        <div className={styles.productGrid}>
-          {paginated.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+      {/* ——— Популярные модели ——— */}
+      <section className={styles.featured}>
+        <div className={`container ${styles.sectionHeader}`}>
+          <span className={styles.sectionLabel}>Коллекция</span>
+          <h2 className={styles.sectionTitle}>Популярные модели</h2>
         </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className={styles.pagination}>
-            <button
-              className={`${styles.pageBtn} ${safePage <= 1 ? styles.pageBtnDisabled : ""}`}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={safePage <= 1}
-            >
-              ←
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter((p) => {
-                if (p === 1 || p === totalPages) return true;
-                if (Math.abs(p - safePage) <= 1) return true;
-                return false;
-              })
-              .map((p, idx, arr) => (
-                <span key={p} className={styles.pageGroup}>
-                  {idx > 0 && arr[idx - 1] !== p - 1 && (
-                    <span className={styles.pageEllipsis}>…</span>
-                  )}
-                  <button
-                    className={`${styles.pageBtn} ${p === safePage ? styles.pageBtnActive : ""}`}
-                    onClick={() => setPage(p)}
-                  >
-                    {p}
-                  </button>
-                </span>
-              ))}
-
-            <button
-              className={`${styles.pageBtn} ${safePage >= totalPages ? styles.pageBtnDisabled : ""}`}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={safePage >= totalPages}
-            >
-              →
-            </button>
+        {featured.length > 0 && (
+          <div className={`container ${styles.featuredGrid}`}>
+            {featured.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
         )}
       </section>
 
-      {/* ——— Values ——— */}
-      <section className={styles.values}>
-        <div className="container">
-          <div className={styles.valuesGrid}>
-            <div className={styles.valueItem}>
-              <h3 className={styles.valueTitle}>Натуральная кожа</h3>
-              <p className={styles.valueDesc}>
-                Отбираем материал вручную. Работаем только с проверенными
-                кожевенными производствами.
-              </p>
-            </div>
-            <div className={styles.valueItem}>
-              <h3 className={styles.valueTitle}>Ручная работа</h3>
-              <p className={styles.valueDesc}>
-                Каждая сумка собирается вручную. Проверяем швы, фурнитуру и
-                посадку перед отправкой.
-              </p>
-            </div>
-            <div className={styles.valueItem}>
-              <h3 className={styles.valueTitle}>Вне времени</h3>
-              <p className={styles.valueDesc}>
-                Классические формы и спокойные цвета — чтобы сумка не надоела
-                через месяц.
-              </p>
-            </div>
-          </div>
+      {/* ——— CTA ——— */}
+      <section className={styles.ctaSection}>
+        <div className={`container ${styles.ctaInner}`}>
+          <h2 className={styles.ctaTitle}>Выберите свою Moranti</h2>
+          <p className={styles.ctaDesc}>
+            Сумка, которая подчеркивает стиль и делает каждый день удобнее.
+          </p>
+          <Link href="/catalog" className={styles.ctaBtnLarge}>
+            Перейти в каталог
+          </Link>
         </div>
       </section>
 
-      {/* ——— Footer ——— */}
-      <footer className={styles.footer}>
-        <div className="container">
-          <div className={styles.footerContent}>
-            <div className={styles.footerBrand}>
-              <h3 className={styles.footerLogo}>Moranti</h3>
-              <p className={styles.footerTagline}>
-                Сумки, которые говорят без слов
-              </p>
-            </div>
-            <div className={styles.footerLinks}>
-              <a
-                href="https://www.instagram.com/_utrends/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.footerLink}
-              >
-                Instagram
-              </a>
-              <a
-                href="https://www.wildberries.ru/brands/moranti"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.footerLink}
-              >
-                Wildberries
-              </a>
-              <a
-                href="https://www.ozon.ru/seller/moranti/?miniapp=seller_4205030"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.footerLink}
-              >
-                Ozon
-              </a>
-            </div>
-          </div>
-          <div className={styles.footerBottom}>
-            <span className={styles.footerCopy}>
-              &copy; {new Date().getFullYear()} Moranti. Все права защищены.
-            </span>
-          </div>
-        </div>
-      </footer>
+      {/* ——— Кнопка на админку (только для админа) ——— */}
+      {isAdmin && (
+        <Link href="/admin/" className={styles.adminFab} title="Панель управления">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+          </svg>
+        </Link>
+      )}
     </>
   );
 }

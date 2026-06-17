@@ -203,3 +203,190 @@
   color: var(--white);
   border-color: var(--dark);
 }
+
+/* ─── Header actions ─── */
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reorderBtn {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 9px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background var(--transition-fast);
+  white-space: nowrap;
+}
+
+.reorderBtn:hover {
+  background: var(--filter-bg);
+}
+
+.saveOrderBtn {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 9px 20px;
+  background: var(--dark);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
+}
+
+.saveOrderBtn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.saveOrderBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cancelReorderBtn {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 9px 16px;
+  background: transparent;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.cancelReorderBtn:hover {
+  color: var(--dark);
+  border-color: var(--dark);
+}
+
+.savedBadge {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--success);
+  background: #e8f5e9;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+/* ─── Reorder list ─── */
+
+.reorderHint {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-md);
+}
+
+.reorderList {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.reorderItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-light-gray);
+  cursor: grab;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+  user-select: none;
+}
+
+.reorderItem:last-child {
+  border-bottom: none;
+}
+
+.reorderItem:hover {
+  background: var(--card-bg);
+}
+
+.reorderItemActive {
+  opacity: 0.5;
+  background: var(--card-bg);
+}
+
+.dragging {
+  opacity: 0.4;
+}
+
+.reorderHandle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  cursor: grab;
+  padding: 0 4px;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.reorderHandle:active {
+  cursor: grabbing;
+}
+
+.reorderNum {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 24px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.reorderThumb {
+  width: 32px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.reorderName {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reorderPrice {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  min-width: 80px;
+  text-align: right;
+}
+
+.reorderBadge {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--filter-bg);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  min-width: 56px;
+  text-align: center;
+}

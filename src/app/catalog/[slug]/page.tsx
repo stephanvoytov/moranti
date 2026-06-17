@@ -95,7 +95,7 @@ export default async function ProductPage({ params }: Props) {
       />
       {/* Breadcrumb */}
       <nav className={styles.breadcrumb}>
-        <Link href="/#catalog" className={styles.breadcrumbLink}>
+        <Link href="/catalog" className={styles.breadcrumbLink}>
           Каталог
         </Link>
         <span className={styles.breadcrumbSep}>/</span>
@@ -156,7 +156,7 @@ export default async function ProductPage({ params }: Props) {
             ))}
           </div>
 
-          <Link href="/#catalog" className={styles.backLink}>
+          <Link href="/catalog" className={styles.backLink}>
             ← Вернуться в каталог
           </Link>
         </div>

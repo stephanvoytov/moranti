@@ -1,5 +1,5 @@
 /* =============================================
-   Hero — Lifestyle full-width image
+   Hero — Lifestyle full-width image + text overlay
    ============================================= */
 
 .hero {
@@ -7,13 +7,20 @@
 }
 
 .imageWrap {
+  position: relative;
   width: 100%;
   height: 70vh;
   max-height: 700px;
   overflow: hidden;
 }
 
-.image {
+.imageFill {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imagePlaceholder {
   width: 100%;
   height: 100%;
   background: var(--ivory);
@@ -21,10 +28,87 @@
   background-size: 80px 80px;
 }
 
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-xl);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 48px;
+  font-weight: 400;
+  color: var(--white);
+  margin: 0 0 var(--space-sm);
+  letter-spacing: 0.08em;
+}
+
+.tagline {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--white);
+  margin: 0 0 6px;
+  max-width: 520px;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--white);
+  margin: 0 0 var(--space-lg);
+  opacity: 0.8;
+}
+
+.cta {
+  display: inline-flex;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dark);
+  background: var(--white);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 12px 32px;
+  border-radius: 4px;
+  transition: all var(--transition-fast);
+}
+
+.cta:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+
 @media (max-width: 768px) {
   .imageWrap {
     height: 45vh;
     max-height: 320px;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+
+  .tagline {
+    font-size: 14px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .cta {
+    padding: 10px 24px;
+    font-size: 11px;
   }
 }
 

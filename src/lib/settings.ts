@@ -9,8 +9,14 @@ import path from "path";
 export interface SiteSettings {
   hero: {
     title: string;
+    tagline: string;
     subtitle: string;
+    image: string;
   };
+  featuredIds: string[];
+  catalogOrder: string[];
+  wbApiKey: string;
+  yandexMetrikaId: string;
   contacts: {
     phone: string;
     email: string;
@@ -44,8 +50,14 @@ function defaults(): SiteSettings {
   return {
     hero: {
       title: "Moranti",
-      subtitle: "Сумки из натуральной кожи",
+      tagline: "Сумки, которые сочетают эстетику, удобство и качество натуральных материалов.",
+      subtitle: "Натуральная кожа итальянского производства. Минималистичные формы, ручная работа.",
+      image: "",
     },
+    featuredIds: [],
+    catalogOrder: [],
+    wbApiKey: "",
+    yandexMetrikaId: "",
     contacts: {
       phone: "",
       email: "",
@@ -80,7 +92,10 @@ export function readSettings(): SiteSettings {
   }
 
   const raw = readFileSync(fp, "utf-8");
-  _settings = JSON.parse(raw);
+  const parsed = JSON.parse(raw);
+
+  // Merge with defaults to ensure new fields exist
+  _settings = { ...defaults(), ...parsed, hero: { ...defaults().hero, ...parsed.hero } };
   return _settings!;
 }
 
