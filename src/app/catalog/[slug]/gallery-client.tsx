@@ -29,6 +29,7 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
           src={activeImage}
           alt={`${alt} — фото ${activeIndex + 1}`}
           className={styles.image}
+          fetchPriority="high"
         />
       </div>
 

@@ -12,5 +12,12 @@ export async function GET() {
   const products = getProducts();
   const categories = getCategories();
 
-  return NextResponse.json({ products, categories });
+  return NextResponse.json(
+    { products, categories },
+    {
+      headers: {
+        "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=300",
+      },
+    },
+  );
 }

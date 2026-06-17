@@ -8,6 +8,7 @@ import { readFileSync, writeFileSync } from "fs";
 import path from "path";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
+import { invalidateProductsCache } from "@/data/products";
 import type { Product, MarketplaceLink } from "@/data/products";
 
 /* ——— Типы ——— */
@@ -174,6 +175,7 @@ export async function POST(request: NextRequest) {
     data.products.push(newProduct);
     data.meta.count = data.products.length;
     writeData(data);
+    invalidateProductsCache();
 
     return NextResponse.json(newProduct, { status: 201 });
   } catch {

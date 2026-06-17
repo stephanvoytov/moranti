@@ -93,6 +93,12 @@ export default function RootLayout({
       className={`${playfair.variable} ${montserrat.variable} ${inter.variable}`}
     >
       <head>
+        {/* Preconnect for external services */}
+        <link rel="preconnect" href="https://mc.yandex.ru" />
+        <link rel="preconnect" href="https://kgd-basket-cdn-01bl.geobasket.ru" />
+        <link rel="dns-prefetch" href="https://mc.yandex.ru" />
+        <link rel="dns-prefetch" href="https://kgd-basket-cdn-01bl.geobasket.ru" />
+
         {/* Organization structured data */}
         <script
           type="application/ld+json"

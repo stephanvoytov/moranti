@@ -8,6 +8,7 @@ import { readFileSync, writeFileSync } from "fs";
 import path from "path";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
+import { invalidateProductsCache } from "@/data/products";
 import type { Product, MarketplaceLink } from "@/data/products";
 
 interface ProductsFile {
@@ -142,6 +143,7 @@ export async function PUT(
 
     data.products[index] = updated;
     writeData(data);
+    invalidateProductsCache();
 
     return NextResponse.json(updated);
   } catch {
@@ -174,6 +176,7 @@ export async function DELETE(
   data.products.splice(index, 1);
   data.meta.count = data.products.length;
   writeData(data);
+  invalidateProductsCache();
 
   return NextResponse.json({ ok: true });
 }

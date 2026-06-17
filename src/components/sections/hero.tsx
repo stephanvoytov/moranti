@@ -19,6 +19,7 @@ export default function Hero({ settings }: { settings: HeroSettings }) {
             src={settings.image}
             alt={settings.title}
             className={styles.imageFill}
+            fetchPriority="high"
           />
         ) : (
           <div className={styles.imagePlaceholder} />

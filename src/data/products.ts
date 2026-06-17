@@ -1,10 +1,9 @@
 /* =============================================
    Moranti — Product Data (113 товаров, Wildberries)
-   Источник: data/products.json (редактируется через админку)
+   Источник: data/products.json (через JsonRepository)
    ============================================= */
 
-import { readFileSync, existsSync } from "fs";
-import path from "path";
+import { JsonRepository } from "@/lib/json-repository";
 
 export interface Product {
   id: string;
@@ -38,55 +37,50 @@ export interface ProductCategory {
   count: number;
 }
 
-/* ——— Загрузка из JSON (серверная) ——— */
-
-let _products: Product[] | null = null;
-let _categories: ProductCategory[] | null = null;
-
-function load(): void {
-  if (_products) return;
-  const jsonPath = path.join(process.cwd(), "data", "products.json");
-  if (!existsSync(jsonPath)) {
-    _products = [];
-    _categories = [];
-    return;
-  }
-  const raw = readFileSync(jsonPath, "utf-8");
-  const data = JSON.parse(raw);
-  _products = data.products;
-  _categories = data.categories;
+interface ProductsData {
+  products: Product[];
+  categories: ProductCategory[];
 }
 
-/* ——— Client-side exports (fallback, загружается при первой загрузке) ——— 
-   Эти данные используются только серверными компонентами (SSG).
-   Клиентские компоненты ("use client") получают данные через API.          */
+const defaults = (): ProductsData => ({
+  products: [],
+  categories: [],
+});
+
+const repo = new JsonRepository<ProductsData>("products.json", defaults);
+
+/* ——— Repository access ——— */
+
+export function invalidateProductsCache(): void {
+  repo.invalidate();
+}
+
+function load(): ProductsData {
+  return repo.read();
+}
+
+/* ——— Query functions ——— */
 
 export function getProducts(): Product[] {
-  load();
-  return _products!;
+  return load().products;
 }
 
 export function getProduct(slug: string): Product | null {
-  load();
-  return _products!.find((p) => p.slug === slug) ?? null;
+  return load().products.find((p) => p.slug === slug) ?? null;
 }
 
 export function getProductsByCategory(category: string): Product[] {
-  load();
-  return _products!.filter((p) => p.category === category);
+  return load().products.filter((p) => p.category === category);
 }
 
 export function getProductsByWbArticle(article: number): Product | null {
-  load();
-  return _products!.find((p) => p.wbArticle === article) ?? null;
+  return load().products.find((p) => p.wbArticle === article) ?? null;
 }
 
 export function getCategories(): ProductCategory[] {
-  load();
-  return _categories!;
+  return load().categories;
 }
 
 export function preloadProducts(): Product[] {
-  load();
-  return _products!;
+  return load().products;
 }

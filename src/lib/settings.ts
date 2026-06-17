@@ -1,10 +1,9 @@
 /* =============================================
    Moranti — Settings read/write helpers
-   Файл: data/settings.json
+   Файл: data/settings.json (через JsonRepository)
    ============================================= */
 
-import { readFileSync, writeFileSync, existsSync } from "fs";
-import path from "path";
+import { JsonRepository } from "@/lib/json-repository";
 
 export interface SiteSettings {
   hero: {
@@ -40,69 +39,55 @@ export interface SiteSettings {
   updatedAt: string;
 }
 
-let _settings: SiteSettings | null = null;
+const defaults = (): SiteSettings => ({
+  hero: {
+    title: "Moranti",
+    tagline: "Сумки, которые сочетают эстетику, удобство и качество натуральных материалов.",
+    subtitle: "Натуральная кожа итальянского производства. Минималистичные формы, ручная работа.",
+    image: "",
+  },
+  featuredIds: [],
+  catalogOrder: [],
+  wbApiKey: "",
+  yandexMetrikaId: "",
+  contacts: {
+    phone: "",
+    email: "",
+    address: "",
+  },
+  social: {
+    instagram: "",
+    vk: "",
+    telegram: "",
+    whatsapp: "",
+  },
+  marketplaces: {
+    wildberries: "",
+    ozon: "",
+    yandexMarket: "",
+  },
+  seo: {
+    defaultTitle: "Moranti",
+    defaultDescription: "",
+  },
+  updatedAt: new Date().toISOString(),
+});
 
-function settingsPath(): string {
-  return path.join(process.cwd(), "data", "settings.json");
-}
+const repo = new JsonRepository<SiteSettings>("settings.json", defaults);
 
-function defaults(): SiteSettings {
-  return {
-    hero: {
-      title: "Moranti",
-      tagline: "Сумки, которые сочетают эстетику, удобство и качество натуральных материалов.",
-      subtitle: "Натуральная кожа итальянского производства. Минималистичные формы, ручная работа.",
-      image: "",
-    },
-    featuredIds: [],
-    catalogOrder: [],
-    wbApiKey: "",
-    yandexMetrikaId: "",
-    contacts: {
-      phone: "",
-      email: "",
-      address: "",
-    },
-    social: {
-      instagram: "",
-      vk: "",
-      telegram: "",
-      whatsapp: "",
-    },
-    marketplaces: {
-      wildberries: "",
-      ozon: "",
-      yandexMarket: "",
-    },
-    seo: {
-      defaultTitle: "Moranti",
-      defaultDescription: "",
-    },
-    updatedAt: new Date().toISOString(),
-  };
-}
+/* ——— Public API ——— */
 
 export function readSettings(): SiteSettings {
-  if (_settings) return _settings;
-
-  const fp = settingsPath();
-  if (!existsSync(fp)) {
-    _settings = defaults();
-    return _settings;
-  }
-
-  const raw = readFileSync(fp, "utf-8");
-  const parsed = JSON.parse(raw);
-
-  // Merge with defaults to ensure new fields exist
-  _settings = { ...defaults(), ...parsed, hero: { ...defaults().hero, ...parsed.hero } };
-  return _settings!;
+  return repo.read();
 }
 
 export function writeSettings(data: Partial<SiteSettings>): SiteSettings {
-  const current = readSettings();
+  const current = repo.read();
   const merged = { ...current, ...data, updatedAt: new Date().toISOString() };
-  writeFileSync(settingsPath(), JSON.stringify(merged, null, 2), "utf-8");
-  _settings = merged;
+  repo.write(merged);
   return merged;
+}
+
+export function invalidateSettingsCache(): void {
+  repo.invalidate();
 }
