@@ -27,6 +27,15 @@
 # temp session files (task delegation)
 .tmp/
 
+# generated price cache (auto-created by WB API service)
+/data/wb-prices-cache.json
+
+# AI-generated images output
+/mcpollinations-output/
+
+# favicon intermediates
+/public/images/favicon-*.png
+
 # project instructions (not source code)
 CLAUDE.md
 AGENTS.md

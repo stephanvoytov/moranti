@@ -42,8 +42,8 @@ export interface SiteSettings {
 const defaults = (): SiteSettings => ({
   hero: {
     title: "Moranti",
-    tagline: "Сумки, которые сочетают эстетику, удобство и качество натуральных материалов.",
-    subtitle: "Натуральная кожа итальянского производства. Минималистичные формы, ручная работа.",
+    tagline: "Минимум пафоса — максимум качества.",
+    subtitle: "Кожаные сумки на каждый день",
     image: "",
   },
   featuredIds: [],

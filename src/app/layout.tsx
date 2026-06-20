@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Playfair_Display, Montserrat, Inter } from "next/font/google";
+import { Alfa_Slab_One, Playfair_Display, Montserrat, Inter } from "next/font/google";
 import { FavoritesProvider } from "@/lib/favorites-context";
 import { readSettings } from "@/lib/settings";
 import Header from "@/components/layout/header";
@@ -13,14 +13,15 @@ const playfair = Playfair_Display({
   subsets: ["latin", "cyrillic"],
   variable: "--font-serif",
   display: "swap",
-  weight: ["400"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 const montserrat = Montserrat({
   subsets: ["latin", "cyrillic"],
   variable: "--font-sans",
   display: "swap",
-  weight: ["400", "500"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 const inter = Inter({
@@ -28,6 +29,13 @@ const inter = Inter({
   variable: "--font-body",
   display: "swap",
   weight: ["300", "400", "500", "600", "700"],
+});
+
+const alfaSlab = Alfa_Slab_One({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+  weight: ["400"],
 });
 
 /* ——— Site URL ——— */
@@ -39,15 +47,15 @@ const siteUrl = process.env.SITE_URL || "http://localhost:3001";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Moranti — сумки из натуральной итальянской кожи",
+    default: "Moranti — кожаные сумки",
     template: "%s — Moranti",
   },
   description:
-    "Moranti — женские сумки из натуральной итальянской кожи. Минималистичные формы, ручная работа, никаких кричащих логотипов.",
+    "Moranti — женские сумки из натуральной итальянской кожи. Минималистичные формы, никаких кричащих логотипов.",
   keywords: [
     "сумки",
     "Moranti",
-    "итальянские сумки",
+    "кожаные сумки",
     "натуральная итальянская кожа",
     "женские сумки",
     "кожаные сумки",
@@ -59,9 +67,9 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "Moranti — сумки из натуральной итальянской кожи",
+    title: "Moranti — кожаные сумки",
     description:
-      "Женские сумки из натуральной итальянской кожи. Минималистичные формы, ручная работа.",
+      "Женские сумки из натуральной итальянской кожи. Минималистичные формы, никаких кричащих логотипов.",
     url: "/",
     siteName: "Moranti",
     type: "website",
@@ -90,7 +98,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${playfair.variable} ${montserrat.variable} ${inter.variable}`}
+      className={`${playfair.variable} ${montserrat.variable} ${inter.variable} ${alfaSlab.variable}`}
     >
       <head>
         {/* Preconnect for external services */}
@@ -109,7 +117,7 @@ export default function RootLayout({
               name: "Moranti",
               url: siteUrl,
               description:
-                "Женские сумки из натуральной итальянской кожи. Минималистичные формы, ручная работа.",
+                "Женские сумки из натуральной итальянской кожи. Минималистичные формы, никаких кричащих логотипов.",
               contactPoint: {
                 "@type": "ContactPoint",
                 contactType: "sales",

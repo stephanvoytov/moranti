@@ -7,7 +7,7 @@
 @import '../styles/typography.css';
 
 body {
-  background-color: var(--white);
+  background-color: var(--bg);
   color: var(--text-primary);
   font-family: var(--font-body);
 }

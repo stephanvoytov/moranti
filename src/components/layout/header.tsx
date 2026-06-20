@@ -11,91 +11,68 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { count } = useFavorites();
 
-  // Не показывать главный хедер на страницах админки
+  // Не показывать хедер на страницах админки
   if (pathname?.startsWith("/admin")) return null;
 
   return (
-    <header className={styles.header}>
-      {/* ——— Top Bar ——— */}
-      <div className={styles.topbar}>
-        <div className={styles.topbarLeft} />
+    <>
+      <header className={styles.header}>
         <Link href="/" className={styles.logo}>
           Moranti
         </Link>
-        <div className={styles.topbarRight}>
-          <div className={styles.search}>
-            <input type="text" placeholder="Поиск" readOnly />
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          </div>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
-          <Link href="/favorites" className={styles.favLink} aria-label="Избранное">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+
+        <nav
+          className={`${styles.nav}${menuOpen ? " " + styles.open : ""}`}
+          id="mainNav"
+        >
+          <Link href="/catalog?sort=new" onClick={() => setMenuOpen(false)}>
+            Новинки
+          </Link>
+          <Link href="/catalog" onClick={() => setMenuOpen(false)}>
+            Коллекции
+          </Link>
+          <Link href="/catalog" onClick={() => setMenuOpen(false)}>
+            Каталог
+          </Link>
+          <Link href="/about" onClick={() => setMenuOpen(false)}>
+            О нас
+          </Link>
+          <a href="https://www.wildberries.ru/brands/moranti" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
+            Wildberries
+          </a>
+          <a href="https://www.ozon.ru/seller/moranti/?miniapp=seller_4205030" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
+            Ozon
+          </a>
+        </nav>
+
+        <div
+          className={`${styles.navBackdrop}${menuOpen ? " " + styles.open : ""}`}
+          onClick={() => setMenuOpen(false)}
+        />
+
+        <div className={styles.actions}>
+          <Link href="/favorites" className={styles.favWrap} aria-label="Избранное">
+            <svg className={styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
             {count > 0 && <span className={styles.favBadge}>{count}</span>}
           </Link>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+
+          <button
+            className={styles.menuToggle}
+            aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
+            aria-expanded={menuOpen}
+            aria-controls="mainNav"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <svg width="22" height="18" viewBox="0 0 22 18" fill="none">
+              <line x1="1" y1="2" x2="21" y2="2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="1" y1="9" x2="21" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="1" y1="16" x2="21" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
-      </div>
-
-      {/* ——— Navigation Bar ——— */}
-      <nav className={styles.nav}>
-        <button
-          className={styles.burger}
-          aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
-          onClick={() => setMenuOpen((v) => !v)}
-        >
-          {menuOpen ? (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-          ) : (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 12h18"/><path d="M3 6h18"/><path d="M3 18h18"/></svg>
-          )}
-        </button>
-
-        <ul className={styles.navLinks}>
-          <li><Link href="/">Главная</Link></li>
-          <li><Link href="/about">О бренде</Link></li>
-          <li><Link href="/catalog">Каталог</Link></li>
-          <li className={styles.dropdown}>
-            <button className={styles.dropdownBtn} type="button">
-              Соцсети
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 1l4 4 4-4"/></svg>
-            </button>
-            <div className={styles.dropdownMenu}>
-              <a href="https://www.instagram.com/_utrends/" target="_blank" rel="noopener noreferrer">Instagram</a>
-              <a href="https://vk.com/moranti_bags" target="_blank" rel="noopener noreferrer">VK</a>
-            </div>
-          </li>
-          <li className={styles.dropdown}>
-            <button className={styles.dropdownBtn} type="button">
-              Магазины
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 1l4 4 4-4"/></svg>
-            </button>
-            <div className={styles.dropdownMenu}>
-              <a href="https://www.wildberries.ru/brands/moranti" target="_blank" rel="noopener noreferrer">Wildberries</a>
-              <a href="https://www.ozon.ru/seller/moranti/?miniapp=seller_4205030" target="_blank" rel="noopener noreferrer">Ozon</a>
-            </div>
-          </li>
-        </ul>
-      </nav>
-
-      {/* ——— Mobile Menu Panel ——— */}
-      <div className={`${styles.mobileMenu}${menuOpen ? ' ' + styles.mobileMenuOpen : ''}`}>
-        <ul className={styles.mobileLinks}>
-            <li><Link href="/" onClick={() => setMenuOpen(false)}>Главная</Link></li>
-            <li><Link href="/about" onClick={() => setMenuOpen(false)}>О бренде</Link></li>
-            <li><Link href="/catalog" onClick={() => setMenuOpen(false)}>Каталог</Link></li>
-            <li><Link href="/favorites" onClick={() => setMenuOpen(false)}>Избранное{count > 0 ? ` (${count})` : ''}</Link></li>
-          </ul>
-          <span className={styles.mobileGroupLabel}>Соцсети</span>
-          <ul className={styles.mobileLinks}>
-            <li><a href="https://www.instagram.com/_utrends/" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>Instagram</a></li>
-            <li><a href="https://vk.com/moranti_bags" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>VK</a></li>
-          </ul>
-          <span className={styles.mobileGroupLabel}>Магазины</span>
-          <ul className={styles.mobileLinks}>
-            <li><a href="https://www.wildberries.ru/brands/moranti" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>Wildberries</a></li>
-            <li><a href="https://www.ozon.ru/seller/moranti/?miniapp=seller_4205030" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>Ozon</a></li>
-        </ul>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

@@ -5,7 +5,7 @@
 /* ——— Header ——— */
 
 .catalog {
-  padding: var(--space-2xl) var(--container-padding) var(--space-3xl);
+  padding: calc(var(--header-height) + var(--space-lg)) var(--container-padding) var(--space-3xl);
   max-width: var(--container-max);
   margin: 0 auto;
 }
@@ -116,10 +116,10 @@
   }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 360px) {
   .productGrid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 12px;
   }
 }
 

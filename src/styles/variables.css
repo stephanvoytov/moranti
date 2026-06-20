@@ -5,12 +5,15 @@
 
 :root {
   /* ——— Colors ——— */
+  --bg: #F6F4EF;
+  --surface: #EDE9E0;
   --cream: #F8F6F0;
   --ivory: #F0EDE5;
   --warm-white: #FAF8F4;
 
   --taupe: #C4B5A0;
   --camel: #A68B6B;
+  --accent: #9C7B5A;
   --brown: #5C4033;
 
   --dark: #2C2420;
@@ -21,16 +24,20 @@
   --error: #C44A4A;
   --success: #4A7C59;
 
-  /* ——— MASTLE-style additions ——— */
+  /* ——— Editorial additions ——— */
   --text-primary: #1A1A1A;
   --text-secondary: #7A7A7A;
   --card-bg: #F4F4F3;
   --filter-bg: #EAE3D2;
-  --border-light-gray: #EAEAEA;
+  --border: #D4C9BC;
+  --border-light: var(--taupe);
+  --border-gray: #EAEAEA;
   --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.06);
 
   /* ——— Typography ——— */
   --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Montserrat', system-ui, -apple-system, sans-serif;
   --font-sans: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
@@ -50,11 +57,12 @@
   --radius-sm: 2px;
   --radius-md: 4px;
   --radius-pill: 4px;
+  --radius-card: 0px;
 
   /* ——— Borders ——— */
   --border-hairline: 1px solid var(--dark);
-  --border-light: 1px solid var(--taupe);
-  --border-gray: 1px solid var(--border-light-gray);
+  --border-ui: 1px solid var(--taupe);
+  --border-line: 1px solid var(--border-gray);
 
   /* ——— Transitions ——— */
   --transition-fast: 0.2s ease;
@@ -67,6 +75,7 @@
 
   /* ——— Grid ——— */
   --grid-gap: 30px;
+  --section-gap: 80px;
 
   /* ——— Z-Index ——— */
   --z-header: 100;

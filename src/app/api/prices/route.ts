@@ -3,14 +3,15 @@
    =============================================
    Прокси для цен Wildberries.
    
-   Пока нет WB_API_KEY — возвращаем статику из products.ts.
-   Когда появится ключ (.env.local → WB_API_KEY=...) —
-   раскомментируй официальный API и закомментируй статику.
+   - Есть WB_API_KEY → живые цены из официального API WB (с серверным кэшем)
+   - Нет ключа → статика из products.json
+   - API недоступен → graceful degradation на статику
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getWbApiKey, type WbPriceResult } from "@/lib/wb-config";
-import { getProducts } from "@/data/products";
+import { getWbPrices, invalidateWbPriceCache } from "@/lib/wb-prices";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -38,30 +39,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Maximum 100 articles" }, { status: 400 });
   }
 
-  const apiKey = getWbApiKey();
-
-  if (apiKey) {
-    // ─── Официальный API Wildberries ───
-    // TODO: реализовать запрос к https://content-api.wildberries.ru
-    // Пока заглушка — возвращает статику
-    return getStaticPrices(articles);
+  // Поддержка ?refresh=1 — сброс кэша (для админки)
+  if (searchParams.get("refresh") === "1") {
+    invalidateWbPriceCache();
   }
 
-  // ─── Статические данные (пока нет API-ключа) ───
-  return getStaticPrices(articles);
-}
-
-/** Возвращает цены из статического массива products.ts */
-function getStaticPrices(articles: number[]): NextResponse<{ articles: WbPriceResult[] }> {
-  const allProducts = getProducts();
-  const result: WbPriceResult[] = articles.map((article) => {
-    const product = allProducts.find((p) => p.wbArticle === article);
-    return {
-      article,
-      price: product?.price ?? 0,
-      originalPrice: product?.originalPrice ?? null,
-    };
-  });
+  const result = await getWbPrices(articles);
 
   return NextResponse.json(
     { articles: result },

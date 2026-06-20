@@ -29,22 +29,26 @@ export function getWbApiKey(): string | undefined {
   return undefined;
 }
 
-/** Базовый URL Content API Wildberries (для продавцов) */
+/** Базовый URL Content API Wildberries (для карточек товаров) */
 export const WB_CONTENT_API = "https://content-api.wildberries.ru";
 
+/** Базовый URL API цен и скидок Wildberries */
+export const WB_PRICING_API = "https://discounts-prices-api.wildberries.ru";
+
 /**
- * Эндпоинты официального API WB:
+ * Эндпоинты официального API WB для цен:
  *
- * 1. Список карточек товаров продавца (с ценами):
- *    POST /content/v2/get/cards/list
- *    Headers: { Authorization: WB_API_KEY }
- *    Body: { "settings": { "cursor": { "limit": 100 } } }
+ * ─── Получение цен ───
+ * GET /api/v2/list/goods/filter?limit=1000
+ * Base: discounts-prices-api.wildberries.ru
+ * Auth: { Authorization: WB_API_KEY }
+ * Описание: возвращает цены, скидки, скидки WB Клуба для всех товаров.
+ * Лимит: один filterNmID за раз. Чтобы получить все — limit=1000 без фильтра.
  *
- * 2. Цены конкретных товаров (по nmId):
- *    POST /content/v1/cards/cursor/list/{nmId}
- *
- * Пока ключа нет — используем статику из products.ts.
- * Когда появится ключ — переключаем вызов здесь.
+ * ─── Используется в проекте ───
+ * Сервис: src/lib/wb-prices.ts
+ * Кэш: in-memory (Map) + файл data/wb-prices-cache.json (переживает рестарт)
+ * Без ключа: статика из products.json (graceful degradation)
  */
 
 export interface WbPriceResult {

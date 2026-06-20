@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import CatalogPage from "./catalog-content";
 
 export const metadata: Metadata = {
-  title: "Каталог сумок из натуральной итальянской кожи",
+  title: "Каталог кожаных сумок",
   description:
-    "Каталог женских сумок Moranti из натуральной итальянской кожи. Трендовые модели: сумки через плечо, тоут, мини, багет, рюкзаки, сёдла, вечерние. Более 100 моделей.",
+    "Каталог женских сумок Moranti из натуральной кожи. Модели: shoulder, tote, mini, baguette, backpack, saddle, evening. Более 50 моделей.",
   openGraph: {
-    title: "Каталог сумок Moranti — натуральная итальянская кожа",
+    title: "Каталог сумок Moranti — натуральная кожа",
     description:
-      "Трендовые модели: shoulder, tote, mini, baguette, backpack, saddle, evening. Более 100 моделей.",
+      "Модели: shoulder, tote, mini, baguette, backpack, saddle, evening. Более 50 моделей.",
     url: "/catalog",
     siteName: "Moranti",
     type: "website",

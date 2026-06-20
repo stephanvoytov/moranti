@@ -20,7 +20,7 @@ export default function CatalogLoading() {
             style={{
               height: 32,
               width: i === 0 ? 48 : 80 + Math.random() * 60,
-              borderRadius: 4,
+              borderRadius: 0,
               background: "var(--card-bg)",
               animation: "pulse 1.5s ease-in-out infinite",
             }}
@@ -42,13 +42,13 @@ export default function CatalogLoading() {
                 animationDelay: `${i * 0.05}s`,
               }}
             />
-            <div style={{ padding: "0 16px 20px", textAlign: "center" }}>
+            <div style={{ padding: "12px 0 0" }}>
               <div
                 style={{
                   height: 14,
                   width: "70%",
-                  margin: "0 auto 8px",
-                  borderRadius: 4,
+                  margin: "0 0 8px",
+                  borderRadius: 0,
                   background: "var(--card-bg)",
                   animation: "pulse 1.5s ease-in-out infinite",
                 }}
@@ -57,8 +57,7 @@ export default function CatalogLoading() {
                 style={{
                   height: 16,
                   width: "40%",
-                  margin: "0 auto",
-                  borderRadius: 4,
+                  borderRadius: 0,
                   background: "var(--card-bg)",
                   animation: "pulse 1.5s ease-in-out infinite",
                 }}

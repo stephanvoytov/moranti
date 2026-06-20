@@ -16,10 +16,16 @@ interface HeroSettings {
 
 const defaultHero: HeroSettings = {
   title: "Moranti",
-  tagline: "Сумки, которые сочетают эстетику, удобство и качество натуральных материалов.",
-  subtitle: "Натуральная кожа итальянского производства. Минималистичные формы, ручная работа.",
+  tagline: "Сумки из натуральной кожи. Минималистичные формы, ручная работа.",
+  subtitle: "Премиальный бренд женских сумок",
   image: "",
 };
+
+/* ——— Подбираем фото для каждой категории (первый товар в категории) ——— */
+function getCategoryImage(products: any[], slug: string): string {
+  const found = products.find((p) => p.category === slug);
+  return found?.image || found?.images?.[0] || "";
+}
 
 export default function Home() {
   const { products, categories } = useProducts();
@@ -44,7 +50,7 @@ export default function Home() {
   const featured =
     featuredIds.length > 0
       ? products.filter((p) => featuredIds.includes(p.id))
-      : products.slice(0, 6);
+      : products.slice(0, 4);
 
   return (
     <>
@@ -52,61 +58,70 @@ export default function Home() {
       <Hero settings={hero} />
 
       {/* ——— Коллекции ——— */}
-      <section className={styles.collections}>
-        <div className={`container ${styles.sectionHeader}`}>
-          <span className={styles.sectionLabel}>Коллекции</span>
-          <h2 className={styles.sectionTitle}>Категории</h2>
-        </div>
-        <div className={`container ${styles.collectionsGrid}`}>
-          {categories.map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/catalog?category=${cat.slug}`}
-              className={styles.collectionCard}
-            >
-              <span className={styles.collectionName}>{cat.name}</span>
-              <span className={styles.collectionCount}>
-                {cat.count}{" "}
-                {cat.count === 1
-                  ? "модель"
-                  : cat.count < 5
-                    ? "модели"
-                    : "моделей"}
-              </span>
-            </Link>
-          ))}
+      <section className={`${styles.section} ${styles.collections}`}>
+        <div className="container">
+          <h2 className={styles.sectionTitle}>Наши коллекции</h2>
+          <div className={styles.collectionsGrid}>
+            {categories.map((cat) => {
+              const img = getCategoryImage(products, cat.slug);
+              return (
+                <Link
+                  key={cat.slug}
+                  href={`/catalog?category=${cat.slug}`}
+                  className={styles.collectionCard}
+                >
+                  {img ? (
+                    <img
+                      src={img}
+                      alt={cat.name}
+                      className={styles.collectionImg}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className={styles.collectionImgFallback} />
+                  )}
+                  <div className={styles.collectionOverlay}>
+                    <span className={styles.collectionName}>{cat.name}</span>
+                    <span className={styles.collectionCount}>
+                      {cat.count} {cat.count === 1 ? "модель" : cat.count < 5 ? "модели" : "моделей"}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </section>
 
       {/* ——— Популярные модели ——— */}
-      <section className={styles.featured}>
-        <div className={`container ${styles.sectionHeader}`}>
-          <span className={styles.sectionLabel}>Коллекция</span>
-          <h2 className={styles.sectionTitle}>Популярные модели</h2>
-        </div>
-        {featured.length > 0 && (
-          <div className={`container ${styles.featuredGrid}`}>
-            {featured.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+      {featured.length > 0 && (
+        <section className={`${styles.section} ${styles.featured}`}>
+          <div className="container">
+            <h2 className={styles.sectionTitle}>Популярные модели</h2>
+            <div className={styles.featuredGrid}>
+              {featured.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       {/* ——— CTA ——— */}
       <section className={styles.ctaSection}>
-        <div className={`container ${styles.ctaInner}`}>
-          <h2 className={styles.ctaTitle}>Выберите свою Moranti</h2>
+        <div className={styles.ctaInner}>
+          <h2 className={styles.ctaTitle}>Сумки из натуральной кожи</h2>
+          <div className={styles.ctaRule} />
           <p className={styles.ctaDesc}>
-            Сумка, которая подчеркивает стиль и делает каждый день удобнее.
+            56 моделей. Доставка по всей России.
           </p>
-          <Link href="/catalog" className={styles.ctaBtnLarge}>
-            Перейти в каталог
+          <Link href="/catalog" className={styles.ctaBtn}>
+            Открыть каталог
           </Link>
         </div>
       </section>
 
-      {/* ——— Кнопка на админку (только для админа) ——— */}
+      {/* ——— Кнопка на админку ——— */}
       {isAdmin && (
         <Link href="/admin/" className={styles.adminFab} title="Панель управления">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
