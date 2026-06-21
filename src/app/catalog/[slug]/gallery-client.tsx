@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
+import GalleryImage from "@/components/ui/gallery-image";
 import styles from "./page.module.css";
 
 interface GalleryClientProps {
@@ -150,11 +151,11 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
           onMouseLeave={onMouseLeave}
           onClick={() => setLightboxOpen(true)}
         >
-          <Image
+          <GalleryImage
             src={activeImage}
             alt={`${alt} — фото ${activeIndex + 1}`}
-            width={516}
-            height={688}
+            width={600}
+            height={800}
             className={`${styles.image} ${zoomPos ? styles.imageZoomed : ""}`}
             style={zoomPos ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
             priority
@@ -236,11 +237,11 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            <Image
+            <GalleryImage
               src={activeImage}
               alt={`${alt} — фото ${activeIndex + 1}`}
-              width={516}
-              height={688}
+              width={600}
+              height={800}
               className={styles.lightboxImage}
               priority
               draggable={false}

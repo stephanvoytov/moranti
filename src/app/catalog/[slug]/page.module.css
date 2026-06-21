@@ -192,7 +192,7 @@
 /* ——— Image zoom ——— */
 .imageZoomed {
   transition: none !important;
-  transform: scale(2);
+  transform: scale(1.5);
   will-change: transform;
 }
 

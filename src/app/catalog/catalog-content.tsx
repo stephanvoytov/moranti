@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import ProductCard from "@/components/ui/product-card";
 import { useProducts } from "@/lib/use-products";
 import { getRecentlyViewed } from "@/lib/recently-viewed";
+import { useDragScroll } from "@/lib/use-drag-scroll";
 import styles from "./page.module.css";
 
 const ITEMS_PER_PAGE = 24;
@@ -60,8 +61,13 @@ function CatalogContent() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  // ― Sort & price filter state ―
-  const [sortOption, setSortOption] = useState("default");
+  // ― Sort & price filter state — read sort from URL ―
+  const initialSort = ["default", "new", "price-asc", "price-desc", "name"].includes(
+    searchParams.get("sort") ?? "",
+  )
+    ? (searchParams.get("sort") as string)
+    : "default";
+  const [sortOption, setSortOption] = useState(initialSort);
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
 
@@ -77,6 +83,7 @@ function CatalogContent() {
 
   // ― Recently viewed ―
   const [recentlyViewed, setRecentlyViewed] = useState<number[]>([]);
+  const drag = useDragScroll<HTMLDivElement>();
 
   useEffect(() => {
     setRecentlyViewed(getRecentlyViewed());
@@ -116,6 +123,9 @@ function CatalogContent() {
 
     // Sort
     switch (sortOption) {
+      case "new":
+        result.sort((a, b) => b.id.localeCompare(a.id));
+        break;
       case "price-asc":
         result.sort((a, b) => a.price - b.price);
         break;
@@ -151,10 +161,17 @@ function CatalogContent() {
       {recentProducts.length > 0 && (
         <section className={styles.recentlySection}>
           <h2 className={styles.recentlyTitle}>Вы недавно смотрели</h2>
-          <div className={styles.recentlyRow}>
-            {recentProducts.map((product) => (
+          <div className={styles.recentlyRow}
+            ref={drag.ref}
+            onMouseDown={drag.onMouseDown}
+            onMouseMove={drag.onMouseMove}
+            onMouseUp={drag.onMouseUp}
+            onDragStart={drag.onDragStart}
+            style={{ cursor: "grab" }}
+          >
+            {recentProducts.map((product, i) => (
               <div key={product.id} className={styles.recentlyCard}>
-                <ProductCard product={product} />
+                <ProductCard product={product} priority={i < 2} />
               </div>
             ))}
           </div>
@@ -184,6 +201,7 @@ function CatalogContent() {
               onChange={(e) => setSortOption(e.target.value)}
             >
               <option value="default">По умолчанию</option>
+              <option value="new">По новинкам</option>
               <option value="price-asc">По цене: возрастание</option>
               <option value="price-desc">По цене: убывание</option>
               <option value="name">По названию</option>
@@ -233,8 +251,8 @@ function CatalogContent() {
         {/* Product grid or empty state */}
         {paginated.length > 0 ? (
           <div className={styles.productGrid}>
-            {paginated.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {paginated.map((product, i) => (
+              <ProductCard key={product.id} product={product} priority={i < 4} />
             ))}
           </div>
         ) : (

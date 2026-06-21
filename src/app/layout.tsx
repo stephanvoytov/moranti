@@ -5,6 +5,7 @@ import { FavoritesProvider } from "@/lib/favorites-context";
 import { readSettings } from "@/lib/settings";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import ScrollToTop from "@/components/ui/scroll-to-top";
 import "./globals.css";
 
 /* ——— Google Fonts (next/font — self-hosted, optimized) ——— */
@@ -99,6 +100,7 @@ export default function RootLayout({
     <html
       lang="ru"
       className={`${playfair.variable} ${montserrat.variable} ${inter.variable} ${alfaSlab.variable}`}
+      data-scroll-behavior="smooth"
     >
       <head>
         {/* Preconnect for external services */}
@@ -165,6 +167,7 @@ export default function RootLayout({
           <Header />
           <main>{children}</main>
           <Footer />
+          <ScrollToTop />
         </FavoritesProvider>
       </body>
     </html>

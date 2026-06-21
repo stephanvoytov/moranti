@@ -10,6 +10,8 @@ import styles from "./product-card.module.css";
 
 interface ProductCardProps {
   product: Product;
+  /** Загружать изображение приоритетно (для LCP — первый ряд карточек) */
+  priority?: boolean;
 }
 
 function HeartIcon({ filled }: { filled: boolean }) {
@@ -28,7 +30,7 @@ function HeartIcon({ filled }: { filled: boolean }) {
   );
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, priority = false }: ProductCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { livePrice, loading } = useLivePrice(product.wbArticle);
   const slug = `wb-${product.wbArticle}`;
@@ -48,7 +50,9 @@ export default function ProductCard({ product }: ProductCardProps) {
     toggleFavorite(product.wbArticle);
   };
 
-  const handleMouseEnter = () => {
+  const touchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const startCycling = () => {
     if (images.length < 2) return;
     setHoverIndex(1);
     hoverTimer.current = setInterval(() => {
@@ -56,23 +60,44 @@ export default function ProductCard({ product }: ProductCardProps) {
     }, 1200);
   };
 
-  const handleMouseLeave = () => {
+  const stopCycling = () => {
     if (hoverTimer.current) clearInterval(hoverTimer.current);
     hoverTimer.current = null;
     setHoverIndex(0);
   };
 
+  const handleMouseEnter = startCycling;
+  const handleMouseLeave = stopCycling;
+
+  const handleTouchStart = () => {
+    if (images.length < 2) return;
+    // Short delay — если палец убрали быстро, это был тап, не запускаем
+    touchTimer.current = setTimeout(() => {
+      startCycling();
+    }, 200);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchTimer.current) {
+      clearTimeout(touchTimer.current);
+      touchTimer.current = null;
+    }
+    stopCycling();
+  };
+
   return (
-    <article className={styles.card} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+    <article className={styles.card} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <div className={styles.imageWrap}>
-        <Link href={link} aria-label={product.name}>
+        <Link href={link} aria-label={product.name} className={styles.imageLink}>
           <Image
             src={images[hoverIndex]}
             alt={product.name}
             fill
             sizes="(max-width: 768px) 50vw, 33vw"
             className={styles.image}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            priority={priority}
+            draggable={false}
           />
         </Link>
         <button

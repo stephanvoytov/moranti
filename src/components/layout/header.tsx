@@ -29,9 +29,6 @@ export default function Header() {
             Новинки
           </Link>
           <Link href="/catalog" onClick={() => setMenuOpen(false)}>
-            Коллекции
-          </Link>
-          <Link href="/catalog" onClick={() => setMenuOpen(false)}>
             Каталог
           </Link>
           <a href="https://www.wildberries.ru/brands/moranti" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>

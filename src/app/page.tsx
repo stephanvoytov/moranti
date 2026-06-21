@@ -121,7 +121,7 @@ export default function Home() {
           <h2 className={styles.ctaTitle}>Сумки из натуральной кожи</h2>
           <div className={styles.ctaRule} />
           <p className={styles.ctaDesc}>
-            56 моделей. Доставка по всей России.
+            {products.length || "..."} моделей. Доставка по всей России.
           </p>
           <Link href="/catalog" className={styles.ctaBtn}>
             Открыть каталог

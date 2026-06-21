@@ -121,16 +121,19 @@
 /* ——— Mobile Menu (nav + backdrop) ——— */
 
 .navBackdrop {
-  display: none;
   position: fixed;
   inset: 0;
   top: var(--header-height);
   background: rgba(44, 36, 32, 0.3);
   z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
 }
 
 .navBackdrop.open {
-  display: block;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* ——— Responsive ——— */
@@ -141,22 +144,30 @@
   }
 
   .nav {
-    display: none;
+    display: flex;
+    flex-direction: column;
     position: fixed;
     top: var(--header-height);
     left: 0;
     right: 0;
     background: var(--bg);
-    flex-direction: column;
     padding: 24px;
     gap: 20px;
     border-bottom: 1px solid var(--border);
     font-size: 14px;
     z-index: 100;
+    opacity: 0;
+    transform: translateY(-12px);
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
   }
 
   .nav.open {
-    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    visibility: visible;
   }
 
   .menuToggle {

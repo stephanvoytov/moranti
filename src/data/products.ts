@@ -1,5 +1,5 @@
 /* =============================================
-   Moranti — Product Data (113 товаров, Wildberries)
+   Moranti — Product Data (54 товара, Wildberries)
    Источник: data/products.json (через JsonRepository)
    ============================================= */
 

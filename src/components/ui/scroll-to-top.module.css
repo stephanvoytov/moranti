@@ -1,0 +1,41 @@
+/* =============================================
+   ScrollToTop — Editorial minimal
+   ============================================= */
+
+.btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 90;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, color 0.2s, border-color 0.2s;
+}
+
+.btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+  .btn {
+    bottom: 20px;
+    right: 20px;
+    width: 38px;
+    height: 38px;
+  }
+}

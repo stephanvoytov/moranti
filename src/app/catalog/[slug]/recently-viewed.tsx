@@ -3,12 +3,14 @@
 import { useState, useEffect } from "react";
 import { getRecentlyViewed } from "@/lib/recently-viewed";
 import { useProducts } from "@/lib/use-products";
+import { useDragScroll } from "@/lib/use-drag-scroll";
 import ProductCard from "@/components/ui/product-card";
 import styles from "./page.module.css";
 
 export default function RecentlyViewed() {
   const { products } = useProducts();
   const [recentArticles, setRecentArticles] = useState<number[]>([]);
+  const drag = useDragScroll<HTMLDivElement>();
 
   useEffect(() => {
     setRecentArticles(getRecentlyViewed());
@@ -23,10 +25,18 @@ export default function RecentlyViewed() {
   return (
     <section className={styles.recentlySection}>
       <h2 className={styles.recentlyTitle}>Вы недавно смотрели</h2>
-      <div className={styles.recentlyRow}>
-        {recentProducts.map((product) => (
+      <div
+        className={styles.recentlyRow}
+        ref={drag.ref}
+        onMouseDown={drag.onMouseDown}
+        onMouseMove={drag.onMouseMove}
+        onMouseUp={drag.onMouseUp}
+        onDragStart={drag.onDragStart}
+        style={{ cursor: "grab" }}
+      >
+        {recentProducts.map((product, i) => (
           <div key={product.id} className={styles.recentlyCard}>
-            <ProductCard product={product} />
+            <ProductCard product={product} priority={i < 2} />
           </div>
         ))}
       </div>
