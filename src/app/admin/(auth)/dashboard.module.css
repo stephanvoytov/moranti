@@ -1,3 +1,7 @@
+/* =============================================
+   Admin Dashboard
+   ============================================= */
+
 .page {
   max-width: 960px;
 }
@@ -59,9 +63,16 @@
   color: var(--muted);
 }
 
-/* ─── Categories table ─── */
+/* ─── Sections ─── */
 .section {
-  margin-top: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: var(--space-md);
 }
 
 .sectionTitle {
@@ -69,9 +80,23 @@
   font-size: 18px;
   font-weight: 400;
   color: var(--dark);
-  margin: 0 0 var(--space-md);
+  margin: 0;
 }
 
+.sectionBadge {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--white);
+  background: var(--camel);
+  border-radius: 10px;
+  padding: 2px 10px;
+}
+
+.sectionBadgeDanger {
+  background: #c0392b;
+}
+
+/* ─── Table ─── */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -106,4 +131,129 @@
 
 .table tbody tr:hover {
   background: var(--card-bg);
+}
+
+/* ─── Issues list ─── */
+.issueRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border-light-gray);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.issueRow:first-child {
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.issueRow:last-child {
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  border-bottom: none;
+}
+
+.issueRow:hover {
+  background: var(--card-bg);
+}
+
+.issueInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.issueName {
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.issueTags {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.issueTag {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: #fef0f0;
+  color: #c0392b;
+}
+
+.issueTagWarn {
+  background: #fef9e7;
+  color: #d4a017;
+}
+
+.issueLink {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--camel);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.issueLink:hover {
+  text-decoration: underline;
+}
+
+/* ─── Empty state ─── */
+.emptyState {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-secondary);
+  padding: 24px;
+  text-align: center;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+}
+
+/* ─── Summary bar ─── */
+.summaryBar {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.summaryItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.summaryDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.summaryDotGood { background: #27ae60; }
+.summaryDotWarn { background: #d4a017; }
+.summaryDotBad  { background: #c0392b; }
+
+/* ─── Responsive tweaks ─── */
+@media (max-width: 768px) {
+  .issueRow {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .issueLink {
+    margin-left: auto;
+  }
 }
