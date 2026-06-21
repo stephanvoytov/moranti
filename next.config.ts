@@ -6,9 +6,19 @@ const nextConfig: NextConfig = {
     root: process.cwd(),
   },
 
-  /* ─── Image optimization (ready for real photos) ─── */
+  /* ─── Image optimization ─── */
   images: {
     formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**.wbbasket.ru",
+      },
+      {
+        protocol: "https",
+        hostname: "**.geobasket.ru",
+      },
+    ],
   },
 };
 

@@ -390,3 +390,240 @@
   min-width: 56px;
   text-align: center;
 }
+
+/* ─── Bulk selection ─── */
+
+.checkboxCol {
+  width: 40px;
+  text-align: center;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--dark);
+  margin: 0;
+}
+
+/* ─── Bulk toolbar ─── */
+
+.bulkToolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-bottom: var(--space-md);
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  flex-wrap: wrap;
+}
+
+.bulkCount {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.bulkActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bulkBtn {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 6px 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background var(--transition-fast);
+  white-space: nowrap;
+}
+
+.bulkBtn:hover:not(:disabled) {
+  background: var(--filter-bg);
+}
+
+.bulkBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.bulkBtnDanger {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 6px 12px;
+  background: var(--error);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--white);
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
+}
+
+.bulkBtnDanger:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.bulkBtnDanger:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.bulkSelect {
+  font-family: var(--font-body);
+  font-size: 12px;
+  padding: 5px 8px;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  outline: none;
+  background: var(--white);
+  min-width: 130px;
+}
+
+.bulkSelect:focus {
+  border-color: var(--dark);
+}
+
+.bulkInputGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bulkLabel {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.bulkInput {
+  font-family: var(--font-body);
+  font-size: 12px;
+  padding: 5px 8px;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  outline: none;
+  background: var(--white);
+  width: 64px;
+}
+
+.bulkInput:focus {
+  border-color: var(--dark);
+}
+
+.bulkSeparator {
+  width: 1px;
+  height: 24px;
+  background: var(--border-light-gray);
+  flex-shrink: 0;
+}
+
+.bulkProgress {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ─── Confirmation modal ─── */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.modalTitle {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--dark);
+  margin: 0 0 8px;
+}
+
+.modalText {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modalBtn {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 16px;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background var(--transition-fast);
+}
+
+.modalBtn:hover {
+  background: var(--card-bg);
+}
+
+.modalBtnDanger {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--error);
+  cursor: pointer;
+  color: var(--white);
+  transition: opacity var(--transition-fast);
+}
+
+.modalBtnDanger:hover {
+  opacity: 0.85;
+}
+
+.bulkSaving {
+  opacity: 0.5;
+  pointer-events: none;
+}

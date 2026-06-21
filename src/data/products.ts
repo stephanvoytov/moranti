@@ -24,6 +24,7 @@ export interface Product {
   imtId?: number;
   colorName?: string;
   siblingIds?: number[];
+  composition?: string;
 }
 
 export interface MarketplaceLink {

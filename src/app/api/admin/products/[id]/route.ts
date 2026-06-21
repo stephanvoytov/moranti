@@ -18,7 +18,7 @@ interface ProductsFile {
 }
 
 const VALID_CATEGORIES = [
-  "tote", "shoulder", "backpack", "baguette", "mini", "evening", "saddle",
+  "crossbody", "na-plecho", "baguette", "tote", "saddle", "backpack",
 ];
 
 function dataPath(): string {

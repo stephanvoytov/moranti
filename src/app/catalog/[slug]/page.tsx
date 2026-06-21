@@ -1,9 +1,16 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { getProducts, getProduct } from "@/data/products";
+import { resolveColor } from "@/lib/color-map";
 import PriceClient from "./price-client";
 import GalleryClient from "./gallery-client";
+import ShareButton from "./share-button";
+import RecentlyViewedTracker from "./recently-viewed-tracker";
+import FavoriteButton from "./favorite-button";
+import ExpandableText from "@/components/ui/expandable-text";
+import RecentlyViewed from "./recently-viewed";
 import styles from "./page.module.css";
 
 interface Props {
@@ -45,6 +52,38 @@ export default async function ProductPage({ params }: Props) {
 
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";
   const allProducts = getProducts();
+
+  // Color variants (same imtId group + same category)
+  const siblings = product.imtId
+    ? allProducts.filter(
+        (p) =>
+          p.imtId === product.imtId &&
+          p.category === product.category &&
+          p.id !== product.id
+      )
+    : [];
+
+  // Color chip label: цвет → материал → размер
+  const colorLabel = (s: typeof product) => {
+    const name = s.colorName || "";
+
+    // Same-color siblings
+    const sameColor = siblings.filter((p) => p.colorName === s.colorName);
+    if (sameColor.length <= 1) return name; // unique color → just name
+
+    // Check if same-color siblings differ by material
+    const getMaterial = (p: typeof product) =>
+      (p.composition || "").toLowerCase().includes("замша") ? "замша" : "кожа";
+
+    const materials = [...new Set(sameColor.map(getMaterial))];
+    if (materials.length > 1) {
+      return `${name} · ${getMaterial(s)}`;
+    }
+
+    // Same color + same material → differentiate by size
+    const isMini = (s.name || "").toLowerCase().includes("мини");
+    return isMini ? `${name} мини` : name;
+  };
   const related = allProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 3);
@@ -86,6 +125,9 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <main className={styles.page}>
+      {/* Track recently viewed */}
+      <RecentlyViewedTracker wbArticle={product.wbArticle} />
+
       {/* Product JSON-LD */}
       <script
         type="application/ld+json"
@@ -122,6 +164,38 @@ export default async function ProductPage({ params }: Props) {
             currency={product.currency}
           />
 
+          {/* Color variants */}
+          {siblings.length > 0 ? (
+            <div className={styles.colors}>
+              <div className={styles.colorsLabel}>Цвет:</div>
+              <div className={styles.colorsList}>
+                <Link
+                  href={`/catalog/${product.slug}`}
+                  className={`${styles.colorLink} ${styles.colorLinkActive}`}
+                >
+                  <span
+                    className={styles.colorDot}
+                    style={{ backgroundColor: resolveColor(product.colorName) }}
+                  />
+                  {colorLabel(product)}
+                </Link>
+                {siblings.map((s) => (
+                  <Link
+                    key={s.id}
+                    href={`/catalog/${s.slug}`}
+                    className={styles.colorLink}
+                  >
+                    <span
+                      className={styles.colorDot}
+                      style={{ backgroundColor: resolveColor(s.colorName) }}
+                    />
+                    {colorLabel(s)}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           {product.rating ? (
             <div className={styles.rating}>
               <span className={styles.stars}>
@@ -139,21 +213,35 @@ export default async function ProductPage({ params }: Props) {
             </div>
           ) : null}
 
-          <p className={styles.description}>{product.description}</p>
+          <ExpandableText text={product.description} />
+
+          {product.composition ? (
+            <p className={styles.composition}>
+              Состав: {product.composition}
+            </p>
+          ) : null}
 
           {/* Marketplace CTAs */}
           <div className={styles.ctas}>
-            {product.marketplaces.map((mp) => (
+            {product.marketplaces.map((mp, i) => (
               <a
                 key={mp.name}
                 href={mp.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={styles.cta}
+                className={i === 0 ? styles.cta : styles.ctaOutline}
               >
                 Купить на {mp.name}
               </a>
             ))}
+          </div>
+
+          <div className={styles.actionsRow}>
+            <FavoriteButton wbArticle={product.wbArticle} />
+            <ShareButton
+              url={`${siteUrl}/catalog/${product.slug}`}
+              title={product.name}
+            />
           </div>
 
           <Link href="/catalog" className={styles.backLink}>
@@ -174,9 +262,11 @@ export default async function ProductPage({ params }: Props) {
                 className={styles.relatedCard}
               >
                 <div className={styles.relatedImageWrapper}>
-                  <img
+                  <Image
                     src={r.image}
                     alt={r.name}
+                    fill
+                    sizes="(max-width: 768px) 50vw, 33vw"
                     className={styles.relatedImage}
                     loading="lazy"
                   />
@@ -190,6 +280,9 @@ export default async function ProductPage({ params }: Props) {
           </div>
         </section>
       )}
+
+      {/* Recently viewed */}
+      <RecentlyViewed />
     </main>
   );
 }

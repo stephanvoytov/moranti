@@ -278,13 +278,12 @@ export default function AdminProductsPage() {
               onChange={(e) => setCategory(e.target.value)}
             >
               <option value="">Все категории</option>
-              <option value="shoulder">Shoulder</option>
-              <option value="tote">Tote</option>
-              <option value="mini">Мини</option>
-              <option value="backpack">Рюкзаки</option>
+              <option value="crossbody">Кросс-боди</option>
+              <option value="na-plecho">На плечо</option>
               <option value="baguette">Багет</option>
+              <option value="tote">Тоут</option>
               <option value="saddle">Седло</option>
-              <option value="evening">Вечерние</option>
+              <option value="backpack">Рюкзаки</option>
             </select>
           </div>
 

@@ -13,7 +13,7 @@
   font-size: clamp(32px, 4vw, 48px);
   font-weight: 400;
   line-height: 1.15;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   text-align: center;
   letter-spacing: -0.01em;
   color: var(--dark);
@@ -22,11 +22,11 @@
 .sectionSubtitle {
   font-family: var(--font-body);
   font-size: 15px;
-  font-weight: 300;
-  color: var(--muted);
+  font-weight: 400;
+  color: var(--text-secondary);
   text-align: center;
-  margin-bottom: 56px;
-  max-width: 560px;
+  margin-bottom: var(--space-7);
+  max-width: 540px;
   margin-left: auto;
   margin-right: auto;
   line-height: 1.7;
@@ -166,8 +166,8 @@
 .ctaDesc {
   font-family: var(--font-body);
   font-size: 16px;
-  font-weight: 300;
-  color: var(--muted);
+  font-weight: 400;
+  color: var(--text-secondary);
   line-height: 1.7;
   margin: 0 0 36px;
 }
@@ -180,19 +180,17 @@
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--dark);
+  color: var(--camel);
   background: transparent;
-  border: 1px solid var(--dark);
+  border: 1px solid var(--camel);
   padding: 16px 36px;
   text-decoration: none;
-  transition: all 0.3s;
   font-weight: 500;
 }
 
 .ctaBtn:hover {
-  background: var(--dark);
+  background: var(--camel);
   color: var(--bg);
-  border-color: var(--dark);
 }
 
 /* ——— Admin FAB ——— */

@@ -18,20 +18,19 @@ interface ProductForm {
 }
 
 const CATEGORIES = [
-  { slug: "shoulder", name: "Shoulder" },
-  { slug: "tote", name: "Tote" },
-  { slug: "mini", name: "Мини" },
-  { slug: "backpack", name: "Рюкзаки" },
+  { slug: "crossbody", name: "Кросс-боди" },
+  { slug: "na-plecho", name: "На плечо" },
   { slug: "baguette", name: "Багет" },
+  { slug: "tote", name: "Тоут" },
   { slug: "saddle", name: "Седло" },
-  { slug: "evening", name: "Вечерние" },
+  { slug: "backpack", name: "Рюкзаки" },
 ];
 
 const emptyForm: ProductForm = {
   name: "",
   price: "",
   originalPrice: "",
-  category: "shoulder",
+  category: "crossbody",
   description: "",
   images: [],
   wbArticle: "",
@@ -74,7 +73,7 @@ export default function ProductEditorPage() {
           name: data.name || "",
           price: String(data.price || ""),
           originalPrice: String(data.originalPrice || ""),
-          category: data.category || "shoulder",
+          category: data.category || "crossbody",
           description: data.description || "",
           images: data.images?.length ? data.images : data.image ? [data.image] : [],
           wbArticle: String(data.wbArticle || ""),

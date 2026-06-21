@@ -1,8 +1,8 @@
 {
   "hero": {
     "title": "Moranti",
-    "tagline": "Минимум пафоса — максимум качества.",
-    "subtitle": "Кожаные сумки на каждый день",
+    "tagline": "Сумки из итальянской кожи. Сдержанная элегантность.",
+    "subtitle": "Тихая роскошь",
     "image": "/images/hero.webp"
   },
   "featuredIds": [],
@@ -10,9 +10,9 @@
   "wbApiKey": "",
   "yandexMetrikaId": "",
   "contacts": {
-    "phone": "+7 (999) 123-45-67",
-    "email": "hello@moranti.ru",
-    "address": "Москва, ул. Примерная, 123"
+    "phone": "",
+    "email": "",
+    "address": ""
   },
   "social": {
     "instagram": "https://www.instagram.com/_utrends/",
@@ -27,7 +27,7 @@
   },
   "seo": {
     "defaultTitle": "Moranti — Сумки из итальянской кожи",
-    "defaultDescription": "Moranti — женские сумки из натуральной кожи. Минималистичные формы, ручная работа, никаких кричащих логотипов."
+    "defaultDescription": "Moranti — женские сумки из натуральной итальянской кожи. Минималистичные формы, ручная работа."
   },
-  "updatedAt": "2026-06-20T23:36:51.706Z"
+  "updatedAt": "2026-06-21T23:36:51.706Z"
 }

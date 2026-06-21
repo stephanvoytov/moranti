@@ -6,31 +6,35 @@
 :root {
   /* ——— Colors ——— */
   --bg: #F6F4EF;
-  --surface: #EDE9E0;
+  --surface: #F0EDE6;
+  --surface-hover: #EAE6DD;
   --cream: #F8F6F0;
   --ivory: #F0EDE5;
   --warm-white: #FAF8F4;
 
   --taupe: #C4B5A0;
-  --camel: #A68B6B;
-  --accent: #9C7B5A;
+  --camel: #8B6F5C;
+  --accent: #8B6F5C;
+  --accent-hover: #735A49;
+  --accent-subtle: rgba(139, 111, 92, 0.08);
   --brown: #5C4033;
 
   --dark: #2C2420;
-  --muted: #8B8178;
+  --muted: #6B6560;
   --black-soft: #1A1817;
 
   --white: #FFFFFF;
-  --error: #C44A4A;
-  --success: #4A7C59;
+  --error: #B08282;
+  --success: #7A8B77;
 
   /* ——— Editorial additions ——— */
-  --text-primary: #1A1A1A;
-  --text-secondary: #7A7A7A;
+  --text-primary: #1A1614;
+  --text-secondary: #6B6560;
+  --text-muted: #9C9590;
   --card-bg: #F4F4F3;
   --filter-bg: #EAE3D2;
-  --border: #D4C9BC;
-  --border-light: var(--taupe);
+  --border: #E2DDD6;
+  --border-light: #EDE9E2;
   --border-gray: #EAEAEA;
   --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.06);
 
@@ -41,7 +45,30 @@
   --font-sans: 'Montserrat', 'Inter', system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
+  /* ——— Typography scale ——— */
+  --text-display: clamp(2.5rem, 5vw, 3.5rem);
+  --text-h1: clamp(2rem, 4vw, 2.75rem);
+  --text-h2: clamp(1.5rem, 3vw, 2rem);
+  --text-h3: 1.25rem;
+  --text-h4: 1.125rem;
+  --text-body: 1rem;
+  --text-body-sm: 0.875rem;
+  --text-caption: 0.75rem;
+  --text-ui: 0.75rem;
+  --text-ui-sm: 0.6875rem;
+
   /* ——— Spacing Scale (4px base) ——— */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  /* Legacy spacing aliases */
   --space-2xs: 4px;
   --space-xs: 8px;
   --space-sm: 16px;
@@ -61,7 +88,7 @@
 
   /* ——— Borders ——— */
   --border-hairline: 1px solid var(--dark);
-  --border-ui: 1px solid var(--taupe);
+  --border-ui: 1px solid var(--color-border, var(--border));
   --border-line: 1px solid var(--border-gray);
 
   /* ——— Transitions ——— */
@@ -72,6 +99,7 @@
   --container-max: 1280px;
   --container-padding: 32px;
   --header-height: 86px;
+  --max-width-narrow: 48rem;
 
   /* ——— Grid ——— */
   --grid-gap: 30px;

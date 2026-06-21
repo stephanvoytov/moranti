@@ -16,8 +16,8 @@ interface HeroSettings {
 
 const defaultHero: HeroSettings = {
   title: "Moranti",
-  tagline: "Сумки из натуральной кожи. Минималистичные формы, ручная работа.",
-  subtitle: "Премиальный бренд женских сумок",
+  tagline: "Сумки из итальянской кожи. Сдержанная элегантность.",
+  subtitle: "Тихая роскошь",
   image: "",
 };
 
@@ -61,6 +61,10 @@ export default function Home() {
       <section className={`${styles.section} ${styles.collections}`}>
         <div className="container">
           <h2 className={styles.sectionTitle}>Наши коллекции</h2>
+          <p className={styles.sectionSubtitle}>
+            Сумка на каждый день, вечерний выход или деловая встреча — форма
+            найдётся для любого сценария.
+          </p>
           <div className={styles.collectionsGrid}>
             {categories.map((cat) => {
               const img = getCategoryImage(products, cat.slug);
@@ -98,6 +102,10 @@ export default function Home() {
         <section className={`${styles.section} ${styles.featured}`}>
           <div className="container">
             <h2 className={styles.sectionTitle}>Популярные модели</h2>
+            <p className={styles.sectionSubtitle}>
+              Модели, которые выбирают чаще всего. Каждая — из натуральной
+              итальянской кожи.
+            </p>
             <div className={styles.featuredGrid}>
               {featured.map((product) => (
                 <ProductCard key={product.id} product={product} />

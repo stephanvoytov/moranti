@@ -35,7 +35,7 @@ function writeData(data: ProductsFile): void {
 }
 
 const VALID_CATEGORIES = [
-  "tote", "shoulder", "backpack", "baguette", "mini", "evening", "saddle",
+  "crossbody", "na-plecho", "baguette", "tote", "saddle", "backpack",
 ];
 
 /* ——— GET /api/admin/products ——— */

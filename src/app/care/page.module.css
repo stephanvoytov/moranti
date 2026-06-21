@@ -1,0 +1,203 @@
+/* =============================================
+   Care Page — Editorial Content
+   ============================================= */
+
+/* ——— Page wrapper ——— */
+
+.page {
+  margin-top: var(--header-height);
+  padding: var(--space-lg) var(--container-padding) var(--space-3xl);
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ——— Breadcrumb ——— */
+
+.breadcrumb {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: var(--space-xl);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-weight: 300;
+}
+
+.breadcrumbLink {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.breadcrumbLink:hover {
+  color: var(--dark);
+}
+
+.breadcrumbSep {
+  color: var(--border);
+}
+
+.breadcrumbCurrent {
+  color: var(--muted);
+}
+
+/* ——— Hero ——— */
+
+.hero {
+  margin-bottom: var(--space-3xl);
+}
+
+.heroTitle {
+  font-family: var(--font-serif);
+  font-size: 48px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--dark);
+  margin: 0 0 var(--space-sm);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.heroDesc {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0;
+  max-width: 520px;
+}
+
+/* ——— Content sections ——— */
+
+.section {
+  margin-bottom: var(--space-3xl);
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionHeader {
+  margin-bottom: var(--space-lg);
+}
+
+.sectionNumber {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--camel);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--dark);
+  margin: 0;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.sectionRule {
+  width: 40px;
+  height: 1px;
+  background: var(--border);
+  margin-top: var(--space-md);
+}
+
+/* ——— Content body ——— */
+
+.body {
+  max-width: 680px;
+}
+
+.text {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin: 0 0 var(--space-sm);
+}
+
+.text:last-child {
+  margin-bottom: 0;
+}
+
+.list {
+  padding: 0;
+  margin: var(--space-md) 0 var(--space-lg);
+  list-style: none;
+}
+
+.list li {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  padding-left: 20px;
+  position: relative;
+}
+
+.list li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--camel);
+}
+
+/* ——— Tip box ——— */
+
+.tip {
+  background: var(--card-bg);
+  padding: var(--space-lg);
+  max-width: 680px;
+  margin-top: var(--space-lg);
+}
+
+.tipTitle {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--camel);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: var(--space-xs);
+}
+
+.tipText {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* ——— Responsive ——— */
+
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: 36px;
+  }
+
+  .sectionTitle {
+    font-size: 26px;
+  }
+
+  .body {
+    max-width: 100%;
+  }
+
+  .tip {
+    padding: var(--space-md);
+  }
+}

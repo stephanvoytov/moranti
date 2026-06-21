@@ -36,14 +36,28 @@
 }
 
 .nav a {
-  color: var(--dark);
+  color: var(--text-secondary);
   text-decoration: none;
   padding: 4px 0;
-  transition: opacity 0.2s;
+  position: relative;
 }
 
 .nav a:hover {
-  opacity: 0.5;
+  color: var(--text-primary);
+}
+
+.nav a.active {
+  color: var(--text-primary);
+}
+
+.nav a.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--text-primary);
 }
 
 .actions {

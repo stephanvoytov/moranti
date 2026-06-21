@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./hero.module.css";
 
 interface HeroSettings {
@@ -13,11 +14,12 @@ export default function Hero({ settings }: { settings: HeroSettings }) {
     <section className={styles.hero}>
       {/* Фоновое изображение поверх градиента (если есть) */}
       {settings.image && settings.image.length > 0 && (
-        <img
+        <Image
           src={settings.image}
           alt=""
+          fill
           className={styles.heroBg}
-          fetchPriority="high"
+          priority
         />
       )}
       <div className={styles.overlay} />

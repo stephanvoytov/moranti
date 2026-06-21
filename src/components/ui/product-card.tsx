@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Product } from "@/data/products";
 import { useFavorites } from "@/lib/favorites-context";
 import { useLivePrice } from "@/lib/use-live-price";
@@ -32,6 +34,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   const slug = `wb-${product.wbArticle}`;
   const link = `/catalog/${slug}`;
   const fav = isFavorite(product.wbArticle);
+  const images = product.images?.length ? product.images : [product.image];
+  const [hoverIndex, setHoverIndex] = useState(0);
+  const hoverTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Use live price when available, fall back to static data
   const displayPrice = livePrice ?? product.price;
@@ -43,13 +48,29 @@ export default function ProductCard({ product }: ProductCardProps) {
     toggleFavorite(product.wbArticle);
   };
 
+  const handleMouseEnter = () => {
+    if (images.length < 2) return;
+    setHoverIndex(1);
+    hoverTimer.current = setInterval(() => {
+      setHoverIndex((prev) => (prev + 1) % Math.min(images.length, 4));
+    }, 1200);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimer.current) clearInterval(hoverTimer.current);
+    hoverTimer.current = null;
+    setHoverIndex(0);
+  };
+
   return (
-    <article className={styles.card}>
+    <article className={styles.card} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <div className={styles.imageWrap}>
         <Link href={link} aria-label={product.name}>
-          <img
-            src={product.image}
+          <Image
+            src={images[hoverIndex]}
             alt={product.name}
+            fill
+            sizes="(max-width: 768px) 50vw, 33vw"
             className={styles.image}
             loading="lazy"
           />
