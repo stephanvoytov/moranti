@@ -21,6 +21,9 @@ export interface Product {
   ozonArticle?: number;
   rating?: number;
   reviewsCount?: number;
+  imtId?: number;
+  colorName?: string;
+  siblingIds?: number[];
 }
 
 export interface MarketplaceLink {
