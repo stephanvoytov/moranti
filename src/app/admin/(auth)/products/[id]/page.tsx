@@ -15,6 +15,9 @@ interface ProductForm {
   ozonArticle: string;
   rating: string;
   reviewsCount: string;
+  colorName: string;
+  composition: string;
+  imtId: string;
 }
 
 const CATEGORIES = [
@@ -37,6 +40,9 @@ const emptyForm: ProductForm = {
   ozonArticle: "",
   rating: "",
   reviewsCount: "",
+  colorName: "",
+  composition: "",
+  imtId: "",
 };
 
 export default function ProductEditorPage() {
@@ -80,6 +86,9 @@ export default function ProductEditorPage() {
           ozonArticle: String(data.ozonArticle || ""),
           rating: data.rating ? String(data.rating) : "",
           reviewsCount: data.reviewsCount ? String(data.reviewsCount) : "",
+          colorName: data.colorName || "",
+          composition: data.composition || "",
+          imtId: data.imtId ? String(data.imtId) : "",
         });
         setLoading(false);
       })
@@ -201,6 +210,9 @@ export default function ProductEditorPage() {
       ozonArticle: form.ozonArticle ? Number(form.ozonArticle) : undefined,
       rating: form.rating ? Number(form.rating) : undefined,
       reviewsCount: form.reviewsCount ? Number(form.reviewsCount) : undefined,
+      colorName: form.colorName || undefined,
+      composition: form.composition || undefined,
+      imtId: form.imtId ? Number(form.imtId) : undefined,
     };
 
     const method = isNew ? "POST" : "PUT";
@@ -303,6 +315,40 @@ export default function ProductEditorPage() {
                 value={form.description}
                 onChange={(e) => updateField("description", e.target.value)}
                 rows={4}
+              />
+            </label>
+
+            <label className={styles.label}>
+              Цвет
+              <input
+                type="text"
+                className={styles.input}
+                value={form.colorName}
+                onChange={(e) => updateField("colorName", e.target.value)}
+                placeholder="Бежевый"
+              />
+            </label>
+
+            <label className={styles.label}>
+              Материал
+              <input
+                type="text"
+                className={styles.input}
+                value={form.composition}
+                onChange={(e) => updateField("composition", e.target.value)}
+                placeholder="Натуральная кожа"
+              />
+            </label>
+
+            <label className={styles.label}>
+              IMT ID
+              <input
+                type="number"
+                className={styles.input}
+                value={form.imtId}
+                onChange={(e) => updateField("imtId", e.target.value)}
+                placeholder="Группа цветов/размеров"
+                min="0"
               />
             </label>
 

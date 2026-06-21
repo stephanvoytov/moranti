@@ -6,7 +6,7 @@ import styles from "./layout.module.css";
 
 export default function AdminLoading() {
   return (
-    <div className={styles.adminLayout}>
+    <div className={styles.layout}>
       {/* Sidebar skeleton */}
       <aside style={{
         width: 220,

@@ -19,7 +19,8 @@ function validateSessionCookie(token: string | undefined): boolean {
     if (parts.length !== 3) return false;
 
     const password = process.env.ADMIN_PASSWORD || "admin";
-    const key = crypto.pbkdf2Sync(password, "moranti-admin-salt-v1", 100_000, 32, "sha256");
+    const salt = process.env.AUTH_SALT || "moranti-admin-salt-v1";
+    const key = crypto.pbkdf2Sync(password, salt, 100_000, 32, "sha256");
     const iv = Buffer.from(parts[0], "hex");
     const tag = Buffer.from(parts[1], "hex");
     const data = parts[2];
