@@ -8,6 +8,7 @@ import styles from "./sidebar.module.css";
 const NAV_ITEMS = [
   { href: "/admin", label: "Дашборд", icon: "▦" },
   { href: "/admin/products", label: "Товары", icon: "☰" },
+  { href: "/admin/sync", label: "Синхронизация WB", icon: "↻" },
   { href: "/admin/settings", label: "Настройки", icon: "⚙" },
 ];
 

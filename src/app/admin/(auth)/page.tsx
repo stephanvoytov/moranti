@@ -3,6 +3,7 @@
    ============================================= */
 
 import { getProducts, getCategories } from "@/data/products";
+import { getSyncStatus } from "@/lib/wb-sync";
 import Link from "next/link";
 import styles from "./dashboard.module.css";
 
@@ -10,6 +11,47 @@ interface Issue {
   productId: string;
   productName: string;
   tags: { text: string; warn?: boolean }[];
+}
+
+function formatDate(ts: string) {
+  try {
+    return new Date(ts).toLocaleString("ru-RU");
+  } catch {
+    return ts;
+  }
+}
+
+function SyncSection() {
+  const sync = getSyncStatus();
+
+  return (
+    <section className={styles.syncSection}>
+      {sync ? (
+        <>
+          <div className={styles.syncStatus}>
+            <span className={styles.syncLabel}>Синхронизация с WB</span>
+            <span className={styles.syncTime}>{formatDate(sync.timestamp)}</span>
+            <span className={styles.syncMeta}>
+              +{sync.added} / ~{sync.updated} / -{sync.archived}
+            </span>
+          </div>
+          <Link href="/admin/sync" className={styles.syncLink}>
+            Запустить →
+          </Link>
+        </>
+      ) : (
+        <>
+          <div className={styles.syncStatus}>
+            <span className={styles.syncLabel}>Синхронизация с WB</span>
+            <span className={styles.syncNever}>Ещё не запускалась</span>
+          </div>
+          <Link href="/admin/sync" className={styles.syncLink}>
+            Запустить →
+          </Link>
+        </>
+      )}
+    </section>
+  );
 }
 
 export default function AdminDashboard() {
@@ -93,6 +135,9 @@ export default function AdminDashboard() {
           <span className={styles.cardLabel}>Полностью заполнено</span>
         </div>
       </div>
+
+      {/* ——— Sync status ——— */}
+      <SyncSection />
 
       {/* ——— Summary ——— */}
       <div className={styles.summaryBar}>

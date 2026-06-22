@@ -247,6 +247,63 @@
 .summaryDotWarn { background: #d4a017; }
 .summaryDotBad  { background: #c0392b; }
 
+/* ─── Sync section ─── */
+.syncSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  margin-bottom: var(--space-lg);
+}
+
+.syncStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.syncLabel {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dark);
+}
+
+.syncTime {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.syncMeta {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.syncNever {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.syncLink {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--camel);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.syncLink:hover {
+  text-decoration: underline;
+}
+
 /* ─── Responsive tweaks ─── */
 @media (max-width: 768px) {
   .issueRow {
