@@ -16,6 +16,8 @@ export interface SiteSettings {
   catalogOrder: string[];
   wbApiKey: string;
   yandexMetrikaId: string;
+  /** Фото категорий для главной: { slug → URL } */
+  categoryImages: Record<string, string>;
   contacts: {
     phone: string;
     email: string;
@@ -50,6 +52,7 @@ const defaults = (): SiteSettings => ({
   catalogOrder: [],
   wbApiKey: "",
   yandexMetrikaId: "",
+  categoryImages: {},
   contacts: {
     phone: "",
     email: "",

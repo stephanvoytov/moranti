@@ -25,7 +25,20 @@ interface SettingsForm {
   ymUrl: string;
   seoTitle: string;
   seoDescription: string;
+  /** Фото категорий: { slug → URL } */
+  catImages: Record<string, string>;
 }
+
+const CATEGORY_SLUGS = ["crossbody", "na-plecho", "baguette", "tote", "saddle", "backpack"];
+
+const CATEGORY_NAMES: Record<string, string> = {
+  crossbody: "Кросс-боди",
+  "na-plecho": "На плечо",
+  baguette: "Багет",
+  tote: "Тоут",
+  saddle: "Седло",
+  backpack: "Рюкзаки",
+};
 
 const emptyForm: SettingsForm = {
   heroTitle: "",
@@ -48,6 +61,7 @@ const emptyForm: SettingsForm = {
   ymUrl: "",
   seoTitle: "",
   seoDescription: "",
+  catImages: {},
 };
 
 export default function AdminSettingsPage() {
@@ -85,6 +99,7 @@ export default function AdminSettingsPage() {
           catalogOrder: Array.isArray(data.catalogOrder) ? data.catalogOrder.join(", ") : "",
           wbApiKey: data.wbApiKey || "",
           yandexMetrikaId: data.yandexMetrikaId || "",
+          catImages: data.categoryImages || {},
           phone: data.contacts?.phone || "",
           email: data.contacts?.email || "",
           address: data.contacts?.address || "",
@@ -137,6 +152,13 @@ export default function AdminSettingsPage() {
       .map((s) => s.trim())
       .filter(Boolean);
 
+    // Чистим пустые URL из catImages
+    const catImages: Record<string, string> = {};
+    for (const slug of CATEGORY_SLUGS) {
+      const val = (form.catImages[slug] || "").trim();
+      if (val) catImages[slug] = val;
+    }
+
     return {
       hero: {
         title: form.heroTitle,
@@ -146,6 +168,7 @@ export default function AdminSettingsPage() {
       },
       featuredIds: featuredIdsArray,
       catalogOrder: form.catalogOrder.split(",").map((s) => s.trim()).filter(Boolean),
+      categoryImages: catImages,
       wbApiKey: form.wbApiKey,
       yandexMetrikaId: form.yandexMetrikaId,
       contacts: {
@@ -242,6 +265,7 @@ export default function AdminSettingsPage() {
         ymUrl: parsed.marketplaces?.yandexMarket || "",
         seoTitle: parsed.seo?.defaultTitle || "",
         seoDescription: parsed.seo?.defaultDescription || "",
+        catImages: parsed.categoryImages || {},
       });
       setMode("form");
       setError("");
@@ -369,6 +393,42 @@ export default function AdminSettingsPage() {
                   Оставьте пустым — покажутся первые 6 товаров
                 </span>
               </label>
+            </section>
+
+            {/* Category Images */}
+            <section className={styles.section}>
+              <h2 className={styles.sectionTitle}>Фото категорий</h2>
+              <p className={styles.hint}>
+                Изображения для плиток категорий на главной странице. Оставьте
+                пустым — подберётся из первого товара в категории.
+              </p>
+              <div className={styles.catImageGrid}>
+                {CATEGORY_SLUGS.map((slug) => (
+                  <label key={slug} className={styles.catImageLabel}>
+                    <span className={styles.catImageName}>{CATEGORY_NAMES[slug]}</span>
+                    <div className={styles.catImageRow}>
+                      <input
+                        type="text"
+                        className={styles.input}
+                        value={form.catImages[slug] || ""}
+                        onChange={(e) =>
+                          setForm((prev) => ({
+                            ...prev,
+                            catImages: { ...prev.catImages, [slug]: e.target.value },
+                          }))
+                        }
+                        placeholder="URL изображения"
+                      />
+                      {form.catImages[slug] && (
+                        <div className={styles.catImagePreview}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={form.catImages[slug]} alt={CATEGORY_NAMES[slug]} />
+                        </div>
+                      )}
+                    </div>
+                  </label>
+                ))}
+              </div>
             </section>
 
             {/* Catalog Order */}

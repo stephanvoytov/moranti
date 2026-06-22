@@ -21,8 +21,13 @@ const defaultHero: HeroSettings = {
   image: "",
 };
 
-/* ——— Подбираем фото для каждой категории (первый товар в категории) ——— */
-function getCategoryImage(products: any[], slug: string): string {
+/* ——— Фото категории: приоритет у настроек, fallback на первый товар ——— */
+function getCategoryImage(
+  products: any[],
+  slug: string,
+  overrides: Record<string, string>,
+): string {
+  if (overrides[slug]) return overrides[slug];
   const found = products.find((p) => p.category === slug);
   return found?.image || found?.images?.[0] || "";
 }
@@ -31,6 +36,7 @@ export default function Home() {
   const { products, categories } = useProducts();
   const [hero, setHero] = useState<HeroSettings>(defaultHero);
   const [featuredIds, setFeaturedIds] = useState<string[]>([]);
+  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -41,9 +47,10 @@ export default function Home() {
     fetch("/api/data/settings")
       .then((res) => res.json())
       .then((data) => {
-        if (data.hero) setHero(data.hero);
-        if (Array.isArray(data.featuredIds)) setFeaturedIds(data.featuredIds);
-      })
+          if (data.hero) setHero(data.hero);
+          if (Array.isArray(data.featuredIds)) setFeaturedIds(data.featuredIds);
+          if (data.categoryImages) setCategoryImages(data.categoryImages);
+        })
       .catch(() => {});
   }, []);
 
@@ -67,7 +74,7 @@ export default function Home() {
           </p>
           <div className={styles.collectionsGrid}>
             {categories.map((cat) => {
-              const img = getCategoryImage(products, cat.slug);
+              const img = getCategoryImage(products, cat.slug, categoryImages);
               return (
                 <Link
                   key={cat.slug}
