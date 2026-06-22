@@ -115,94 +115,15 @@
 
 .previewWrap {
   max-width: 280px;
-  border: 1px solid var(--border-light-gray);
-  border-radius: 8px;
-  overflow: hidden;
-  transition: box-shadow 0.2s;
+  border: none;
 }
 
 .previewWrap:hover {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  box-shadow: none;
 }
 
 .previewWrap img {
   max-width: 100%;
-}
-
-.previewImageWrap {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  overflow: hidden;
-  background: var(--card-bg);
-}
-
-.previewImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.previewImagePlaceholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  background: var(--card-bg);
-}
-
-.previewHeart {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--white);
-  border-radius: 50%;
-  color: var(--dark);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-  opacity: 0.9;
-}
-
-.previewInfo {
-  padding: 10px 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.previewName {
-  font-family: var(--font-serif);
-  font-size: 14px;
-  color: var(--text-primary);
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.previewDesc {
-  font-family: var(--font-body);
-  font-size: 11px;
-  color: var(--text-secondary);
-  line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.previewPrice {
-  font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-primary);
-  margin-top: 2px;
-  text-align: center;
 }
 
 .imageEmpty {
