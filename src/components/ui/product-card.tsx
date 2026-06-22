@@ -125,6 +125,17 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             </span>
           )}
         </div>
+        {product.rating ? (
+          <div className={styles.rating}>
+            <span className={styles.stars}>
+              {"★".repeat(Math.round(product.rating))}
+              {"☆".repeat(5 - Math.round(product.rating))}
+            </span>
+            <span className={styles.ratingText}>
+              {product.rating.toFixed(1)}
+            </span>
+          </div>
+        ) : null}
       </div>
     </article>
   );

@@ -214,6 +214,13 @@ export default async function ProductPage({ params }: Props) {
             </div>
           ) : null}
 
+          {product.salesCount ? (
+            <p className={styles.salesCount}>
+              Заказали {product.salesCount}{" "}
+              {product.salesCount === 1 ? "раз" : "раз"}
+            </p>
+          ) : null}
+
           <ExpandableText text={product.description} />
 
           {product.composition ? (

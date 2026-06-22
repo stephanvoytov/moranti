@@ -76,7 +76,7 @@ function CatalogContent() {
   }, [searchInput]);
 
   // ― Sort & price filter state — read sort from URL ―
-  const initialSort = ["default", "new", "price-asc", "price-desc", "name"].includes(
+  const initialSort = ["default", "new", "popular", "price-asc", "price-desc", "name"].includes(
     searchParams.get("sort") ?? "",
   )
     ? (searchParams.get("sort") as string)
@@ -178,6 +178,9 @@ function CatalogContent() {
 
     // Sort
     switch (sortOption) {
+      case "popular":
+        result.sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0));
+        break;
       case "new":
         result.sort((a, b) => b.id.localeCompare(a.id));
         break;
@@ -275,6 +278,7 @@ function CatalogContent() {
                 onChange={(e) => setSortOption(e.target.value)}
               >
                 <option value="default">По умолчанию</option>
+                <option value="popular">По популярности</option>
                 <option value="new">По новинкам</option>
                 <option value="price-asc">По цене: возрастание</option>
                 <option value="price-desc">По цене: убывание</option>

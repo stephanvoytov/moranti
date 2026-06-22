@@ -151,6 +151,29 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ——— Rating ——— */
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.stars {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--camel);
+  line-height: 1;
+}
+
+.ratingText {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
 /* ——— Responsive ——— */
 
 @media (max-width: 768px) {

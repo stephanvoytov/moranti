@@ -16,6 +16,7 @@ interface ProductForm {
   ozonArticle: string;
   rating: string;
   reviewsCount: string;
+  salesCount: string;
   colorName: string;
   composition: string;
   imtId: string;
@@ -41,6 +42,7 @@ const emptyForm: ProductForm = {
   ozonArticle: "",
   rating: "",
   reviewsCount: "",
+  salesCount: "",
   colorName: "",
   composition: "",
   imtId: "",
@@ -77,10 +79,11 @@ export default function ProductEditorPage() {
     marketplaces: [],
     wbArticle: Number(form.wbArticle) || 0,
     ozonArticle: form.ozonArticle ? Number(form.ozonArticle) : undefined,
-    rating: form.rating ? Number(form.rating) : undefined,
-    reviewsCount: form.reviewsCount ? Number(form.reviewsCount) : undefined,
-    colorName: form.colorName || undefined,
-    composition: form.composition || undefined,
+      rating: form.rating ? Number(form.rating) : undefined,
+      reviewsCount: form.reviewsCount ? Number(form.reviewsCount) : undefined,
+      salesCount: form.salesCount ? Number(form.salesCount) : undefined,
+      colorName: form.colorName || undefined,
+      composition: form.composition || undefined,
     imtId: form.imtId ? Number(form.imtId) : undefined,
   }), [form, params.id]);
 
@@ -109,6 +112,7 @@ export default function ProductEditorPage() {
           ozonArticle: String(data.ozonArticle || ""),
           rating: data.rating ? String(data.rating) : "",
           reviewsCount: data.reviewsCount ? String(data.reviewsCount) : "",
+          salesCount: data.salesCount ? String(data.salesCount) : "",
           colorName: data.colorName || "",
           composition: data.composition || "",
           imtId: data.imtId ? String(data.imtId) : "",
@@ -231,9 +235,10 @@ export default function ProductEditorPage() {
       images: form.images,
       wbArticle: form.wbArticle ? Number(form.wbArticle) : undefined,
       ozonArticle: form.ozonArticle ? Number(form.ozonArticle) : undefined,
-      rating: form.rating ? Number(form.rating) : undefined,
-      reviewsCount: form.reviewsCount ? Number(form.reviewsCount) : undefined,
-      colorName: form.colorName || undefined,
+    rating: form.rating ? Number(form.rating) : undefined,
+    reviewsCount: form.reviewsCount ? Number(form.reviewsCount) : undefined,
+    salesCount: form.salesCount ? Number(form.salesCount) : undefined,
+    colorName: form.colorName || undefined,
       composition: form.composition || undefined,
       imtId: form.imtId ? Number(form.imtId) : undefined,
     };
@@ -418,6 +423,16 @@ export default function ProductEditorPage() {
                   className={styles.input}
                   value={form.reviewsCount}
                   onChange={(e) => updateField("reviewsCount", e.target.value)}
+                  min="0"
+                />
+              </label>
+              <label className={styles.label}>
+                Заказов
+                <input
+                  type="number"
+                  className={styles.input}
+                  value={form.salesCount}
+                  onChange={(e) => updateField("salesCount", e.target.value)}
                   min="0"
                 />
               </label>

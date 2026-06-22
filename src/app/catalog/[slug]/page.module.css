@@ -428,6 +428,14 @@
   border-top: 1px solid var(--border);
 }
 
+.salesCount {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--camel);
+  margin: 0 0 var(--space-md);
+}
+
 /* ——— CTAs (editorial ghost) ——— */
 .ctas {
   display: flex;
