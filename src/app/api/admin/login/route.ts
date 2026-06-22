@@ -5,7 +5,7 @@
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";
-import { login, setSessionCookie } from "@/lib/admin-auth";
+import { login } from "@/lib/admin-auth";
 
 /* ——— Rate limiter ——— */
 
@@ -61,7 +61,13 @@ export async function POST(request: NextRequest) {
     loginAttempts.delete(ip);
 
     const response = NextResponse.json({ ok: true });
-    response.headers.set("Set-Cookie", setSessionCookie(session));
+    response.cookies.set("admin_session", session, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 86400, // 24h
+    });
     return response;
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
