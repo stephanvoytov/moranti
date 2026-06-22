@@ -85,6 +85,18 @@ function CatalogContent() {
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [colorOpen, setColorOpen] = useState(false);
+  const colorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (colorRef.current && !colorRef.current.contains(e.target as Node)) {
+        setColorOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   // Reset page to 1 when any filter changes
   const prevFilterKey = useRef("");
@@ -271,32 +283,62 @@ function CatalogContent() {
             </div>
 
             {colorOptions.length > 0 && (
-              <div className={styles.filterSelectWrapper}>
-                <span
-                  className={styles.colorSwatch}
-                  style={{
-                    backgroundColor: selectedColor
-                      ? resolveColor(selectedColor)
-                      : "transparent",
-                    borderColor: selectedColor
-                      ? "rgba(0,0,0,0.1)"
-                      : "var(--border)",
-                  }}
-                />
-                <select
-                  className={`${styles.filterSelect} ${selectedColor ? styles.filterSelectIcon : ""}`}
-                  value={selectedColor || ""}
-                  onChange={(e) =>
-                    setSelectedColor(e.target.value || null)
-                  }
+              <div className={styles.colorPicker} ref={colorRef}>
+                <button
+                  className={styles.colorPickerTrigger}
+                  onClick={() => setColorOpen((p) => !p)}
                 >
-                  <option value="">Цвет</option>
-                  {colorOptions.map((color) => (
-                    <option key={color} value={color}>
-                      {color}
-                    </option>
-                  ))}
-                </select>
+                  <span
+                    className={styles.colorPickerDot}
+                    style={{
+                      backgroundColor: selectedColor
+                        ? resolveColor(selectedColor)
+                        : "transparent",
+                    }}
+                  />
+                  <span>{selectedColor || "Цвет"}</span>
+                </button>
+                {colorOpen && (
+                  <div className={styles.colorPickerMenu}>
+                    {!selectedColor && (
+                      <div className={styles.colorPickerArrow} />
+                    )}
+                    <button
+                      className={`${styles.colorPickerOption} ${!selectedColor ? styles.colorPickerOptionActive : ""}`}
+                      onClick={() => {
+                        setSelectedColor(null);
+                        setColorOpen(false);
+                      }}
+                    >
+                      <span
+                        className={styles.colorPickerDot}
+                        style={{
+                          backgroundColor: "transparent",
+                          border: "1px dashed var(--border)",
+                        }}
+                      />
+                      Цвет
+                    </button>
+                    {colorOptions.map((color) => (
+                      <button
+                        key={color}
+                        className={`${styles.colorPickerOption} ${selectedColor === color ? styles.colorPickerOptionActive : ""}`}
+                        onClick={() => {
+                          setSelectedColor(color);
+                          setColorOpen(false);
+                        }}
+                      >
+                        <span
+                          className={styles.colorPickerDot}
+                          style={{
+                            backgroundColor: resolveColor(color),
+                          }}
+                        />
+                        {color}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

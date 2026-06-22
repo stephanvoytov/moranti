@@ -476,22 +476,81 @@
   pointer-events: none;
 }
 
-.colorSwatch {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+/* ——— Custom color picker ——— */
+
+.colorPicker {
+  position: relative;
+}
+
+.colorPickerTrigger {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.03em;
+  transition: border-color var(--transition-fast);
+  min-width: 60px;
+}
+
+.colorPickerTrigger:hover {
+  border-color: var(--dark);
+}
+
+.colorPickerDot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
+  flex-shrink: 0;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  pointer-events: none;
-  z-index: 1;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
-.filterSelectIcon {
-  padding-left: 18px;
+.colorPickerMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  z-index: 20;
+  min-width: 130px;
+  padding: 4px 0;
+}
+
+.colorPickerArrow {
+  /* decorative arrow, matches the filterSelect arrow */
+}
+
+.colorPickerOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: left;
+}
+
+.colorPickerOption:hover {
+  background: var(--card-bg);
+}
+
+.colorPickerOptionActive {
+  font-weight: 600;
 }
 
 /* ——— Price range ——— */
@@ -571,12 +630,20 @@
   }
 
   .filterSelectWrapper,
+  .colorPicker,
   .priceGroup {
     width: 100%;
   }
 
-  .filterSelect {
+  .filterSelect,
+  .colorPickerTrigger {
     width: 100%;
     min-width: 0;
+  }
+
+  .colorPickerMenu {
+    left: 0;
+    right: auto;
+    min-width: 100%;
   }
 }
