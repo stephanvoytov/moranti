@@ -18,7 +18,8 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return getProducts().map((p) => ({ slug: p.slug }));
+  const products = await getProducts();
+  return products.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -51,7 +52,7 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
 
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";
-  const allProducts = getProducts();
+  const allProducts = await getProducts();
 
   // Color variants (same imtId group + same category)
   const siblings = product.imtId

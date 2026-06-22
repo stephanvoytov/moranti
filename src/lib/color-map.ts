@@ -16,12 +16,19 @@ export const COLOR_MAP: Record<string, string> = {
   "Тауп": "#A89F91",
   "Чёрный": "#2C2420",
   "Шоколадный": "#5C3A1E",
-  // многоцветные варианты — нейтральный оттенок
-  "желтый, лимонный, сливочный": "#E8C84A",
 };
 
 /** Resolve a color hex or fallback to a neutral gray */
 export function resolveColor(name: string | undefined): string {
   if (!name) return "#ccc";
-  return COLOR_MAP[name] ?? "#ccc";
+  const normalized = normalizeColorName(name);
+  return COLOR_MAP[normalized] ?? "#ccc";
+}
+
+/** Normalize raw WB color names to canonical Russian names */
+export function normalizeColorName(name: string): string {
+  const map: Record<string, string> = {
+    "желтый, лимонный, сливочный": "Жёлтый",
+  };
+  return map[name] ?? name;
 }

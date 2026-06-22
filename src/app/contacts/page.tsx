@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ContactsPage() {
-  const { contacts, social } = readSettings();
+export default async function ContactsPage() {
+  const { contacts, social } = await readSettings();
 
   return (
     <>

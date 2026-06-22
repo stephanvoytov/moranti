@@ -11,8 +11,9 @@ const HERO_IMG =
 const LIFESTYLE_IMG =
   "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=600&q=80";
 
-export default function DemoPage() {
-  const demoProducts = getProducts().slice(0, 9);
+export default async function DemoPage() {
+  const allProducts = await getProducts();
+  const demoProducts = allProducts.slice(0, 9);
 
   return (
     <div className="demo">

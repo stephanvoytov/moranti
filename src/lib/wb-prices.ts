@@ -12,12 +12,10 @@
    Схема:
    1. Есть ключ → POST с nmList запрошенных артикулов
    2. При 429 → exponential backoff (до 3 попыток)
-   3. Кэш: in-memory (Map) + файл (data/wb-prices-cache.json)
-   4. Нет ключа / ошибка → статика из products.json
+   3. Кэш: in-memory (Map) + TTL 5 мин
+   4. Нет ключа / ошибка → статика из Prisma (fallback JSON)
    ============================================= */
 
-import { readFileSync, writeFileSync, existsSync } from "fs";
-import path from "path";
 import { getWbApiKey } from "./wb-config";
 import { getProducts } from "@/data/products";
 import type { WbPriceResult } from "./wb-config";
@@ -56,11 +54,6 @@ interface PriceSnapshotEntry {
   originalPrice: number;
 }
 
-interface PriceCacheFile {
-  updatedAt: string;
-  articles: Record<number, PriceSnapshotEntry>;
-}
-
 /* =============================================
    Constants
    ============================================= */
@@ -76,9 +69,6 @@ const MAX_NM_PER_REQUEST = 100;
 
 /** Таймаут запроса к WB API */
 const FETCH_TIMEOUT_MS = 15_000;
-
-/** Путь к файловому кэшу */
-const CACHE_FILE = path.join(process.cwd(), "data", "wb-prices-cache.json");
 
 /** Максимум retry при 429 */
 const MAX_RETRIES = 3;
@@ -96,46 +86,14 @@ function isSnapshotFresh(): boolean {
 }
 
 /* =============================================
-   File-based cache persistence
+   Static fallback from products
    ============================================= */
 
-function loadCacheFromDisk(): Map<number, PriceSnapshotEntry> | null {
-  try {
-    if (!existsSync(CACHE_FILE)) return null;
-    const raw = readFileSync(CACHE_FILE, "utf-8");
-    const data: PriceCacheFile = JSON.parse(raw);
-    const map = new Map<number, PriceSnapshotEntry>();
-    for (const [key, entry] of Object.entries(data.articles)) {
-      map.set(Number(key), entry);
-    }
-    return map;
-  } catch {
-    return null;
-  }
-}
+let staticSnapshot: Map<number, PriceSnapshotEntry> | null = null;
 
-function saveCacheToDisk(map: Map<number, PriceSnapshotEntry>): void {
-  try {
-    const articles: Record<number, PriceSnapshotEntry> = {};
-    for (const [key, entry] of map) {
-      articles[key] = entry;
-    }
-    const data: PriceCacheFile = {
-      updatedAt: new Date().toISOString(),
-      articles,
-    };
-    writeFileSync(CACHE_FILE, JSON.stringify(data, null, 2), "utf-8");
-  } catch (err) {
-    console.warn("[wb-prices] Failed to save cache to disk:", err);
-  }
-}
-
-/* =============================================
-   Static fallback from products.json
-   ============================================= */
-
-function buildStaticSnapshot(): Map<number, PriceSnapshotEntry> {
-  const all = getProducts();
+async function buildStaticSnapshot(): Promise<Map<number, PriceSnapshotEntry>> {
+  if (staticSnapshot) return staticSnapshot;
+  const all = await getProducts();
   const map = new Map<number, PriceSnapshotEntry>();
   for (const p of all) {
     if (p.wbArticle) {
@@ -145,11 +103,12 @@ function buildStaticSnapshot(): Map<number, PriceSnapshotEntry> {
       });
     }
   }
+  staticSnapshot = map;
   return map;
 }
 
-function staticPricesFor(articles: number[]): WbPriceResult[] {
-  const all = getProducts();
+async function staticPricesFor(articles: number[]): Promise<WbPriceResult[]> {
+  const all = await getProducts();
   return articles.map((article) => {
     const p = all.find((x) => x.wbArticle === article);
     return {
@@ -282,26 +241,21 @@ async function fetchArticlesBatched(
  *
  * Приоритет:
  *   1. In-memory кэш (TTL 5 мин)
- *   2. File-кэш (data/wb-prices-cache.json)
- *   3. WB API (POST с nmList запрошенных артикулов)
- *   4. Статика из products.json
+ *   2. WB API (POST с nmList запрошенных артикулов)
+ *   3. Статика из Prisma/JSON
  */
 export async function getWbPrices(articles: number[]): Promise<WbPriceResult[]> {
   if (articles.length === 0) return [];
 
-  const apiKey = getWbApiKey();
+  const apiKey = await getWbApiKey();
 
   if (!apiKey) {
     return staticPricesFor(articles);
   }
 
-  // ── Загружаем кэш с диска при первом вызове (переживает рестарт) ──
-  if (snapshot === null) {
-    const fromDisk = loadCacheFromDisk();
-    if (fromDisk && fromDisk.size > 0) {
-      snapshot = fromDisk;
-      snapshotTimestamp = Date.now();
-    }
+  // ── Инициализируем статический кэш при первом вызове ──
+  if (staticSnapshot === null) {
+    await buildStaticSnapshot();
   }
 
   // ── Определяем, какие артикулы нужно обновить ──
@@ -330,9 +284,6 @@ export async function getWbPrices(articles: number[]): Promise<WbPriceResult[]> 
       snapshot.set(key, val);
     }
     snapshotTimestamp = Date.now();
-
-    // Сохраняем на диск (асинхронно, не ждём)
-    saveCacheToDisk(snapshot);
   } catch (err) {
     console.warn("[wb-prices] WB API fetch failed, using cache/fallback:", err);
   }
@@ -344,8 +295,7 @@ export async function getWbPrices(articles: number[]): Promise<WbPriceResult[]> 
       return { article, price: entry.price, originalPrice: entry.originalPrice };
     }
     // Fallback на статику для артикулов, которые не вернул WB API
-    const fallback = staticPricesFor([article]);
-    return fallback[0];
+    return { article, price: 0, originalPrice: null };
   });
 }
 
@@ -353,4 +303,5 @@ export async function getWbPrices(articles: number[]): Promise<WbPriceResult[]> 
 export function invalidateWbPriceCache(): void {
   snapshot = null;
   snapshotTimestamp = 0;
+  staticSnapshot = null;
 }

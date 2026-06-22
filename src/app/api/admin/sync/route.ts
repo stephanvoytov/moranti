@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { runWbSync } from "@/lib/wb-sync";
-import { invalidateProductsCache } from "@/data/products";
+import { invalidateCache } from "@/data/products";
 
 export async function POST(request: Request) {
   const csrf = csrfGuard(request);
@@ -19,8 +19,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const report = runWbSync();
-  invalidateProductsCache();
+  const report = await runWbSync();
+  invalidateCache();
 
   const status = report.error ? 500 : 200;
   return NextResponse.json(report, { status });

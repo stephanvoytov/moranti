@@ -1,6 +1,6 @@
 /**
  * Серверная обёртка для запуска WB Sync из Next.js API.
- * Запускает скрипт sync-wb.js в дочернем процессе.
+ * Запускает sync-wb.mjs (Prisma) через Node.js execSync.
  */
 
 import { execSync } from "child_process";
@@ -8,9 +8,8 @@ import path from "path";
 import { readFileSync, existsSync } from "fs";
 
 const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
-const SYNC_SCRIPT = path.join(SCRIPTS_DIR, "sync-wb.js");
-const DATA_DIR = path.join(process.cwd(), "data");
-const SYNC_LOG_FILE = path.join(DATA_DIR, "sync-log.json");
+const SYNC_SCRIPT = path.join(SCRIPTS_DIR, "sync-wb.mjs");
+const SYNC_LOG_FILE = path.join(process.cwd(), "data", "sync-log.json");
 
 export interface SyncReport {
   timestamp: string;
@@ -31,13 +30,14 @@ export interface SyncReport {
 
 /**
  * Запускает синхронизацию с WB.
- * Выполняет sync-wb.js через Node.js (дочерний процесс).
+ * Выполняет sync-wb.mjs через Node.js (дочерний процесс).
+ * Скрипт сам пишет результаты в Prisma (Neon).
  */
 export function runWbSync(): SyncReport {
   try {
     const result = execSync(`node "${SYNC_SCRIPT}"`, {
       cwd: process.cwd(),
-      timeout: 120_000, // 2 min max
+      timeout: 120_000,
       encoding: "utf-8",
       env: { ...process.env, CI: "true" },
     });
@@ -45,21 +45,17 @@ export function runWbSync(): SyncReport {
     // Последняя строка — JSON с отчётом
     const lines = result.trim().split("\n");
     const lastLine = lines[lines.length - 1];
-    const report = JSON.parse(lastLine);
-
-    return report;
+    return JSON.parse(lastLine);
   } catch (err: any) {
     // При ошибке скрипт пишет JSON в stdout и выходит с кодом 1
-    // execSync бросает исключение, но stdout сохраняется
     try {
       const stdout = err.stdout || "";
       const lines = stdout.trim().split("\n");
       const lastLine = lines[lines.length - 1];
-      const report = JSON.parse(lastLine);
-      if (report) return report;
+      const parsed = JSON.parse(lastLine);
+      if (parsed) return parsed;
     } catch {}
 
-    // Следующая попытка — stderr
     try {
       const stderr = err.stderr || "";
       const match = stderr.match(/\{.*"error".*\}/);

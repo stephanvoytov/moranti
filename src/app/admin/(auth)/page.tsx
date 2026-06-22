@@ -21,8 +21,7 @@ function formatDate(ts: string) {
   }
 }
 
-function SyncSection() {
-  const sync = getSyncStatus();
+function SyncSection({ sync }: { sync: ReturnType<typeof getSyncStatus> }) {
 
   return (
     <section className={styles.syncSection}>
@@ -54,9 +53,12 @@ function SyncSection() {
   );
 }
 
-export default function AdminDashboard() {
-  const products = getProducts();
-  const categories = getCategories();
+export default async function AdminDashboard() {
+  const [products, categories] = await Promise.all([
+    getProducts(),
+    getCategories(),
+  ]);
+  const syncStatus = getSyncStatus();
 
   const totalProducts = products.length;
   const totalCategories = categories.length;
@@ -137,7 +139,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* ——— Sync status ——— */}
-      <SyncSection />
+      <SyncSection sync={syncStatus} />
 
       {/* ——— Summary ——— */}
       <div className={styles.summaryBar}>

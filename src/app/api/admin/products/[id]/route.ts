@@ -4,35 +4,13 @@
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";
-import { readFileSync, writeFileSync } from "fs";
-import path from "path";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
-import { invalidateProductsCache } from "@/data/products";
-import type { Product, MarketplaceLink } from "@/data/products";
-
-interface ProductsFile {
-  products: Product[];
-  categories: { name: string; slug: string }[];
-  meta: { count: number };
-}
+import prisma from "@/lib/prisma";
 
 const VALID_CATEGORIES = [
   "crossbody", "na-plecho", "baguette", "tote", "saddle", "backpack",
 ];
-
-function dataPath(): string {
-  return path.join(process.cwd(), "data", "products.json");
-}
-
-function readData(): ProductsFile {
-  const raw = readFileSync(dataPath(), "utf-8");
-  return JSON.parse(raw);
-}
-
-function writeData(data: ProductsFile): void {
-  writeFileSync(dataPath(), JSON.stringify(data, null, 2), "utf-8");
-}
 
 /* ——— GET /api/admin/products/[id] ——— */
 
@@ -46,8 +24,7 @@ export async function GET(
   }
 
   const { id } = await params;
-  const data = readData();
-  const product = data.products.find((p: Product) => p.id === id);
+  const product = await prisma.product.findUnique({ where: { id } });
 
   if (!product) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
@@ -71,79 +48,78 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const data = readData();
-  const index = data.products.findIndex((p: Product) => p.id === id);
 
-  if (index === -1) {
+  const existing = await prisma.product.findUnique({ where: { id } });
+  if (!existing) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
   }
 
   try {
     const body = await request.json();
 
-    // Validation
     if (body.name !== undefined && (!body.name || !body.name.trim())) {
       return NextResponse.json({ error: "Name cannot be empty" }, { status: 400 });
     }
-
     if (body.price !== undefined && (isNaN(Number(body.price)) || Number(body.price) <= 0)) {
       return NextResponse.json({ error: "Price must be > 0" }, { status: 400 });
     }
-
     if (body.category !== undefined && !VALID_CATEGORIES.includes(body.category)) {
       return NextResponse.json({ error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(", ")}` }, { status: 400 });
     }
 
-    // Update fields
-    const current = data.products[index];
-    const updated = { ...current };
+    const data: Record<string, unknown> = {};
 
-    if (body.name) updated.name = body.name.trim();
-    if (body.price !== undefined) updated.price = Number(body.price);
-    if (body.originalPrice !== undefined) updated.originalPrice = Number(body.originalPrice);
-    if (body.category) updated.category = body.category;
-    if (body.description !== undefined) updated.description = body.description;
-    if (body.rating !== undefined) updated.rating = body.rating ? Number(body.rating) : undefined;
-    if (body.reviewsCount !== undefined) updated.reviewsCount = body.reviewsCount ? Number(body.reviewsCount) : undefined;
+    if (body.name) data.name = body.name.trim();
+    if (body.price !== undefined) data.price = Number(body.price);
+    if (body.originalPrice !== undefined) data.originalPrice = Number(body.originalPrice);
+    if (body.category) data.category = body.category;
+    if (body.description !== undefined) data.description = body.description;
+    if (body.rating !== undefined) data.rating = body.rating ? Number(body.rating) : null;
+    if (body.reviewsCount !== undefined) data.reviewsCount = body.reviewsCount ? Number(body.reviewsCount) : null;
+    if (body.salesCount !== undefined) data.salesCount = body.salesCount ? Number(body.salesCount) : null;
 
-    // Images array
     if (body.images !== undefined && Array.isArray(body.images)) {
       const filtered = body.images.filter(Boolean);
-      updated.images = filtered;
-      updated.image = filtered[0] || "";
+      data.images = filtered;
+      data.image = filtered[0] || "";
     }
 
-    // Article numbers → auto-generate marketplace links
+    // Article numbers + marketplace links
     if (body.wbArticle !== undefined) {
-      updated.wbArticle = Number(body.wbArticle);
-      // slug тоже обновляем, если меняется артикул
-      updated.slug = `wb-${updated.wbArticle}`;
+      data.wbArticle = Number(body.wbArticle);
+      data.slug = `wb-${body.wbArticle}`;
     }
     if (body.ozonArticle !== undefined) {
-      updated.ozonArticle = body.ozonArticle ? Number(body.ozonArticle) : undefined;
+      data.ozonArticle = body.ozonArticle ? Number(body.ozonArticle) : null;
     }
 
-    // Rebuild marketplaces from article numbers
-    const marketplaces: MarketplaceLink[] = [];
-    if (updated.wbArticle && Number(updated.wbArticle) > 0) {
+    // Rebuild marketplaces
+    const wbNum = body.wbArticle !== undefined ? Number(body.wbArticle) : existing.wbArticle;
+    const ozonNum = body.ozonArticle !== undefined
+      ? (body.ozonArticle ? Number(body.ozonArticle) : null)
+      : existing.ozonArticle;
+
+    const marketplaces = [];
+    if (wbNum && wbNum > 0) {
       marketplaces.push({
         name: "Wildberries",
-        url: `https://www.wildberries.ru/catalog/${updated.wbArticle}/detail.aspx`,
+        url: `https://www.wildberries.ru/catalog/${wbNum}/detail.aspx`,
         icon: "/images/icons/wb.svg",
       });
     }
-    if (updated.ozonArticle) {
+    if (ozonNum) {
       marketplaces.push({
         name: "Ozon",
-        url: `https://www.ozon.ru/product/${updated.ozonArticle}/`,
+        url: `https://www.ozon.ru/product/${ozonNum}/`,
         icon: "/images/icons/ozon.svg",
       });
     }
-    updated.marketplaces = marketplaces;
+    data.marketplaces = marketplaces;
 
-    data.products[index] = updated;
-    writeData(data);
-    invalidateProductsCache();
+    const updated = await prisma.product.update({
+      where: { id },
+      data,
+    });
 
     return NextResponse.json(updated);
   } catch {
@@ -154,29 +130,22 @@ export async function PUT(
 /* ——— DELETE /api/admin/products/[id] ——— */
 
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const csrf = csrfGuard(request);
-  if (csrf) return csrf;
-
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
   const { id } = await params;
-  const data = readData();
-  const index = data.products.findIndex((p: Product) => p.id === id);
+  const existing = await prisma.product.findUnique({ where: { id } });
 
-  if (index === -1) {
+  if (!existing) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
   }
 
-  data.products.splice(index, 1);
-  data.meta.count = data.products.length;
-  writeData(data);
-  invalidateProductsCache();
+  await prisma.product.delete({ where: { id } });
 
   return NextResponse.json({ ok: true });
 }

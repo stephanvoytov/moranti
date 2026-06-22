@@ -78,24 +78,22 @@ export const metadata: Metadata = {
   },
 };
 
-/* ——— Yandex Metrika ID ——— */
-
-// Из админки (settings.json) или .env.local
-let ymId: string | undefined;
-try {
-  const settings = readSettings();
-  ymId = settings.yandexMetrikaId || process.env.YANDEX_METRIKA_ID;
-} catch {
-  ymId = process.env.YANDEX_METRIKA_ID;
-}
-
 /* ——— Root Layout ——— */
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Yandex Metrika ID: из админки или .env.local
+  let ymId: string | undefined;
+  try {
+    const settings = await readSettings();
+    ymId = settings.yandexMetrikaId || process.env.YANDEX_METRIKA_ID;
+  } catch {
+    ymId = process.env.YANDEX_METRIKA_ID;
+  }
+
   return (
     <html
       lang="ru"

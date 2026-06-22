@@ -1,9 +1,12 @@
 /* =============================================
-   Moranti — Settings read/write helpers
-   Файл: data/settings.json (через JsonRepository)
+   Moranti — Settings
+   Источник: Neon Postgres (через Prisma)
+   Fallback: data/settings.json
    ============================================= */
 
-import { JsonRepository } from "@/lib/json-repository";
+import { readFileSync } from "fs";
+import path from "path";
+import prisma from "@/lib/prisma";
 
 export interface SiteSettings {
   hero: {
@@ -41,56 +44,99 @@ export interface SiteSettings {
   updatedAt: string;
 }
 
-const defaults = (): SiteSettings => ({
-  hero: {
-    title: "Moranti",
-    tagline: "Минимум пафоса — максимум качества.",
-    subtitle: "Кожаные сумки на каждый день",
-    image: "",
-  },
-  featuredIds: [],
-  catalogOrder: [],
-  wbApiKey: "",
-  yandexMetrikaId: "",
-  categoryImages: {},
-  contacts: {
-    phone: "",
-    email: "",
-    address: "",
-  },
-  social: {
-    instagram: "",
-    vk: "",
-    telegram: "",
-    whatsapp: "",
-  },
-  marketplaces: {
-    wildberries: "",
-    ozon: "",
-    yandexMarket: "",
-  },
-  seo: {
-    defaultTitle: "Moranti",
-    defaultDescription: "",
-  },
-  updatedAt: new Date().toISOString(),
-});
+/* =============================================
+   Defaults
+   ============================================= */
 
-const repo = new JsonRepository<SiteSettings>("settings.json", defaults);
-
-/* ——— Public API ——— */
-
-export function readSettings(): SiteSettings {
-  return repo.read();
+export function defaultSettings(): SiteSettings {
+  return {
+    hero: {
+      title: "Moranti",
+      tagline: "Минимум пафоса — максимум качества.",
+      subtitle: "Кожаные сумки на каждый день",
+      image: "",
+    },
+    featuredIds: [],
+    catalogOrder: [],
+    wbApiKey: "",
+    yandexMetrikaId: "",
+    categoryImages: {},
+    contacts: { phone: "", email: "", address: "" },
+    social: { instagram: "", vk: "", telegram: "", whatsapp: "" },
+    marketplaces: { wildberries: "", ozon: "", yandexMarket: "" },
+    seo: { defaultTitle: "Moranti", defaultDescription: "" },
+    updatedAt: new Date().toISOString(),
+  };
 }
 
-export function writeSettings(data: Partial<SiteSettings>): SiteSettings {
-  const current = repo.read();
-  const merged = { ...current, ...data, updatedAt: new Date().toISOString() };
-  repo.write(merged);
+/* =============================================
+   Fallback: data/settings.json
+   ============================================= */
+
+function readJsonFallback(): SiteSettings | null {
+  try {
+    const filePath = path.join(process.cwd(), "data", "settings.json");
+    return JSON.parse(readFileSync(filePath, "utf-8"));
+  } catch {
+    return null;
+  }
+}
+
+let fallbackCache: SiteSettings | null = null;
+
+function getFallback(): SiteSettings {
+  if (!fallbackCache) {
+    fallbackCache = readJsonFallback() ?? defaultSettings();
+  }
+  return fallbackCache;
+}
+
+/* =============================================
+   Read
+   ============================================= */
+
+export async function readSettings(): Promise<SiteSettings> {
+  try {
+    const row = await prisma.settings.findUnique({
+      where: { id: "singleton" },
+    });
+    if (row?.data) {
+      const data = row.data as unknown as SiteSettings;
+      // Проверяем что данные не пустые
+      if (data.hero && data.seo) return data;
+    }
+  } catch {
+    // fallback
+  }
+  return getFallback();
+}
+
+/* =============================================
+   Write
+   ============================================= */
+
+export async function writeSettings(data: Partial<SiteSettings>): Promise<SiteSettings> {
+  // Читаем текущие (из БД или fallback)
+  const current = await readSettings();
+  const merged: SiteSettings = {
+    ...current,
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+
+  try {
+    await prisma.settings.upsert({
+      where: { id: "singleton" },
+      create: { id: "singleton", data: merged as any },
+      update: { data: merged as any },
+    });
+  } catch (err) {
+    console.warn("[settings] Failed to write to DB:", err);
+  }
+
   return merged;
 }
 
 export function invalidateSettingsCache(): void {
-  repo.invalidate();
+  fallbackCache = null;
 }

@@ -14,7 +14,7 @@ export async function GET() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const settings = readSettings();
+  const settings = await readSettings();
   return NextResponse.json(settings);
 }
 
@@ -29,7 +29,7 @@ export async function PUT(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const updated = writeSettings(body);
+    const updated = await writeSettings(body);
     return NextResponse.json(updated);
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });

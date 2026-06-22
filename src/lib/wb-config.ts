@@ -12,10 +12,10 @@ import { readSettings } from "./settings";
  * WB_API_KEY берётся из настроек сайта или process.env.
  * Приоритет: settings.json > .env.local
  */
-export function getWbApiKey(): string | undefined {
-  // Сначала проверяем settings.json (редактируется через админку)
+export async function getWbApiKey(): Promise<string | undefined> {
+  // Сначала проверяем настройки (редактируется через админку)
   try {
-    const settings = readSettings();
+    const settings = await readSettings();
     if (settings.wbApiKey) return settings.wbApiKey;
   } catch {
     // ignore

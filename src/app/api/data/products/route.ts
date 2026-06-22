@@ -9,8 +9,10 @@ import { getProducts, getCategories } from "@/data/products";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const products = getProducts();
-  const categories = getCategories();
+  const [products, categories] = await Promise.all([
+    getProducts(),
+    getCategories(),
+  ]);
 
   return NextResponse.json(
     { products, categories },

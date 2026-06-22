@@ -4,35 +4,9 @@
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";
-import { readFileSync, writeFileSync } from "fs";
-import path from "path";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
-import { invalidateProductsCache } from "@/data/products";
-import type { Product, MarketplaceLink } from "@/data/products";
-
-/* ——— Типы ——— */
-
-interface ProductsFile {
-  products: Product[];
-  categories: { name: string; slug: string }[];
-  meta: { count: number };
-}
-
-/* ——— Helpers ——— */
-
-function dataPath(): string {
-  return path.join(process.cwd(), "data", "products.json");
-}
-
-function readData(): ProductsFile {
-  const raw = readFileSync(dataPath(), "utf-8");
-  return JSON.parse(raw);
-}
-
-function writeData(data: ProductsFile): void {
-  writeFileSync(dataPath(), JSON.stringify(data, null, 2), "utf-8");
-}
+import prisma from "@/lib/prisma";
 
 const VALID_CATEGORIES = [
   "crossbody", "na-plecho", "baguette", "tote", "saddle", "backpack",
@@ -52,36 +26,33 @@ export async function GET(request: NextRequest) {
   const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
   const limit = Math.min(200, Math.max(1, parseInt(searchParams.get("limit") || "20", 10)));
 
-  const data = readData();
-  let filtered = data.products;
-
+  const where: Record<string, unknown> = {};
   if (search) {
-    filtered = filtered.filter(
-      (p: Product) =>
-        p.name.toLowerCase().includes(search) ||
-        p.id.toLowerCase().includes(search) ||
-        String(p.wbArticle).includes(search),
-    );
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+      { id: { contains: search, mode: "insensitive" } },
+      { wbArticle: isNaN(Number(search)) ? undefined : Number(search) },
+    ].filter(Boolean);
   }
-
   if (category && VALID_CATEGORIES.includes(category)) {
-    filtered = filtered.filter((p: Product) => p.category === category);
+    where.category = category;
   }
 
-  const total = filtered.length;
+  const [items, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.product.count({ where }),
+  ]);
+
   const totalPages = Math.ceil(total / limit);
-  const safePage = Math.min(page, Math.max(totalPages, 1));
-  const start = (safePage - 1) * limit;
-  const items = filtered.slice(start, start + limit);
 
   return NextResponse.json({
     items,
-    pagination: {
-      page: safePage,
-      limit,
-      total,
-      totalPages,
-    },
+    pagination: { page, limit, total, totalPages },
   });
 }
 
@@ -99,7 +70,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Validation
     if (!body.name || typeof body.name !== "string" || !body.name.trim()) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
@@ -114,24 +84,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(", ")}` }, { status: 400 });
     }
 
-    const data = readData();
-
     // Generate new ID
-    const maxNum = data.products.reduce(
-      (max: number, p: Product) => Math.max(max, parseInt(p.id.replace("mor-", ""), 10) || 0),
-      0,
-    );
-    const newId = `mor-${String(maxNum + 1).padStart(3, "0")}`;
+    const lastProduct = await prisma.product.findFirst({
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    });
+    const lastNum = lastProduct
+      ? parseInt(lastProduct.id.replace("mor-", ""), 10) || 0
+      : 0;
+    const newId = `mor-${String(lastNum + 1).padStart(3, "0")}`;
 
     const hasWbArticle = body.wbArticle && Number(body.wbArticle) > 0;
     const hasOzonArticle = body.ozonArticle && Number(body.ozonArticle) > 0;
     const wbArticleNum = hasWbArticle ? Number(body.wbArticle) : undefined;
     const ozonArticleNum = hasOzonArticle ? Number(body.ozonArticle) : undefined;
-    // Slug: если есть артикул WB — от него, иначе от newId
     const slug = body.slug || (hasWbArticle ? `wb-${wbArticleNum}` : `product-${newId}`);
 
-    // Auto-generate marketplace links from article numbers
-    const marketplaces: MarketplaceLink[] = [];
+    const marketplaces = [];
     if (hasWbArticle) {
       marketplaces.push({
         name: "Wildberries",
@@ -147,37 +116,34 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Images: if provided as array, use as-is; fallback from single image for migration
-    const images: string[] = Array.isArray(body.images) && body.images.length > 0
+    const images = Array.isArray(body.images) && body.images.length > 0
       ? body.images.filter(Boolean)
       : body.image
         ? [body.image]
         : [];
 
-    const newProduct: Omit<Product, "id"> & { id: string } = {
-      id: newId,
-      slug,
-      name: body.name.trim(),
-      price,
-      originalPrice: body.originalPrice ? Number(body.originalPrice) : price,
-      currency: "₽",
-      category,
-      description: body.description || "",
-      image: images[0] || "",
-      images,
-      marketplaces,
-      wbArticle: wbArticleNum ?? 0,
-      ozonArticle: ozonArticleNum,
-      rating: body.rating ? Number(body.rating) : undefined,
-      reviewsCount: body.reviewsCount ? Number(body.reviewsCount) : undefined,
-    };
+    const product = await prisma.product.create({
+      data: {
+        id: newId,
+        slug,
+        name: body.name.trim(),
+        price,
+        originalPrice: body.originalPrice ? Number(body.originalPrice) : price,
+        currency: "₽",
+        category,
+        description: body.description || "",
+        image: images[0] || "",
+        images,
+        marketplaces,
+        wbArticle: wbArticleNum ?? null,
+        ozonArticle: ozonArticleNum ?? null,
+        rating: body.rating ? Number(body.rating) : null,
+        reviewsCount: body.reviewsCount ? Number(body.reviewsCount) : null,
+        salesCount: body.salesCount ? Number(body.salesCount) : null,
+      },
+    });
 
-    data.products.push(newProduct);
-    data.meta.count = data.products.length;
-    writeData(data);
-    invalidateProductsCache();
-
-    return NextResponse.json(newProduct, { status: 201 });
+    return NextResponse.json(product, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }

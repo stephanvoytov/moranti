@@ -2,14 +2,14 @@ import { describe, it, expect } from "vitest";
 import { getProducts, getProduct, getProductsByCategory, getCategories } from "@/data/products";
 
 describe("products data", () => {
-  it("getProducts returns array of products", () => {
-    const products = getProducts();
+  it("getProducts returns array of products", async () => {
+    const products = await getProducts();
     expect(Array.isArray(products)).toBe(true);
     expect(products.length).toBeGreaterThan(0);
   });
 
-  it("each product has required fields", () => {
-    const products = getProducts();
+  it("each product has required fields", async () => {
+    const products = await getProducts();
     for (const p of products) {
       expect(p.id).toBeTruthy();
       expect(p.slug).toBeTruthy();
@@ -20,28 +20,28 @@ describe("products data", () => {
     }
   });
 
-  it("getProduct returns correct product by slug", () => {
-    const products = getProducts();
+  it("getProduct returns correct product by slug", async () => {
+    const products = await getProducts();
     const first = products[0];
-    const found = getProduct(first.slug);
+    const found = await getProduct(first.slug);
     expect(found).not.toBeNull();
     expect(found?.id).toBe(first.id);
   });
 
-  it("getProduct returns null for unknown slug", () => {
-    const found = getProduct("nonexistent-slug");
+  it("getProduct returns null for unknown slug", async () => {
+    const found = await getProduct("nonexistent-slug");
     expect(found).toBeNull();
   });
 
-  it("getProductsByCategory filters correctly", () => {
-    const crossbody = getProductsByCategory("crossbody");
+  it("getProductsByCategory filters correctly", async () => {
+    const crossbody = await getProductsByCategory("crossbody");
     for (const p of crossbody) {
       expect(p.category).toBe("crossbody");
     }
   });
 
-  it("getCategories returns valid category objects", () => {
-    const categories = getCategories();
+  it("getCategories returns valid category objects", async () => {
+    const categories = await getCategories();
     expect(Array.isArray(categories)).toBe(true);
     expect(categories.length).toBeGreaterThan(0);
     for (const cat of categories) {

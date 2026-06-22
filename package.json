@@ -7,9 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "prisma:seed": "prisma db seed"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -24,6 +31,7 @@
     "eslint-config-next": "16.2.9",
     "jsdom": "^29.1.1",
     "obsidian-mcp-server": "3.2.7",
+    "prisma": "^6.19.3",
     "typescript": "^5",
     "vitest": "^4.1.9"
   }
