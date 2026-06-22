@@ -13,9 +13,6 @@ interface SettingsForm {
   catalogOrder: string;
   wbApiKey: string;
   yandexMetrikaId: string;
-  phone: string;
-  email: string;
-  address: string;
   instagram: string;
   vk: string;
   telegram: string;
@@ -49,9 +46,6 @@ const emptyForm: SettingsForm = {
   catalogOrder: "",
   wbApiKey: "",
   yandexMetrikaId: "",
-  phone: "",
-  email: "",
-  address: "",
   instagram: "",
   vk: "",
   telegram: "",
@@ -100,9 +94,6 @@ export default function AdminSettingsPage() {
           wbApiKey: data.wbApiKey || "",
           yandexMetrikaId: data.yandexMetrikaId || "",
           catImages: data.categoryImages || {},
-          phone: data.contacts?.phone || "",
-          email: data.contacts?.email || "",
-          address: data.contacts?.address || "",
           instagram: data.social?.instagram || "",
           vk: data.social?.vk || "",
           telegram: data.social?.telegram || "",
@@ -171,11 +162,6 @@ export default function AdminSettingsPage() {
       categoryImages: catImages,
       wbApiKey: form.wbApiKey,
       yandexMetrikaId: form.yandexMetrikaId,
-      contacts: {
-        phone: form.phone,
-        email: form.email,
-        address: form.address,
-      },
       social: {
         instagram: form.instagram,
         vk: form.vk,
@@ -253,9 +239,6 @@ export default function AdminSettingsPage() {
         catalogOrder: Array.isArray(parsed.catalogOrder) ? parsed.catalogOrder.join(", ") : "",
         wbApiKey: parsed.wbApiKey || "",
         yandexMetrikaId: parsed.yandexMetrikaId || "",
-        phone: parsed.contacts?.phone || "",
-        email: parsed.contacts?.email || "",
-        address: parsed.contacts?.address || "",
         instagram: parsed.social?.instagram || "",
         vk: parsed.social?.vk || "",
         telegram: parsed.social?.telegram || "",
@@ -478,40 +461,6 @@ export default function AdminSettingsPage() {
                   <span className={styles.hint}>
                     ID счётчика Яндекс.Метрики
                   </span>
-                </label>
-              </div>
-            </section>
-
-            {/* Contacts */}
-            <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Контакты</h2>
-              <div className={styles.fieldGrid}>
-                <label className={styles.label}>
-                  Телефон
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={form.phone}
-                    onChange={(e) => updateField("phone", e.target.value)}
-                  />
-                </label>
-                <label className={styles.label}>
-                  Email
-                  <input
-                    type="email"
-                    className={styles.input}
-                    value={form.email}
-                    onChange={(e) => updateField("email", e.target.value)}
-                  />
-                </label>
-                <label className={styles.label}>
-                  Адрес
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={form.address}
-                    onChange={(e) => updateField("address", e.target.value)}
-                  />
                 </label>
               </div>
             </section>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Alfa_Slab_One, Playfair_Display, Montserrat, Inter } from "next/font/google";
+import { Playfair_Display, Montserrat, Inter } from "next/font/google";
 import { FavoritesProvider } from "@/lib/favorites-context";
 import { readSettings } from "@/lib/settings";
 import Header from "@/components/layout/header";
@@ -30,13 +30,6 @@ const inter = Inter({
   variable: "--font-body",
   display: "swap",
   weight: ["300", "400", "500", "600", "700"],
-});
-
-const alfaSlab = Alfa_Slab_One({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-  weight: ["400"],
 });
 
 /* ——— Site URL ——— */
@@ -97,7 +90,7 @@ export default async function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${playfair.variable} ${montserrat.variable} ${inter.variable} ${alfaSlab.variable}`}
+      className={`${playfair.variable} ${montserrat.variable} ${inter.variable}`}
       data-scroll-behavior="smooth"
     >
       <head>

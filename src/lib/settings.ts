@@ -13,7 +13,6 @@ export interface SiteSettings {
   wbApiKey: string;
   yandexMetrikaId: string;
   categoryImages: Record<string, string>;
-  contacts: { phone: string; email: string; address: string };
   social: { instagram: string; vk: string; telegram: string; whatsapp: string };
   marketplaces: { wildberries: string; ozon: string; yandexMarket: string };
   seo: { defaultTitle: string; defaultDescription: string };
@@ -32,7 +31,6 @@ const DEFAULTS: SiteSettings = {
   wbApiKey: "",
   yandexMetrikaId: "",
   categoryImages: {},
-  contacts: { phone: "", email: "", address: "" },
   social: { instagram: "", vk: "", telegram: "", whatsapp: "" },
   marketplaces: { wildberries: "", ozon: "", yandexMarket: "" },
   seo: { defaultTitle: "Moranti", defaultDescription: "" },

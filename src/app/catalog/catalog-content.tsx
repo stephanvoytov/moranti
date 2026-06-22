@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useMemo, useRef, Suspense, useCallback } from "react";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import ProductCard from "@/components/ui/product-card";
 import { useProducts } from "@/lib/use-products";
 import { getRecentlyViewed } from "@/lib/recently-viewed";
@@ -44,6 +44,8 @@ function normalizeMaterial(composition: string | undefined): string | null {
 
 function CatalogContent() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
   const { products, categories } = useProducts();
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
@@ -60,17 +62,26 @@ function CatalogContent() {
       .catch(() => {});
   }, []);
 
-  const initialCat = searchParams.get("category");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    initialCat ?? null,
-  );
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
+  // Read all filter state from URL
+  const urlCategory = searchParams.get("category");
+  const urlColor = searchParams.get("color");
+  const urlMaterial = searchParams.get("material");
+  const urlSort = ["default", "new", "popular", "price-asc", "price-desc", "name"].includes(
+    searchParams.get("sort") ?? "",
+  ) ? (searchParams.get("sort") as string) : "default";
+  const urlSearch = searchParams.get("q") ?? "";
+  const urlPriceMin = searchParams.get("priceMin") ?? "";
+  const urlPriceMax = searchParams.get("priceMax") ?? "";
+  const urlPage = parseInt(searchParams.get("page") ?? "1", 10) || 1;
+
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(urlCategory);
+  const [selectedColor, setSelectedColor] = useState<string | null>(urlColor);
+  const [selectedMaterial, setSelectedMaterial] = useState<string | null>(urlMaterial);
+  const [page, setPage] = useState(urlPage);
 
   // ― Search state with debounce ―
-  const [searchInput, setSearchInput] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState(urlSearch);
+  const [searchQuery, setSearchQuery] = useState(urlSearch);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -80,14 +91,9 @@ function CatalogContent() {
   }, [searchInput]);
 
   // ― Sort & price filter state — read sort from URL ―
-  const initialSort = ["default", "new", "popular", "price-asc", "price-desc", "name"].includes(
-    searchParams.get("sort") ?? "",
-  )
-    ? (searchParams.get("sort") as string)
-    : "default";
-  const [sortOption, setSortOption] = useState(initialSort);
-  const [priceMin, setPriceMin] = useState("");
-  const [priceMax, setPriceMax] = useState("");
+  const [sortOption, setSortOption] = useState(urlSort);
+  const [priceMin, setPriceMin] = useState(urlPriceMin);
+  const [priceMax, setPriceMax] = useState(urlPriceMax);
   const [showFilters, setShowFilters] = useState(false);
   const [colorOpen, setColorOpen] = useState(false);
   const colorRef = useRef<HTMLDivElement>(null);
@@ -112,6 +118,27 @@ function CatalogContent() {
     prevFilterKey.current = key;
   }, [selectedCategory, selectedColor, selectedMaterial, searchQuery, priceMin, priceMax, sortOption]);
 
+  // Sync filter state to URL
+  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    syncTimeoutRef.current = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (selectedCategory) params.set("category", selectedCategory);
+      if (selectedColor) params.set("color", selectedColor);
+      if (selectedMaterial) params.set("material", selectedMaterial);
+      if (sortOption && sortOption !== "default") params.set("sort", sortOption);
+      if (searchInput) params.set("q", searchInput);
+      if (priceMin) params.set("priceMin", priceMin);
+      if (priceMax) params.set("priceMax", priceMax);
+      if (page > 1) params.set("page", String(page));
+      const qs = params.toString();
+      const newUrl = qs ? pathname + "?" + qs : pathname;
+      router.replace(newUrl, { scroll: false });
+    }, 50);
+    return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
+  }, [selectedCategory, selectedColor, selectedMaterial, sortOption, searchInput, priceMin, priceMax, page]);
+
   // ― Recently viewed ―
   const [recentlyViewed, setRecentlyViewed] = useState<number[]>([]);
   const drag = useDragScroll<HTMLDivElement>();
@@ -126,9 +153,9 @@ function CatalogContent() {
 
   // Reset category when URL changes
   useEffect(() => {
-    setSelectedCategory(initialCat ?? null);
+    setSelectedCategory(urlCategory ?? null);
     setPage(1);
-  }, [initialCat]);
+  }, [urlCategory]);
 
   // ― Extract unique colors (normalized) and materials from products ―
   const colorOptions = useMemo(() => {
@@ -183,7 +210,7 @@ function CatalogContent() {
     // Sort
     switch (sortOption) {
       case "popular":
-        result.sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0));
+        result.sort((a, b) => (b.reviewsCount || 0) - (a.reviewsCount || 0));
         break;
       case "new":
         result.sort((a, b) => b.id.localeCompare(a.id));

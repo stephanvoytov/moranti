@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { getProducts, getProduct } from "@/data/products";
 import { resolveColor } from "@/lib/color-map";
@@ -10,6 +9,7 @@ import ShareButton from "./share-button";
 import RecentlyViewedTracker from "./recently-viewed-tracker";
 import FavoriteButton from "./favorite-button";
 import ExpandableText from "@/components/ui/expandable-text";
+import ProductCard from "@/components/ui/product-card";
 import RecentlyViewed from "./recently-viewed";
 import styles from "./page.module.css";
 
@@ -85,8 +85,22 @@ export default async function ProductPage({ params }: Props) {
     const isMini = (s.name || "").toLowerCase().includes("мини");
     return isMini ? `${name} мини` : name;
   };
+  // Related: same category, prefer same material + size keywords
   const related = allProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
+    .sort((a, b) => {
+      const sizeWords = ["мини", "большой", "вечерний"];
+      const prod = product;
+      function score(p: typeof a) {
+        let s = 0;
+        if (p.composition && p.composition === prod.composition) s += 2;
+        for (const w of sizeWords) {
+          if (p.name.toLowerCase().includes(w) && prod.name.toLowerCase().includes(w)) s += 1;
+        }
+        return s;
+      }
+      return score(b) - score(a);
+    })
     .slice(0, 3);
 
   // Product JSON-LD structured data
@@ -214,12 +228,6 @@ export default async function ProductPage({ params }: Props) {
             </div>
           ) : null}
 
-          {product.salesCount ? (
-            <p className={styles.salesCount}>
-              Заказали {product.salesCount}{" "}
-              {product.salesCount === 1 ? "раз" : "раз"}
-            </p>
-          ) : null}
 
           <ExpandableText text={product.description} />
 
@@ -264,26 +272,7 @@ export default async function ProductPage({ params }: Props) {
           <h2 className={styles.relatedTitle}>Похожие модели</h2>
           <div className={styles.relatedGrid}>
             {related.map((r) => (
-              <Link
-                key={r.id}
-                href={`/catalog/${r.slug}`}
-                className={styles.relatedCard}
-              >
-                <div className={styles.relatedImageWrapper}>
-                  <Image
-                    src={r.image}
-                    alt={r.name}
-                    fill
-                    sizes="(max-width: 768px) 50vw, 33vw"
-                    className={styles.relatedImage}
-                    loading="lazy"
-                  />
-                </div>
-                <span className={styles.relatedName}>{r.name}</span>
-                <span className={styles.relatedPrice}>
-                  {r.price.toLocaleString("ru-RU")} {r.currency}
-                </span>
-              </Link>
+              <ProductCard key={r.id} product={r} priority={false} />
             ))}
           </div>
         </section>

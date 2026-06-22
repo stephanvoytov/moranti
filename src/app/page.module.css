@@ -209,7 +209,7 @@
   background: var(--card-bg);
   color: var(--muted);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   text-decoration: none;
   opacity: 0.6;
 }

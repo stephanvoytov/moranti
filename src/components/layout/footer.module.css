@@ -49,7 +49,7 @@
   display: block;
   color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
-  transition: color 0.2s;
+  transition: color var(--transition-fast);
   font-weight: 300;
   padding: 2px 0;
 }
@@ -76,7 +76,7 @@
 .social a {
   color: rgba(255, 255, 255, 0.5);
   text-decoration: none;
-  transition: color 0.2s;
+  transition: color var(--transition-fast);
   font-size: 14px;
 }
 
