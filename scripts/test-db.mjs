@@ -6,7 +6,7 @@ async function main() {
   // Try pooled (PgBouncer)
   console.log('--- Testing PgBouncer (port 6543) ---');
   const pool1 = new Pool({
-    connectionString: process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL,
+    connectionString: process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL,
     ssl: { rejectUnauthorized: true },
     connectionTimeoutMillis: 10000,
   });
@@ -22,7 +22,7 @@ async function main() {
   // Try direct
   console.log('\n--- Testing Direct (port 5432) ---');
   const pool2 = new Pool({
-    connectionString: process.env.POSTGRES_URL_NON_POOLING || process.env.DIRECT_URL,
+    connectionString: process.env.DIRECT_URL || process.env.POSTGRES_URL_NON_POOLING,
     ssl: { rejectUnauthorized: true },
     connectionTimeoutMillis: 10000,
   });
