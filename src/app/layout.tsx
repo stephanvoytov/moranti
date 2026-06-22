@@ -41,34 +41,51 @@ const siteUrl = process.env.SITE_URL || "http://localhost:3001";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Moranti — кожаные сумки",
+    default: "Moranti — премиальные кожаные сумки",
     template: "%s — Moranti",
   },
   description:
-    "Moranti — женские сумки из натуральной итальянской кожи. Минималистичные формы, никаких кричащих логотипов.",
+    "Moranti — женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов. Доставка по всей России.",
   keywords: [
-    "сумки",
-    "Moranti",
-    "кожаные сумки",
-    "натуральная итальянская кожа",
-    "женские сумки",
-    "кожаные сумки",
-    "сумки через плечо",
-    "сумки из замши",
-    "классические сумки",
+    "сумки", "Moranti", "кожаные сумки", "натуральная итальянская кожа",
+    "женские сумки", "сумки через плечо", "сумки из замши", "классические сумки",
+    "кросс-боди", "тоут", "багет", "рюкзак кожаный",
   ],
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Moranti — кожаные сумки",
+    title: "Moranti — премиальные кожаные сумки",
     description:
-      "Женские сумки из натуральной итальянской кожи. Минималистичные формы, никаких кричащих логотипов.",
+      "Женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов.",
     url: "/",
     siteName: "Moranti",
     type: "website",
     locale: "ru_RU",
+    images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Moranti — премиальные кожаные сумки",
+    description:
+      "Женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов.",
+    images: ["/twitter-image.png"],
+  },
+  icons: {
+    icon: [
+      { url: "/images/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/images/favicon-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  verification: {
+    // Можно задать через YANDEX_VERIFICATION в .env.local
+    yandex: process.env.YANDEX_VERIFICATION || undefined,
+  },
+};
+
+export const viewport = {
+  themeColor: "#2C2420",
 };
 
 /* ——— Root Layout ——— */
@@ -100,22 +117,36 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://mc.yandex.ru" />
         <link rel="dns-prefetch" href="https://kgd-basket-cdn-01bl.geobasket.ru" />
 
-        {/* Organization structured data */}
+        {/* Favicon for legacy browsers */}
+        <link rel="shortcut icon" href="/images/favicon-32.png" />
+
+        {/* Structured data: Organization + WebSite */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: "Moranti",
-              url: siteUrl,
-              description:
-                "Женские сумки из натуральной итальянской кожи. Минималистичные формы, никаких кричащих логотипов.",
-              contactPoint: {
-                "@type": "ContactPoint",
-                contactType: "sales",
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: "Moranti",
+                url: siteUrl,
+                logo: `${siteUrl}/images/moranti-logo.png`,
+                description:
+                  "Женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов.",
+                contactPoint: {
+                  "@type": "ContactPoint",
+                  contactType: "sales",
+                },
               },
-            }),
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: "Moranti",
+                url: siteUrl,
+                description: "Премиальные кожаные сумки ручной работы",
+                inLanguage: "ru",
+              },
+            ]),
           }}
         />
       </head>
