@@ -6,6 +6,7 @@ import ProductCard from "@/components/ui/product-card";
 import { useProducts } from "@/lib/use-products";
 import { getRecentlyViewed } from "@/lib/recently-viewed";
 import { useDragScroll } from "@/lib/use-drag-scroll";
+import { normalizeColorName } from "@/lib/color-map";
 import styles from "./page.module.css";
 
 const ITEMS_PER_PAGE = 24;
@@ -30,6 +31,17 @@ function sortByOrder(
   return [...inOrder, ...rest];
 }
 
+function normalizeMaterial(composition: string | undefined): string | null {
+  if (!composition) return null;
+  const c = composition.toLowerCase();
+  const hasLeather = c.includes("кожа");
+  const hasSuede = c.includes("замша");
+  if (hasLeather && hasSuede) return "Кожа + Замша";
+  if (hasLeather) return "Кожа";
+  if (hasSuede) return "Замша";
+  return null;
+}
+
 function CatalogContent() {
   const searchParams = useSearchParams();
   const { products, categories } = useProducts();
@@ -48,6 +60,8 @@ function CatalogContent() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     initialCat ?? null,
   );
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
   // ― Search state with debounce ―
@@ -70,16 +84,17 @@ function CatalogContent() {
   const [sortOption, setSortOption] = useState(initialSort);
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
-  // Reset page to 1 when any filter/sort/search changes (skip initial render)
+  // Reset page to 1 when any filter changes
   const prevFilterKey = useRef("");
   useEffect(() => {
-    const key = `${selectedCategory}-${searchQuery}-${priceMin}-${priceMax}-${sortOption}`;
+    const key = `${selectedCategory}-${selectedColor}-${selectedMaterial}-${searchQuery}-${priceMin}-${priceMax}-${sortOption}`;
     if (prevFilterKey.current !== "" && prevFilterKey.current !== key) {
       setPage(1);
     }
     prevFilterKey.current = key;
-  }, [selectedCategory, searchQuery, priceMin, priceMax, sortOption]);
+  }, [selectedCategory, selectedColor, selectedMaterial, searchQuery, priceMin, priceMax, sortOption]);
 
   // ― Recently viewed ―
   const [recentlyViewed, setRecentlyViewed] = useState<number[]>([]);
@@ -93,17 +108,45 @@ function CatalogContent() {
     .map((article) => products.find((p) => p.wbArticle === article))
     .filter((p): p is NonNullable<typeof p> => p != null);
 
-  // Reset page when category changes from URL
+  // Reset category when URL changes
   useEffect(() => {
     setSelectedCategory(initialCat ?? null);
     setPage(1);
   }, [initialCat]);
 
-  // ― Filter pipeline: category → search → price → sort ―
+  // ― Extract unique colors (normalized) and materials from products ―
+  const colorOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of products) {
+      if (p.colorName) set.add(normalizeColorName(p.colorName));
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "ru"));
+  }, [products]);
+
+  const materialOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of products) {
+      const m = normalizeMaterial(p.composition);
+      if (m) set.add(m);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "ru"));
+  }, [products]);
+
+  // ― Filter pipeline: category → color → material → search → price → sort ―
   const filtered = useMemo(() => {
     let result = selectedCategory
       ? products.filter((p) => p.category === selectedCategory)
       : [...products];
+
+    // Color filter
+    if (selectedColor) {
+      result = result.filter((p) => p.colorName && normalizeColorName(p.colorName) === selectedColor);
+    }
+
+    // Material filter
+    if (selectedMaterial) {
+      result = result.filter((p) => normalizeMaterial(p.composition) === selectedMaterial);
+    }
 
     // Search filter (case-insensitive)
     if (searchQuery) {
@@ -135,12 +178,12 @@ function CatalogContent() {
       case "name":
         result.sort((a, b) => a.name.localeCompare(b.name, "ru"));
         break;
-      default: // "default" — catalog order from settings
+      default:
         result = sortByOrder(result, catalogOrder);
     }
 
     return result;
-  }, [products, selectedCategory, searchQuery, priceMin, priceMax, sortOption, catalogOrder]);
+  }, [products, selectedCategory, selectedColor, selectedMaterial, searchQuery, priceMin, priceMax, sortOption, catalogOrder]);
 
   // ― Paginate ―
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -152,6 +195,14 @@ function CatalogContent() {
 
   const handleFilter = (cat: string | null) => {
     setSelectedCategory(cat);
+    setPage(1);
+  };
+
+  const hasActiveFilter = selectedCategory || selectedColor || selectedMaterial;
+  const clearFilters = () => {
+    setSelectedCategory(null);
+    setSelectedColor(null);
+    setSelectedMaterial(null);
     setPage(1);
   };
 
@@ -184,69 +235,146 @@ function CatalogContent() {
           <h1 className={styles.title}>Наши сумки</h1>
         </div>
 
-        {/* Toolbar: search, sort, price filter */}
+        {/* Toolbar: search + toggle button + filter panel */}
         <div className={styles.toolbar}>
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Поиск..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-          />
-
-          <div className={styles.sortWrapper}>
-            <select
-              className={styles.sortSelect}
-              value={sortOption}
-              onChange={(e) => setSortOption(e.target.value)}
-            >
-              <option value="default">По умолчанию</option>
-              <option value="new">По новинкам</option>
-              <option value="price-asc">По цене: возрастание</option>
-              <option value="price-desc">По цене: убывание</option>
-              <option value="name">По названию</option>
-            </select>
-          </div>
-
-          <div className={styles.priceGroup}>
+          <div className={styles.toolbarMain}>
             <input
-              type="number"
-              className={styles.priceInput}
-              placeholder="от"
-              value={priceMin}
-              onChange={(e) => setPriceMin(e.target.value)}
-              min={0}
+              type="text"
+              className={styles.searchInput}
+              placeholder="Поиск..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
-            <span className={styles.priceDash}>—</span>
-            <input
-              type="number"
-              className={styles.priceInput}
-              placeholder="до"
-              value={priceMax}
-              onChange={(e) => setPriceMax(e.target.value)}
-              min={0}
-            />
-          </div>
-        </div>
-
-        {/* Filter pills */}
-        <div className={styles.filterRow}>
-          <button
-            className={`${styles.filterPill} ${selectedCategory === null ? styles.pillActive : ""}`}
-            onClick={() => handleFilter(null)}
-          >
-            Все
-          </button>
-          {categories.map((cat) => (
             <button
-              key={cat.slug}
-              className={`${styles.filterPill} ${selectedCategory === cat.slug ? styles.pillActive : ""}`}
-              onClick={() => handleFilter(cat.slug)}
+              className={styles.filterToggle}
+              onClick={() => setShowFilters((p) => !p)}
             >
-              {cat.name}
+              {showFilters ? "Скрыть" : "Фильтры"}
             </button>
-          ))}
+          </div>
+
+          <div
+            className={`${styles.filterPanel} ${showFilters ? styles.filterPanelVisible : ""}`}
+          >
+            <div className={styles.filterSelectWrapper}>
+              <select
+                className={styles.filterSelect}
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+              >
+                <option value="default">По умолчанию</option>
+                <option value="new">По новинкам</option>
+                <option value="price-asc">По цене: возрастание</option>
+                <option value="price-desc">По цене: убывание</option>
+                <option value="name">По названию</option>
+              </select>
+            </div>
+
+            {colorOptions.length > 0 && (
+              <div className={styles.filterSelectWrapper}>
+                <select
+                  className={styles.filterSelect}
+                  value={selectedColor || ""}
+                  onChange={(e) =>
+                    setSelectedColor(e.target.value || null)
+                  }
+                >
+                  <option value="">Цвет</option>
+                  {colorOptions.map((color) => (
+                    <option key={color} value={color}>
+                      {color}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {materialOptions.length > 0 && (
+              <div className={styles.filterSelectWrapper}>
+                <select
+                  className={styles.filterSelect}
+                  value={selectedMaterial || ""}
+                  onChange={(e) =>
+                    setSelectedMaterial(e.target.value || null)
+                  }
+                >
+                  <option value="">Материал</option>
+                  {materialOptions.map((mat) => (
+                    <option key={mat} value={mat}>
+                      {mat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className={styles.priceGroup}>
+              <input
+                type="number"
+                className={styles.priceInput}
+                placeholder="от"
+                value={priceMin}
+                onChange={(e) => setPriceMin(e.target.value)}
+                min={0}
+              />
+              <span className={styles.priceDash}>—</span>
+              <input
+                type="number"
+                className={styles.priceInput}
+                placeholder="до"
+                value={priceMax}
+                onChange={(e) => setPriceMax(e.target.value)}
+                min={0}
+              />
+            </div>
+          </div>
         </div>
+
+        {/* Category pills — always visible */}
+        <div className={styles.filterSection}>
+          <div className={styles.filterRow}>
+            <button
+              className={`${styles.filterPill} ${selectedCategory === null ? styles.pillActive : ""}`}
+              onClick={() => { setSelectedCategory(null); setPage(1); }}
+            >
+              Все
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.slug}
+                className={`${styles.filterPill} ${selectedCategory === cat.slug ? styles.pillActive : ""}`}
+                onClick={() => handleFilter(cat.slug)}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Active filter strip */}
+        {hasActiveFilter && (
+          <div className={styles.activeFilters}>
+            {selectedCategory && (
+              <span className={styles.activePill}>
+                {categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory}
+                <button className={styles.activeRemove} onClick={() => setSelectedCategory(null)}>×</button>
+              </span>
+            )}
+            {selectedColor && (
+              <span className={styles.activePill}>
+                {selectedColor}
+                <button className={styles.activeRemove} onClick={() => setSelectedColor(null)}>×</button>
+              </span>
+            )}
+            {selectedMaterial && (
+              <span className={styles.activePill}>
+                {selectedMaterial}
+                <button className={styles.activeRemove} onClick={() => setSelectedMaterial(null)}>×</button>
+              </span>
+            )}
+            <button className={styles.clearBtn} onClick={clearFilters}>Сбросить всё</button>
+          </div>
+        )}
 
         {/* Product grid or empty state */}
         {paginated.length > 0 ? (
