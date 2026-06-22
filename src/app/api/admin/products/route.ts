@@ -9,7 +9,7 @@ import { readFileSync, writeFileSync, existsSync } from "fs";
 import path from "path";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
-import prisma from "@/lib/prisma";
+import prisma, { prismaQuery } from "@/lib/prisma";
 
 const VALID_CATEGORIES = [
   "crossbody", "na-plecho", "baguette", "tote", "saddle", "backpack",
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       where.category = category;
     }
 
-    const [items, total] = await Promise.all([
+    const [items, total] = await prismaQuery(() => Promise.all([
       prisma.product.findMany({
         where,
         orderBy: { createdAt: "desc" },
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
         take: limit,
       }),
       prisma.product.count({ where }),
-    ]);
+    ]));
 
     const totalPages = Math.ceil(total / limit);
     return NextResponse.json({
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
   const wbArticleNum = hasWbArticle ? Number(body.wbArticle) : undefined;
   const ozonArticleNum = hasOzonArticle ? Number(body.ozonArticle) : undefined;
 
-  const marketplaces = [];
+  const marketplaces: { name: string; url: string; icon: string }[] = [];
   if (hasWbArticle) {
     marketplaces.push({
       name: "Wildberries",
@@ -172,36 +172,40 @@ export async function POST(request: NextRequest) {
 
   // Try Prisma first
   try {
-    const lastProduct = await prisma.product.findFirst({
-      orderBy: { createdAt: "desc" },
-      select: { id: true },
-    });
+    const lastProduct = await prismaQuery(() =>
+      prisma.product.findFirst({
+        orderBy: { createdAt: "desc" },
+        select: { id: true },
+      })
+    );
     const lastNum = lastProduct
       ? parseInt(lastProduct.id.replace("mor-", ""), 10) || 0
       : 0;
     const newId = `mor-${String(lastNum + 1).padStart(3, "0")}`;
     const slug = (body.slug as string) || (hasWbArticle ? `wb-${wbArticleNum}` : `product-${newId}`);
 
-    const product = await prisma.product.create({
-      data: {
-        id: newId,
-        slug,
-        name: (body.name as string).trim(),
-        price,
-        originalPrice: body.originalPrice ? Number(body.originalPrice) : price,
-        currency: "₽",
-        category,
-        description: (body.description as string) || "",
-        image: (images[0] as string) || "",
-        images,
-        marketplaces,
-        wbArticle: wbArticleNum ?? null,
-        ozonArticle: ozonArticleNum ?? null,
-        rating: body.rating ? Number(body.rating) : null,
-        reviewsCount: body.reviewsCount ? Number(body.reviewsCount) : null,
-        salesCount: body.salesCount ? Number(body.salesCount) : null,
-      },
-    });
+    const product = await prismaQuery(() =>
+      prisma.product.create({
+        data: {
+          id: newId,
+          slug,
+          name: (body.name as string).trim(),
+          price,
+          originalPrice: body.originalPrice ? Number(body.originalPrice) : price,
+          currency: "₽",
+          category,
+          description: (body.description as string) || "",
+          image: (images[0] as string) || "",
+          images,
+          marketplaces,
+          wbArticle: wbArticleNum ?? null,
+          ozonArticle: ozonArticleNum ?? null,
+          rating: body.rating ? Number(body.rating) : null,
+          reviewsCount: body.reviewsCount ? Number(body.reviewsCount) : null,
+          salesCount: body.salesCount ? Number(body.salesCount) : null,
+        },
+      })
+    );
     return NextResponse.json(product, { status: 201 });
   } catch {
     // Prisma unavailable — fallback to JSON

@@ -9,7 +9,7 @@ import { readFileSync, writeFileSync, existsSync } from "fs";
 import path from "path";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
-import prisma from "@/lib/prisma";
+import prisma, { prismaQuery } from "@/lib/prisma";
 
 const VALID_CATEGORIES = [
   "crossbody", "na-plecho", "baguette", "tote", "saddle", "backpack",
@@ -53,7 +53,7 @@ export async function GET(
 
   // Try Prisma first
   try {
-    const product = await prisma.product.findUnique({ where: { id } });
+    const product = await prismaQuery(() => prisma.product.findUnique({ where: { id } }));
     if (product) return NextResponse.json(product);
   } catch {
     // Prisma unavailable — fallback to JSON
@@ -86,7 +86,7 @@ export async function PUT(
 
   // Try Prisma first
   try {
-    const existing = await prisma.product.findUnique({ where: { id } });
+    const existing = await prismaQuery(() => prisma.product.findUnique({ where: { id } }));
     if (!existing) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
@@ -150,10 +150,12 @@ export async function PUT(
     }
     data.marketplaces = marketplaces;
 
-    const updated = await prisma.product.update({
-      where: { id },
-      data,
-    });
+    const updated = await prismaQuery(() =>
+      prisma.product.update({
+        where: { id },
+        data,
+      })
+    );
 
     return NextResponse.json(updated);
   } catch {
@@ -251,11 +253,11 @@ export async function DELETE(
 
   // Try Prisma first
   try {
-    const existing = await prisma.product.findUnique({ where: { id } });
+    const existing = await prismaQuery(() => prisma.product.findUnique({ where: { id } }));
     if (!existing) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
-    await prisma.product.delete({ where: { id } });
+    await prismaQuery(() => prisma.product.delete({ where: { id } }));
     return NextResponse.json({ ok: true });
   } catch {
     // Prisma unavailable → fallback to JSON
