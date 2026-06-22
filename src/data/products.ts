@@ -5,6 +5,7 @@
 
 import type { Product as PrismaProduct } from "@prisma/client";
 import prisma, { prismaQuery } from "@/lib/prisma";
+import { cacheGet } from "@/lib/data-cache";
 
 export interface MarketplaceLink {
   name: "Wildberries" | "Ozon" | "Yandex Market";
@@ -85,17 +86,21 @@ function mapProduct(p: PrismaProduct): Product {
 }
 
 export async function getProducts(): Promise<Product[]> {
-  const rows = await prismaQuery(() =>
-    prisma.product.findMany({ orderBy: { createdAt: "asc" } }),
-  );
-  return rows.filter((p) => !p.archivedAt).map(mapProduct);
+  return cacheGet("all-products", async () => {
+    const rows = await prismaQuery(() =>
+      prisma.product.findMany({ orderBy: { createdAt: "asc" } }),
+    );
+    return rows.filter((p) => !p.archivedAt).map(mapProduct);
+  });
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
-  const row = await prismaQuery(() =>
-    prisma.product.findUnique({ where: { slug } }),
-  );
-  return row ? mapProduct(row) : null;
+  return cacheGet(`product:${slug}`, async () => {
+    const row = await prismaQuery(() =>
+      prisma.product.findUnique({ where: { slug } }),
+    );
+    return row ? mapProduct(row) : null;
+  });
 }
 
 export async function getProductsByCategory(
@@ -120,23 +125,25 @@ export async function getProductsByWbArticle(
 }
 
 export async function getCategories(): Promise<ProductCategory[]> {
-  const counts = await prismaQuery(() =>
-    prisma.product.groupBy({
-      by: ["category"],
-      where: { archivedAt: null },
-      _count: { id: true },
-    }),
-  );
+  return cacheGet("all-categories", async () => {
+    const counts = await prismaQuery(() =>
+      prisma.product.groupBy({
+        by: ["category"],
+        where: { archivedAt: null },
+        _count: { id: true },
+      }),
+    );
 
-  const countMap = new Map(counts.map((c) => [c.category, c._count.id]));
+    const countMap = new Map(counts.map((c) => [c.category, c._count.id]));
 
-  return Object.entries(CATEGORY_INFO).map(([slug, info]) => ({
-    slug,
-    name: info.name,
-    description: info.description,
-    image: `/images/categories/${slug}.jpg`,
-    count: countMap.get(slug) ?? 0,
-  }));
+    return Object.entries(CATEGORY_INFO).map(([slug, info]) => ({
+      slug,
+      name: info.name,
+      description: info.description,
+      image: `/images/categories/${slug}.jpg`,
+      count: countMap.get(slug) ?? 0,
+    }));
+  });
 }
 
 export async function getAllSlugs(): Promise<string[]> {

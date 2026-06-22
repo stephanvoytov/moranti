@@ -45,6 +45,10 @@ function normalizeMaterial(composition: string | undefined): string | null {
 function CatalogContent() {
   const searchParams = useSearchParams();
   const { products, categories } = useProducts();
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    if (products.length > 0) setLoaded(true);
+  }, [products]);
   const [catalogOrder, setCatalogOrder] = useState<string[]>([]);
 
   useEffect(() => {
@@ -433,14 +437,20 @@ function CatalogContent() {
           </div>
         )}
 
-        {/* Product grid or empty state */}
-        {paginated.length > 0 ? (
+        {/* Loading state */}
+        {!loaded ? (
+          <div className={styles.loadingGrid}>
+            <div className={styles.spinner} />
+          </div>
+        ) : paginated.length > 0 ? (
+          /* Product grid */
           <div className={styles.productGrid}>
             {paginated.map((product, i) => (
               <ProductCard key={product.id} product={product} priority={i < 4} />
             ))}
           </div>
         ) : (
+          /* Empty state */
           <p className={styles.noResults}>Ничего не найдено</p>
         )}
 

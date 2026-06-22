@@ -4,6 +4,7 @@
    ============================================= */
 
 import prisma, { prismaQuery } from "@/lib/prisma";
+import { cacheGet } from "@/lib/data-cache";
 
 export interface SiteSettings {
   hero: { title: string; tagline: string; subtitle: string; image: string };
@@ -43,13 +44,15 @@ export function defaultSettings(): SiteSettings {
 }
 
 export async function readSettings(): Promise<SiteSettings> {
-  const row = await prismaQuery(() =>
-    prisma.settings.findUnique({ where: { id: "singleton" } }),
-  );
+  return cacheGet("site-settings", async () => {
+    const row = await prismaQuery(() =>
+      prisma.settings.findUnique({ where: { id: "singleton" } }),
+    );
 
-  if (!row) return defaultSettings();
+    if (!row) return defaultSettings();
 
-  return { ...DEFAULTS, ...(row.data as unknown as SiteSettings) };
+    return { ...DEFAULTS, ...(row.data as unknown as SiteSettings) };
+  });
 }
 
 export async function writeSettings(
