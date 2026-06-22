@@ -1,25 +1,32 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, Suspense, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import ProductCard from "@/components/ui/product-card";
+import type { Product, ProductCategory } from "@/data/products";
 import { useProducts } from "@/lib/use-products";
 import { getRecentlyViewed } from "@/lib/recently-viewed";
 import { useDragScroll } from "@/lib/use-drag-scroll";
 import { resolveColor, normalizeColorName } from "@/lib/color-map";
 import styles from "./page.module.css";
 
+interface CatalogContentProps {
+  initialProducts?: Product[];
+  initialCategories?: ProductCategory[];
+  initialCatalogOrder?: string[];
+}
+
 const ITEMS_PER_PAGE = 24;
 const SEARCH_DEBOUNCE_MS = 300;
 
 function sortByOrder(
-  products: import("@/data/products").Product[],
+  products: Product[],
   order: string[],
-): import("@/data/products").Product[] {
+): Product[] {
   if (!order || order.length === 0) return products;
   const orderMap = new Map(order.map((id, i) => [id, i]));
-  const inOrder: import("@/data/products").Product[] = [];
-  const rest: import("@/data/products").Product[] = [];
+  const inOrder: Product[] = [];
+  const rest: Product[] = [];
   for (const p of products) {
     if (orderMap.has(p.id)) {
       inOrder.push(p);
@@ -42,25 +49,34 @@ function normalizeMaterial(composition: string | undefined): string | null {
   return null;
 }
 
-function CatalogContent() {
+function CatalogContent({ initialProducts, initialCategories, initialCatalogOrder }: CatalogContentProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const { products, categories } = useProducts();
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    if (products.length > 0) setLoaded(true);
-  }, [products]);
-  const [catalogOrder, setCatalogOrder] = useState<string[]>([]);
 
+  // Use server-provided initial data if available (first load), fall back to API fetch
+  const hasInitialData = initialProducts && initialProducts.length > 0;
+  const { products, categories } = hasInitialData
+    ? { products: initialProducts, categories: initialCategories ?? [] }
+    : useProducts();
+
+  const [loaded, setLoaded] = useState(hasInitialData);
   useEffect(() => {
-    fetch("/api/data/settings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data.catalogOrder)) setCatalogOrder(data.catalogOrder);
-      })
-      .catch(() => {});
-  }, []);
+    if (!hasInitialData && products.length > 0) setLoaded(true);
+  }, [products, hasInitialData]);
+
+  // catalogOrder: from props (server) or fetch from API (client nav)
+  const [catalogOrder, setCatalogOrder] = useState<string[]>(initialCatalogOrder ?? []);
+  useEffect(() => {
+    if (!hasInitialData && !initialCatalogOrder) {
+      fetch("/api/data/settings")
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data.catalogOrder)) setCatalogOrder(data.catalogOrder);
+        })
+        .catch(() => {});
+    }
+  }, [hasInitialData, initialCatalogOrder]);
 
   // Read all filter state from URL
   const urlCategory = searchParams.get("category");
@@ -526,10 +542,10 @@ function CatalogContent() {
   );
 }
 
-export default function CatalogPage() {
+export default function CatalogPage(props: CatalogContentProps) {
   return (
     <Suspense fallback={<div className={styles.loading}>Загрузка...</div>}>
-      <CatalogContent />
+      <CatalogContent {...props} />
     </Suspense>
   );
 }

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getProducts, getCategories } from "@/data/products";
+import { readSettings } from "@/lib/settings";
 import CatalogPage from "./catalog-content";
 
 export const metadata: Metadata = {
@@ -16,6 +18,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CatalogPageWrapper() {
-  return <CatalogPage />;
+export default async function CatalogPageWrapper() {
+  const [products, categories, settings] = await Promise.all([
+    getProducts(),
+    getCategories(),
+    readSettings(),
+  ]);
+
+  return (
+    <CatalogPage
+      initialProducts={products}
+      initialCategories={categories}
+      initialCatalogOrder={settings.catalogOrder ?? []}
+    />
+  );
 }

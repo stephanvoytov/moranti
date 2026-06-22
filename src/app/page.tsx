@@ -1,29 +1,14 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import { readSettings } from "@/lib/settings";
+import { getProducts, getCategories } from "@/data/products";
 import Link from "next/link";
 import Hero from "@/components/sections/hero";
 import ProductCard from "@/components/ui/product-card";
-import { useProducts } from "@/lib/use-products";
+import HomeClient from "./home-client";
 import styles from "./page.module.css";
-
-interface HeroSettings {
-  title: string;
-  tagline: string;
-  subtitle: string;
-  image: string;
-}
-
-const defaultHero: HeroSettings = {
-  title: "Moranti",
-  tagline: "Сумки из итальянской кожи. Сдержанная элегантность.",
-  subtitle: "Тихая роскошь",
-  image: "",
-};
 
 /* ——— Фото категории: приоритет у настроек, fallback на первый товар ——— */
 function getCategoryImage(
-  products: any[],
+  products: Awaited<ReturnType<typeof getProducts>>,
   slug: string,
   overrides: Record<string, string>,
 ): string {
@@ -32,27 +17,16 @@ function getCategoryImage(
   return found?.image || found?.images?.[0] || "";
 }
 
-export default function Home() {
-  const { products, categories } = useProducts();
-  const [hero, setHero] = useState<HeroSettings>(defaultHero);
-  const [featuredIds, setFeaturedIds] = useState<string[]>([]);
-  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
-  const [isAdmin, setIsAdmin] = useState(false);
+export default async function Home() {
+  const [products, categories, settings] = await Promise.all([
+    getProducts(),
+    getCategories(),
+    readSettings(),
+  ]);
 
-  useEffect(() => {
-    setIsAdmin(localStorage.getItem("moranti_admin") === "1");
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/data/settings")
-      .then((res) => res.json())
-      .then((data) => {
-          if (data.hero) setHero(data.hero);
-          if (Array.isArray(data.featuredIds)) setFeaturedIds(data.featuredIds);
-          if (data.categoryImages) setCategoryImages(data.categoryImages);
-        })
-      .catch(() => {});
-  }, []);
+  const hero = settings.hero;
+  const featuredIds = settings.featuredIds ?? [];
+  const categoryImages = settings.categoryImages ?? {};
 
   const featured =
     featuredIds.length > 0
@@ -61,7 +35,7 @@ export default function Home() {
 
   return (
     <>
-      {/* ——— Hero ——— */}
+      {/* ——— Hero (серверный, с реальной картинкой сразу) ——— */}
       <Hero settings={hero} />
 
       {/* ——— Коллекции ——— */}
@@ -128,7 +102,7 @@ export default function Home() {
           <h2 className={styles.ctaTitle}>Сумки из натуральной кожи</h2>
           <div className={styles.ctaRule} />
           <p className={styles.ctaDesc}>
-            {products.length || "..."} моделей. Доставка по всей России.
+            {products.length} моделей. Доставка по всей России.
           </p>
           <Link href="/catalog" className={styles.ctaBtn}>
             Открыть каталог
@@ -136,15 +110,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ——— Кнопка на админку ——— */}
-      {isAdmin && (
-        <Link href="/admin/" className={styles.adminFab} title="Панель управления">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 20h9" />
-            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-          </svg>
-        </Link>
-      )}
+      {/* ——— Кнопка на админку (клиентский компонент) ——— */}
+      <HomeClient />
     </>
   );
 }
