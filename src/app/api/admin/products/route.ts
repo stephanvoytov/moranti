@@ -1,12 +1,10 @@
 /* =============================================
    Admin Products API — GET (list), POST (create)
    Protected: requires valid admin session
-   Fallback: если Prisma недоступна — читает/пишет JSON
+   Source: Prisma (Supabase Postgres)
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";
-import { readFileSync, writeFileSync, existsSync } from "fs";
-import path from "path";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import prisma, { prismaQuery } from "@/lib/prisma";
@@ -14,29 +12,6 @@ import prisma, { prismaQuery } from "@/lib/prisma";
 const VALID_CATEGORIES = [
   "crossbody", "na-plecho", "baguette", "tote", "saddle", "backpack",
 ];
-
-/* ——— JSON fallback helpers ——— */
-
-function dataPath() {
-  return path.join(process.cwd(), "data", "products.json");
-}
-
-function readJsonFallback() {
-  try {
-    if (!existsSync(dataPath())) return { products: [] };
-    return JSON.parse(readFileSync(dataPath(), "utf-8"));
-  } catch {
-    return { products: [] };
-  }
-}
-
-function writeJsonFallback(data: unknown) {
-  try {
-    writeFileSync(dataPath(), JSON.stringify(data, null, 2), "utf-8");
-  } catch {
-    // read-only fs — silently ignore
-  }
-}
 
 /* ——— GET /api/admin/products ——— */
 
@@ -52,64 +27,31 @@ export async function GET(request: NextRequest) {
   const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
   const limit = Math.min(200, Math.max(1, parseInt(searchParams.get("limit") || "20", 10)));
 
-  try {
-    const where: Record<string, unknown> = {};
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { id: { contains: search, mode: "insensitive" } },
-        { wbArticle: isNaN(Number(search)) ? undefined : Number(search) },
-      ].filter(Boolean);
-    }
-    if (category && VALID_CATEGORIES.includes(category)) {
-      where.category = category;
-    }
-
-    const [items, total] = await prismaQuery(() => Promise.all([
-      prisma.product.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      prisma.product.count({ where }),
-    ]));
-
-    const totalPages = Math.ceil(total / limit);
-    return NextResponse.json({
-      items,
-      pagination: { page, limit, total, totalPages },
-    });
-  } catch {
-    // Prisma unavailable — fallback to JSON
-  }
-
-  // JSON fallback
-  const data = readJsonFallback();
-  let filtered = data.products || [];
-
+  const where: Record<string, unknown> = {};
   if (search) {
-    const q = search.toLowerCase();
-    filtered = filtered.filter(
-      (p: { name: string; id: string; wbArticle?: number }) =>
-        p.name.toLowerCase().includes(q) ||
-        p.id.toLowerCase().includes(q) ||
-        String(p.wbArticle ?? "").includes(q),
-    );
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+      { id: { contains: search, mode: "insensitive" } },
+    ].filter(Boolean);
   }
   if (category && VALID_CATEGORIES.includes(category)) {
-    filtered = filtered.filter((p: { category: string }) => p.category === category);
+    where.category = category;
   }
 
-  const total = filtered.length;
-  const totalPages = Math.ceil(total / limit);
-  const safePage = Math.min(page, Math.max(totalPages, 1));
-  const start = (safePage - 1) * limit;
-  const items = filtered.slice(start, start + limit);
+  const [items, total] = await prismaQuery(() => Promise.all([
+    prisma.product.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.product.count({ where }),
+  ]));
 
+  const totalPages = Math.ceil(total / limit);
   return NextResponse.json({
     items,
-    pagination: { page: safePage, limit, total, totalPages },
+    pagination: { page, limit, total, totalPages },
   });
 }
 
@@ -143,23 +85,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(", ")}` }, { status: 400 });
   }
 
-  const hasWbArticle = body.wbArticle && Number(body.wbArticle) > 0;
-  const hasOzonArticle = body.ozonArticle && Number(body.ozonArticle) > 0;
-  const wbArticleNum = hasWbArticle ? Number(body.wbArticle) : undefined;
-  const ozonArticleNum = hasOzonArticle ? Number(body.ozonArticle) : undefined;
+  const wbArticle = body.wbArticle && Number(body.wbArticle) > 0 ? Number(body.wbArticle) : undefined;
+  const ozonArticle = body.ozonArticle ? Number(body.ozonArticle) : undefined;
 
   const marketplaces: { name: string; url: string; icon: string }[] = [];
-  if (hasWbArticle) {
+  if (wbArticle) {
     marketplaces.push({
       name: "Wildberries",
-      url: `https://www.wildberries.ru/catalog/${wbArticleNum}/detail.aspx`,
+      url: `https://www.wildberries.ru/catalog/${wbArticle}/detail.aspx`,
       icon: "/images/icons/wb.svg",
     });
   }
-  if (hasOzonArticle) {
+  if (ozonArticle) {
     marketplaces.push({
       name: "Ozon",
-      url: `https://www.ozon.ru/product/${ozonArticleNum}/`,
+      url: `https://www.ozon.ru/product/${ozonArticle}/`,
       icon: "/images/icons/ozon.svg",
     });
   }
@@ -170,79 +110,40 @@ export async function POST(request: NextRequest) {
       ? [body.image]
       : [];
 
-  // Try Prisma first
-  try {
-    const lastProduct = await prismaQuery(() =>
-      prisma.product.findFirst({
-        orderBy: { createdAt: "desc" },
-        select: { id: true },
-      })
-    );
-    const lastNum = lastProduct
-      ? parseInt(lastProduct.id.replace("mor-", ""), 10) || 0
-      : 0;
-    const newId = `mor-${String(lastNum + 1).padStart(3, "0")}`;
-    const slug = (body.slug as string) || (hasWbArticle ? `wb-${wbArticleNum}` : `product-${newId}`);
-
-    const product = await prismaQuery(() =>
-      prisma.product.create({
-        data: {
-          id: newId,
-          slug,
-          name: (body.name as string).trim(),
-          price,
-          originalPrice: body.originalPrice ? Number(body.originalPrice) : price,
-          currency: "₽",
-          category,
-          description: (body.description as string) || "",
-          image: (images[0] as string) || "",
-          images,
-          marketplaces,
-          wbArticle: wbArticleNum ?? null,
-          ozonArticle: ozonArticleNum ?? null,
-          rating: body.rating ? Number(body.rating) : null,
-          reviewsCount: body.reviewsCount ? Number(body.reviewsCount) : null,
-          salesCount: body.salesCount ? Number(body.salesCount) : null,
-        },
-      })
-    );
-    return NextResponse.json(product, { status: 201 });
-  } catch {
-    // Prisma unavailable — fallback to JSON
-  }
-
-  // JSON fallback
-  const data = readJsonFallback();
-  const products = data.products || [];
-  const maxNum = products.reduce(
-    (max: number, p: { id: string }) => Math.max(max, parseInt(p.id.replace("mor-", ""), 10) || 0),
-    0,
+  const lastProduct = await prismaQuery(() =>
+    prisma.product.findFirst({
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    })
   );
-  const newId = `mor-${String(maxNum + 1).padStart(3, "0")}`;
-  const slug = (body.slug as string) || (hasWbArticle ? `wb-${wbArticleNum}` : `product-${newId}`);
+  const lastNum = lastProduct
+    ? parseInt(lastProduct.id.replace("mor-", ""), 10) || 0
+    : 0;
+  const newId = `mor-${String(lastNum + 1).padStart(3, "0")}`;
+  const slug = (body.slug as string) || (wbArticle ? `wb-${wbArticle}` : `product-${newId}`);
 
-  const newProduct = {
-    id: newId,
-    slug,
-    name: (body.name as string).trim(),
-    price,
-    originalPrice: body.originalPrice ? Number(body.originalPrice) : price,
-    currency: "₽",
-    category,
-    description: (body.description as string) || "",
-    image: (images[0] as string) || "",
-    images,
-    marketplaces,
-    wbArticle: wbArticleNum || 0,
-    ozonArticle: ozonArticleNum,
-    rating: body.rating ? Number(body.rating) : undefined,
-    reviewsCount: body.reviewsCount ? Number(body.reviewsCount) : undefined,
-  };
+  const product = await prismaQuery(() =>
+    prisma.product.create({
+      data: {
+        id: newId,
+        slug,
+        name: (body.name as string).trim(),
+        price,
+        originalPrice: body.originalPrice ? Number(body.originalPrice) : price,
+        currency: "₽",
+        category,
+        description: (body.description as string) || "",
+        image: (images[0] as string) || "",
+        images,
+        marketplaces,
+        wbArticle: wbArticle ?? null,
+        ozonArticle: ozonArticle ?? null,
+        rating: body.rating ? Number(body.rating) : null,
+        reviewsCount: body.reviewsCount ? Number(body.reviewsCount) : null,
+        salesCount: body.salesCount ? Number(body.salesCount) : null,
+      },
+    })
+  );
 
-  data.products.push(newProduct);
-  data.meta = data.meta || { count: 0 };
-  data.meta.count = data.products.length;
-  writeJsonFallback(data);
-
-  return NextResponse.json(newProduct, { status: 201 });
+  return NextResponse.json(product, { status: 201 });
 }

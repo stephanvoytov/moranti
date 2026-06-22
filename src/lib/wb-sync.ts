@@ -11,6 +11,14 @@ const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
 const SYNC_SCRIPT = path.join(SCRIPTS_DIR, "sync-wb.mjs");
 const SYNC_LOG_FILE = path.join(process.cwd(), "data", "sync-log.json");
 
+/**
+ * Пул подключений Supabase (PgBouncer) не любит долгие batch-операции.
+ * Для sync используем прямой URL (без pgBouncer).
+ */
+function getDirectDbUrl(): string | undefined {
+  return process.env.DIRECT_URL || process.env.DATABASE_URL;
+}
+
 export interface SyncReport {
   timestamp: string;
   duration: number;
@@ -29,9 +37,8 @@ export interface SyncReport {
 }
 
 /**
- * Запускает синхронизацию с WB.
- * Выполняет sync-wb.mjs через Node.js (дочерний процесс).
- * Скрипт сам пишет результаты в Prisma (Neon).
+ * Запускает синхронизацию с WB через дочерний процесс.
+ * Передаёт DIRECT_URL как DATABASE_URL скрипту для обхода PgBouncer.
  */
 export function runWbSync(): SyncReport {
   try {
@@ -39,7 +46,11 @@ export function runWbSync(): SyncReport {
       cwd: process.cwd(),
       timeout: 120_000,
       encoding: "utf-8",
-      env: { ...process.env, CI: "true" },
+      env: {
+        ...process.env,
+        DATABASE_URL: getDirectDbUrl(),
+        CI: "true",
+      },
     });
 
     // Последняя строка — JSON с отчётом
@@ -47,7 +58,6 @@ export function runWbSync(): SyncReport {
     const lastLine = lines[lines.length - 1];
     return JSON.parse(lastLine);
   } catch (err: any) {
-    // При ошибке скрипт пишет JSON в stdout и выходит с кодом 1
     try {
       const stdout = err.stdout || "";
       const lines = stdout.trim().split("\n");
@@ -80,7 +90,6 @@ export function runWbSync(): SyncReport {
  */
 export function getSyncStatus(): SyncReport | null {
   if (!existsSync(SYNC_LOG_FILE)) return null;
-
   try {
     const raw = readFileSync(SYNC_LOG_FILE, "utf-8");
     return JSON.parse(raw);

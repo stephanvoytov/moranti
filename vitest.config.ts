@@ -1,5 +1,11 @@
 import { defineConfig } from "vitest/config";
 import path from "path";
+import dotenv from "dotenv";
+import fs from "fs";
+
+// Load .env.local so Prisma can find DATABASE_URL
+const envPath = path.resolve(__dirname, ".env.local");
+if (fs.existsSync(envPath)) dotenv.config({ path: envPath });
 
 export default defineConfig({
   test: {

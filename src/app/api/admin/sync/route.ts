@@ -1,27 +1,43 @@
 /* =============================================
-   POST /api/admin/sync
-   Запускает синхронизацию с Wildberries.
-   Protected: требует сессии + CSRF.
+   Admin WB Sync API — POST (start), GET (status)
+   Protected: requires valid admin session
    ============================================= */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/admin-auth";
-import { csrfGuard } from "@/lib/csrf";
 import { runWbSync } from "@/lib/wb-sync";
-import { invalidateCache } from "@/data/products";
 
-export async function POST(request: Request) {
-  const csrf = csrfGuard(request);
-  if (csrf) return csrf;
-
+export async function GET() {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const report = await runWbSync();
-  invalidateCache();
+  try {
+    const { readFileSync, existsSync } = await import("fs");
+    const path = await import("path");
+    const logPath = path.join(process.cwd(), "data", "sync-log.json");
+    if (existsSync(logPath)) {
+      return NextResponse.json(JSON.parse(readFileSync(logPath, "utf-8")));
+    }
+  } catch {
+    // log not available
+  }
 
-  const status = report.error ? 500 : 200;
-  return NextResponse.json(report, { status });
+  return NextResponse.json({ status: "unknown" });
+}
+
+export async function POST() {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  try {
+    const result = await runWbSync();
+    return NextResponse.json(result);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Sync failed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
