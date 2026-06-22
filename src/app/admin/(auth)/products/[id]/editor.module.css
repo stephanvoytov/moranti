@@ -113,16 +113,20 @@
   gap: 6px;
 }
 
-.previewCard {
+.previewWrap {
+  max-width: 280px;
   border: 1px solid var(--border-light-gray);
-  border-radius: var(--radius-md);
+  border-radius: 8px;
   overflow: hidden;
-  background: var(--white);
-  transition: box-shadow var(--transition-fast);
+  transition: box-shadow 0.2s;
 }
 
-.previewCard:hover {
+.previewWrap:hover {
   box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.previewWrap img {
+  max-width: 100%;
 }
 
 .previewImageWrap {

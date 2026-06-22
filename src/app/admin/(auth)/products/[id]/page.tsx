@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, FormEvent, useRef } from "react";
+import { useState, useEffect, FormEvent, useRef, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
+import ProductCard from "@/components/ui/product-card";
 import styles from "./editor.module.css";
 
 interface ProductForm {
@@ -60,6 +61,28 @@ export default function ProductEditorPage() {
   const [imgDragIndex, setImgDragIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imgDragNode = useRef<HTMLDivElement | null>(null);
+
+  // Real-time preview product object for ProductCard
+  const previewProduct = useMemo(() => ({
+    id: params.id as string || "preview",
+    slug: form.wbArticle ? `wb-${form.wbArticle}` : "preview",
+    name: form.name || "Название товара",
+    price: Number(form.price) || 0,
+    originalPrice: Number(form.originalPrice) || Number(form.price) || 0,
+    currency: "₽" as const,
+    category: form.category,
+    description: form.description || "",
+    image: form.images[0] || "",
+    images: form.images.length > 0 ? form.images : [""],
+    marketplaces: [],
+    wbArticle: Number(form.wbArticle) || 0,
+    ozonArticle: form.ozonArticle ? Number(form.ozonArticle) : undefined,
+    rating: form.rating ? Number(form.rating) : undefined,
+    reviewsCount: form.reviewsCount ? Number(form.reviewsCount) : undefined,
+    colorName: form.colorName || undefined,
+    composition: form.composition || undefined,
+    imtId: form.imtId ? Number(form.imtId) : undefined,
+  }), [form, params.id]);
 
   // Load product data for editing
   useEffect(() => {
@@ -407,49 +430,11 @@ export default function ProductEditorPage() {
 
           {/* Right column — preview + images */}
           <div className={styles.imageCol}>
-            {/* ——— Превью карточки ——— */}
+            {/* ——— Превью карточки (как на витрине) ——— */}
             <div className={styles.previewSection}>
               <label className={styles.label}>Превью</label>
-              <div className={styles.previewCard}>
-                <div className={styles.previewImageWrap}>
-                  {form.images[0] ? (
-                    <img
-                      src={form.images[0]}
-                      alt=""
-                      className={styles.previewImage}
-                    />
-                  ) : (
-                    <div className={styles.previewImagePlaceholder}>
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                        <circle cx="8.5" cy="8.5" r="1.5" />
-                        <polyline points="21 15 16 10 5 21" />
-                      </svg>
-                    </div>
-                  )}
-                  <div className={styles.previewHeart}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className={styles.previewInfo}>
-                  <div className={styles.previewName}>
-                    {form.name || "Название товара"}
-                  </div>
-                  <div className={styles.previewDesc}>
-                    {form.description
-                      ? (form.description.length > 60
-                          ? form.description.slice(0, 60) + "…"
-                          : form.description)
-                      : "Описание товара"}
-                  </div>
-                  <div className={styles.previewPrice}>
-                    {form.price
-                      ? `${Number(form.price).toLocaleString("ru-RU")} ₽`
-                      : "Цена"}
-                  </div>
-                </div>
+              <div className={styles.previewWrap}>
+                <ProductCard product={previewProduct} priority />
               </div>
             </div>
 
