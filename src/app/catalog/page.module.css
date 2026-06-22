@@ -476,6 +476,24 @@
   pointer-events: none;
 }
 
+.colorSwatch {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  z-index: 1;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.filterSelectIcon {
+  padding-left: 18px;
+}
+
 /* ——— Price range ——— */
 
 .priceGroup {

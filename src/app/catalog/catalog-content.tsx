@@ -6,7 +6,7 @@ import ProductCard from "@/components/ui/product-card";
 import { useProducts } from "@/lib/use-products";
 import { getRecentlyViewed } from "@/lib/recently-viewed";
 import { useDragScroll } from "@/lib/use-drag-scroll";
-import { normalizeColorName } from "@/lib/color-map";
+import { resolveColor, normalizeColorName } from "@/lib/color-map";
 import styles from "./page.module.css";
 
 const ITEMS_PER_PAGE = 24;
@@ -272,8 +272,19 @@ function CatalogContent() {
 
             {colorOptions.length > 0 && (
               <div className={styles.filterSelectWrapper}>
+                <span
+                  className={styles.colorSwatch}
+                  style={{
+                    backgroundColor: selectedColor
+                      ? resolveColor(selectedColor)
+                      : "transparent",
+                    borderColor: selectedColor
+                      ? "rgba(0,0,0,0.1)"
+                      : "var(--border)",
+                  }}
+                />
                 <select
-                  className={styles.filterSelect}
+                  className={`${styles.filterSelect} ${selectedColor ? styles.filterSelectIcon : ""}`}
                   value={selectedColor || ""}
                   onChange={(e) =>
                     setSelectedColor(e.target.value || null)
