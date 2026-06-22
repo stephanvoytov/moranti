@@ -40,10 +40,19 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: [
-          // Prevent MIME-sniffing (redundant with proxy.ts, belt-and-suspenders)
+          // Prevent MIME-sniffing
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          // Clickjacking protection (frame-ancestors не работает в meta CSP)
+          { key: "X-Frame-Options", value: "DENY" },
+          // Referrer policy for user privacy
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // Permissions Policy — отключаем ненужные API
           {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
+            key: "Permissions-Policy",
+            value:
+              "camera=(), microphone=(), geolocation=(), interest-cohort=(), " +
+              "payment=(), usb=(), bluetooth=(), midi=(), sync-xhr=(), " +
+              "accelerometer=(), gyroscope=(), magnetometer=(), ambient-light-sensor=()",
           },
         ],
       },
