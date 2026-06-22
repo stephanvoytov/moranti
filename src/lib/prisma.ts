@@ -11,14 +11,14 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const MAX_RETRIES = 4;
-const BASE_DELAY = 1000; // ms
+const MAX_RETRIES = 3;
+const BASE_DELAY = 200; // ms — cold-start Supabase ~2-3s, быстрые ретраи
 
 /**
  * Retry a Prisma query with exponential backoff when connection fails.
- * Neon Free Plan suspends after ~5 min of inactivity; wake-up takes 2-5 s.
- * This wrapper retries with delays of 1 → 2 → 4 → 8 seconds before giving up.
- * On final failure the caller's catch block takes over (→ JSON fallback).
+ * Supabase Free Plan suspends after ~5 min of inactivity; wake-up takes 2-5 s.
+ * This wrapper retries with delays of 0.2 → 0.4 → 0.8 seconds (3 tries, ~1.4s total).
+ * On final failure the error is thrown to the caller.
  */
 export async function prismaQuery<T>(
   fn: () => Promise<T>,

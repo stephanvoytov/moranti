@@ -95,6 +95,12 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
+  // ——— Сначала ищем в кеше всех продуктов (SSG: 1 запрос вместо 55) ———
+  const all = await getProducts();
+  const found = all.find((p) => p.slug === slug);
+  if (found) return found;
+
+  // ——— Fallback: прямой запрос (если slug не в all-products) ———
   return cacheGet(`product:${slug}`, async () => {
     const row = await prismaQuery(() =>
       prisma.product.findUnique({ where: { slug } }),

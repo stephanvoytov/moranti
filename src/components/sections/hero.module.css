@@ -11,6 +11,11 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  /* ——— Fallback фон: виден сразу, пока грузится картинка ——— */
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 40%,
+    #C4956A 0%, #A67B52 25%, #8B6540 50%, #5C3D28 75%, #2C2420 100%
+  );
 }
 
 .heroBg {
@@ -20,15 +25,12 @@
   height: 100%;
   object-fit: cover;
   object-position: center 30%;
+  animation: imageFadeIn 0.6s ease both;
 }
 
-.fallback {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse 80% 60% at 50% 40%,
-    #C4956A 0%, #A67B52 25%, #8B6540 50%, #5C3D28 75%, #2C2420 100%
-  );
+@keyframes imageFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .overlay {
@@ -126,7 +128,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .content {
+  .content,
+  .heroBg {
     animation: none;
   }
 }
