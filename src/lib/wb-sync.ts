@@ -16,10 +16,10 @@ const SYNC_LOG_FILE = path.join(process.cwd(), "data", "sync-log.json");
  * Для sync используем прямой URL (без pgBouncer).
  */
 function getDirectDbUrl(): string | undefined {
-  return process.env.DIRECT_URL
-    || process.env.POSTGRES_URL_NON_POOLING
-    || process.env.DATABASE_URL
-    || process.env.POSTGRES_PRISMA_URL;
+  return process.env.POSTGRES_URL_NON_POOLING
+    || process.env.DIRECT_URL
+    || process.env.POSTGRES_PRISMA_URL
+    || process.env.DATABASE_URL;
 }
 
 export interface SyncReport {
@@ -51,8 +51,8 @@ export function runWbSync(): SyncReport {
       encoding: "utf-8",
       env: {
         ...process.env,
-        DATABASE_URL: getDirectDbUrl(),
-        DIRECT_URL: getDirectDbUrl(),
+        POSTGRES_PRISMA_URL: getDirectDbUrl(),
+        POSTGRES_URL_NON_POOLING: getDirectDbUrl(),
         CI: "true",
       },
     });
