@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { randomUUID } from "crypto";
 import { Playfair_Display, Montserrat, Inter } from "next/font/google";
 import { FavoritesProvider } from "@/lib/favorites-context";
 import { readSettings } from "@/lib/settings";
@@ -104,6 +105,38 @@ export default async function RootLayout({
     ymId = process.env.YANDEX_METRIKA_ID;
   }
 
+  // ─── CSP nonce (per-request, prevents XSS via inline scripts) ───
+  const nonce = randomUUID();
+
+  // ─── Content-Security-Policy via <meta> tag ───
+  // HTTP-заголовок из proxy.ts + next.config.ts для frame-ancestors.
+  // Meta-тег покрывает остальные директивы с per-request nonce.
+  // Примечание: frame-ancestors НЕ работает в meta-тегах — используем
+  // X-Frame-Options: DENY + next.config.ts headers.
+  const csp = [
+    "default-src 'self'",
+    // Scripts: nonce + strict-dynamic для цепочки Яндекс.Метрики
+    `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' 'strict-dynamic'`,
+    // Styles: 'unsafe-inline' для dev-режима (Next.js Fast Refresh)
+    "style-src 'self' 'unsafe-inline'",
+    // Images: WB CDN + Яндекс.Метрика
+    "img-src 'self' https://*.wbbasket.ru https://*.geobasket.ru https://mc.yandex.ru data:",
+    // Fonts: self-hosted via next/font
+    "font-src 'self'",
+    // Connections: same-origin + Яндекс.Метрика
+    "connect-src 'self' https://mc.yandex.ru",
+    // Media: пока не используем
+    "media-src 'none'",
+    // Frame: block all
+    "frame-src 'none'",
+    // Objects: block plugins
+    "object-src 'none'",
+    // Base: restrict to same origin
+    "base-uri 'self'",
+    // Forms: only submit to same origin
+    "form-action 'self'",
+  ].join("; ");
+
   return (
     <html
       lang="ru"
@@ -111,6 +144,9 @@ export default async function RootLayout({
       data-scroll-behavior="smooth"
     >
       <head>
+        {/* Content-Security-Policy (nonce + инструкции) */}
+        <meta httpEquiv="Content-Security-Policy" content={csp} />
+
         {/* Preconnect for external services */}
         <link rel="preconnect" href="https://mc.yandex.ru" />
         <link rel="preconnect" href="https://kgd-basket-cdn-01bl.geobasket.ru" />
@@ -122,6 +158,7 @@ export default async function RootLayout({
 
         {/* Structured data: Organization + WebSite */}
         <script
+          nonce={nonce}
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify([
@@ -157,6 +194,7 @@ export default async function RootLayout({
             <Script
               id="yandex-metrika"
               strategy="afterInteractive"
+              nonce={nonce}
               dangerouslySetInnerHTML={{
                 __html: `
                   (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};

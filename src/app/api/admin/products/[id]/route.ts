@@ -7,11 +7,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
+import { enforceRateLimit } from "@/lib/rate-limit";
+import { updateProductSchema, VALID_CATEGORIES } from "@/lib/schemas";
 import prisma, { prismaQuery } from "@/lib/prisma";
-
-const VALID_CATEGORIES = [
-  "crossbody", "na-plecho", "baguette", "tote", "saddle", "backpack",
-];
 
 /* ——— GET /api/admin/products/[id] ——— */
 
@@ -46,6 +44,9 @@ export async function PUT(
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
+  const rl = enforceRateLimit(request);
+  if (rl) return rl;
+
   const { id } = await params;
 
   const product = await prismaQuery(() => prisma.product.findUnique({ where: { id } }));
@@ -60,44 +61,43 @@ export async function PUT(
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  if (body.name !== undefined && (typeof body.name !== "string" || !body.name.trim())) {
-    return NextResponse.json({ error: "Name cannot be empty" }, { status: 400 });
+  const parsed = updateProductSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+      { status: 400 },
+    );
   }
-  if (body.price !== undefined && (isNaN(Number(body.price)) || Number(body.price) <= 0)) {
-    return NextResponse.json({ error: "Price must be > 0" }, { status: 400 });
-  }
-  if (body.category !== undefined && (typeof body.category !== "string" || !VALID_CATEGORIES.includes(body.category))) {
-    return NextResponse.json({ error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(", ")}` }, { status: 400 });
-  }
+
+  const { name, price, originalPrice, category, description, rating, reviewsCount, images, wbArticle, ozonArticle, composition, colorName } = parsed.data;
 
   const data: Record<string, unknown> = {};
-  if (body.name) data.name = (body.name as string).trim();
-  if (body.price !== undefined) data.price = Number(body.price);
-  if (body.originalPrice !== undefined) data.originalPrice = Number(body.originalPrice);
-  if (body.category) data.category = body.category;
-  if (body.description !== undefined) data.description = body.description;
-  if (body.rating !== undefined) data.rating = body.rating ? Number(body.rating) : null;
-  if (body.reviewsCount !== undefined) data.reviewsCount = body.reviewsCount ? Number(body.reviewsCount) : null;
-  if (body.salesCount !== undefined) data.salesCount = body.salesCount ? Number(body.salesCount) : null;
+  if (name !== undefined) data.name = name.trim();
+  if (price !== undefined) data.price = price;
+  if (originalPrice !== undefined) data.originalPrice = originalPrice;
+  if (category !== undefined) data.category = category;
+  if (description !== undefined) data.description = description;
+  if (rating !== undefined) data.rating = rating ?? null;
+  if (reviewsCount !== undefined) data.reviewsCount = reviewsCount ?? null;
+  if (composition !== undefined) data.composition = composition;
+  if (colorName !== undefined) data.colorName = colorName;
 
-  if (body.images !== undefined && Array.isArray(body.images)) {
-    const filtered = (body.images as string[]).filter(Boolean);
+  if (images !== undefined) {
+    const filtered = images.filter(Boolean);
     data.images = filtered;
     data.image = filtered[0] || "";
   }
 
-  if (body.wbArticle !== undefined) {
-    data.wbArticle = Number(body.wbArticle);
-    data.slug = `wb-${body.wbArticle}`;
+  if (wbArticle !== undefined) {
+    data.wbArticle = wbArticle;
+    data.slug = `wb-${wbArticle}`;
   }
-  if (body.ozonArticle !== undefined) {
-    data.ozonArticle = body.ozonArticle ? Number(body.ozonArticle) : null;
+  if (ozonArticle !== undefined) {
+    data.ozonArticle = ozonArticle ?? null;
   }
 
-  const wbNum = body.wbArticle !== undefined ? Number(body.wbArticle) : product.wbArticle;
-  const ozonNum = body.ozonArticle !== undefined
-    ? (body.ozonArticle ? Number(body.ozonArticle) : null)
-    : product.ozonArticle;
+  const wbNum = wbArticle !== undefined ? wbArticle : product.wbArticle;
+  const ozonNum = ozonArticle !== undefined ? (ozonArticle ?? null) : product.ozonArticle;
 
   const marketplaces: { name: string; url: string; icon: string }[] = [];
   if (wbNum && wbNum > 0) {
@@ -125,9 +125,12 @@ export async function PUT(
 /* ——— DELETE /api/admin/products/[id] ——— */
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const csrf = csrfGuard(request);
+  if (csrf) return csrf;
+
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });

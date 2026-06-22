@@ -9,6 +9,9 @@ if (!process.env.DATABASE_URL && process.env.POSTGRES_PRISMA_URL) {
 }
 
 const nextConfig: NextConfig = {
+  /* ─── Remove X-Powered-By: Next.js header ─── */
+  poweredByHeader: false,
+
   /* ─── Turbopack root (fixes lockfile warning) ─── */
   turbopack: {
     root: process.cwd(),
@@ -27,6 +30,44 @@ const nextConfig: NextConfig = {
         hostname: "**.geobasket.ru",
       },
     ],
+  },
+
+  /* ─── Static security headers (applied to all routes) ───
+       Note: CSP, X-Frame-Options, etc. are set dynamically in proxy.ts
+       for nonce generation. These are additional static headers. ─── */
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          // Prevent MIME-sniffing (redundant with proxy.ts, belt-and-suspenders)
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+        ],
+      },
+      // Allow fonts to be cached aggressively
+      {
+        source: "/_next/static/media/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      // Allow static images to be cached
+      {
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+    ];
   },
 };
 

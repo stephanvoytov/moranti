@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 // ⚠️ Vercel rewrite schema.prisma url → env("DATABASE_URL") via modifyConfig.
 //    Supabase injects POSTGRES_PRISMA_URL, NOT DATABASE_URL.
@@ -53,19 +54,10 @@ export async function prismaQuery<T>(
 
       if (attempt < MAX_RETRIES) {
         const delay = BASE_DELAY * Math.pow(2, attempt);
-        if (process.env.NODE_ENV === "development") {
-          console.warn(
-            `[prisma:retry] attempt ${attempt + 1}/${MAX_RETRIES} failed (${code}), retrying in ${delay}ms...`,
-          );
-        }
+        logger.warn("Prisma retry", { attempt: attempt + 1, max: MAX_RETRIES, code, delayMs: delay });
         await new Promise((resolve) => setTimeout(resolve, delay));
       } else {
-        // Final attempt — log and let caller handle fallback
-        if (process.env.NODE_ENV === "development") {
-          console.warn(
-            `[prisma:retry] all ${MAX_RETRIES} retries exhausted, falling back to JSON`,
-          );
-        }
+        logger.error("Prisma retries exhausted", { max: MAX_RETRIES, code });
       }
     }
   }

@@ -1,64 +1,42 @@
 /* =============================================
    POST /api/admin/login
    Body: { "password": "..." }
-   Simple in-memory rate limiter (5 попыток / 15s)
+   Rate limit: 5 попыток / 15s
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";
 import { login } from "@/lib/admin-auth";
+import { loginSchema } from "@/lib/schemas";
+import { enforceRateLimit, getClientIp } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
-/* ——— Rate limiter ——— */
-
-const loginAttempts = new Map<string, { count: number; resetAt: number }>();
-const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 15_000;
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = loginAttempts.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    loginAttempts.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return true;
-  }
-
-  if (entry.count >= MAX_ATTEMPTS) {
-    return false;
-  }
-
-  entry.count++;
-  return true;
-}
-
-/* ——— Route ——— */
+const LOGIN_OPTS = { max: 5, windowMs: 15_000 };
 
 export async function POST(request: NextRequest) {
-  try {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-      || request.headers.get("x-real-ip")
-      || "127.0.0.1";
+  const ip = getClientIp(request);
 
-    if (!checkRateLimit(ip)) {
+  // Rate limit
+  const rl = enforceRateLimit(request, LOGIN_OPTS);
+  if (rl) return rl;
+
+  try {
+    const body = await request.json();
+    const parsed = loginSchema.safeParse(body);
+
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Too many attempts. Try again later." },
-        { status: 429 },
+        { error: "Password required", details: parsed.error.flatten().fieldErrors },
+        { status: 400 },
       );
     }
 
-    const body = await request.json();
-    const password = body?.password;
-
-    if (!password || typeof password !== "string") {
-      return NextResponse.json({ error: "Password required" }, { status: 400 });
-    }
-
-    const session = login(password);
+    const session = login(parsed.data.password);
     if (!session) {
+      logger.warn("Login failed", { ip });
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
-    // Сбросить счётчик при успешном входе
-    loginAttempts.delete(ip);
+    logger.info("Login successful", { ip });
 
     const response = NextResponse.json({ ok: true });
     response.cookies.set("admin_session", session, {

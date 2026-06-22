@@ -4,27 +4,32 @@
    Прокси для цен Wildberries.
    
    - Есть WB_API_KEY → живые цены из официального API WB (с серверным кэшем)
-   - Нет ключа → статика из products.json
+   - Нет ключа → статика из БД
    - API недоступен → graceful degradation на статику
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";
 import { getWbPrices, invalidateWbPriceCache } from "@/lib/wb-prices";
+import { enforceRateLimit } from "@/lib/rate-limit";
+import { pricesQuerySchema } from "@/lib/schemas";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const articlesRaw = searchParams.get("articles");
+  const rl = enforceRateLimit(request, { max: 60, windowMs: 60_000 });
+  if (rl) return rl;
 
-  if (!articlesRaw) {
+  const { searchParams } = new URL(request.url);
+  const parsed = pricesQuerySchema.safeParse(Object.fromEntries(searchParams));
+
+  if (!parsed.success) {
     return NextResponse.json(
       { error: "Missing 'articles' query param. Example: ?articles=969008238,584878143" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
-  const articles = articlesRaw
+  const articles = parsed.data.articles
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean)

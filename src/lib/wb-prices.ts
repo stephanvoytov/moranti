@@ -18,6 +18,7 @@
 
 import { getWbApiKey } from "./wb-config";
 import { getProducts } from "@/data/products";
+import { logger } from "@/lib/logger";
 import type { WbPriceResult } from "./wb-config";
 
 /* =============================================
@@ -173,7 +174,7 @@ async function fetchArticlesFromWbApi(
   // ── 429 Too Many Requests → retry с exponential backoff ──
   if (res.status === 429 && attempt <= MAX_RETRIES) {
     const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10_000) + Math.random() * 1000;
-    console.warn(`[wb-prices] 429 rate limited, retry ${attempt}/${MAX_RETRIES} after ${Math.round(delay)}ms`);
+    logger.warn("WB API 429 rate limited", { attempt, max: MAX_RETRIES, delayMs: Math.round(delay) });
     await new Promise((r) => setTimeout(r, delay));
     return fetchArticlesFromWbApi(apiKey, nmList, attempt + 1);
   }
@@ -285,7 +286,7 @@ export async function getWbPrices(articles: number[]): Promise<WbPriceResult[]> 
     }
     snapshotTimestamp = Date.now();
   } catch (err) {
-    console.warn("[wb-prices] WB API fetch failed, using cache/fallback:", err);
+    logger.warn("WB API fetch failed, using cache/fallback", { error: err instanceof Error ? err.message : String(err) });
   }
 
   // ── Отвечаем (из кэша + fallback на статику) ──

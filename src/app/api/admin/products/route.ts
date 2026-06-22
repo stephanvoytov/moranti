@@ -7,11 +7,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
+import { enforceRateLimit } from "@/lib/rate-limit";
+import { createProductSchema, productsQuerySchema, VALID_CATEGORIES } from "@/lib/schemas";
 import prisma, { prismaQuery } from "@/lib/prisma";
-
-const VALID_CATEGORIES = [
-  "crossbody", "na-plecho", "baguette", "tote", "saddle", "backpack",
-];
 
 /* ——— GET /api/admin/products ——— */
 
@@ -22,10 +20,8 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const search = searchParams.get("search")?.toLowerCase() || "";
-  const category = searchParams.get("category") || "";
-  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-  const limit = Math.min(200, Math.max(1, parseInt(searchParams.get("limit") || "20", 10)));
+  const parsed = productsQuerySchema.safeParse(Object.fromEntries(searchParams));
+  const { search = "", category = "", page = 1, limit = 20 } = parsed.data ?? {};
 
   const where: Record<string, unknown> = {};
   if (search) {
@@ -34,7 +30,7 @@ export async function GET(request: NextRequest) {
       { id: { contains: search, mode: "insensitive" } },
     ].filter(Boolean);
   }
-  if (category && VALID_CATEGORIES.includes(category)) {
+  if (category && VALID_CATEGORIES.includes(category as typeof VALID_CATEGORIES[number])) {
     where.category = category;
   }
 
@@ -66,6 +62,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
+  const rl = enforceRateLimit(request);
+  if (rl) return rl;
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -73,20 +72,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  if (!body.name || typeof body.name !== "string" || !body.name.trim()) {
-    return NextResponse.json({ error: "Name is required" }, { status: 400 });
-  }
-  const price = Number(body.price);
-  if (isNaN(price) || price <= 0) {
-    return NextResponse.json({ error: "Price must be > 0" }, { status: 400 });
-  }
-  const category = body.category as string;
-  if (!VALID_CATEGORIES.includes(category)) {
-    return NextResponse.json({ error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(", ")}` }, { status: 400 });
+  const parsed = createProductSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+      { status: 400 },
+    );
   }
 
-  const wbArticle = body.wbArticle && Number(body.wbArticle) > 0 ? Number(body.wbArticle) : undefined;
-  const ozonArticle = body.ozonArticle ? Number(body.ozonArticle) : undefined;
+  const { name, price, originalPrice, category, description, wbArticle, ozonArticle, images: inputImages, rating, reviewsCount, slug: customSlug } = parsed.data;
 
   const marketplaces: { name: string; url: string; icon: string }[] = [];
   if (wbArticle) {
@@ -104,11 +98,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const images = Array.isArray(body.images) && body.images.length > 0
-    ? body.images.filter(Boolean)
-    : body.image
-      ? [body.image]
-      : [];
+  const images = inputImages.length > 0 ? inputImages : [];
 
   const lastProduct = await prismaQuery(() =>
     prisma.product.findFirst({
@@ -120,27 +110,26 @@ export async function POST(request: NextRequest) {
     ? parseInt(lastProduct.id.replace("mor-", ""), 10) || 0
     : 0;
   const newId = `mor-${String(lastNum + 1).padStart(3, "0")}`;
-  const slug = (body.slug as string) || (wbArticle ? `wb-${wbArticle}` : `product-${newId}`);
+  const slug = customSlug || (wbArticle ? `wb-${wbArticle}` : `product-${newId}`);
 
   const product = await prismaQuery(() =>
     prisma.product.create({
       data: {
         id: newId,
         slug,
-        name: (body.name as string).trim(),
+        name: name.trim(),
         price,
-        originalPrice: body.originalPrice ? Number(body.originalPrice) : price,
+        originalPrice: originalPrice ?? price,
         currency: "₽",
         category,
-        description: (body.description as string) || "",
-        image: (images[0] as string) || "",
+        description: description || "",
+        image: images[0] || "",
         images,
         marketplaces,
         wbArticle: wbArticle ?? null,
         ozonArticle: ozonArticle ?? null,
-        rating: body.rating ? Number(body.rating) : null,
-        reviewsCount: body.reviewsCount ? Number(body.reviewsCount) : null,
-        salesCount: body.salesCount ? Number(body.salesCount) : null,
+        rating: rating ?? null,
+        reviewsCount: reviewsCount ?? null,
       },
     })
   );
