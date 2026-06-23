@@ -25,7 +25,7 @@ function generateName({ category, composition, wbName }) {
     lower.includes("mini");
 
   // Собираем имя
-  let name = isMini ? "Мини " + base : base;
+  let name = isMini ? base + " мини" : base;
 
   // Добавляем материал, если он известен
   // composition может быть "замша натуральная; натуральная кожа" (через ;)

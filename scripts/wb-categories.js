@@ -42,11 +42,11 @@ const NAME_FALLBACK = {
 
 /** @type {Record<string, string>} */
 const CATEGORY_RU = {
-  crossbody: "Кросс-боди",
-  "na-plecho": "На плечо",
-  baguette: "Багет",
-  tote: "Тоут",
-  saddle: "Седло",
+  crossbody: "Сумка кросс-боди",
+  "na-plecho": "Сумка на плечо",
+  baguette: "Сумка-багет",
+  tote: "Сумка-тоут",
+  saddle: "Сумка-седло",
   backpack: "Рюкзак",
 };
 
