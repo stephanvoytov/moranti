@@ -40,6 +40,13 @@ export function cdnImageUrl(
  *
  * Если article не задан — возвращает undefined (используется fallback).
  */
+/**
+ * Миниатюра для переключателя цветов — размер tm (tiny).
+ */
+export function swatchUrl(article: number): string {
+  return cdnImageUrl(article, 1, "tm");
+}
+
 export function generateProductImages(
   article: number | null | undefined,
   photoCount: number,

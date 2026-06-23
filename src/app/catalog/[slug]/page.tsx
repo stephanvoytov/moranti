@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getProducts, getProduct } from "@/data/products";
-import { resolveColor } from "@/lib/color-map";
+import { swatchUrl } from "@/lib/product-images";
 import PriceClient from "./price-client";
 import GalleryClient from "./gallery-client";
 import ShareButton from "./share-button";
@@ -180,32 +180,36 @@ export default async function ProductPage({ params }: Props) {
             currency={product.currency}
           />
 
-          {/* Color variants */}
+          {/* Color variants — image-based swatches */}
           {siblings.length > 0 ? (
             <div className={styles.colors}>
               <div className={styles.colorsLabel}>Цвет:</div>
               <div className={styles.colorsList}>
                 <Link
                   href={`/catalog/${product.slug}`}
-                  className={`${styles.colorLink} ${styles.colorLinkActive}`}
+                  className={`${styles.swatch} ${styles.swatchActive}`}
+                  title={colorLabel(product)}
                 >
-                  <span
-                    className={styles.colorDot}
-                    style={{ backgroundColor: resolveColor(product.colorName) }}
+                  <img
+                    src={swatchUrl(product.wbArticle!)}
+                    alt={colorLabel(product)}
+                    className={styles.swatchImage}
+                    loading="lazy"
                   />
-                  {colorLabel(product)}
                 </Link>
                 {siblings.map((s) => (
                   <Link
                     key={s.id}
                     href={`/catalog/${s.slug}`}
-                    className={styles.colorLink}
+                    className={styles.swatch}
+                    title={colorLabel(s)}
                   >
-                    <span
-                      className={styles.colorDot}
-                      style={{ backgroundColor: resolveColor(s.colorName) }}
+                    <img
+                      src={swatchUrl(s.wbArticle!)}
+                      alt={colorLabel(s)}
+                      className={styles.swatchImage}
+                      loading="lazy"
                     />
-                    {colorLabel(s)}
                   </Link>
                 ))}
               </div>
@@ -231,15 +235,22 @@ export default async function ProductPage({ params }: Props) {
 
           {/* Marketplace CTAs — выше описания, чтобы не скроллить */}
           <div className={styles.ctas}>
-            {product.marketplaces.map((mp, i) => (
+            {product.marketplaces.map((mp) => (
               <a
                 key={mp.name}
                 href={mp.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={i === 0 ? styles.cta : styles.ctaOutline}
+                className={styles.cta}
               >
-                Купить на {mp.name}
+                <img
+                  src={`/images/icons/${mp.name.toLowerCase()}.svg`}
+                  alt=""
+                  width={16}
+                  height={16}
+                  style={{ opacity: 0.5, flexShrink: 0 }}
+                />
+                {mp.name}
               </a>
             ))}
           </div>

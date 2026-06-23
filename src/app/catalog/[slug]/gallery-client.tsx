@@ -195,6 +195,21 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
             </>
           )}
         </div>
+
+        {/* Pagination dots (mobile) */}
+        {hasMultiple && (
+          <div className={styles.dots}>
+            {images.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                className={`${styles.dot} ${i === activeIndex ? styles.dotActive : ""}`}
+                onClick={() => setActiveIndex(i)}
+                aria-label={`Фото ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Lightbox overlay */}
