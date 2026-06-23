@@ -1,16 +1,19 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import type { CharacteristicGroup } from "@/data/products";
 import { getProducts, getProduct } from "@/data/products";
-import { swatchUrl } from "@/lib/product-images";
 import PriceClient from "./price-client";
+import ColorSwatches from "./color-swatches";
 import GalleryClient from "./gallery-client";
 import ShareButton from "./share-button";
+import GalleryOverlay from "./gallery-overlay";
 import RecentlyViewedTracker from "./recently-viewed-tracker";
 import FavoriteButton from "./favorite-button";
 import ExpandableText from "@/components/ui/expandable-text";
 import ProductCard from "@/components/ui/product-card";
 import ProductCharacteristics from "@/components/ui/product-characteristics";
+import ProductTabs from "@/components/ui/product-tabs";
 import RecentlyViewed from "./recently-viewed";
 import styles from "./page.module.css";
 
@@ -46,6 +49,48 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+/** Извлечь значение характеристики по имени */
+function getCharValue(chars: CharacteristicGroup[] | null, name: string): string | null {
+  if (!chars) return null;
+  for (const g of chars) {
+    for (const o of g.options) {
+      if (o.name === name) return o.value;
+    }
+  }
+  return null;
+}
+
+/** Собрать подзаголовок: страна · состав ( · материал) */
+function buildSubtitle(
+  composition: string | null,
+  chars: CharacteristicGroup[] | null
+): string | null {
+  const parts: string[] = [];
+
+  const country = getCharValue(chars, "Страна производства");
+  if (country) parts.push(country);
+
+  if (composition) parts.push(composition);
+
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
+/** Размеры: ширина × высота × глубина */
+function extractDimensions(chars: CharacteristicGroup[] | null) {
+  if (!chars) return null;
+  const dims = [
+    { key: "Ширина предмета", label: "Ширина" },
+    { key: "Высота предмета", label: "Высота" },
+    { key: "Глубина предмета", label: "Глубина" },
+  ];
+  const result: { label: string; value: string }[] = [];
+  for (const d of dims) {
+    const v = getCharValue(chars, d.key);
+    if (v) result.push({ label: d.label, value: v });
+  }
+  return result.length > 0 ? result : null;
+}
+
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const product = await getProduct(slug);
@@ -65,27 +110,6 @@ export default async function ProductPage({ params }: Props) {
       )
     : [];
 
-  // Color chip label: цвет → материал → размер
-  const colorLabel = (s: typeof product) => {
-    const name = s.colorName || "";
-
-    // Same-color siblings
-    const sameColor = siblings.filter((p) => p.colorName === s.colorName);
-    if (sameColor.length <= 1) return name; // unique color → just name
-
-    // Check if same-color siblings differ by material
-    const getMaterial = (p: typeof product) =>
-      (p.composition || "").toLowerCase().includes("замша") ? "замша" : "кожа";
-
-    const materials = [...new Set(sameColor.map(getMaterial))];
-    if (materials.length > 1) {
-      return `${name} · ${getMaterial(s)}`;
-    }
-
-    // Same color + same material → differentiate by size
-    const isMini = (s.name || "").toLowerCase().includes("мини");
-    return isMini ? `${name} мини` : name;
-  };
   // Related: same category, prefer same material + size keywords
   const related = allProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
@@ -102,7 +126,7 @@ export default async function ProductPage({ params }: Props) {
       }
       return score(b) - score(a);
     })
-    .slice(0, 3);
+    .slice(0, 4);
 
   // Product JSON-LD structured data
   const offers = product.marketplaces?.length
@@ -139,6 +163,10 @@ export default async function ProductPage({ params }: Props) {
     };
   }
 
+  // Build subtitle & dimensions
+  const subtitle = buildSubtitle(product.composition, product.characteristics);
+  const dimensions = extractDimensions(product.characteristics);
+
   return (
     <main className={styles.page}>
       {/* Track recently viewed */}
@@ -151,18 +179,32 @@ export default async function ProductPage({ params }: Props) {
           __html: JSON.stringify(productJsonLd),
         }}
       />
-      {/* Breadcrumb */}
-      <nav className={styles.breadcrumb}>
-        <Link href="/catalog" className={styles.breadcrumbLink}>
-          Каталог
-        </Link>
-        <span className={styles.breadcrumbSep}>/</span>
-        <span className={styles.breadcrumbCurrent}>{product.name}</span>
-      </nav>
+      {/* Top row: breadcrumb + actions */}
+      <div className={styles.topRow}>
+        <nav className={styles.breadcrumb}>
+          <Link href="/catalog" className={styles.breadcrumbLink}>
+            Каталог
+          </Link>
+          <span className={styles.breadcrumbSep}>/</span>
+          <span className={styles.breadcrumbCurrent}>{product.name}</span>
+        </nav>
+        <div className={styles.topActions}>
+          <FavoriteButton wbArticle={product.wbArticle} />
+          <ShareButton
+            url={`${siteUrl}/catalog/${product.slug}`}
+            title={product.name}
+          />
+        </div>
+      </div>
 
       <div className={styles.layout}>
         {/* Gallery */}
         <div className={styles.imageCol}>
+          <GalleryOverlay
+            wbArticle={product.wbArticle!}
+            shareUrl={`${siteUrl}/catalog/${product.slug}`}
+            shareTitle={product.name}
+          />
           <GalleryClient
             images={product.images?.length ? product.images : [product.image]}
             alt={product.name}
@@ -173,6 +215,10 @@ export default async function ProductPage({ params }: Props) {
         <div className={styles.infoCol}>
           <h1 className={styles.title}>{product.name}</h1>
 
+          {subtitle && (
+            <p className={styles.subtitle}>{subtitle}</p>
+          )}
+
           {product.archivedAt ? (
             <div className={styles.outOfStock}>
               <span className={styles.priceMuted}>
@@ -181,50 +227,17 @@ export default async function ProductPage({ params }: Props) {
               <span className={styles.outOfStockLabel}>Нет в наличии</span>
             </div>
           ) : (
-            <>
-              <PriceClient
-                wbArticle={product.wbArticle}
-                staticPrice={product.price}
-                staticOriginal={product.originalPrice}
-                currency={product.currency}
-              />
-            </>
+            <PriceClient
+              wbArticle={product.wbArticle}
+              staticPrice={product.price}
+              staticOriginal={product.originalPrice}
+              currency={product.currency}
+            />
           )}
 
           {/* Color variants — image-based swatches */}
           {siblings.length > 0 ? (
-            <div className={styles.colors}>
-              <div className={styles.colorsLabel}>Цвет:</div>
-              <div className={styles.colorsList}>
-                <Link
-                  href={`/catalog/${product.slug}`}
-                  className={`${styles.swatch} ${styles.swatchActive}`}
-                  title={colorLabel(product)}
-                >
-                  <img
-                    src={swatchUrl(product.wbArticle!)}
-                    alt={colorLabel(product)}
-                    className={styles.swatchImage}
-                    loading="lazy"
-                  />
-                </Link>
-                {siblings.map((s) => (
-                  <Link
-                    key={s.id}
-                    href={`/catalog/${s.slug}`}
-                    className={styles.swatch}
-                    title={colorLabel(s)}
-                  >
-                    <img
-                      src={swatchUrl(s.wbArticle!)}
-                      alt={colorLabel(s)}
-                      className={styles.swatchImage}
-                      loading="lazy"
-                    />
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <ColorSwatches current={product} siblings={siblings} />
           ) : null}
 
           {product.rating ? (
@@ -244,7 +257,7 @@ export default async function ProductPage({ params }: Props) {
             </div>
           ) : null}
 
-          {/* Marketplace CTAs — только если в наличии */}
+          {/* Marketplace CTAs */}
           {!product.archivedAt && (
             <div className={styles.ctas}>
               {product.marketplaces.map((mp) => (
@@ -255,42 +268,47 @@ export default async function ProductPage({ params }: Props) {
                   rel="noopener noreferrer"
                   className={styles.cta}
                 >
-                  <img
-                    src={`/images/icons/${mp.name.toLowerCase()}.svg`}
-                    alt=""
-                    width={16}
-                    height={16}
-                    style={{ opacity: 0.5, flexShrink: 0 }}
-                  />
                   {mp.name}
                 </a>
               ))}
             </div>
           )}
 
-          <ExpandableText text={product.description} />
-
-          {product.composition ? (
-            <p className={styles.composition}>
-              Состав: {product.composition}
-            </p>
-          ) : null}
-
-          {product.characteristics ? (
-            <ProductCharacteristics data={product.characteristics} />
-          ) : null}
-
-          <div className={styles.actionsRow}>
-            <FavoriteButton wbArticle={product.wbArticle} />
-            <ShareButton
-              url={`${siteUrl}/catalog/${product.slug}`}
-              title={product.name}
-            />
-          </div>
-
-          <Link href="/catalog" className={styles.backLink}>
-            ← Вернуться в каталог
-          </Link>
+          {/* Tabs: Description / Characteristics / Dimensions */}
+          <ProductTabs
+            tabs={[
+              {
+                label: "Описание",
+                content: <ExpandableText text={product.description} />,
+              },
+              {
+                label: "Характеристики",
+                content: (
+                  <ProductCharacteristics
+                    data={product.characteristics ?? []}
+                    composition={product.composition ?? undefined}
+                  />
+                ),
+              },
+              ...(dimensions
+                ? [
+                    {
+                      label: "Размеры",
+                      content: (
+                        <div className={styles.dimensionsGrid}>
+                          {dimensions.map((d) => (
+                            <div key={d.label} className={styles.dimItem}>
+                              <span className={styles.dimValue}>{d.value}</span>
+                              <span className={styles.dimLabel}>{d.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ),
+                    },
+                  ]
+                : []),
+            ]}
+          />
         </div>
       </div>
 

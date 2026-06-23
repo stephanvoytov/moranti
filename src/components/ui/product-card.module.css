@@ -72,7 +72,7 @@
 
 @media (hover: none) {
   .favorite {
-    opacity: 1;
+    opacity: 0.75;
   }
 }
 
@@ -191,16 +191,24 @@
   }
 
   .info {
-    padding: 14px 0;
-    gap: 4px;
+    padding: 10px var(--space-2xs) 14px;
+    gap: 6px;
   }
 
   .name {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.4;
   }
 
+  .priceRow {
+    gap: 6px;
+  }
+
   .currentPrice {
-    font-size: 12px;
+    font-size: 13px;
+  }
+
+  .oldPrice {
+    font-size: 11px;
   }
 }

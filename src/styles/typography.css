@@ -59,6 +59,22 @@ h4, .h4 {
   text-transform: uppercase;
 }
 
+@media (max-width: 768px) {
+  .nav-link,
+  .button-text {
+    font-size: 0.8125rem;
+    letter-spacing: 0.1em;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-link,
+  .button-text {
+    font-size: 0.75rem;
+    letter-spacing: 0.09em;
+  }
+}
+
 .product-title {
   font-family: var(--font-sans);
   font-size: 0.8rem;
@@ -128,10 +144,17 @@ body {
   font-family: var(--font-sans);
   font-size: 0.7rem;
   font-weight: 500;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--camel);
   margin-bottom: var(--space-sm);
+}
+
+@media (max-width: 768px) {
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+  }
 }
 
 /* ——— Rich text ——— */

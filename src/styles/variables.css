@@ -8,15 +8,13 @@
   --bg: #F6F4EF;
   --surface: #F0EDE6;
   --surface-hover: #EAE6DD;
-  --cream: #F8F6F0;
-  --ivory: #F0EDE5;
-  --warm-white: #FAF8F4;
+  /* Note: --cream, --ivory, --warm-white removed — use --bg / --surface instead */
 
   --taupe: #C4B5A0;
   --camel: #8B6F5C;
-  --accent: #8B6F5C;
-  --accent-hover: #735A49;
-  --accent-subtle: rgba(139, 111, 92, 0.08);
+  --accent: #C49A6C;
+  --accent-hover: #AD8355;
+  --accent-subtle: rgba(196, 154, 108, 0.10);
   --brown: #5C4033;
 
   --dark: #2C2420;
@@ -30,7 +28,7 @@
   /* ——— Editorial additions ——— */
   --text-primary: #1A1614;
   --text-secondary: #6B6560;
-  --text-muted: #9C9590;
+  --text-muted: #7F7872;
   --card-bg: #F4F4F3;
   --filter-bg: #EAE3D2;
   --border: #E2DDD6;
@@ -129,10 +127,11 @@
 /* ——— Responsive ——— */
 @media (max-width: 768px) {
   :root {
-    --container-padding: 16px;
+    --container-padding: 20px;
+    --grid-gap: 20px;
     --space-4xl: 80px;
     --space-3xl: 60px;
     --space-2xl: 48px;
-    --header-height: 94px;
+    --header-height: 64px;
   }
 }

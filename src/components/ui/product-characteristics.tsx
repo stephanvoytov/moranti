@@ -2,42 +2,34 @@
 
 /* =============================================
    Moranti — Product Characteristics
-   Только полезные поля, скрыто по умолчанию,
-   Италия подсвечена
+   Плоская сетка, без сворачивания.
+   Используется внутри таба «Характеристики».
    ============================================= */
 
-import { useState, useId } from "react";
 import type { CharacteristicGroup } from "@/data/products";
 import styles from "./product-characteristics.module.css";
 
 interface Props {
   data: CharacteristicGroup[];
+  composition?: string;
 }
 
 interface FieldDef {
-  /** display group: "details" | "dimensions" */
-  group: "details" | "dimensions";
-  /** label override (optional — keeps original if absent) */
   label?: string;
-  /** highlight this field */
   highlight?: boolean;
 }
 
-/** Какие поля показываем, остальные — игнорируем */
+/** Какие поля показываем в характеристиках, остальные — игнорируем */
 const ALLOW_LIST: Record<string, FieldDef> = {
-  "Фактура материала":     { group: "details" },
-  "Материал подкладки":    { group: "details", label: "Подкладка" },
-  "Карманы":               { group: "details" },
-  "Вид застежки":          { group: "details", label: "Застёжка" },
-  "Длина плечевого ремня": { group: "details", label: "Длина ремня" },
-  "Страна производства":   { group: "details", highlight: true },
-  "Высота предмета":       { group: "dimensions", label: "Высота" },
-  "Ширина предмета":       { group: "dimensions", label: "Ширина" },
-  "Глубина предмета":      { group: "dimensions", label: "Глубина" },
-  "Вес товара без упаковки": { group: "dimensions", label: "Вес" },
+  "Фактура материала":      {},
+  "Материал подкладки":     { label: "Подкладка" },
+  "Карманы":                {},
+  "Вид застежки":           { label: "Застёжка" },
+  "Длина плечевого ремня":  { label: "Длина ремня" },
+  "Страна производства":    { highlight: true },
 };
 
-/** Миниатюра флага Италии (CSS-градиент) */
+/** Миниатюра флага Италии */
 function ItalyFlag() {
   return (
     <span
@@ -51,75 +43,44 @@ function ItalyFlag() {
   );
 }
 
-export default function ProductCharacteristics({ data }: Props) {
-  const [open, setOpen] = useState(false);
-  const id = useId();
-
-  // Flatten all groups into a single pool, filter by allow-list
+export default function ProductCharacteristics({ data, composition }: Props) {
+  // Flatten groups & filter by allow-list
   const allOptions = data.flatMap((g) => g.options);
 
-  const details: { name: string; value: string; highlight?: boolean }[] = [];
-  const dimensions: { name: string; value: string }[] = [];
+  const items: { name: string; value: string; highlight?: boolean }[] = [];
+
+  // Composition first, if provided
+  if (composition) {
+    items.push({ name: "Состав", value: composition });
+  }
 
   for (const opt of allOptions) {
     const def = ALLOW_LIST[opt.name];
     if (!def) continue;
-    const item = { name: def.label || opt.name, value: opt.value, highlight: def.highlight };
-    if (def.group === "dimensions") {
-      dimensions.push(item);
-    } else {
-      details.push(item);
-    }
+    items.push({
+      name: def.label || opt.name,
+      value: opt.value,
+      highlight: def.highlight ?? false,
+    });
   }
 
-  if (details.length === 0 && dimensions.length === 0) return null;
+  if (items.length === 0) return null;
 
   return (
-    <div className={styles.wrapper}>
-      <button
-        type="button"
-        className={`${styles.toggle} ${open ? styles.toggleOpen : ""}`}
-        aria-expanded={open}
-        aria-controls={id}
-        onClick={() => setOpen((v) => !v)}
-      >
-        Характеристики
-        <span className={styles.toggleArrow}>▼</span>
-      </button>
-
-      <div
-        id={id}
-        className={`${styles.content} ${open ? styles.contentOpen : ""}`}
-      >
-        {/* Details grid */}
-        <div className={styles.details}>
-          {details.map((d) => (
-            <div key={d.name} className={styles.item}>
-              <span className={styles.itemLabel}>{d.name}</span>
-              {d.highlight ? (
-                <span className={styles.highlightValue}>
-                  {d.value}
-                  {d.value.toLowerCase().includes("итали") && <ItalyFlag />}
-                </span>
-              ) : (
-                <span className={styles.itemValue}>{d.value}</span>
-              )}
-            </div>
-          ))}
+    <div className={styles.grid}>
+      {items.map((item) => (
+        <div key={item.name} className={styles.item}>
+          <span className={styles.label}>{item.name}</span>
+          {item.highlight ? (
+            <span className={styles.highlightValue}>
+              {item.value}
+              {item.value.toLowerCase().includes("итали") && <ItalyFlag />}
+            </span>
+          ) : (
+            <span className={styles.value}>{item.value}</span>
+          )}
         </div>
-
-        {/* Dimensions row */}
-        {dimensions.length > 0 && (
-          <div className={styles.dimensions}>
-            {dimensions.map((d) => (
-              <div key={d.name} className={styles.dimItem}>
-                <span className={styles.dimValue}>{d.value}</span>
-                <span className={styles.dimLabel}>{d.name}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      ))}
     </div>
   );
 }

@@ -25,20 +25,22 @@ export default function RecentlyViewed() {
   return (
     <section className={styles.recentlySection}>
       <h2 className={styles.recentlyTitle}>Вы недавно смотрели</h2>
-      <div
-        className={styles.recentlyRow}
-        ref={drag.ref}
-        onMouseDown={drag.onMouseDown}
-        onMouseMove={drag.onMouseMove}
-        onMouseUp={drag.onMouseUp}
-        onDragStart={drag.onDragStart}
-        style={{ cursor: "grab" }}
-      >
-        {recentProducts.map((product, i) => (
-          <div key={product.id} className={styles.recentlyCard}>
-            <ProductCard product={product} priority={i < 2} />
-          </div>
-        ))}
+      <div className={styles.recentlyRowWrap}>
+        <div
+          className={styles.recentlyRow}
+          ref={drag.ref}
+          onMouseDown={drag.onMouseDown}
+          onMouseMove={drag.onMouseMove}
+          onMouseUp={drag.onMouseUp}
+          onDragStart={drag.onDragStart}
+          style={{ cursor: "grab" }}
+        >
+          {recentProducts.map((product, i) => (
+            <div key={product.id} className={styles.recentlyCard}>
+              <ProductCard product={product} priority={i < 2} />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
