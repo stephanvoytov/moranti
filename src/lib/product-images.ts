@@ -14,9 +14,8 @@ const CDN_HOST = "kgd-basket-cdn-01bl.geobasket.ru";
  * Вычисляет vol/part для CDN-пути по артикулу WB.
  */
 function getVolPart(article: number): { vol: number; part: number } {
-  const s = String(article);
-  const vol = s <= "143" ? 1 : Math.floor(article / 100000);
-  const part = Math.floor(Number(s.slice(0, -3)) / 10) * 10;
+  const vol = article <= 143 ? 1 : Math.floor(article / 100000);
+  const part = Math.floor(article / 1000);
   return { vol, part };
 }
 
