@@ -229,20 +229,7 @@ export default async function ProductPage({ params }: Props) {
             </div>
           ) : null}
 
-
-          <ExpandableText text={product.description} />
-
-          {product.composition ? (
-            <p className={styles.composition}>
-              Состав: {product.composition}
-            </p>
-          ) : null}
-
-          {product.characteristics ? (
-            <ProductCharacteristics data={product.characteristics} />
-          ) : null}
-
-          {/* Marketplace CTAs */}
+          {/* Marketplace CTAs — выше описания, чтобы не скроллить */}
           <div className={styles.ctas}>
             {product.marketplaces.map((mp, i) => (
               <a
@@ -256,6 +243,18 @@ export default async function ProductPage({ params }: Props) {
               </a>
             ))}
           </div>
+
+          <ExpandableText text={product.description} />
+
+          {product.composition ? (
+            <p className={styles.composition}>
+              Состав: {product.composition}
+            </p>
+          ) : null}
+
+          {product.characteristics ? (
+            <ProductCharacteristics data={product.characteristics} />
+          ) : null}
 
           <div className={styles.actionsRow}>
             <FavoriteButton wbArticle={product.wbArticle} />

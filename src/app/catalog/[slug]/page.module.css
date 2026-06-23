@@ -441,7 +441,10 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding-top: var(--space-md);
+  margin-top: var(--space-lg);
   margin-bottom: var(--space-lg);
+  border-top: 1px solid var(--border);
 }
 
 .cta {
