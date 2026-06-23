@@ -82,6 +82,7 @@ export default function ProductEditorPage() {
       colorName: form.colorName || undefined,
       composition: form.composition || undefined,
     imtId: form.imtId ? Number(form.imtId) : undefined,
+    photoCount: form.images?.length || 1,
   }), [form, params.id]);
 
   // Load product data for editing
@@ -235,7 +236,8 @@ export default function ProductEditorPage() {
     reviewsCount: form.reviewsCount ? Number(form.reviewsCount) : undefined,
     colorName: form.colorName || undefined,
       composition: form.composition || undefined,
-      imtId: form.imtId ? Number(form.imtId) : undefined,
+    imtId: form.imtId ? Number(form.imtId) : undefined,
+    photoCount: form.images?.length || 1,
     };
 
     const method = isNew ? "POST" : "PUT";

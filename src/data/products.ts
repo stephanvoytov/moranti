@@ -9,6 +9,7 @@ import type { Product as PrismaProduct } from "@prisma/client";
 import prisma, { prismaQuery } from "@/lib/prisma";
 import { cacheGet } from "@/lib/data-cache";
 import { logger } from "@/lib/logger";
+import { generateProductImages } from "@/lib/product-images";
 
 /** Загрузить JSON fallback при недоступности БД */
 function loadJsonFallback<T>(file: string): T | null {
@@ -53,6 +54,7 @@ export interface Product {
   archivedAt?: string;
   wbCreatedAt?: string;
   characteristics?: CharacteristicGroup[];
+  photoCount: number;
 }
 
 export interface CharacteristicOption {
@@ -85,6 +87,13 @@ const CATEGORY_INFO: Record<string, { name: string; description: string }> = {
 
 function mapProduct(p: PrismaProduct): Product {
   const marketplaces = (p.marketplaces ?? []) as unknown as MarketplaceLink[];
+
+  // Generate image URLs from wbArticle + photoCount (single source of truth)
+  const photoCount = p.photoCount || p.images?.length || 1;
+  const computed = generateProductImages(p.wbArticle, photoCount);
+  const image = computed?.image || p.image || "";
+  const images = computed?.images?.length ? computed.images : p.images;
+
   return {
     id: p.id,
     slug: p.slug,
@@ -94,8 +103,8 @@ function mapProduct(p: PrismaProduct): Product {
     currency: p.currency,
     category: p.category,
     description: p.description,
-    image: p.image,
-    images: p.images,
+    image,
+    images,
     marketplaces,
     wbArticle: p.wbArticle ?? 0,
     ozonArticle: p.ozonArticle ?? undefined,
@@ -113,6 +122,7 @@ function mapProduct(p: PrismaProduct): Product {
     characteristics: p.characteristics
       ? (p.characteristics as unknown as CharacteristicGroup[])
       : undefined,
+    photoCount,
   };
 }
 

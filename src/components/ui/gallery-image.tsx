@@ -15,26 +15,12 @@ interface Props {
 }
 
 /**
- * Пытается взять максимальный размер из WB CDN.
- * Сначала c1200x1600, потом big, потом оригинал.
- * Использует <img> без next/image — никакого пережатия.
+ * Пытается загрузить HD-версию (big) картинки с WB CDN.
+ * big ~ 900×1200 — как на самом WB.
+ * Если big не грузится (404/редирект) — падает на оригинальный URL из БД.
  */
-function bestUrl(url: string): string {
-  const cdnBase = url.split("/images/")[0];
-  if (!cdnBase) return url;
-  const match = url.match(/\/images\/[^/]+\/(\d+)\.webp$/);
-  if (!match) return url;
-  const idx = match[1];
-  return `${cdnBase}/images/c1200x1600/${idx}.webp`;
-}
-
-function fallbackUrl(url: string): string {
-  const cdnBase = url.split("/images/")[0];
-  if (!cdnBase) return url;
-  const match = url.match(/\/images\/[^/]+\/(\d+)\.webp$/);
-  if (!match) return url;
-  const idx = match[1];
-  return `${cdnBase}/images/big/${idx}.webp`;
+function hdUrl(url: string): string {
+  return url.replace("/c516x688/", "/big/");
 }
 
 export default function GalleryImage({
@@ -48,21 +34,16 @@ export default function GalleryImage({
   draggable,
   onMouseDown,
 }: Props) {
-  const [currentSrc, setCurrentSrc] = useState(() => bestUrl(src));
+  const [currentSrc, setCurrentSrc] = useState(() => hdUrl(src));
 
   // Reset when src changes
   useEffect(() => {
-    setCurrentSrc(bestUrl(src));
+    setCurrentSrc(hdUrl(src));
   }, [src]);
 
   const onError = useCallback(() => {
-    if (currentSrc === bestUrl(src)) {
-      // c1200x1600 failed → try big
-      setCurrentSrc(fallbackUrl(src));
-    } else if (currentSrc !== src) {
-      // big failed → try original
-      setCurrentSrc(src);
-    }
+    // big failed → fall back to stored URL
+    if (currentSrc !== src) setCurrentSrc(src);
   }, [currentSrc, src]);
 
   return (
