@@ -15,11 +15,10 @@ interface Props {
 }
 
 /**
- * Пытается загрузить HD-версию (big) картинки с WB CDN.
- * big ~ 900×1200 — как на самом WB.
- * Если big не грузится (404/редирект) — падает на оригинальный URL из БД.
+ * Галерея — сырой <img> с WB CDN, без next/image.
+ * URL уже в размере big (900×1200), но если попадётся c516x688 — апгрейдит.
  */
-function hdUrl(url: string): string {
+function upgradeUrl(url: string): string {
   return url.replace("/c516x688/", "/big/");
 }
 
@@ -34,15 +33,13 @@ export default function GalleryImage({
   draggable,
   onMouseDown,
 }: Props) {
-  const [currentSrc, setCurrentSrc] = useState(() => hdUrl(src));
+  const [currentSrc, setCurrentSrc] = useState(() => upgradeUrl(src));
 
-  // Reset when src changes
   useEffect(() => {
-    setCurrentSrc(hdUrl(src));
+    setCurrentSrc(upgradeUrl(src));
   }, [src]);
 
   const onError = useCallback(() => {
-    // big failed → fall back to stored URL
     if (currentSrc !== src) setCurrentSrc(src);
   }, [currentSrc, src]);
 

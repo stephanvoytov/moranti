@@ -5,7 +5,7 @@
    ============================================= */
 
 /** Размер фото на WB CDN */
-export const WB_IMAGE_SIZE = "c516x688";
+export const WB_IMAGE_SIZE = "big";
 
 /** Основной хост CDN */
 const CDN_HOST = "kgd-basket-cdn-01bl.geobasket.ru";

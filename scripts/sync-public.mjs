@@ -458,10 +458,10 @@ async function syncProductsJson() {
   const withImages = products.map((p) => {
     const photoCount = p.photoCount || p.images?.length || 1;
     const image = p.wbArticle
-      ? cardCdnUrl(p.wbArticle, 1)
+      ? cardCdnUrl(p.wbArticle, 1, "big")
       : p.image;
     const images = p.wbArticle
-      ? cardCdnUrls(p.wbArticle, photoCount)
+      ? cardCdnUrls(p.wbArticle, photoCount, "big")
       : p.images;
     return { ...p, image, images };
   });
