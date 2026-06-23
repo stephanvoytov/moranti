@@ -173,12 +173,23 @@ export default async function ProductPage({ params }: Props) {
         <div className={styles.infoCol}>
           <h1 className={styles.title}>{product.name}</h1>
 
-          <PriceClient
-            wbArticle={product.wbArticle}
-            staticPrice={product.price}
-            staticOriginal={product.originalPrice}
-            currency={product.currency}
-          />
+          {product.archivedAt ? (
+            <div className={styles.outOfStock}>
+              <span className={styles.priceMuted}>
+                {product.price.toLocaleString("ru-RU")} {product.currency}
+              </span>
+              <span className={styles.outOfStockLabel}>Нет в наличии</span>
+            </div>
+          ) : (
+            <>
+              <PriceClient
+                wbArticle={product.wbArticle}
+                staticPrice={product.price}
+                staticOriginal={product.originalPrice}
+                currency={product.currency}
+              />
+            </>
+          )}
 
           {/* Color variants — image-based swatches */}
           {siblings.length > 0 ? (
@@ -233,27 +244,29 @@ export default async function ProductPage({ params }: Props) {
             </div>
           ) : null}
 
-          {/* Marketplace CTAs — выше описания, чтобы не скроллить */}
-          <div className={styles.ctas}>
-            {product.marketplaces.map((mp) => (
-              <a
-                key={mp.name}
-                href={mp.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.cta}
-              >
-                <img
-                  src={`/images/icons/${mp.name.toLowerCase()}.svg`}
-                  alt=""
-                  width={16}
-                  height={16}
-                  style={{ opacity: 0.5, flexShrink: 0 }}
-                />
-                {mp.name}
-              </a>
-            ))}
-          </div>
+          {/* Marketplace CTAs — только если в наличии */}
+          {!product.archivedAt && (
+            <div className={styles.ctas}>
+              {product.marketplaces.map((mp) => (
+                <a
+                  key={mp.name}
+                  href={mp.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.cta}
+                >
+                  <img
+                    src={`/images/icons/${mp.name.toLowerCase()}.svg`}
+                    alt=""
+                    width={16}
+                    height={16}
+                    style={{ opacity: 0.5, flexShrink: 0 }}
+                  />
+                  {mp.name}
+                </a>
+              ))}
+            </div>
+          )}
 
           <ExpandableText text={product.description} />
 

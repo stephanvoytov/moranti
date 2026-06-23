@@ -145,17 +145,23 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
-  // ——— Сначала ищем в кеше всех продуктов (SSG: 1 запрос вместо 55) ———
+  // ——— Сначала ищем в кеше неархивных продуктов ———
   const all = await getProducts();
   const found = all.find((p) => p.slug === slug);
   if (found) return found;
 
-  // ——— Fallback: прямой запрос (если slug не в all-products) ———
+  // ——— Архивный товар? Прямой запрос к БД + JSON fallback ———
   return cacheGet(`product:${slug}`, async () => {
-    const row = await prismaQuery(() =>
-      prisma.product.findUnique({ where: { slug } }),
-    );
-    return row ? mapProduct(row) : null;
+    try {
+      const row = await prismaQuery(() =>
+        prisma.product.findUnique({ where: { slug } }),
+      );
+      if (row) return mapProduct(row);
+    } catch {
+      // DB cold-start — fallback ниже
+    }
+    const fallback = loadJsonFallback<{ products: Product[] }>("products.json");
+    return fallback?.products?.find((p) => p.slug === slug) ?? null;
   });
 }
 

@@ -114,7 +114,7 @@ async function staticPricesFor(articles: number[]): Promise<WbPriceResult[]> {
     const p = all.find((x) => x.wbArticle === article);
     return {
       article,
-      price: p?.price ?? 0,
+      price: p?.price ?? null,
       originalPrice: p?.originalPrice ?? null,
     };
   });
@@ -296,7 +296,7 @@ export async function getWbPrices(articles: number[]): Promise<WbPriceResult[]> 
       return { article, price: entry.price, originalPrice: entry.originalPrice };
     }
     // Fallback на статику для артикулов, которые не вернул WB API
-    return { article, price: 0, originalPrice: null };
+    return { article, price: null, originalPrice: null };
   });
 }
 

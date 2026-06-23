@@ -53,6 +53,6 @@ export const WB_PRICING_API = "https://discounts-prices-api.wildberries.ru";
 
 export interface WbPriceResult {
   article: number;
-  price: number;
+  price: number | null;
   originalPrice: number | null;
 }
