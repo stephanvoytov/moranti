@@ -1,0 +1,30 @@
+name: Sync Wildberries
+
+on:
+  schedule:
+    # 8, 14, 20 MSK (UTC+3) → 5, 11, 17 UTC
+    - cron: '0 5,11,17 * * *'
+  workflow_dispatch:  # ручной запуск из GitHub UI
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Sync catalog with Wildberries
+        run: node scripts/sync-wb.mjs
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          WB_API_KEY: ${{ secrets.WB_API_KEY }}
