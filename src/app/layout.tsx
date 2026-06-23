@@ -97,9 +97,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Yandex Metrika ID: из админки или .env.local
+  // Таймаут 2 секунды — если Supabase холодная, не блокируем рендер
   let ymId: string | undefined;
   try {
-    const settings = await readSettings();
+    const settings = await Promise.race([
+      readSettings(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("settings timeout")), 2000),
+      ),
+    ]);
     ymId = settings.yandexMetrikaId || process.env.YANDEX_METRIKA_ID;
   } catch {
     ymId = process.env.YANDEX_METRIKA_ID;
@@ -109,14 +115,18 @@ export default async function RootLayout({
   const nonce = randomUUID();
 
   // ─── Content-Security-Policy via <meta> tag ───
-  // HTTP-заголовок из proxy.ts + next.config.ts для frame-ancestors.
-  // Meta-тег покрывает остальные директивы с per-request nonce.
-  // Примечание: frame-ancestors НЕ работает в meta-тегах — используем
-  // X-Frame-Options: DENY + next.config.ts headers.
+  // Важно: Next.js injects свои inline-скрипты (chunks, bootstrap) без nonce.
+  // 'strict-dynamic' НЕ используется — он запрещает 'self' и ломает Next.js.
+  // Вместо этого: 'self' разрешает Next.js чанки, 'unsafe-inline' разрешает
+  // Next.js inline-скрипты, а nonce — страховка для наших JSON-LD и Я.Метрики.
+  // Остальные директивы (img-src, connect-src, etc.) строгие.
+  const isDev = process.env.NODE_ENV === "development";
   const csp = [
     "default-src 'self'",
-    // Scripts: nonce + strict-dynamic для цепочки Яндекс.Метрики
-    `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' 'strict-dynamic'`,
+    // Scripts: 'self' для Next.js чанков, 'unsafe-inline' для его inline-скриптов,
+    // nonce для наших JSON-LD и Яндекс.Метрики.
+    // 'unsafe-eval' — нужен React DevTools в dev-режиме (eval для callstack).
+    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
     // Styles: 'unsafe-inline' для dev-режима (Next.js Fast Refresh)
     "style-src 'self' 'unsafe-inline'",
     // Images: WB CDN + Яндекс.Метрика
@@ -129,9 +139,9 @@ export default async function RootLayout({
     "media-src 'none'",
     // Frame: block all
     "frame-src 'none'",
-    // Objects: block plugins
+    // Objects: block plugins (Flash, PDF viewers)
     "object-src 'none'",
-    // Base: restrict to same origin
+    // Base: restrict <base> to same origin
     "base-uri 'self'",
     // Forms: only submit to same origin
     "form-action 'self'",

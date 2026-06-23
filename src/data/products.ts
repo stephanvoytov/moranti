@@ -3,9 +3,23 @@
    Источник (чтение): Супрабаза (Prisma)
    ============================================= */
 
+import { readFileSync, existsSync } from "fs";
+import path from "path";
 import type { Product as PrismaProduct } from "@prisma/client";
 import prisma, { prismaQuery } from "@/lib/prisma";
 import { cacheGet } from "@/lib/data-cache";
+import { logger } from "@/lib/logger";
+
+/** Загрузить JSON fallback при недоступности БД */
+function loadJsonFallback<T>(file: string): T | null {
+  try {
+    const p = path.join(process.cwd(), "data", file);
+    if (!existsSync(p)) return null;
+    return JSON.parse(readFileSync(p, "utf-8")) as T;
+  } catch {
+    return null;
+  }
+}
 
 export interface MarketplaceLink {
   name: "Wildberries" | "Ozon" | "Yandex Market";
@@ -87,10 +101,19 @@ function mapProduct(p: PrismaProduct): Product {
 
 export async function getProducts(): Promise<Product[]> {
   return cacheGet("all-products", async () => {
-    const rows = await prismaQuery(() =>
-      prisma.product.findMany({ orderBy: { createdAt: "asc" } }),
-    );
-    return rows.filter((p) => !p.archivedAt).map(mapProduct);
+    try {
+      const rows = await prismaQuery(() =>
+        prisma.product.findMany({ orderBy: { createdAt: "asc" } }),
+      );
+      return rows.filter((p) => !p.archivedAt).map(mapProduct);
+    } catch (err) {
+      logger.warn("DB unavailable, fallback to products.json", {
+        error: (err as Error)?.message,
+      });
+      const fallback = loadJsonFallback<{ products: Product[] }>("products.json");
+      if (!fallback?.products) throw err;
+      return fallback.products;
+    }
   });
 }
 
@@ -132,32 +155,54 @@ export async function getProductsByWbArticle(
 
 export async function getCategories(): Promise<ProductCategory[]> {
   return cacheGet("all-categories", async () => {
-    const counts = await prismaQuery(() =>
-      prisma.product.groupBy({
-        by: ["category"],
-        where: { archivedAt: null },
-        _count: { id: true },
-      }),
-    );
+    try {
+      const counts = await prismaQuery(() =>
+        prisma.product.groupBy({
+          by: ["category"],
+          where: { archivedAt: null },
+          _count: { id: true },
+        }),
+      );
 
-    const countMap = new Map(counts.map((c) => [c.category, c._count.id]));
+      const countMap = new Map(counts.map((c) => [c.category, c._count.id]));
 
-    return Object.entries(CATEGORY_INFO).map(([slug, info]) => ({
-      slug,
-      name: info.name,
-      description: info.description,
-      image: `/images/categories/${slug}.jpg`,
-      count: countMap.get(slug) ?? 0,
-    }));
+      return Object.entries(CATEGORY_INFO).map(([slug, info]) => ({
+        slug,
+        name: info.name,
+        description: info.description,
+        image: `/images/categories/${slug}.jpg`,
+        count: countMap.get(slug) ?? 0,
+      }));
+    } catch (err) {
+      logger.warn("DB unavailable, fallback to products.json for categories", {
+        error: (err as Error)?.message,
+      });
+      const fallback = loadJsonFallback<{
+        categories: ProductCategory[];
+      }>("products.json");
+      if (!fallback?.categories) throw err;
+      return fallback.categories;
+    }
   });
 }
 
 export async function getAllSlugs(): Promise<string[]> {
-  const rows = await prismaQuery(() =>
-    prisma.product.findMany({
-      where: { archivedAt: null },
-      select: { slug: true },
-    }),
-  );
-  return rows.map((r) => r.slug);
+  try {
+    const rows = await prismaQuery(() =>
+      prisma.product.findMany({
+        where: { archivedAt: null },
+        select: { slug: true },
+      }),
+    );
+    return rows.map((r) => r.slug);
+  } catch (err) {
+    logger.warn("DB unavailable, fallback to products.json for slugs", {
+      error: (err as Error)?.message,
+    });
+    const fallback = loadJsonFallback<{ products: { slug: string }[] }>(
+      "products.json",
+    );
+    if (!fallback?.products) throw err;
+    return fallback.products.map((p) => p.slug);
+  }
 }

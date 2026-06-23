@@ -1,13 +1,5 @@
 import type { NextConfig } from "next";
 
-// ⚠️ Vercel force-rewrites schema.prisma datasource URL to env("DATABASE_URL")
-//    (via "Applying modifyConfig from Vercel" build step).
-//    Supabase injection provides POSTGRES_PRISMA_URL but NOT DATABASE_URL.
-//    Bridge: set DATABASE_URL from what Supabase actually injects.
-if (!process.env.DATABASE_URL && process.env.POSTGRES_PRISMA_URL) {
-  process.env.DATABASE_URL = process.env.POSTGRES_PRISMA_URL;
-}
-
 const nextConfig: NextConfig = {
   /* ─── Remove X-Powered-By: Next.js header ─── */
   poweredByHeader: false,
@@ -32,21 +24,15 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  /* ─── Static security headers (applied to all routes) ───
-       Note: CSP, X-Frame-Options, etc. are set dynamically in proxy.ts
-       for nonce generation. These are additional static headers. ─── */
+  /* ─── Static security headers ─── */
   async headers() {
     return [
       {
         source: "/(.*)",
         headers: [
-          // Prevent MIME-sniffing
           { key: "X-Content-Type-Options", value: "nosniff" },
-          // Clickjacking protection (frame-ancestors не работает в meta CSP)
           { key: "X-Frame-Options", value: "DENY" },
-          // Referrer policy for user privacy
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          // Permissions Policy — отключаем ненужные API
           {
             key: "Permissions-Policy",
             value:
@@ -56,7 +42,6 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      // Allow fonts to be cached aggressively
       {
         source: "/_next/static/media/:path*",
         headers: [
@@ -66,7 +51,6 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      // Allow static images to be cached
       {
         source: "/images/:path*",
         headers: [

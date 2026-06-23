@@ -1,34 +1,42 @@
 import { PrismaClient } from "@prisma/client";
 import { logger } from "@/lib/logger";
 
-// ⚠️ Vercel rewrite schema.prisma url → env("DATABASE_URL") via modifyConfig.
-//    Supabase injects POSTGRES_PRISMA_URL, NOT DATABASE_URL.
-//    Bridge at runtime so PrismaClient resolves the env var.
-if (!process.env.DATABASE_URL && process.env.POSTGRES_PRISMA_URL) {
-  process.env.DATABASE_URL = process.env.POSTGRES_PRISMA_URL;
-}
-
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const MAX_RETRIES = 3;
-const BASE_DELAY = 200; // ms — cold-start Supabase ~2-3s, быстрые ретраи
+const MAX_RETRIES = 2;
+const BASE_DELAY = 500; // ms
+const MAX_DELAY = 2000; // ms
+const QUERY_TIMEOUT = 5_000; // ms — не ждать TCP таймаут 30+ секунд
+
+/**
+ * Throw if promise doesn't settle within `ms` milliseconds.
+ * The underlying operation continues but we stop waiting for it.
+ */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`Query timed out after ${ms}ms`)), ms),
+    ),
+  ]);
+}
 
 /**
  * Retry a Prisma query with exponential backoff when connection fails.
- * Supabase Free Plan suspends after ~5 min of inactivity; wake-up takes 2-5 s.
- * This wrapper retries with delays of 0.2 → 0.4 → 0.8 seconds (3 tries, ~1.4s total).
- * On final failure the error is thrown to the caller.
+ * Retries: 2 попытки с задержками 500ms → 1000ms.
+ * JSON fallback в products.ts / settings.ts перехватывает окончательную ошибку.
  */
 export async function prismaQuery<T>(
   fn: () => Promise<T>,
+  timeoutMs: number = QUERY_TIMEOUT,
 ): Promise<T> {
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      return await fn();
+      return await withTimeout(fn(), timeoutMs);
     } catch (err: unknown) {
       lastError = err;
       const code =
@@ -45,15 +53,15 @@ export async function prismaQuery<T>(
         code === "ENOTFOUND" ||
         (err as Error)?.message?.includes("Can't reach database server") ||
         (err as Error)?.message?.includes("connection pool timeout") ||
-        (err as Error)?.message?.includes("Connection refused");
+        (err as Error)?.message?.includes("Connection refused") ||
+        (err as Error)?.message?.includes("timed out after");
 
       if (!isConnectionError) {
-        // Not a connection issue — throw immediately
-        throw err;
+        throw err; // Not a connection issue — throw immediately
       }
 
       if (attempt < MAX_RETRIES) {
-        const delay = BASE_DELAY * Math.pow(2, attempt);
+        const delay = Math.min(MAX_DELAY, BASE_DELAY * Math.pow(2, attempt));
         logger.warn("Prisma retry", { attempt: attempt + 1, max: MAX_RETRIES, code, delayMs: delay });
         await new Promise((resolve) => setTimeout(resolve, delay));
       } else {
