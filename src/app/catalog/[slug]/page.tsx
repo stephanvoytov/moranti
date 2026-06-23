@@ -164,8 +164,8 @@ export default async function ProductPage({ params }: Props) {
   }
 
   // Build subtitle & dimensions
-  const subtitle = buildSubtitle(product.composition, product.characteristics);
-  const dimensions = extractDimensions(product.characteristics);
+  const subtitle = buildSubtitle(product.composition ?? null, product.characteristics);
+  const dimensions = extractDimensions(product.characteristics ?? null);
 
   return (
     <main className={styles.page}>
