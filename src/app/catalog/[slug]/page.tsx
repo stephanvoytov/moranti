@@ -164,7 +164,7 @@ export default async function ProductPage({ params }: Props) {
   }
 
   // Build subtitle & dimensions
-  const subtitle = buildSubtitle(product.composition ?? null, product.characteristics);
+  const subtitle = buildSubtitle(product.composition ?? null, product.characteristics ?? null);
   const dimensions = extractDimensions(product.characteristics ?? null);
 
   return (
