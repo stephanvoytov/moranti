@@ -52,16 +52,25 @@ const CATEGORY_RU = {
 
 /**
  * Определяет категорию Moranti по subject ID и subject name.
- * @param {number|undefined} subjectId
- * @param {string} [subjectName]
+ * Приоритет: subjId (из card.json) → subjectId (из seller API) → название.
+ *
+ * @param {number|undefined} subjectId — subjectId из seller API (общий, часто 50)
+ * @param {string} [subjectName] — название подкатегории (subj_name из card.json)
+ * @param {number} [subjId] — точный subj_id из card.json (1, 2, 7, 8…)
  * @returns {string}
  */
-function wbToCategory(subjectId, subjectName) {
+function wbToCategory(subjectId, subjectName, subjId) {
+  // 1) Точный subj_id из card.json (самый надёжный)
+  if (subjId && CATEGORY_MAP[subjId]) {
+    return CATEGORY_MAP[subjId];
+  }
+
+  // 2) subjectId из seller API
   if (subjectId && CATEGORY_MAP[subjectId]) {
     return CATEGORY_MAP[subjectId];
   }
 
-  // Fallback по названию
+  // 3) Fallback по названию
   if (subjectName) {
     const lower = subjectName.toLowerCase();
     for (const [keyword, cat] of Object.entries(NAME_FALLBACK)) {
@@ -69,7 +78,7 @@ function wbToCategory(subjectId, subjectName) {
     }
   }
 
-  // Если ничего не подошло — crossbody (самая частая)
+  // 4) Если ничего не подошло — crossbody (самая частая)
   return "crossbody";
 }
 

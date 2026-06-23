@@ -28,16 +28,26 @@ function generateName({ category, composition, wbName }) {
   let name = isMini ? "Мини " + base : base;
 
   // Добавляем материал, если он известен
+  // composition может быть "замша натуральная; натуральная кожа" (через ;)
+  // или просто "натуральная кожа", "замша" и т.д.
   if (composition) {
     const comp = composition.toLowerCase().trim();
-    if (comp === "замша") {
+
+    // Замша (проверяем первой — более специфичный материал)
+    if (comp.includes("замша") || comp.includes("замши")) {
       name = name + " из замши";
-    } else if (["натуральная кожа", "кожа", "сафьян", "сафьяновая кожа", "гладкая кожа"].some(
-      (k) => comp.includes(k)
-    )) {
+    }
+    // Кожа (в т.ч. сафьян, гладкая кожа)
+    else if (comp.includes("кожа") || comp.includes("кожи")) {
       name = name + " из натуральной кожи";
-    } else if (comp !== "текстиль" && comp !== "полиэстер") {
-      name = name + " из " + composition.toLowerCase();
+    }
+    // Текстиль/полиэстер — не указываем материал
+    else if (comp === "текстиль" || comp === "полиэстер") {
+      // skip
+    }
+    // Всё остальное — как есть
+    else {
+      name = name + " из " + composition.toLowerCase().trim();
     }
   }
 
