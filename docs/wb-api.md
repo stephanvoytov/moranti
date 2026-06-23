@@ -13,7 +13,7 @@ search.wb.ru (поисковый)              ◄─ цены, рейтинги
 card.json CDN (basket-*.wbbasket.ru) ◄─ характеристики, даты (инкрементально)
        │
        ▼
-  sync-public.mjs ──────────────────► Prisma (Supabase Postgres)
+   sync-public.mjs ──────────────────► Prisma Postgres (db.prisma.io)
        │
        └── optional ──► data/products.json (--sync-json)
                         data/sync-log.json (всегда)

@@ -4,7 +4,7 @@
 Сайт-каталог с админ-панелью, ссылками на маркетплейсы (Wildberries, Ozon),
 системой избранного, галереей и SEO.
 
-**Стек:** Next.js 16.2.9 (App Router) · TypeScript · CSS Modules · Prisma · Supabase
+**Стек:** Next.js 16.2.9 (App Router) · TypeScript · CSS Modules · Prisma (Prisma Postgres)
 
 ---
 
@@ -23,9 +23,7 @@ npm start          # продакшен-сервер
 
 ```env
 ADMIN_PASSWORD=ваш_пароль          # обязательно
-DATABASE_URL=...                   # Prisma datasource (Supabase Postgres)
-POSTGRES_PRISMA_URL=...            # Supabase auto-inject (Vercel)
-POSTGRES_URL_NON_POOLING=...       # Supabase auto-inject (direct)
+DATABASE_URL=...                   # Prisma datasource (db.prisma.io:5432)
 SITE_URL=https://moranti.ru        # для sitemap/canonical
 ```
 
@@ -74,9 +72,9 @@ http://localhost:3001/admin
 
 ## Архитектура
 
-### Данные: Supabase Postgres (Prisma ORM)
+### Данные: Prisma Postgres
 
-Все данные читаются через Prisma из Supabase Postgres.
+Все данные читаются через Prisma из Postgres (db.prisma.io).
 JSON-файлы — только бекап, не source of truth.
 
 | Функция | Описание |
@@ -87,7 +85,7 @@ JSON-файлы — только бекап, не source of truth.
 | `readSettings()` | Настройки сайта |
 
 Кэш в памяти: `src/lib/data-cache.ts` — TTL 300s, дедикап in-flight промисов.
-Ретрай: `prismaQuery()` — 3 попытки, 200ms→400ms→800ms (холодный старт Supabase).
+Ретрай: `prismaQuery()` — 2 попытки, 500ms→1000ms (холодный старт Prisma Postgres).
 
 ### Страницы
 
@@ -167,12 +165,12 @@ moranti/
 │   │   ├── prisma.ts         # PrismaClient + prismaQuery (retry)
 │   │   ├── data-cache.ts     # TTL-кэш + dedup
 │   │   ├── admin-auth.ts     # Сессии AES-256-GCM
-│   │   ├── settings.ts       # Чтение/запись в Supabase
+│   │   ├── settings.ts       # Чтение/запись в Prisma Postgres
 │   │   ├── favorites-context.tsx
 │   │   └── ...utils
 │   ├── proxy.ts              # Next.js 16 proxy (/admin protection)
 │   └── styles/               # variables.css, reset.css, typography.css
-├── next.config.ts            # + env bridge for Vercel
+├── next.config.ts
 └── .env.local
 ```
 
@@ -196,8 +194,7 @@ moranti/
 | React | 19.2.4 | UI |
 | TypeScript | ~5 | Типизация |
 | CSS Modules | — | Стилизация |
-| Prisma | 6.19.3 | ORM (Supabase Postgres) |
-| Supabase | — | Postgres hosting (free tier) |
+| Prisma | 6.19.3 | ORM (Prisma Postgres — db.prisma.io) |
 
 ---
 
