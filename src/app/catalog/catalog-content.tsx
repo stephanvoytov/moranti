@@ -232,7 +232,11 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
         result.sort((a, b) => (b.reviewsCount || 0) - (a.reviewsCount || 0));
         break;
       case "new":
-        result.sort((a, b) => b.id.localeCompare(a.id));
+        result.sort((a, b) => {
+          const dateA = a.wbCreatedAt ? new Date(a.wbCreatedAt).getTime() : -Infinity;
+          const dateB = b.wbCreatedAt ? new Date(b.wbCreatedAt).getTime() : -Infinity;
+          return dateB - dateA; // newest first, products without date at the end
+        });
         break;
       case "price-asc":
         result.sort((a, b) => a.price - b.price);
