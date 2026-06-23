@@ -186,6 +186,15 @@ async function syncToDb(searchMap, cardMap, dbProducts, syncLog) {
     if (p.wbArticle) dbByArticle.set(p.wbArticle, p);
   }
 
+  // Also load archived products for slug conflict detection
+  const archivedProducts = await prisma.product.findMany({
+    where: { archivedAt: { not: null }, wbArticle: { not: null } },
+  });
+  const archivedByArticle = new Map();
+  for (const p of archivedProducts) {
+    if (p.wbArticle) archivedByArticle.set(p.wbArticle, p);
+  }
+
   const searchArticles = new Set(searchMap.keys());
   const cardArticles = new Set(cardMap.keys());
 
@@ -312,10 +321,24 @@ async function syncToDb(searchMap, cardMap, dbProducts, syncLog) {
     }
   }
 
-  /* ---------- Create new products ---------- */
+  /* ---------- Create new products (or reactivate archived) ---------- */
 
   for (const [article, sp] of searchMap) {
     if (dbByArticle.has(article)) continue;
+
+    // Если товар был архивирован — реактивируем
+    const archived = archivedByArticle.get(article);
+    if (archived) {
+      if (!flags.dry) {
+        await prisma.product.update({
+          where: { id: archived.id },
+          data: { archivedAt: null },
+        });
+      }
+      console.log(`  Reactivated: ${archived.id} article=${article}`);
+      created++;
+      continue;
+    }
 
     const card = cardMap.get(article) || null;
     const subjName = card?.subj_name || null;

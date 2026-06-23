@@ -47,7 +47,7 @@ const CATEGORY_RU = {
   baguette: "Сумка-багет",
   tote: "Сумка-тоут",
   saddle: "Сумка-седло",
-  backpack: "Рюкзак",
+  backpack: "Сумка-рюкзак",
 };
 
 /**
