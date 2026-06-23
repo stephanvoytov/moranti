@@ -58,3 +58,15 @@ yarn-error.log*
 next-env.d.ts
 
 tmp/
+
+# vercel
+.vercel
+
+# local dev scripts (not for production)
+scripts/scrape-wb.mjs
+scripts/update-db-from-scrape.mjs
+scripts/compare-results.mjs
+scripts/test-*.mjs
+
+# scraped data artifacts
+/data/wb-scrape-result.json

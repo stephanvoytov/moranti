@@ -132,7 +132,7 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
                   src={src}
                   alt=""
                   className={styles.thumbImage}
-                  loading={i < 6 ? "eager" : "lazy"}
+                  loading="lazy"
                   draggable={false}
                 />
               </button>
