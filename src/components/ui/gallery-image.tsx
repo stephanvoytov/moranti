@@ -1,8 +1,6 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useCallback, useEffect } from "react";
-import { wbImageHd } from "@/lib/wb-image";
 
 interface Props {
   src: string;
@@ -17,10 +15,28 @@ interface Props {
 }
 
 /**
- * Пытается загрузить HD-версию (big) картинки с WB.
- * Если HD не найдена (404), падает на c516x688.
- * При смене src пересоздаётся (key на Image) — старое фото исчезает сразу.
+ * Пытается взять максимальный размер из WB CDN.
+ * Сначала c1200x1600, потом big, потом оригинал.
+ * Использует <img> без next/image — никакого пережатия.
  */
+function bestUrl(url: string): string {
+  const cdnBase = url.split("/images/")[0];
+  if (!cdnBase) return url;
+  const match = url.match(/\/images\/[^/]+\/(\d+)\.webp$/);
+  if (!match) return url;
+  const idx = match[1];
+  return `${cdnBase}/images/c1200x1600/${idx}.webp`;
+}
+
+function fallbackUrl(url: string): string {
+  const cdnBase = url.split("/images/")[0];
+  if (!cdnBase) return url;
+  const match = url.match(/\/images\/[^/]+\/(\d+)\.webp$/);
+  if (!match) return url;
+  const idx = match[1];
+  return `${cdnBase}/images/big/${idx}.webp`;
+}
+
 export default function GalleryImage({
   src,
   alt,
@@ -32,20 +48,26 @@ export default function GalleryImage({
   draggable,
   onMouseDown,
 }: Props) {
-  const hdSrc = wbImageHd(src);
-  const [currentSrc, setCurrentSrc] = useState(hdSrc);
+  const [currentSrc, setCurrentSrc] = useState(() => bestUrl(src));
 
-  // Reset to HD when src changes
+  // Reset when src changes
   useEffect(() => {
-    setCurrentSrc(hdSrc);
-  }, [hdSrc, src]);
+    setCurrentSrc(bestUrl(src));
+  }, [src]);
 
   const onError = useCallback(() => {
-    if (currentSrc !== src) setCurrentSrc(src);
+    if (currentSrc === bestUrl(src)) {
+      // c1200x1600 failed → try big
+      setCurrentSrc(fallbackUrl(src));
+    } else if (currentSrc !== src) {
+      // big failed → try original
+      setCurrentSrc(src);
+    }
   }, [currentSrc, src]);
 
   return (
-    <Image
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       key={src}
       src={currentSrc}
       alt={alt}
@@ -53,7 +75,8 @@ export default function GalleryImage({
       height={height}
       className={className}
       style={style}
-      priority={priority}
+      loading={priority ? "eager" : "lazy"}
+      fetchPriority={priority ? "high" : undefined}
       draggable={draggable}
       onMouseDown={onMouseDown}
       onError={onError}

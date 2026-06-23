@@ -104,6 +104,10 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
     setZoomPos(null);
   }, []);
 
+  /** Для превью — маленький размер */
+  const thumbUrl = (url: string) =>
+    url.replace(/\/images\/[^/]+\//, "/images/c246x328/");
+
   const activeImage = images[activeIndex] || images[0] || "";
 
   if (!activeImage) {
@@ -129,7 +133,7 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
                 aria-label={`${alt} — фото ${i + 1}`}
               >
                 <img
-                  src={src}
+                  src={thumbUrl(src)}
                   alt=""
                   className={styles.thumbImage}
                   loading="lazy"

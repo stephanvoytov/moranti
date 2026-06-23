@@ -10,6 +10,7 @@ import RecentlyViewedTracker from "./recently-viewed-tracker";
 import FavoriteButton from "./favorite-button";
 import ExpandableText from "@/components/ui/expandable-text";
 import ProductCard from "@/components/ui/product-card";
+import ProductCharacteristics from "@/components/ui/product-characteristics";
 import RecentlyViewed from "./recently-viewed";
 import styles from "./page.module.css";
 
@@ -235,6 +236,10 @@ export default async function ProductPage({ params }: Props) {
             <p className={styles.composition}>
               Состав: {product.composition}
             </p>
+          ) : null}
+
+          {product.characteristics ? (
+            <ProductCharacteristics data={product.characteristics} />
           ) : null}
 
           {/* Marketplace CTAs */}

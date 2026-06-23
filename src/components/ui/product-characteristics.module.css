@@ -1,0 +1,160 @@
+/* =============================================
+   Product Characteristics — Collapsible Specs
+   ============================================= */
+
+.wrapper {
+  margin-bottom: var(--space-xl);
+}
+
+/* ——— Toggle ——— */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--dark);
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border);
+  padding: 12px 0 0;
+  cursor: pointer;
+  width: 100%;
+  transition: color var(--transition-fast);
+}
+
+.toggle:hover {
+  color: var(--camel);
+}
+
+.toggleArrow {
+  font-size: 10px;
+  transition: transform var(--transition-fast);
+  color: var(--text-muted);
+}
+
+.toggleOpen .toggleArrow {
+  transform: rotate(180deg);
+}
+
+/* ——— Content ——— */
+.content {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.35s ease, opacity 0.3s ease, margin 0.3s ease;
+  margin-top: 0;
+}
+
+.contentOpen {
+  max-height: 600px;
+  opacity: 1;
+  margin-top: var(--space-md);
+}
+
+/* ——— Details group ——— */
+.details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-bottom: var(--space-md);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+/* last two items in a 2-col grid: no border */
+.item:nth-last-child(-n+2) {
+  border-bottom: none;
+}
+
+.itemLabel {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.itemValue {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+
+/* ——— Italy highlight ——— */
+.highlightValue {
+  composes: itemValue;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.italyBadge {
+  display: inline-block;
+  width: 16px;
+  height: 12px;
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+
+/* ——— Dimensions row ——— */
+.dimensions {
+  display: flex;
+  gap: var(--grid-gap);
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-md);
+}
+
+.dimItem {
+  display: flex;
+  flex-direction: column;
+  min-width: 60px;
+}
+
+.dimValue {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--dark);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.dimLabel {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+  .details {
+    grid-template-columns: 1fr;
+  }
+
+  .item:nth-last-child(-n+2) {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .item:last-child {
+    border-bottom: none;
+  }
+
+  .dimensions {
+    gap: var(--space-md);
+  }
+}

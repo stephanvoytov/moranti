@@ -178,10 +178,10 @@ export async function batchFetchCardJson(articles, opts = {}) {
  *
  * @param {number} article — артикул WB
  * @param {number} index — номер фото (1-based)
- * @param {string} [size="c516x688"] — размер (c246x328, c516x688, big)
+ * @param {string} [size="c1200x1600"] — размер (c246x328, c516x688, c1200x1600, big)
  * @returns {string}
  */
-export function cardCdnUrl(article, index, size = "c516x688") {
+export function cardCdnUrl(article, index, size = "c1200x1600") {
   const { vol, part } = getVolPart(article);
   return (
     "https://kgd-basket-cdn-01bl.geobasket.ru/vol" +
