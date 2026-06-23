@@ -7,7 +7,7 @@ import type { Product, ProductCategory } from "@/data/products";
 import { useProducts } from "@/lib/use-products";
 import { getRecentlyViewed } from "@/lib/recently-viewed";
 import { useDragScroll } from "@/lib/use-drag-scroll";
-import { resolveColor, normalizeColorName } from "@/lib/color-map";
+import { resolveColor, getBasicColorName } from "@/lib/color-map";
 import styles from "./page.module.css";
 
 interface CatalogContentProps {
@@ -177,7 +177,10 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
   const colorOptions = useMemo(() => {
     const set = new Set<string>();
     for (const p of products) {
-      if (p.colorName) set.add(normalizeColorName(p.colorName));
+      if (p.colorName) {
+        const basic = getBasicColorName(p.colorName);
+        if (basic) set.add(basic);
+      }
     }
     return Array.from(set).sort((a, b) => a.localeCompare(b, "ru"));
   }, [products]);
@@ -199,7 +202,7 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
 
     // Color filter
     if (selectedColor) {
-      result = result.filter((p) => p.colorName && normalizeColorName(p.colorName) === selectedColor);
+      result = result.filter((p) => p.colorName && getBasicColorName(p.colorName) === selectedColor);
     }
 
     // Material filter

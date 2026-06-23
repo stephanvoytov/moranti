@@ -1,34 +1,201 @@
-/** Color name → hex swatch for visual markers on product page */
-export const COLOR_MAP: Record<string, string> = {
-  "Бежевый": "#C9A882",
-  "Белый": "#F0EDE5",
-  "Бургунди": "#6E2C3D",
-  "Винный": "#722F37",
-  "Жёлтый": "#E8C84A",
-  "Капучино": "#A58B72",
-  "Карамельный": "#C68E5B",
-  "Коричневый": "#6B4226",
-  "Молочный шоколад": "#8B6B4A",
-  "Песочный": "#D4BFA2",
-  "Розовый": "#D4A0A0",
-  "Серый": "#9E9E9E",
-  "Синий": "#4A6A8A",
-  "Тауп": "#A89F91",
-  "Чёрный": "#2C2420",
-  "Шоколадный": "#5C3A1E",
+/**
+ * Color system for Moranti.
+ *
+ * Two levels:
+ *   1) Basic colors (14 categories) — показаны в фильтре каталога, как на WB.
+ *   2) Specific color names — маппятся к базовым.
+ *
+ * Compound colors из WB ("тауп, капучино, бежевый") разбиваются и сводятся
+ * к базовой категории по первому распознанному цвету.
+ */
+
+/* =============================================
+   Basic color categories (14)
+   ============================================= */
+
+export interface BasicColor {
+  /** Русское название (показывается в фильтре) */
+  label: string;
+  /** Hex-свотч */
+  hex: string;
+  /** Ключ для сортировки */
+  sortKey: string;
+}
+
+export const BASIC_COLORS: BasicColor[] = [
+  { label: "Бежевый",   hex: "#C9A882",  sortKey: "01" },
+  { label: "Белый",     hex: "#F0EDE5",  sortKey: "02" },
+  { label: "Бордовый",  hex: "#6E2C3D",  sortKey: "03" },
+  { label: "Голубой",   hex: "#8DB6CE",  sortKey: "04" },
+  { label: "Жёлтый",    hex: "#E8C84A",  sortKey: "05" },
+  { label: "Зелёный",   hex: "#7B8D6F",  sortKey: "06" },
+  { label: "Коричневый",hex: "#6B4226",  sortKey: "07" },
+  { label: "Красный",   hex: "#B34A4A",  sortKey: "08" },
+  { label: "Оранжевый", hex: "#D4944A",  sortKey: "09" },
+  { label: "Розовый",   hex: "#D4A0A0",  sortKey: "10" },
+  { label: "Серый",     hex: "#9E9E9E",  sortKey: "11" },
+  { label: "Синий",     hex: "#4A6A8A",  sortKey: "12" },
+  { label: "Фиолетовый",hex: "#8A7BA8",  sortKey: "13" },
+  { label: "Чёрный",    hex: "#2C2420",  sortKey: "14" },
+];
+
+const BASIC_MAP = Object.fromEntries(
+  BASIC_COLORS.map((c) => [c.label.toLowerCase(), c.hex])
+);
+
+/* =============================================
+   Specific → basic color mapping
+   ============================================= */
+
+const COLOR_GROUP: Record<string, string> = {
+  // → Бежевый
+  "бежевый":      "Бежевый",
+  "беж":          "Бежевый",
+  "песочный":     "Бежевый",
+  "тауп":         "Бежевый",
+  "капучино":     "Бежевый",
+  "латте":        "Бежевый",
+  "молочный":     "Бежевый",
+  "кремовый":     "Бежевый",
+  "сливочный":    "Бежевый",
+  "слоновая кость": "Бежевый",
+
+  // → Белый
+  "белый":        "Белый",
+  "белоснежный":  "Белый",
+
+  // → Бордовый
+  "бордовый":     "Бордовый",
+  "бургунди":     "Бордовый",
+  "винный":       "Бордовый",
+  "марсала":      "Бордовый",
+  "вишневый":     "Бордовый",
+  "вишнёвый":     "Бордовый",
+  "малиновый":    "Бордовый",
+
+  // → Голубой
+  "голубой":      "Голубой",
+  "небесно-голубой": "Голубой",
+  "бирюзовый":    "Голубой",
+
+  // → Жёлтый
+  "желтый":       "Жёлтый",
+  "жёлтый":       "Жёлтый",
+  "лимонный":     "Жёлтый",
+  "солнечный":    "Жёлтый",
+
+  // → Зелёный
+  "зеленый":      "Зелёный",
+  "зелёный":      "Зелёный",
+  "оливковый":    "Зелёный",
+  "хаки":         "Зелёный",
+  "болотный":     "Зелёный",
+  "мятный":       "Зелёный",
+
+  // → Коричневый
+  "коричневый":   "Коричневый",
+  "шоколадный":   "Коричневый",
+  "горький шоколад":  "Коричневый",
+  "карамельный":  "Коричневый",
+  "кофейный":     "Коричневый",
+  "рыжий":        "Коричневый",
+  "серо-коричневый": "Коричневый",
+
+  // → Красный
+  "красный":      "Красный",
+  "алый":         "Красный",
+  "коралловый":   "Красный",
+
+  // → Оранжевый
+  "оранжевый":    "Оранжевый",
+  "персиковый":   "Оранжевый",
+  "тыквенный":    "Оранжевый",
+
+  // → Розовый
+  "розовый":      "Розовый",
+  "розовая пудра": "Розовый",
+  "пыльная роза": "Розовый",
+  "фуксия":       "Розовый",
+  "лососевый":    "Розовый",
+
+  // → Серый
+  "серый":        "Серый",
+  "графит":       "Серый",
+  "серебристый":  "Серый",
+  "пепельный":    "Серый",
+  "дымчатый":     "Серый",
+
+  // → Синий
+  "синий":        "Синий",
+  "темно-синий":  "Синий",
+  "индиго":       "Синий",
+  "васильковый":  "Синий",
+
+  // → Фиолетовый
+  "фиолетовый":   "Фиолетовый",
+  "сиреневый":    "Фиолетовый",
+  "лавандовый":   "Фиолетовый",
+  "лиловый":      "Фиолетовый",
+  "пурпурный":    "Фиолетовый",
+
+  // → Чёрный
+  "черный":       "Чёрный",
+  "чёрный":       "Чёрный",
+  "угольный":     "Чёрный",
 };
 
-/** Resolve a color hex or fallback to a neutral gray */
-export function resolveColor(name: string | undefined): string {
-  if (!name) return "#ccc";
-  const normalized = normalizeColorName(name);
-  return COLOR_MAP[normalized] ?? "#ccc";
+/* =============================================
+   Public API
+   ============================================= */
+
+/**
+ * Разбивает составной цвет ("тауп, капучино, бежевый") на части,
+ * возвращает первый распознанный базовый цвет.
+ *
+ * Пример:
+ *   getBasicColorName("тауп, капучино, бежевый") → "Бежевый"
+ *   getBasicColorName("черный") → "Чёрный"
+ *   getBasicColorName(undefined) → null
+ */
+export function getBasicColorName(name: string | undefined | null): string | null {
+  if (!name) return null;
+
+  // Разбиваем по ", " или "; "
+  const parts = name.split(/[,;]\s*/);
+
+  for (const part of parts) {
+    const key = part.trim().toLowerCase();
+    if (!key) continue;
+    if (COLOR_GROUP[key]) return COLOR_GROUP[key];
+  }
+
+  return null;
 }
 
-/** Normalize raw WB color names to canonical Russian names */
-export function normalizeColorName(name: string): string {
-  const map: Record<string, string> = {
-    "желтый, лимонный, сливочный": "Жёлтый",
-  };
-  return map[name] ?? name;
+/**
+ * Возвращает hex для базового цвета (по названию или по любому специфическому).
+ * Для детальной страницы товара.
+ */
+export function resolveColor(name: string | undefined | null): string {
+  if (!name) return "#ccc";
+
+  // Сначала пытаемся найти как базовый
+  const basic = getBasicColorName(name);
+  if (basic) {
+    const hex = BASIC_MAP[basic.toLowerCase()];
+    if (hex) return hex;
+  }
+
+  // Fallback: прямой поиск в COLOR_GROUP (для старых вызовов)
+  const key = name.trim().toLowerCase();
+  if (COLOR_GROUP[key]) {
+    const basic2 = COLOR_GROUP[key];
+    const hex = BASIC_MAP[basic2.toLowerCase()];
+    if (hex) return hex;
+  }
+
+  return "#ccc";
 }
+
+// Re-export for convenience
+export { COLOR_GROUP as COLOR_MAP, BASIC_MAP };
