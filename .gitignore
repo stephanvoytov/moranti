@@ -27,7 +27,8 @@
 # temp session files (task delegation)
 .tmp/
 
-# generated price cache (auto-created by WB API service)
+# WB sync temp files
+/data/.sync-lock
 /data/wb-prices-cache.json
 
 # AI-generated images output

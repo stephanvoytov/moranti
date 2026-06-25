@@ -23,8 +23,9 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
+      # sync-public.mjs использует search.wb.ru + card.json с CDN
+      # (публичные API, без токена, работают из любого региона)
       - name: Sync catalog with Wildberries
-        run: node scripts/sync-wb.mjs
+        run: node scripts/sync-public.mjs
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          WB_API_KEY: ${{ secrets.WB_API_KEY }}
