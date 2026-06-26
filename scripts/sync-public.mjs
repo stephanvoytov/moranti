@@ -212,11 +212,22 @@ async function syncToDb(searchMap, cardMap, dbProducts, syncLog) {
 
     const priceUpdates = {};
 
-    if (sp.priceProduct != null && sp.priceProduct !== db.price) {
-      priceUpdates.price = sp.priceProduct;
+    if (sp.priceProduct != null) {
+      priceUpdates.wbPrice = sp.priceProduct;
+      // Display price = min across available marketplaces
+      const ozonPrice = db.ozonPrice ?? Infinity;
+      const minPrice = Math.min(sp.priceProduct, ozonPrice);
+      if (minPrice !== Infinity && minPrice !== db.price) {
+        priceUpdates.price = minPrice;
+      }
     }
-    if (sp.priceBasic != null && sp.priceBasic !== db.originalPrice) {
-      priceUpdates.originalPrice = sp.priceBasic;
+    if (sp.priceBasic != null) {
+      priceUpdates.wbOriginalPrice = sp.priceBasic;
+      const ozonOrig = db.ozonOriginalPrice ?? Infinity;
+      const minOrig = Math.min(sp.priceBasic, ozonOrig);
+      if (minOrig !== Infinity && minOrig !== db.originalPrice) {
+        priceUpdates.originalPrice = minOrig;
+      }
     }
     if (sp.rating != null && sp.rating !== db.rating) {
       priceUpdates.rating = sp.rating;
@@ -370,10 +381,12 @@ async function syncToDb(searchMap, cardMap, dbProducts, syncLog) {
     await prisma.product.create({
       data: {
         id: newId,
-        slug: "wb-" + article,
+        slug: "product-mor-" + String(nextNum).padStart(3, "0"),
         name: newName,
         price: sp.priceProduct || 0,
         originalPrice: sp.priceBasic || 0,
+        wbPrice: sp.priceProduct || 0,
+        wbOriginalPrice: sp.priceBasic || 0,
         currency: "₽",
         category,
         description: card?.description || "",

@@ -65,7 +65,7 @@ export default function ProductEditorPage() {
   // Real-time preview product object for ProductCard
   const previewProduct = useMemo(() => ({
     id: params.id as string || "preview",
-    slug: form.wbArticle ? `wb-${form.wbArticle}` : "preview",
+    slug: isNew ? "preview" : (params.id as string),
     name: form.name || "Название товара",
     price: Number(form.price) || 0,
     originalPrice: Number(form.originalPrice) || Number(form.price) || 0,

@@ -20,7 +20,11 @@ model Product {
   images            String[]
   marketplaces      Json     @default("[]")
   wbArticle         Int?     @unique
-  ozonArticle       Int?
+  ozonArticle       Int?     @unique
+  wbPrice           Float?
+  wbOriginalPrice   Float?
+  ozonPrice         Float?
+  ozonOriginalPrice Float?
   rating            Float?
   reviewsCount      Int?
   salesCount        Int?

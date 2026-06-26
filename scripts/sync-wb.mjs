@@ -622,7 +622,7 @@ async function runSync() {
 
         const product = {
           id: newId,
-          slug: "wb-" + data.id,
+          slug: "product-mor-" + newId.replace("mor-", ""),
           name,
           price: data.price,
           originalPrice: data.originalPrice || data.price,

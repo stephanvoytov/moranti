@@ -90,7 +90,7 @@ export async function PUT(
 
   if (wbArticle !== undefined) {
     data.wbArticle = wbArticle;
-    data.slug = `wb-${wbArticle}`;
+    data.slug = product.slug;
   }
   if (ozonArticle !== undefined) {
     data.ozonArticle = ozonArticle ?? null;

@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
     ? parseInt(lastProduct.id.replace("mor-", ""), 10) || 0
     : 0;
   const newId = `mor-${String(lastNum + 1).padStart(3, "0")}`;
-  const slug = customSlug || (wbArticle ? `wb-${wbArticle}` : `product-${newId}`);
+  const slug = customSlug || `product-mor-${String(lastNum + 1).padStart(3, "0")}`;
 
   const product = await prismaQuery(() =>
     prisma.product.create({

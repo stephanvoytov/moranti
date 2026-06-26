@@ -34,6 +34,10 @@ export interface Product {
   name: string;
   price: number;
   originalPrice: number;
+  wbPrice?: number;
+  wbOriginalPrice?: number;
+  ozonPrice?: number;
+  ozonOriginalPrice?: number;
   currency: string;
   category: string;
   description: string;
@@ -100,6 +104,10 @@ function mapProduct(p: PrismaProduct): Product {
     name: p.name,
     price: p.price,
     originalPrice: p.originalPrice,
+    wbPrice: p.wbPrice ?? undefined,
+    wbOriginalPrice: p.wbOriginalPrice ?? undefined,
+    ozonPrice: p.ozonPrice ?? undefined,
+    ozonOriginalPrice: p.ozonOriginalPrice ?? undefined,
     currency: p.currency,
     category: p.category,
     description: p.description,

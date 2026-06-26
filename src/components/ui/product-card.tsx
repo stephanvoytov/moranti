@@ -32,7 +32,7 @@ function HeartIcon({ filled }: { filled: boolean }) {
 export default function ProductCard({ product, priority = false }: ProductCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { livePrice, loading } = useLivePrice(product.wbArticle);
-  const slug = `wb-${product.wbArticle}`;
+  const slug = product.slug;
   const link = `/catalog/${slug}`;
   const fav = isFavorite(product.wbArticle);
   const images = product.images?.length ? product.images : [product.image];

@@ -74,10 +74,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/images/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icon.png", sizes: "48x48", type: "image/png" },
       { url: "/images/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/images/favicon-16.png", sizes: "16x16", type: "image/png" },
     ],
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    other: [{ rel: "icon", url: "/favicon.ico" }],
   },
   verification: {
     // Можно задать через YANDEX_VERIFICATION в .env.local

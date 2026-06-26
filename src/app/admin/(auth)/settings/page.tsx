@@ -12,6 +12,8 @@ interface SettingsForm {
   featuredIds: string;
   catalogOrder: string;
   wbApiKey: string;
+  ozonClientId: string;
+  ozonApiKey: string;
   yandexMetrikaId: string;
   instagram: string;
   vk: string;
@@ -45,6 +47,8 @@ const emptyForm: SettingsForm = {
   featuredIds: "",
   catalogOrder: "",
   wbApiKey: "",
+  ozonClientId: "",
+  ozonApiKey: "",
   yandexMetrikaId: "",
   instagram: "",
   vk: "",
@@ -92,6 +96,8 @@ export default function AdminSettingsPage() {
           featuredIds: Array.isArray(data.featuredIds) ? data.featuredIds.join(", ") : "",
           catalogOrder: Array.isArray(data.catalogOrder) ? data.catalogOrder.join(", ") : "",
           wbApiKey: data.wbApiKey || "",
+          ozonClientId: data.ozonClientId || "",
+          ozonApiKey: data.ozonApiKey || "",
           yandexMetrikaId: data.yandexMetrikaId || "",
           catImages: data.categoryImages || {},
           instagram: data.social?.instagram || "",
@@ -161,6 +167,8 @@ export default function AdminSettingsPage() {
       catalogOrder: form.catalogOrder.split(",").map((s) => s.trim()).filter(Boolean),
       categoryImages: catImages,
       wbApiKey: form.wbApiKey,
+      ozonClientId: form.ozonClientId,
+      ozonApiKey: form.ozonApiKey,
       yandexMetrikaId: form.yandexMetrikaId,
       social: {
         instagram: form.instagram,
@@ -238,6 +246,8 @@ export default function AdminSettingsPage() {
         featuredIds: Array.isArray(parsed.featuredIds) ? parsed.featuredIds.join(", ") : "",
         catalogOrder: Array.isArray(parsed.catalogOrder) ? parsed.catalogOrder.join(", ") : "",
         wbApiKey: parsed.wbApiKey || "",
+        ozonClientId: parsed.ozonClientId || "",
+        ozonApiKey: parsed.ozonApiKey || "",
         yandexMetrikaId: parsed.yandexMetrikaId || "",
         instagram: parsed.social?.instagram || "",
         vk: parsed.social?.vk || "",
@@ -447,6 +457,32 @@ export default function AdminSettingsPage() {
                   />
                   <span className={styles.hint}>
                     Для живых цен с Wildberries. Без ключа — статические цены
+                  </span>
+                </label>
+                <label className={styles.label}>
+                  Ozon Client ID
+                  <input
+                    type="text"
+                    className={styles.input}
+                    value={form.ozonClientId}
+                    onChange={(e) => updateField("ozonClientId", e.target.value)}
+                    placeholder="оставьте пустым, если не используется"
+                  />
+                  <span className={styles.hint}>
+                    ID клиента из настроек API Ozon Seller
+                  </span>
+                </label>
+                <label className={styles.label}>
+                  Ozon API Key
+                  <input
+                    type="password"
+                    className={styles.input}
+                    value={form.ozonApiKey}
+                    onChange={(e) => updateField("ozonApiKey", e.target.value)}
+                    placeholder="оставьте пустым, если не используется"
+                  />
+                  <span className={styles.hint}>
+                    Секретный ключ из настроек API Ozon Seller
                   </span>
                 </label>
                 <label className={styles.label}>

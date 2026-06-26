@@ -34,9 +34,6 @@
 # AI-generated images output
 /mcpollinations-output/
 
-# favicon generated files (app/icon.ts outputs)
-/public/favicon.ico
-
 # project instructions (not source code)
 CLAUDE.md
 AGENTS.md

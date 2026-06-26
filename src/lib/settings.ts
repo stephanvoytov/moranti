@@ -14,6 +14,8 @@ export interface SiteSettings {
   featuredIds: string[];
   catalogOrder: string[];
   wbApiKey: string;
+  ozonClientId: string;
+  ozonApiKey: string;
   yandexMetrikaId: string;
   categoryImages: Record<string, string>;
   social: { instagram: string; vk: string; telegram: string; whatsapp: string };
@@ -32,6 +34,8 @@ const DEFAULTS: SiteSettings = {
   featuredIds: [],
   catalogOrder: [],
   wbApiKey: "",
+  ozonClientId: "",
+  ozonApiKey: "",
   yandexMetrikaId: "",
   categoryImages: {},
   social: { instagram: "", vk: "", telegram: "", whatsapp: "" },
