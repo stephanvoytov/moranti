@@ -23,7 +23,7 @@ function loadJsonFallback<T>(file: string): T | null {
 }
 
 export interface MarketplaceLink {
-  name: "Wildberries" | "Ozon" | "Yandex Market";
+  name: "Wildberries" | "Ozon";
   url: string;
   icon: string;
 }
@@ -90,7 +90,35 @@ const CATEGORY_INFO: Record<string, { name: string; description: string }> = {
 };
 
 function mapProduct(p: PrismaProduct): Product {
-  const marketplaces = (p.marketplaces ?? []) as unknown as MarketplaceLink[];
+  // Auto-generate marketplace links from articles if missing in DB
+  const storedMps = (p.marketplaces ?? []) as { name: string; url: string; icon: string }[];
+  const wbArt = p.wbArticle ? Number(p.wbArticle) : null;
+  const ozonArt = p.ozonArticle ? Number(p.ozonArticle) : null;
+
+  const marketplaces: MarketplaceLink[] = [];
+
+  // WB marketplace
+  if (wbArt && !storedMps.some((m) => m.name === "Wildberries")) {
+    marketplaces.push({
+      name: "Wildberries",
+      url: `https://www.wildberries.ru/catalog/${wbArt}/detail.aspx`,
+      icon: "/images/icons/wb.svg",
+    });
+  }
+  // Ozon marketplace
+  if (ozonArt && !storedMps.some((m) => m.name === "Ozon")) {
+    marketplaces.push({
+      name: "Ozon",
+      url: `https://www.ozon.ru/product/${ozonArt}/`,
+      icon: "/images/icons/ozon.svg",
+    });
+  }
+  // Include any stored marketplaces not already added
+  for (const mp of storedMps) {
+    if (!marketplaces.some((m) => m.name === mp.name)) {
+      marketplaces.push(mp as MarketplaceLink);
+    }
+  }
 
   // Generate image URLs from wbArticle + photoCount (single source of truth)
   const photoCount = p.photoCount || p.images?.length || 1;

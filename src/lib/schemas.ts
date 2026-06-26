@@ -27,7 +27,7 @@ export const loginSchema = z.object({
 /* ─── Product ─── */
 
 export const marketplaceLinkSchema = z.object({
-  name: z.enum(["Wildberries", "Ozon", "Yandex Market"]),
+  name: z.enum(["Wildberries", "Ozon"]),
   url: z.string().url(),
   icon: z.string(),
 });

@@ -19,7 +19,7 @@ export interface SiteSettings {
   yandexMetrikaId: string;
   categoryImages: Record<string, string>;
   social: { instagram: string; vk: string; telegram: string; whatsapp: string };
-  marketplaces: { wildberries: string; ozon: string; yandexMarket: string };
+  marketplaces: { wildberries: string; ozon: string };
   seo: { defaultTitle: string; defaultDescription: string };
   updatedAt: string;
 }
@@ -39,7 +39,7 @@ const DEFAULTS: SiteSettings = {
   yandexMetrikaId: "",
   categoryImages: {},
   social: { instagram: "", vk: "", telegram: "", whatsapp: "" },
-  marketplaces: { wildberries: "", ozon: "", yandexMarket: "" },
+  marketplaces: { wildberries: "", ozon: "" },
   seo: { defaultTitle: "Moranti", defaultDescription: "" },
   updatedAt: new Date().toISOString(),
 };

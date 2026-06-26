@@ -21,7 +21,6 @@ interface SettingsForm {
   whatsapp: string;
   wbUrl: string;
   ozonUrl: string;
-  ymUrl: string;
   seoTitle: string;
   seoDescription: string;
   /** Фото категорий: { slug → URL } */
@@ -56,7 +55,6 @@ const emptyForm: SettingsForm = {
   whatsapp: "",
   wbUrl: "",
   ozonUrl: "",
-  ymUrl: "",
   seoTitle: "",
   seoDescription: "",
   catImages: {},
@@ -106,7 +104,7 @@ export default function AdminSettingsPage() {
           whatsapp: data.social?.whatsapp || "",
           wbUrl: data.marketplaces?.wildberries || "",
           ozonUrl: data.marketplaces?.ozon || "",
-          ymUrl: data.marketplaces?.yandexMarket || "",
+
           seoTitle: data.seo?.defaultTitle || "",
           seoDescription: data.seo?.defaultDescription || "",
         });
@@ -179,7 +177,6 @@ export default function AdminSettingsPage() {
       marketplaces: {
         wildberries: form.wbUrl,
         ozon: form.ozonUrl,
-        yandexMarket: form.ymUrl,
       },
       seo: {
         defaultTitle: form.seoTitle,
@@ -255,7 +252,6 @@ export default function AdminSettingsPage() {
         whatsapp: parsed.social?.whatsapp || "",
         wbUrl: parsed.marketplaces?.wildberries || "",
         ozonUrl: parsed.marketplaces?.ozon || "",
-        ymUrl: parsed.marketplaces?.yandexMarket || "",
         seoTitle: parsed.seo?.defaultTitle || "",
         seoDescription: parsed.seo?.defaultDescription || "",
         catImages: parsed.categoryImages || {},
@@ -570,16 +566,6 @@ export default function AdminSettingsPage() {
                     value={form.ozonUrl}
                     onChange={(e) => updateField("ozonUrl", e.target.value)}
                     placeholder="https://ozon.ru/..."
-                  />
-                </label>
-                <label className={styles.label}>
-                  Yandex Market
-                  <input
-                    type="url"
-                    className={styles.input}
-                    value={form.ymUrl}
-                    onChange={(e) => updateField("ymUrl", e.target.value)}
-                    placeholder="https://market.yandex.ru/..."
                   />
                 </label>
               </div>
