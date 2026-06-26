@@ -170,6 +170,7 @@ async function sync() {
   console.log("[3/3] Updating database...");
 
   let updated = 0;
+let ratingDebugged = false;
   let errors = 0;
   const details = { updated: [], priceUpdated: [] };
 
@@ -273,6 +274,64 @@ async function sync() {
       if (hasStock !== currentlyInStock) {
         updates.inStock = hasStock;
         if (!hasStock) console.log(`  Out of stock: ${db.id} article=${article}`);
+      }
+    }
+
+    // --- Rating & Reviews (Ozon) ---
+    if (info) {
+      // Пробуем извлечь рейтинг. Поле может называться по-разному в разных версиях API.
+      let ozonRating = info.rating != null ? Number(info.rating) : null;
+      let ozonReviewsCount = null;
+
+      if (info.reviews_count != null) ozonReviewsCount = Number(info.reviews_count);
+      else if (info.total_reviews != null) ozonReviewsCount = Number(info.total_reviews);
+      else if (info.feedback_rating?.count != null) ozonReviewsCount = Number(info.feedback_rating.count);
+
+      // Если рейтинг не нашли — выведем все ключи info первого товара (один раз за запуск)
+      if (ozonRating == null && !ratingDebugged) {
+        ratingDebugged = true;
+        const allKeys = Object.keys(info).filter(k => !["offer_id","name","price","old_price","images",
+          "is_archived","is_autoarchived","stocks","discounted_fbo_stocks","id","images360","primary_image",
+          "currency_code","visibility_details","marketing_price","min_price","commissions","errors",
+          "sources","statuses","barcodes","color_image","created_at","updated_at","description_category_id",
+          "has_discounted_fbo_item","is_discounted","is_kgt","is_prepayment_allowed","is_super","model_info",
+          "promotions","type_id","vat","volume_weight","price_indexes"].includes(k));
+        console.log(`  [debug] ⚠ rating not found in Ozon response for ${db.id}. Available extra keys: ${allKeys.join(", ") || "(none)"}`);
+        // Также выведем ценную информацию
+        if (allKeys.length === 0) {
+          console.log(`  [debug] All keys: ${Object.keys(info).join(", ")}`);
+        }
+      }
+
+      if (ozonRating == null) { /* rating not found, skip rating update */ } else {
+
+      // Комбинируем с WB через взвешенное среднее
+      const wbRC = db.reviewsCount ?? 0;
+      const wbRat = db.rating ?? 0;
+      const hasWb = wbRC > 0 && wbRat > 0;
+      const hasOzRC = ozonReviewsCount != null && ozonReviewsCount > 0;
+
+      let combRat, combRC;
+
+      if (hasWb && hasOzRC) {
+        const total = wbRC + ozonReviewsCount;
+        combRat = (wbRat * wbRC + ozonRating * ozonReviewsCount) / total;
+        combRC = total;
+      } else if (hasWb) {
+        combRat = wbRat;
+        combRC = wbRC;
+      } else if (hasOzRC) {
+        combRat = ozonRating;
+        combRC = ozonReviewsCount;
+      } else {
+        combRat = ozonRating;
+        combRC = wbRC || 0;
+      }
+
+      combRat = Math.round(combRat * 10) / 10;
+
+      if (combRat !== db.rating) updates.rating = combRat;
+      if (combRC !== db.reviewsCount) updates.reviewsCount = combRC;
       }
     }
 
