@@ -37,15 +37,9 @@
           "url": "https://www.wildberries.ru/catalog/253051367/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
-        },
-        {
-          "name": "Ozon",
-          "url": "https://www.ozon.ru/product/3672922562/",
-          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 253051367,
-      "ozonArticle": 3672922562,
       "rating": 5,
       "reviewsCount": 51,
       "salesCount": 765,
@@ -185,8 +179,6 @@
       "wbUpdatedAt": "2026-06-07T11:11:15.688Z",
       "createdAt": "2026-06-23T09:48:56.175Z",
       "updatedAt": "2026-06-23T13:38:09.303Z",
-      "ozonPrice": 9900,
-      "ozonOriginalPrice": null,
       "wbPrice": 9014,
       "wbOriginalPrice": 23150
     },
@@ -3288,7 +3280,7 @@
       "id": "mor-020",
       "slug": "product-mor-020",
       "name": "Сумка-тоут из замши",
-      "price": 10095,
+      "price": 9900,
       "originalPrice": 30000,
       "currency": "₽",
       "category": "tote",
@@ -3319,12 +3311,12 @@
         },
         {
           "name": "Ozon",
-          "url": "https://www.ozon.ru/product/4204303621/",
+          "url": "https://www.ozon.ru/product/3672922562/",
           "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 328035699,
-      "ozonArticle": 4204303621,
+      "ozonArticle": 3672922562,
       "rating": 5,
       "reviewsCount": 25,
       "salesCount": 375,
@@ -3470,7 +3462,7 @@
       "wbUpdatedAt": "2026-05-06T22:03:13.636Z",
       "createdAt": "2026-06-23T09:48:58.649Z",
       "updatedAt": "2026-06-23T13:38:04.126Z",
-      "ozonPrice": 10095,
+      "ozonPrice": 9900,
       "ozonOriginalPrice": null,
       "wbPrice": 11682,
       "wbOriginalPrice": 30000
