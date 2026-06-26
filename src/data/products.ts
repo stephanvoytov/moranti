@@ -94,7 +94,7 @@ function mapProduct(p: PrismaProduct): Product {
 
   // Generate image URLs from wbArticle + photoCount (single source of truth)
   const photoCount = p.photoCount || p.images?.length || 1;
-  const computed = generateProductImages(p.wbArticle, photoCount);
+  const computed = generateProductImages(p.wbArticle ? Number(p.wbArticle) : null, photoCount);
   const image = computed?.image || p.image || "";
   const images = computed?.images?.length ? computed.images : p.images;
 
@@ -114,8 +114,8 @@ function mapProduct(p: PrismaProduct): Product {
     image,
     images,
     marketplaces,
-    wbArticle: p.wbArticle ?? 0,
-    ozonArticle: p.ozonArticle ?? undefined,
+    wbArticle: p.wbArticle ? Number(p.wbArticle) : 0,
+    ozonArticle: p.ozonArticle ? Number(p.ozonArticle) : undefined,
     rating: p.rating ?? undefined,
     reviewsCount: p.reviewsCount ?? undefined,
     salesCount: p.salesCount ?? undefined,

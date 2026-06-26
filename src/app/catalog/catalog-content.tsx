@@ -79,6 +79,7 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
   }, [hasInitialData, initialCatalogOrder]);
 
   // Read all filter state from URL
+  const urlMarketplace = searchParams.get("marketplace");
   const urlCategory = searchParams.get("category");
   const urlColor = searchParams.get("color");
   const urlMaterial = searchParams.get("material");
@@ -90,6 +91,7 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
   const urlPriceMax = searchParams.get("priceMax") ?? "";
   const urlPage = parseInt(searchParams.get("page") ?? "1", 10) || 1;
 
+  const [selectedMarketplace, setSelectedMarketplace] = useState<string | null>(urlMarketplace);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(urlCategory);
   const [selectedColor, setSelectedColor] = useState<string | null>(urlColor);
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(urlMaterial);
@@ -127,12 +129,12 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
   // Reset page to 1 when any filter changes
   const prevFilterKey = useRef("");
   useEffect(() => {
-    const key = `${selectedCategory}-${selectedColor}-${selectedMaterial}-${searchQuery}-${priceMin}-${priceMax}-${sortOption}`;
+    const key = `${selectedMarketplace}-${selectedCategory}-${selectedColor}-${selectedMaterial}-${searchQuery}-${priceMin}-${priceMax}-${sortOption}`;
     if (prevFilterKey.current !== "" && prevFilterKey.current !== key) {
       setPage(1);
     }
     prevFilterKey.current = key;
-  }, [selectedCategory, selectedColor, selectedMaterial, searchQuery, priceMin, priceMax, sortOption]);
+  }, [selectedMarketplace, selectedCategory, selectedColor, selectedMaterial, searchQuery, priceMin, priceMax, sortOption]);
 
   // Sync filter state to URL
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -140,6 +142,7 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
     if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     syncTimeoutRef.current = setTimeout(() => {
       const params = new URLSearchParams();
+      if (selectedMarketplace) params.set("marketplace", selectedMarketplace);
       if (selectedCategory) params.set("category", selectedCategory);
       if (selectedColor) params.set("color", selectedColor);
       if (selectedMaterial) params.set("material", selectedMaterial);
@@ -153,7 +156,7 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
       router.replace(newUrl, { scroll: false });
     }, 50);
     return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
-  }, [selectedCategory, selectedColor, selectedMaterial, sortOption, searchInput, priceMin, priceMax, page]);
+  }, [selectedMarketplace, selectedCategory, selectedColor, selectedMaterial, sortOption, searchInput, priceMin, priceMax, page]);
 
   // ― Recently viewed ―
   const [recentlyViewed, setRecentlyViewed] = useState<number[]>([]);
@@ -194,11 +197,18 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
     return Array.from(set).sort((a, b) => a.localeCompare(b, "ru"));
   }, [products]);
 
-  // ― Filter pipeline: category → color → material → search → price → sort ―
+  // ― Filter pipeline: marketplace → category → color → material → search → price → sort ―
   const filtered = useMemo(() => {
     let result = selectedCategory
       ? products.filter((p) => p.category === selectedCategory)
       : [...products];
+
+    // Marketplace filter
+    if (selectedMarketplace === "wb") {
+      result = result.filter((p) => p.wbArticle != null);
+    } else if (selectedMarketplace === "ozon") {
+      result = result.filter((p) => p.ozonArticle != null);
+    }
 
     // Color filter
     if (selectedColor) {
@@ -252,7 +262,7 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
     }
 
     return result;
-  }, [products, selectedCategory, selectedColor, selectedMaterial, searchQuery, priceMin, priceMax, sortOption, catalogOrder]);
+  }, [products, selectedMarketplace, selectedCategory, selectedColor, selectedMaterial, searchQuery, priceMin, priceMax, sortOption, catalogOrder]);
 
   // ― Paginate ―
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -267,8 +277,9 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
     setPage(1);
   };
 
-  const hasActiveFilter = selectedCategory || selectedColor || selectedMaterial;
+  const hasActiveFilter = selectedMarketplace || selectedCategory || selectedColor || selectedMaterial;
   const clearFilters = () => {
+    setSelectedMarketplace(null);
     setSelectedCategory(null);
     setSelectedColor(null);
     setSelectedMaterial(null);
@@ -462,9 +473,39 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
           </div>
         </div>
 
+        {/* Marketplace pills */}
+        <div className={styles.filterSection}>
+          <div className={styles.filterRow}>
+            <button
+              className={`${styles.filterPill} ${selectedMarketplace === null ? styles.pillActive : ""}`}
+              onClick={() => { setSelectedMarketplace(null); setPage(1); }}
+            >
+              Все площадки
+            </button>
+            <button
+              className={`${styles.filterPill} ${selectedMarketplace === "wb" ? styles.pillActive : ""}`}
+              onClick={() => { setSelectedMarketplace("wb"); setPage(1); }}
+            >
+              Wildberries
+            </button>
+            <button
+              className={`${styles.filterPill} ${selectedMarketplace === "ozon" ? styles.pillActive : ""}`}
+              onClick={() => { setSelectedMarketplace("ozon"); setPage(1); }}
+            >
+              Ozon
+            </button>
+          </div>
+        </div>
+
         {/* Active filter strip */}
         {hasActiveFilter && (
           <div className={styles.activeFilters}>
+            {selectedMarketplace && (
+              <span className={styles.activePill}>
+                {selectedMarketplace === "wb" ? "Wildberries" : "Ozon"}
+                <button className={styles.activeRemove} onClick={() => setSelectedMarketplace(null)}>×</button>
+              </span>
+            )}
             {selectedCategory && (
               <span className={styles.activePill}>
                 {categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory}
