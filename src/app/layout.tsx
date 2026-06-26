@@ -74,13 +74,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icon.png", sizes: "48x48", type: "image/png" },
-      { url: "/images/favicon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/images/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg", type: "image/svg+xml" },
     ],
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
-    other: [{ rel: "icon", url: "/favicon.ico" }],
   },
+  manifest: "/manifest.json",
   verification: {
     // Можно задать через YANDEX_VERIFICATION в .env.local
     yandex: process.env.YANDEX_VERIFICATION || undefined,
@@ -166,7 +165,7 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://kgd-basket-cdn-01bl.geobasket.ru" />
 
         {/* Favicon for legacy browsers */}
-        <link rel="shortcut icon" href="/images/favicon-32.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
 
         {/* Structured data: Organization + WebSite */}
         <script

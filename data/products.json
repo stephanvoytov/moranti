@@ -2,7 +2,7 @@
   "products": [
     {
       "id": "mor-001",
-      "slug": "wb-253051367",
+      "slug": "product-mor-001",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 9014,
       "originalPrice": 23150,
@@ -37,10 +37,15 @@
           "url": "https://www.wildberries.ru/catalog/253051367/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/3672922562/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 253051367,
-      "ozonArticle": null,
+      "ozonArticle": 3672922562,
       "rating": 5,
       "reviewsCount": 51,
       "salesCount": 765,
@@ -179,11 +184,15 @@
       "wbCreatedAt": "2024-08-15T14:05:36.357Z",
       "wbUpdatedAt": "2026-06-07T11:11:15.688Z",
       "createdAt": "2026-06-23T09:48:56.175Z",
-      "updatedAt": "2026-06-23T13:38:09.303Z"
+      "updatedAt": "2026-06-23T13:38:09.303Z",
+      "ozonPrice": 9900,
+      "ozonOriginalPrice": null,
+      "wbPrice": 9014,
+      "wbOriginalPrice": 23150
     },
     {
       "id": "mor-002",
-      "slug": "wb-391198267",
+      "slug": "product-mor-002",
       "name": "Сумка кросс-боди из замши",
       "price": 9062,
       "originalPrice": 20000,
@@ -210,10 +219,15 @@
           "url": "https://www.wildberries.ru/catalog/391198267/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/3663847113/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 391198267,
-      "ozonArticle": null,
+      "ozonArticle": 3663847113,
       "rating": 5,
       "reviewsCount": 13,
       "salesCount": 195,
@@ -360,11 +374,15 @@
       "wbCreatedAt": "2025-04-15T12:40:19.484Z",
       "wbUpdatedAt": "2026-06-11T14:37:04.090Z",
       "createdAt": "2026-06-23T09:48:56.403Z",
-      "updatedAt": "2026-06-23T13:38:11.242Z"
+      "updatedAt": "2026-06-23T13:38:11.242Z",
+      "ozonPrice": 10556,
+      "ozonOriginalPrice": null,
+      "wbPrice": 9062,
+      "wbOriginalPrice": 20000
     },
     {
       "id": "mor-003",
-      "slug": "wb-899371733",
+      "slug": "product-mor-003",
       "name": "Вечерний кросс-боди из натуральной кожи",
       "price": 10039,
       "originalPrice": 20000,
@@ -409,7 +427,7 @@
     },
     {
       "id": "mor-004",
-      "slug": "wb-899355983",
+      "slug": "product-mor-004",
       "name": "Сумка-тоут из замши",
       "price": 12319,
       "originalPrice": 30000,
@@ -583,7 +601,7 @@
     },
     {
       "id": "mor-005",
-      "slug": "wb-328031735",
+      "slug": "product-mor-005",
       "name": "Сумка-тоут из замши",
       "price": 11682,
       "originalPrice": 30000,
@@ -620,10 +638,15 @@
           "url": "https://www.wildberries.ru/catalog/328031735/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/4203970460/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 328031735,
-      "ozonArticle": null,
+      "ozonArticle": 4203970460,
       "rating": 4,
       "reviewsCount": 9,
       "salesCount": 135,
@@ -770,11 +793,15 @@
       "wbCreatedAt": "2025-02-07T10:12:57.058Z",
       "wbUpdatedAt": "2026-05-06T22:02:10.772Z",
       "createdAt": "2026-06-23T09:48:56.799Z",
-      "updatedAt": "2026-06-23T13:38:12.727Z"
+      "updatedAt": "2026-06-23T13:38:12.727Z",
+      "ozonPrice": 11729,
+      "ozonOriginalPrice": null,
+      "wbPrice": 11682,
+      "wbOriginalPrice": 30000
     },
     {
       "id": "mor-006",
-      "slug": "wb-969178673",
+      "slug": "product-mor-006",
       "name": "Сумка-багет из натуральной кожи",
       "price": 8500,
       "originalPrice": 20350,
@@ -971,7 +998,7 @@
     },
     {
       "id": "mor-007",
-      "slug": "wb-462993756",
+      "slug": "product-mor-007",
       "name": "Сумка-седло из натуральной кожи",
       "price": 9963,
       "originalPrice": 25130,
@@ -1158,7 +1185,7 @@
     },
     {
       "id": "mor-008",
-      "slug": "wb-463001457",
+      "slug": "product-mor-008",
       "name": "Сумка-тоут из замши",
       "price": 11469,
       "originalPrice": 30000,
@@ -1201,10 +1228,15 @@
           "url": "https://www.wildberries.ru/catalog/463001457/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/3791983538/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 463001457,
-      "ozonArticle": null,
+      "ozonArticle": 3791983538,
       "rating": 5,
       "reviewsCount": 32,
       "salesCount": 480,
@@ -1353,11 +1385,15 @@
       "wbCreatedAt": "2025-07-10T12:49:48.410Z",
       "wbUpdatedAt": "2026-03-19T13:31:15.146Z",
       "createdAt": "2026-06-23T09:48:57.205Z",
-      "updatedAt": "2026-06-23T13:38:10.584Z"
+      "updatedAt": "2026-06-23T13:38:10.584Z",
+      "ozonPrice": 11977,
+      "ozonOriginalPrice": null,
+      "wbPrice": 11469,
+      "wbOriginalPrice": 30000
     },
     {
       "id": "mor-010",
-      "slug": "wb-445415947",
+      "slug": "product-mor-010",
       "name": "Сумка-тоут из натуральной кожи",
       "price": 9579,
       "originalPrice": 22550,
@@ -1554,9 +1590,9 @@
     },
     {
       "id": "mor-011",
-      "slug": "wb-226023435",
+      "slug": "product-mor-011",
       "name": "Сумка кросс-боди из натуральной кожи",
-      "price": 9657,
+      "price": 8118,
       "originalPrice": 22000,
       "currency": "₽",
       "category": "crossbody",
@@ -1578,10 +1614,15 @@
           "url": "https://www.wildberries.ru/catalog/226023435/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/3890520375/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 226023435,
-      "ozonArticle": null,
+      "ozonArticle": 3890520375,
       "rating": 5,
       "reviewsCount": 16,
       "salesCount": 240,
@@ -1722,11 +1763,15 @@
       "wbCreatedAt": "2024-04-22T12:36:13.577Z",
       "wbUpdatedAt": "2026-06-11T14:40:11.583Z",
       "createdAt": "2026-06-23T09:48:57.467Z",
-      "updatedAt": "2026-06-23T13:38:12.360Z"
+      "updatedAt": "2026-06-23T13:38:12.360Z",
+      "ozonPrice": 8118,
+      "ozonOriginalPrice": null,
+      "wbPrice": 9657,
+      "wbOriginalPrice": 22000
     },
     {
       "id": "mor-012",
-      "slug": "wb-226024975",
+      "slug": "product-mor-012",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 9345,
       "originalPrice": 22000,
@@ -1902,7 +1947,7 @@
     },
     {
       "id": "mor-013",
-      "slug": "wb-119833702",
+      "slug": "product-mor-013",
       "name": "Сумка-тоут из натуральной кожи",
       "price": 9717,
       "originalPrice": 22500,
@@ -2098,7 +2143,7 @@
     },
     {
       "id": "mor-014",
-      "slug": "wb-899303821",
+      "slug": "product-mor-014",
       "name": "Сумка-рюкзак из натуральной кожи",
       "price": 10053,
       "originalPrice": 20000,
@@ -2295,7 +2340,7 @@
     },
     {
       "id": "mor-015",
-      "slug": "wb-584857819",
+      "slug": "product-mor-015",
       "name": "Сумка-багет из замши",
       "price": 9735,
       "originalPrice": 25000,
@@ -2484,7 +2529,7 @@
     },
     {
       "id": "mor-016",
-      "slug": "wb-165436666",
+      "slug": "product-mor-016",
       "name": "Сумка-багет из натуральной кожи",
       "price": 7802,
       "originalPrice": 19000,
@@ -2521,10 +2566,15 @@
           "url": "https://www.wildberries.ru/catalog/165436666/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/4203643356/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 165436666,
-      "ozonArticle": null,
+      "ozonArticle": 4203643356,
       "rating": 5,
       "reviewsCount": 26,
       "salesCount": 390,
@@ -2660,11 +2710,15 @@
       "wbCreatedAt": "2023-06-15T13:26:21.632Z",
       "wbUpdatedAt": "2026-05-06T22:06:04.287Z",
       "createdAt": "2026-06-23T09:48:58.122Z",
-      "updatedAt": "2026-06-23T13:38:10.226Z"
+      "updatedAt": "2026-06-23T13:38:10.226Z",
+      "ozonPrice": 9817,
+      "ozonOriginalPrice": null,
+      "wbPrice": 7802,
+      "wbOriginalPrice": 19000
     },
     {
       "id": "mor-017",
-      "slug": "wb-899375103",
+      "slug": "product-mor-017",
       "name": "Сумка кросс-боди",
       "price": 9204,
       "originalPrice": 20000,
@@ -2846,7 +2900,7 @@
     },
     {
       "id": "mor-018",
-      "slug": "wb-899321020",
+      "slug": "product-mor-018",
       "name": "Сумка-рюкзак из натуральной кожи",
       "price": 10195,
       "originalPrice": 20000,
@@ -3043,7 +3097,7 @@
     },
     {
       "id": "mor-019",
-      "slug": "wb-584839195",
+      "slug": "product-mor-019",
       "name": "Сумка кросс-боди из замши",
       "price": 8779,
       "originalPrice": 20000,
@@ -3232,9 +3286,9 @@
     },
     {
       "id": "mor-020",
-      "slug": "wb-328035699",
+      "slug": "product-mor-020",
       "name": "Сумка-тоут из замши",
-      "price": 11682,
+      "price": 10095,
       "originalPrice": 30000,
       "currency": "₽",
       "category": "tote",
@@ -3262,10 +3316,15 @@
           "url": "https://www.wildberries.ru/catalog/328035699/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/4204303621/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 328035699,
-      "ozonArticle": null,
+      "ozonArticle": 4204303621,
       "rating": 5,
       "reviewsCount": 25,
       "salesCount": 375,
@@ -3410,11 +3469,15 @@
       "wbCreatedAt": "2025-02-07T10:16:43.803Z",
       "wbUpdatedAt": "2026-05-06T22:03:13.636Z",
       "createdAt": "2026-06-23T09:48:58.649Z",
-      "updatedAt": "2026-06-23T13:38:04.126Z"
+      "updatedAt": "2026-06-23T13:38:04.126Z",
+      "ozonPrice": 10095,
+      "ozonOriginalPrice": null,
+      "wbPrice": 11682,
+      "wbOriginalPrice": 30000
     },
     {
       "id": "mor-021",
-      "slug": "wb-391176745",
+      "slug": "product-mor-021",
       "name": "Сумка кросс-боди из замши",
       "price": 9062,
       "originalPrice": 20000,
@@ -3443,10 +3506,15 @@
           "url": "https://www.wildberries.ru/catalog/391176745/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/3891442328/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 391176745,
-      "ozonArticle": null,
+      "ozonArticle": 3891442328,
       "rating": 5,
       "reviewsCount": 18,
       "salesCount": 270,
@@ -3586,11 +3654,15 @@
       "wbCreatedAt": "2025-04-15T11:54:43.449Z",
       "wbUpdatedAt": "2026-05-21T12:59:37.647Z",
       "createdAt": "2026-06-23T09:48:58.785Z",
-      "updatedAt": "2026-06-23T13:38:07.936Z"
+      "updatedAt": "2026-06-23T13:38:07.936Z",
+      "ozonPrice": 10114,
+      "ozonOriginalPrice": null,
+      "wbPrice": 9062,
+      "wbOriginalPrice": 20000
     },
     {
       "id": "mor-022",
-      "slug": "wb-577159834",
+      "slug": "product-mor-022",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 6769,
       "originalPrice": 19200,
@@ -3777,7 +3849,7 @@
     },
     {
       "id": "mor-023",
-      "slug": "wb-425312758",
+      "slug": "product-mor-023",
       "name": "Багет из натуральной кожи",
       "price": 7279,
       "originalPrice": 20000,
@@ -3820,7 +3892,7 @@
     },
     {
       "id": "mor-024",
-      "slug": "wb-462984217",
+      "slug": "product-mor-024",
       "name": "Сумка-багет из натуральной кожи",
       "price": 7929,
       "originalPrice": 20000,
@@ -4011,7 +4083,7 @@
     },
     {
       "id": "mor-025",
-      "slug": "wb-584878143",
+      "slug": "product-mor-025",
       "name": "Сумка-тоут из натуральной кожи",
       "price": 10210,
       "originalPrice": 25300,
@@ -4199,7 +4271,7 @@
     },
     {
       "id": "mor-026",
-      "slug": "wb-584856106",
+      "slug": "product-mor-026",
       "name": "Сумка-багет из замши",
       "price": 9418,
       "originalPrice": 25100,
@@ -4389,9 +4461,9 @@
     },
     {
       "id": "mor-027",
-      "slug": "wb-462987423",
+      "slug": "product-mor-027",
       "name": "Сумка-тоут из натуральной кожи",
-      "price": 9868,
+      "price": 7479,
       "originalPrice": 20200,
       "currency": "₽",
       "category": "tote",
@@ -4419,10 +4491,15 @@
           "url": "https://www.wildberries.ru/catalog/462987423/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/3878356974/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 462987423,
-      "ozonArticle": null,
+      "ozonArticle": 3878356974,
       "rating": 5,
       "reviewsCount": 25,
       "salesCount": 375,
@@ -4575,11 +4652,15 @@
       "wbCreatedAt": "2025-07-10T12:20:44.857Z",
       "wbUpdatedAt": "2026-06-15T16:03:47.654Z",
       "createdAt": "2026-06-23T09:48:59.933Z",
-      "updatedAt": "2026-06-23T13:38:09.474Z"
+      "updatedAt": "2026-06-23T13:38:09.474Z",
+      "ozonPrice": 7479,
+      "ozonOriginalPrice": null,
+      "wbPrice": 9868,
+      "wbOriginalPrice": 20200
     },
     {
       "id": "mor-028",
-      "slug": "wb-261294903",
+      "slug": "product-mor-028",
       "name": "Сумка-седло из натуральной кожи",
       "price": 8885,
       "originalPrice": 25100,
@@ -4755,7 +4836,7 @@
     },
     {
       "id": "mor-029",
-      "slug": "wb-462990511",
+      "slug": "product-mor-029",
       "name": "Сумка-багет из замши",
       "price": 8294,
       "originalPrice": 20200,
@@ -4947,7 +5028,7 @@
     },
     {
       "id": "mor-030",
-      "slug": "wb-445414843",
+      "slug": "product-mor-030",
       "name": "Сумка кросс-боди из замши",
       "price": 7788,
       "originalPrice": 20000,
@@ -4979,10 +5060,15 @@
           "url": "https://www.wildberries.ru/catalog/445414843/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/3774156486/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 445414843,
-      "ozonArticle": null,
+      "ozonArticle": 3774156486,
       "rating": 5,
       "reviewsCount": 10,
       "salesCount": 150,
@@ -5129,11 +5215,15 @@
       "wbCreatedAt": "2025-06-18T13:39:57.661Z",
       "wbUpdatedAt": "2026-05-21T12:59:37.687Z",
       "createdAt": "2026-06-23T09:49:00.467Z",
-      "updatedAt": "2026-06-23T13:38:10.051Z"
+      "updatedAt": "2026-06-23T13:38:10.051Z",
+      "ozonPrice": 8225,
+      "ozonOriginalPrice": null,
+      "wbPrice": 7788,
+      "wbOriginalPrice": 20000
     },
     {
       "id": "mor-031",
-      "slug": "wb-391150373",
+      "slug": "product-mor-031",
       "name": "Сумка-багет из натуральной кожи",
       "price": 8437,
       "originalPrice": 20200,
@@ -5316,7 +5406,7 @@
     },
     {
       "id": "mor-033",
-      "slug": "wb-584881064",
+      "slug": "product-mor-033",
       "name": "Сумка-тоут из натуральной кожи",
       "price": 12717,
       "originalPrice": 25300,
@@ -5507,7 +5597,7 @@
     },
     {
       "id": "mor-035",
-      "slug": "wb-226025376",
+      "slug": "product-mor-035",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 9095,
       "originalPrice": 22150,
@@ -5537,10 +5627,15 @@
           "url": "https://www.wildberries.ru/catalog/226025376/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/3890588228/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 226025376,
-      "ozonArticle": null,
+      "ozonArticle": 3890588228,
       "rating": 5,
       "reviewsCount": 21,
       "salesCount": 315,
@@ -5681,11 +5776,15 @@
       "wbCreatedAt": "2024-04-22T12:42:53.985Z",
       "wbUpdatedAt": "2026-04-16T12:05:10.490Z",
       "createdAt": "2026-06-23T09:49:00.878Z",
-      "updatedAt": "2026-06-23T13:38:06.037Z"
+      "updatedAt": "2026-06-23T13:38:06.037Z",
+      "ozonPrice": 9304,
+      "ozonOriginalPrice": null,
+      "wbPrice": 9095,
+      "wbOriginalPrice": 22150
     },
     {
       "id": "mor-036",
-      "slug": "wb-584864653",
+      "slug": "product-mor-036",
       "name": "Сумка-тоут из замши",
       "price": 11740,
       "originalPrice": 30150,
@@ -5850,7 +5949,7 @@
     },
     {
       "id": "mor-037",
-      "slug": "wb-144391368",
+      "slug": "product-mor-037",
       "name": "Сумка-тоут из натуральной кожи",
       "price": 11055,
       "originalPrice": 23000,
@@ -6040,7 +6139,7 @@
     },
     {
       "id": "mor-038",
-      "slug": "wb-969008238",
+      "slug": "product-mor-038",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 8850,
       "originalPrice": 25000,
@@ -6224,7 +6323,7 @@
     },
     {
       "id": "mor-039",
-      "slug": "wb-253053689",
+      "slug": "product-mor-039",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 8749,
       "originalPrice": 22470,
@@ -6404,7 +6503,7 @@
     },
     {
       "id": "mor-040",
-      "slug": "wb-185673251",
+      "slug": "product-mor-040",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 7268,
       "originalPrice": 19200,
@@ -6582,7 +6681,7 @@
     },
     {
       "id": "mor-041",
-      "slug": "wb-391159701",
+      "slug": "product-mor-041",
       "name": "Сумка-багет из натуральной кожи",
       "price": 6358,
       "originalPrice": 24680,
@@ -6752,7 +6851,7 @@
     },
     {
       "id": "mor-042",
-      "slug": "wb-253033047",
+      "slug": "product-mor-042",
       "name": "Сумка-багет из натуральной кожи",
       "price": 10054,
       "originalPrice": 22000,
@@ -6952,7 +7051,7 @@
     },
     {
       "id": "mor-043",
-      "slug": "wb-584882297",
+      "slug": "product-mor-043",
       "name": "Сумка-тоут из замши",
       "price": 13530,
       "originalPrice": 35000,
@@ -7145,7 +7244,7 @@
     },
     {
       "id": "mor-044",
-      "slug": "wb-584837180",
+      "slug": "product-mor-044",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 8253,
       "originalPrice": 20100,
@@ -7179,10 +7278,15 @@
           "url": "https://www.wildberries.ru/catalog/584837180/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/3823524564/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 584837180,
-      "ozonArticle": null,
+      "ozonArticle": 3823524564,
       "rating": 4,
       "reviewsCount": 6,
       "salesCount": 90,
@@ -7324,11 +7428,15 @@
       "wbCreatedAt": "2025-10-28T11:14:10.050Z",
       "wbUpdatedAt": "2026-04-29T11:48:24.367Z",
       "createdAt": "2026-06-23T09:49:02.021Z",
-      "updatedAt": "2026-06-23T13:38:13.266Z"
+      "updatedAt": "2026-06-23T13:38:13.266Z",
+      "ozonPrice": 9029,
+      "ozonOriginalPrice": null,
+      "wbPrice": 8253,
+      "wbOriginalPrice": 20100
     },
     {
       "id": "mor-045",
-      "slug": "wb-462991980",
+      "slug": "product-mor-045",
       "name": "Сумка-багет из натуральной кожи",
       "price": 6760,
       "originalPrice": 20350,
@@ -7517,7 +7625,7 @@
     },
     {
       "id": "mor-046",
-      "slug": "wb-969189657",
+      "slug": "product-mor-046",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 10620,
       "originalPrice": 25000,
@@ -7688,7 +7796,7 @@
     },
     {
       "id": "mor-047",
-      "slug": "wb-165436665",
+      "slug": "product-mor-047",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 8071,
       "originalPrice": 19000,
@@ -7865,7 +7973,7 @@
     },
     {
       "id": "mor-048",
-      "slug": "wb-226020314",
+      "slug": "product-mor-048",
       "name": "Сумка-седло из натуральной кожи",
       "price": 10581,
       "originalPrice": 24500,
@@ -8047,7 +8155,7 @@
     },
     {
       "id": "mor-049",
-      "slug": "wb-899312868",
+      "slug": "product-mor-049",
       "name": "Сумка-рюкзак из натуральной кожи",
       "price": 9628,
       "originalPrice": 20000,
@@ -8239,7 +8347,7 @@
     },
     {
       "id": "mor-050",
-      "slug": "wb-969257682",
+      "slug": "product-mor-050",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 10443,
       "originalPrice": 25000,
@@ -8424,7 +8532,7 @@
     },
     {
       "id": "mor-051",
-      "slug": "wb-899315968",
+      "slug": "product-mor-051",
       "name": "Сумка-рюкзак из натуральной кожи",
       "price": 10053,
       "originalPrice": 20000,
@@ -8621,7 +8729,7 @@
     },
     {
       "id": "mor-052",
-      "slug": "wb-969260081",
+      "slug": "product-mor-052",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 11151,
       "originalPrice": 25000,
@@ -8794,7 +8902,7 @@
     },
     {
       "id": "mor-053",
-      "slug": "wb-969025312",
+      "slug": "product-mor-053",
       "name": "Сумка на плечо из замши",
       "price": 9027,
       "originalPrice": 25000,
@@ -8829,10 +8937,15 @@
           "url": "https://www.wildberries.ru/catalog/969025312/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/4204158780/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 969025312,
-      "ozonArticle": null,
+      "ozonArticle": 4204158780,
       "rating": 0,
       "reviewsCount": 0,
       "salesCount": null,
@@ -8979,11 +9092,15 @@
       "wbCreatedAt": "2026-04-16T09:12:09.868Z",
       "wbUpdatedAt": "2026-06-04T14:03:49.351Z",
       "createdAt": "2026-06-23T09:49:03.185Z",
-      "updatedAt": "2026-06-23T13:38:14.199Z"
+      "updatedAt": "2026-06-23T13:38:14.199Z",
+      "ozonPrice": 10913,
+      "ozonOriginalPrice": null,
+      "wbPrice": 9027,
+      "wbOriginalPrice": 25000
     },
     {
       "id": "mor-054",
-      "slug": "wb-969265618",
+      "slug": "product-mor-054",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 11151,
       "originalPrice": 25000,
@@ -9165,7 +9282,7 @@
     },
     {
       "id": "mor-055",
-      "slug": "wb-969020680",
+      "slug": "product-mor-055",
       "name": "Сумка на плечо из натуральной кожи",
       "price": 9027,
       "originalPrice": 25000,
@@ -9345,7 +9462,7 @@
     },
     {
       "id": "mor-056",
-      "slug": "wb-584838455",
+      "slug": "product-mor-056",
       "name": "Сумка кросс-боди из натуральной кожи",
       "price": 6746,
       "originalPrice": 19900,
@@ -9378,10 +9495,15 @@
           "url": "https://www.wildberries.ru/catalog/584838455/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/3825785539/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 584838455,
-      "ozonArticle": null,
+      "ozonArticle": 3825785539,
       "rating": 4,
       "reviewsCount": 2,
       "salesCount": 30,
@@ -9525,14 +9647,18 @@
       "wbCreatedAt": "2025-10-28T11:15:42.306Z",
       "wbUpdatedAt": "2026-04-29T11:48:27.435Z",
       "createdAt": "2026-06-23T09:49:03.511Z",
-      "updatedAt": "2026-06-23T13:38:15.923Z"
+      "updatedAt": "2026-06-23T13:38:15.923Z",
+      "ozonPrice": 7436,
+      "ozonOriginalPrice": null,
+      "wbPrice": 6746,
+      "wbOriginalPrice": 19900
     },
     {
       "id": "mor-057",
-      "slug": "wb-969253912",
+      "slug": "product-mor-057",
       "name": "Кросс-боди из натуральной кожи",
-      "price": 11969,
-      "originalPrice": 25000,
+      "price": 9551,
+      "originalPrice": 9551,
       "currency": "₽",
       "category": "crossbody",
       "description": "Сумка женская кросс-боди из натуральной кожи на плечо. Наша кросс-боди это стильная базовая маленькая сумочка, которая выполнена из 100% натуральной качественной кожи на фабрике в Италии. Сумка женская кожаная может использоваться как кросс-боди через плечо или как сумка клатч. В комплекте к сумочке идет широкий удобный регулируемый ремень с максимальной длинной 130 см и минимальной длиной 110 см, позволяющий носить ее через плечо как кросс-боди и носить на плече. Вариант с широким ремнем подходит как для повседневной носки в офис на работу для учебы как офисная так и для вечернего варианты на свадьбу день рождения,вечеринку. Итальянская сумка на бедро имеет одно отделение, которое закрывается клапаном на магнитной кнопке, а также молнией. Внутри есть карман на молнии. Хорошо подойдет для телефона и кошелька удобна для путешествий. Фурнитура сумки багет высокого качества итальянского производства. Цвет фурнитуры - темное серебро. Клач, благодаря регулируемому ремню можно носить как летнюю сумку и на куртку на осень или пальто, как зимний вариант. Внутри есть лейбл с нашим брендом Moranti.",
@@ -9545,10 +9671,15 @@
           "url": "https://www.wildberries.ru/catalog/969253912/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
+        },
+        {
+          "name": "Ozon",
+          "url": "https://www.ozon.ru/product/3878128886/",
+          "icon": "/images/icons/ozon.svg"
         }
       ],
       "wbArticle": 969253912,
-      "ozonArticle": null,
+      "ozonArticle": 3878128886,
       "rating": null,
       "reviewsCount": null,
       "salesCount": null,
@@ -9564,11 +9695,15 @@
       "wbCreatedAt": null,
       "wbUpdatedAt": null,
       "createdAt": "2026-06-23T09:49:03.650Z",
-      "updatedAt": "2026-06-23T10:44:44.741Z"
+      "updatedAt": "2026-06-23T10:44:44.741Z",
+      "ozonPrice": 9551,
+      "ozonOriginalPrice": null,
+      "wbPrice": 11969,
+      "wbOriginalPrice": null
     },
     {
       "id": "mor-058",
-      "slug": "wb-391171927",
+      "slug": "product-mor-058",
       "name": "Сумка-тоут из замши",
       "price": 12531,
       "originalPrice": 30000,
