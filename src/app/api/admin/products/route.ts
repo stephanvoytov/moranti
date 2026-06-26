@@ -9,7 +9,7 @@ import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { createProductSchema, productsQuerySchema, VALID_CATEGORIES } from "@/lib/schemas";
-import prisma, { prismaQuery } from "@/lib/prisma";
+import prisma, { prismaQuery, serializeProduct } from "@/lib/prisma";
 
 /* ——— GET /api/admin/products ——— */
 
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
   const totalPages = Math.ceil(total / limit);
   return NextResponse.json({
-    items,
+    items: items.map((p) => serializeProduct(p as Record<string, unknown>)),
     pagination: { page, limit, total, totalPages },
   });
 }
@@ -134,5 +134,5 @@ export async function POST(request: NextRequest) {
     })
   );
 
-  return NextResponse.json(product, { status: 201 });
+  return NextResponse.json(serializeProduct(product as Record<string, unknown>), { status: 201 });
 }

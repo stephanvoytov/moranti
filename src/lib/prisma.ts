@@ -82,3 +82,13 @@ export const prisma =
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 export default prisma;
+
+/**
+ * Конвертирует BigInt поля Prisma Product в Number для JSON-сериализации.
+ * Нужно перед возвратом из API-роутов, т.к. JSON.stringify не поддерживает BigInt.
+ */
+export function serializeProduct(p: Record<string, unknown>): Record<string, unknown> {
+  if (p.wbArticle != null) p.wbArticle = Number(p.wbArticle);
+  if (p.ozonArticle != null) p.ozonArticle = Number(p.ozonArticle);
+  return p;
+}

@@ -9,7 +9,7 @@ import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { updateProductSchema, VALID_CATEGORIES } from "@/lib/schemas";
-import prisma, { prismaQuery } from "@/lib/prisma";
+import prisma, { prismaQuery, serializeProduct } from "@/lib/prisma";
 
 /* ——— GET /api/admin/products/[id] ——— */
 
@@ -27,7 +27,7 @@ export async function GET(
   if (!product) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
   }
-  return NextResponse.json(product);
+  return NextResponse.json(serializeProduct(product as Record<string, unknown>));
 }
 
 /* ——— PUT /api/admin/products/[id] ——— */
@@ -119,7 +119,7 @@ export async function PUT(
   const updated = await prismaQuery(() =>
     prisma.product.update({ where: { id }, data })
   );
-  return NextResponse.json(updated);
+  return NextResponse.json(serializeProduct(updated as Record<string, unknown>));
 }
 
 /* ——— DELETE /api/admin/products/[id] ——— */
