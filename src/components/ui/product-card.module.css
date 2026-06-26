@@ -86,7 +86,26 @@
 }
 
 .favoriteActive .heartIcon {
-  fill: var(--dark);
+  color: var(--dark);
+}
+
+/* ─── Out of stock / archived badge ─── */
+
+.outBadge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text-secondary);
+  padding: 2px 6px;
+  border-radius: 2px;
+  pointer-events: none;
+  backdrop-filter: blur(2px);
 }
 
 /* ——— Info ——— */

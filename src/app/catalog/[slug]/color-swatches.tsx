@@ -14,6 +14,7 @@ interface SwatchProduct {
   price: number;
   originalPrice: number;
   currency: string;
+  inStock?: boolean;
 }
 
 interface ColorSwatchesProps {
@@ -100,27 +101,33 @@ export default function ColorSwatches({ current, siblings }: ColorSwatchesProps)
         </div>
 
         {/* Sibling swatches */}
-        {siblings.map((s) => (
-          <div
-            key={s.slug}
-            className={styles.swatchWrap}
-            onMouseEnter={(e) => showPreview(s.wbArticle, e)}
-            onMouseLeave={hidePreview}
-          >
-            <Link
-              href={`/catalog/${s.slug}`}
-              className={styles.swatch}
-              title={label(s, siblings)}
+        {siblings.map((s) => {
+          const isOutOfStock = s.inStock === false;
+          return (
+            <div
+              key={s.slug}
+              className={`${styles.swatchWrap} ${isOutOfStock ? styles.swatchWrapOos : ""}`}
+              onMouseEnter={(e) => showPreview(s.wbArticle, e)}
+              onMouseLeave={hidePreview}
             >
-              <img
-                src={swatchUrl(s.wbArticle)}
-                alt={label(s, siblings)}
-                className={styles.swatchImage}
-                loading="lazy"
-              />
-            </Link>
-          </div>
-        ))}
+              <Link
+                href={`/catalog/${s.slug}`}
+                className={styles.swatch}
+                title={label(s, siblings)}
+              >
+                <img
+                  src={swatchUrl(s.wbArticle)}
+                  alt={label(s, siblings)}
+                  className={`${styles.swatchImage} ${isOutOfStock ? styles.swatchImageOos : ""}`}
+                  loading="lazy"
+                />
+              </Link>
+              {isOutOfStock && (
+                <span className={styles.swatchOosLabel}>нет</span>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Hover preview tooltip */}

@@ -664,6 +664,41 @@
   display: block;
 }
 
+/* Out-of-stock swatch variant */
+.swatchWrapOos {
+  position: relative;
+}
+
+.swatchWrapOos .swatchImage {
+  opacity: 0.35;
+  filter: grayscale(0.6);
+}
+
+.swatchOosLabel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.archivedLabel {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c0392b;
+  opacity: 0.7;
+}
+
 .rating {
   display: flex;
   align-items: center;

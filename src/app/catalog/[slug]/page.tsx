@@ -100,12 +100,12 @@ export default async function ProductPage({ params }: Props) {
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";
   const allProducts = await getProducts();
 
-  // Color variants (same imtId group + same category)
-  const siblings = product.imtId
+  // Color variants (same modelId) — show if not archived, even if out of stock
+  const siblings = product.modelId
     ? allProducts.filter(
         (p) =>
-          p.imtId === product.imtId &&
-          p.category === product.category &&
+          p.modelId === product.modelId &&
+          !p.archivedAt &&
           p.id !== product.id
       )
     : [];
@@ -220,6 +220,13 @@ export default async function ProductPage({ params }: Props) {
           )}
 
           {product.archivedAt ? (
+            <div className={styles.outOfStock}>
+              <span className={styles.priceMuted}>
+                {product.price.toLocaleString("ru-RU")} {product.currency}
+              </span>
+              <span className={styles.archivedLabel}>Архивирован</span>
+            </div>
+          ) : !product.inStock ? (
             <div className={styles.outOfStock}>
               <span className={styles.priceMuted}>
                 {product.price.toLocaleString("ru-RU")} {product.currency}

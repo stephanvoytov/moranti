@@ -19,6 +19,13 @@ interface ProductForm {
   colorName: string;
   composition: string;
   imtId: string;
+  modelId: string;
+}
+
+interface ModelOption {
+  id: string;
+  name: string;
+  category: string;
 }
 
 const CATEGORIES = [
@@ -44,6 +51,7 @@ const emptyForm: ProductForm = {
   colorName: "",
   composition: "",
   imtId: "",
+  modelId: "",
 };
 
 export default function ProductEditorPage() {
@@ -58,6 +66,7 @@ export default function ProductEditorPage() {
   const [error, setError] = useState("");
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [urlInputValue, setUrlInputValue] = useState("");
+  const [models, setModels] = useState<ModelOption[]>([]);
   const [imgDragIndex, setImgDragIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imgDragNode = useRef<HTMLDivElement | null>(null);
@@ -79,26 +88,35 @@ export default function ProductEditorPage() {
     ozonArticle: form.ozonArticle ? Number(form.ozonArticle) : undefined,
       rating: form.rating ? Number(form.rating) : undefined,
       reviewsCount: form.reviewsCount ? Number(form.reviewsCount) : undefined,
-      colorName: form.colorName || undefined,
+    colorName: form.colorName || undefined,
       composition: form.composition || undefined,
     imtId: form.imtId ? Number(form.imtId) : undefined,
+    modelId: form.modelId || undefined,
+    inStock: true,
     photoCount: form.images?.length || 1,
   }), [form, params.id]);
 
   // Load product data for editing
   useEffect(() => {
-    if (isNew) return;
+    async function load() {
+      // Load models list
+      try {
+        const modelsRes = await fetch("/api/admin/models");
+        const modelsData = await modelsRes.json();
+        setModels((modelsData.items || []).map((m: { id: string; name: string; category: string }) => ({
+          id: m.id,
+          name: m.name,
+          category: m.category,
+        })));
+      } catch { /* ignore */ }
 
-    fetch(`/api/admin/products/${params.id}`)
-      .then((res) => {
-        if (res.status === 401) router.push("/admin/login");
-        return res.json();
-      })
-      .then((data) => {
-        if (data.error) {
-          setError(data.error);
-          return;
-        }
+      if (isNew) return;
+
+      try {
+        const res = await fetch(`/api/admin/products/${params.id}`);
+        if (res.status === 401) { router.push("/admin/login"); return; }
+        const data = await res.json();
+        if (data.error) { setError(data.error); return; }
         setForm({
           name: data.name || "",
           price: String(data.price || ""),
@@ -113,13 +131,16 @@ export default function ProductEditorPage() {
           colorName: data.colorName || "",
           composition: data.composition || "",
           imtId: data.imtId ? String(data.imtId) : "",
+          modelId: data.modelId || "",
         });
         setLoading(false);
-      })
-      .catch(() => {
+      } catch {
         setError("Не удалось загрузить товар");
         setLoading(false);
-      });
+      }
+    }
+
+    load();
   }, [isNew, params.id, router]);
 
   function updateField(field: keyof ProductForm, value: string) {
@@ -332,6 +353,26 @@ export default function ProductEditorPage() {
                 ))}
               </select>
             </label>
+
+            {models.length > 0 && (
+              <label className={styles.label}>
+                Модель (семейство)
+                <select
+                  className={styles.select}
+                  value={form.modelId}
+                  onChange={(e) => updateField("modelId", e.target.value)}
+                >
+                  <option value="">— Не привязана —</option>
+                  {models
+                    .filter((m) => !form.category || m.category === form.category)
+                    .map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}
+                      </option>
+                    ))}
+                </select>
+              </label>
+            )}
 
             <label className={styles.label}>
               Описание

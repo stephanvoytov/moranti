@@ -27,6 +27,7 @@ import {
   SUPPLIER_ID,
   sleep,
   fetchWithRetry,
+  fetchCardJson,
   batchFetchCardJson,
   cardCdnUrl,
   cardCdnUrls,
@@ -236,6 +237,15 @@ async function syncToDb(searchMap, cardMap, dbProducts, syncLog) {
       priceUpdates.reviewsCount = sp.feedbacks;
     }
 
+    // Stock status
+    if (sp.totalQuantity != null) {
+      const currentlyInStock = db.inStock !== false;
+      const shouldBeInStock = sp.totalQuantity > 0;
+      if (shouldBeInStock !== currentlyInStock) {
+        priceUpdates.inStock = shouldBeInStock;
+      }
+    }
+
     // Photo count increased?
     if (sp.pics != null) {
       const currentCount = db.photoCount || (db.images ? db.images.length : 0);
@@ -341,7 +351,7 @@ async function syncToDb(searchMap, cardMap, dbProducts, syncLog) {
       if (!flags.dry) {
         await prisma.product.update({
           where: { id: archived.id },
-          data: { archivedAt: null },
+          data: { archivedAt: null, inStock: true },
         });
       }
       console.log(`  Reactivated: ${archived.id} article=${article}`);
@@ -414,16 +424,33 @@ async function syncToDb(searchMap, cardMap, dbProducts, syncLog) {
   /* ---------- Archive removed products ---------- */
 
   for (const db of dbProducts) {
-    if (db.wbArticle && !searchArticles.has(db.wbArticle) && !db.archivedAt) {
+    if (!db.wbArticle || searchArticles.has(db.wbArticle) || db.archivedAt) continue;
+
+    const article = Number(db.wbArticle);
+
+    // Check if card still exists on WB before archiving
+    const card = await fetchCardJson(article);
+    if (card) {
+      // Card exists but hidden from search — out of stock, not truly gone
       if (!flags.dry) {
         await prisma.product.update({
           where: { id: db.id },
-          data: { archivedAt: new Date().toISOString() },
+          data: { inStock: false },
         });
       }
-      console.log(`  Archived: ${db.id} article=${db.wbArticle} ${db.name}`);
-      archived++;
+      console.log(`  Out of stock (not archiving): ${db.id} article=${article} ${db.name}`);
+      continue;
     }
+
+    // Card.json 404 — product truly gone from WB
+    if (!flags.dry) {
+      await prisma.product.update({
+        where: { id: db.id },
+        data: { archivedAt: new Date().toISOString() },
+      });
+    }
+    console.log(`  Archived (card.json 404): ${db.id} article=${article} ${db.name}`);
+    archived++;
   }
 
   return { pricesUpdated, cardApplied, created, archived, skippedCard };

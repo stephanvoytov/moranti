@@ -1,12 +1,12 @@
 /* =============================================
    GET /api/admin/sync-status
-   Возвращает статус последней синхронизации.
+   Возвращает историю синхронизации (WB + Ozon).
    Protected: требует сессии.
    ============================================= */
 
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/admin-auth";
-import { getSyncStatus } from "@/lib/wb-sync";
+import { getSyncHistory } from "@/lib/sync-history";
 
 export async function GET() {
   const session = await getSession();
@@ -14,6 +14,8 @@ export async function GET() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const status = getSyncStatus();
-  return NextResponse.json(status || { neverRun: true });
+  const wb = getSyncHistory("wb");
+  const ozon = getSyncHistory("ozon");
+
+  return NextResponse.json({ wb, ozon });
 }

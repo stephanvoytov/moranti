@@ -50,6 +50,7 @@ export const createProductSchema = z.object({
   reviewsCount: z.number().int().nonnegative().optional().nullable(),
   salesCount: z.number().int().nonnegative().optional().nullable(),
   slug: z.string().optional(),
+  modelId: z.string().optional(),
 });
 
 export const updateProductSchema = z.object({
@@ -69,6 +70,7 @@ export const updateProductSchema = z.object({
   reviewsCount: z.number().int().nonnegative().optional().nullable(),
   composition: z.string().optional(),
   colorName: z.string().optional(),
+  modelId: z.string().optional().nullable(),
 });
 
 /* ─── Settings ─── */

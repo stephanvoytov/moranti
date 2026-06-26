@@ -1,5 +1,5 @@
 /* =============================================
-   Admin WB Sync API — POST (start), GET (status)
+   Admin Ozon Sync API — POST (start), GET (status)
    Protected: requires valid admin session
    ============================================= */
 
@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
-import { runWbSync } from "@/lib/wb-sync";
+import { runOzonSync } from "@/lib/ozon-sync";
 import { getSyncHistory } from "@/lib/sync-history";
 
 export async function GET() {
@@ -16,7 +16,7 @@ export async function GET() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const history = getSyncHistory("wb");
+  const history = getSyncHistory("ozon");
   return NextResponse.json({ runs: history });
 }
 
@@ -33,10 +33,10 @@ export async function POST(request: NextRequest) {
   if (rl) return rl;
 
   try {
-    const result = runWbSync();
+    const result = runOzonSync();
     return NextResponse.json(result);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Sync failed";
+    const message = err instanceof Error ? err.message : "Ozon sync failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

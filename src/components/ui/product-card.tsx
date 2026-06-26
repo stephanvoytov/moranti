@@ -103,6 +103,12 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         >
           <HeartIcon filled={fav} />
         </button>
+        {product.inStock === false && !product.archivedAt && (
+          <span className={styles.outBadge}>Нет в наличии</span>
+        )}
+        {product.archivedAt && (
+          <span className={styles.outBadge}>Архивирован</span>
+        )}
       </div>
 
       <div className={styles.info}>

@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { name, price, originalPrice, category, description, wbArticle, ozonArticle, images: inputImages, rating, reviewsCount, slug: customSlug } = parsed.data;
+  const { name, price, originalPrice, category, description, wbArticle, ozonArticle, images: inputImages, rating, reviewsCount, slug: customSlug, modelId } = parsed.data;
 
   const marketplaces: { name: string; url: string; icon: string }[] = [];
   if (wbArticle) {
@@ -130,6 +130,7 @@ export async function POST(request: NextRequest) {
         ozonArticle: ozonArticle ?? null,
         rating: rating ?? null,
         reviewsCount: reviewsCount ?? null,
+        modelId: modelId ?? null,
       },
     })
   );

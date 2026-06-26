@@ -1,6 +1,6 @@
 /**
- * Серверная обёртка для запуска WB Sync из Next.js API.
- * Запускает sync-public.mjs, захватывает полный вывод,
+ * Серверная обёртка для запуска Ozon Sync из Next.js API.
+ * Запускает sync-ozon.mjs, захватывает полный вывод,
  * сохраняет в историю синхронизации.
  */
 
@@ -10,8 +10,8 @@ import { readFileSync, existsSync } from "fs";
 import { addSyncRun, getLastSyncRun, SyncRunRecord } from "./sync-history";
 
 const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
-const SYNC_SCRIPT = path.join(SCRIPTS_DIR, "sync-public.mjs");
-const SYNC_LOG_FILE = path.join(process.cwd(), "data", "sync-log.json");
+const SYNC_SCRIPT = path.join(SCRIPTS_DIR, "sync-ozon.mjs");
+const SYNC_LOG_FILE = path.join(process.cwd(), "data", "ozon-sync-log.json");
 
 function getDirectDbUrl(): string | undefined {
   return process.env.POSTGRES_URL_NON_POOLING
@@ -23,17 +23,17 @@ function getDirectDbUrl(): string | undefined {
 export type { SyncRunRecord };
 
 /**
- * Запускает синхронизацию с WB через sync-public.mjs.
+ * Запускает синхронизацию с Ozon через sync-ozon.mjs.
  * Возвращает полную запись запуска с логом.
  */
-export function runWbSync(): SyncRunRecord {
+export function runOzonSync(): SyncRunRecord {
   const startTime = Date.now();
   let stdout = "";
   let stderr = "";
 
   try {
     const result = execSync(
-      `node "${SYNC_SCRIPT}" --sync-json --save-json`,
+      `node "${SYNC_SCRIPT}" --sync-json`,
       {
         cwd: process.cwd(),
         timeout: 180_000,
@@ -50,14 +50,7 @@ export function runWbSync(): SyncRunRecord {
   } catch (err: any) {
     stdout = err.stdout || "";
     stderr = err.stderr || "";
-    // Пытаемся прочитать лог, если скрипт частично выполнился
     const record = buildRecord(startTime, stdout, stderr);
-    if (!record.error || existsSync(SYNC_LOG_FILE)) {
-      // Если лог есть — успех несмотря на ошибку exec
-      try {
-        return buildRecord(startTime, stdout, stderr);
-      } catch {}
-    }
     addSyncRun(record);
     return record;
   }
@@ -74,42 +67,47 @@ function buildRecord(startTime: number, stdout: string, stderr: string): SyncRun
   let stats = { added: 0, updated: 0, archived: 0, skipped: 0, errors: 0, total: 0 };
   let success = true;
   let error: string | undefined;
+  let details: any = undefined;
 
-  // Парсим лог sync-public.mjs
+  // Парсим лог sync-ozon.mjs
   if (existsSync(SYNC_LOG_FILE)) {
     try {
       const raw = JSON.parse(readFileSync(SYNC_LOG_FILE, "utf-8"));
       const s = raw.stats || {};
       stats = {
-        added: s.created || 0,
-        updated: (s.pricesUpdated || 0) + (s.cardApplied || 0),
-        archived: s.archived || 0,
-        skipped: s.skippedCard || 0,
-        errors: 0,
-        total: (s.created || 0) + (s.pricesUpdated || 0),
+        added: 0,
+        updated: s.updated || 0,
+        archived: 0,
+        skipped: 0,
+        errors: s.errors || 0,
+        total: s.total || 0,
       };
+      if (raw.details) {
+        details = raw.details;
+      }
     } catch {}
   }
 
-  if (stderr) {
+  if (stderr && !stdout.includes("SUMMARY")) {
     error = stderr.slice(0, 500);
     success = false;
   }
 
   return {
-    platform: "wb",
+    platform: "ozon",
     timestamp: new Date().toISOString(),
     duration,
     success,
     error,
     stats,
+    details,
     log: fullLog,
   };
 }
 
 /**
- * Возвращает последний запуск WB или null.
+ * Возвращает последний запуск Ozon или null.
  */
-export function getWbSyncStatus(): SyncRunRecord | null {
-  return getLastSyncRun("wb");
+export function getOzonSyncStatus(): SyncRunRecord | null {
+  return getLastSyncRun("ozon");
 }

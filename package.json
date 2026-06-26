@@ -13,7 +13,7 @@
     "prisma:seed": "prisma db seed"
   },
   "prisma": {
-    "seed": "node prisma/seed.mjs"
+    "seed": "node prisma/seed.mjs && node prisma/seed-models.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

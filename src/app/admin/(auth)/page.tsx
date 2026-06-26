@@ -3,8 +3,9 @@
    ============================================= */
 
 import { getProducts, getCategories } from "@/data/products";
-import { getSyncStatus } from "@/lib/wb-sync";
+import { getWbSyncStatus } from "@/lib/wb-sync";
 import Link from "next/link";
+import prisma, { prismaQuery } from "@/lib/prisma";
 import styles from "./dashboard.module.css";
 
 interface Issue {
@@ -21,7 +22,7 @@ function formatDate(ts: string) {
   }
 }
 
-function SyncSection({ sync }: { sync: ReturnType<typeof getSyncStatus> }) {
+function SyncSection({ sync }: { sync: ReturnType<typeof getWbSyncStatus> }) {
 
   return (
     <section className={styles.syncSection}>
@@ -31,7 +32,7 @@ function SyncSection({ sync }: { sync: ReturnType<typeof getSyncStatus> }) {
             <span className={styles.syncLabel}>Синхронизация с WB</span>
             <span className={styles.syncTime}>{formatDate(sync.timestamp)}</span>
             <span className={styles.syncMeta}>
-              +{sync.added} / ~{sync.updated} / -{sync.archived}
+              +{sync.stats.added} / ~{sync.stats.updated} / -{sync.stats.archived}
             </span>
           </div>
           <Link href="/admin/sync" className={styles.syncLink}>
@@ -54,14 +55,18 @@ function SyncSection({ sync }: { sync: ReturnType<typeof getSyncStatus> }) {
 }
 
 export default async function AdminDashboard() {
-  const [products, categories] = await Promise.all([
+  const [products, categories, models] = await Promise.all([
     getProducts(),
     getCategories(),
+    prismaQuery(() => prisma.model.findMany({
+      include: { variants: { where: { archivedAt: null }, select: { id: true } } },
+    })),
   ]);
-  const syncStatus = getSyncStatus();
+  const syncStatus = getWbSyncStatus();
 
   const totalProducts = products.length;
   const totalCategories = categories.length;
+  const totalModels = models.length;
   const avgPrice = Math.round(
     products.reduce((s, p) => s + p.price, 0) / totalProducts,
   );
@@ -73,6 +78,11 @@ export default async function AdminDashboard() {
   const fullyComplete = products.filter(
     (p) => p.colorName && p.composition && p.images?.length && p.wbArticle,
   ).length;
+  const linkedToModel = products.filter((p) => p.modelId).length;
+
+  // Variants per model stats
+  const modelsWithSingle = models.filter((m) => m.variants.length === 1).length;
+  const modelsWithMultiple = models.filter((m) => m.variants.length > 1).length;
 
   // ─── Issues (products needing attention) ───
   const issues: Issue[] = [];
@@ -89,9 +99,9 @@ export default async function AdminDashboard() {
   // Sort: most issues first
   issues.sort((a, b) => b.tags.length - a.tags.length);
 
-  // ─── Recent products (by id desc) ───
-  const recent = [...products]
-    .sort((a, b) => b.id.localeCompare(a.id))
+  // ─── Recent models ───
+  const recentModels = [...models]
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     .slice(0, 5);
 
   // ─── Category completeness ───
@@ -107,12 +117,12 @@ export default async function AdminDashboard() {
       {/* ——— Stats ——— */}
       <div className={styles.grid}>
         <div className={styles.card}>
-          <span className={styles.cardValue}>{totalProducts}</span>
-          <span className={styles.cardLabel}>Товаров</span>
+          <span className={styles.cardValue}>{totalModels}</span>
+          <span className={styles.cardLabel}>Моделей</span>
         </div>
         <div className={styles.card}>
-          <span className={styles.cardValue}>{totalCategories}</span>
-          <span className={styles.cardLabel}>Категорий</span>
+          <span className={styles.cardValue}>{totalProducts}</span>
+          <span className={styles.cardLabel}>Вариантов (цветов)</span>
         </div>
         <div className={styles.card}>
           <span className={styles.cardValue}>
@@ -127,14 +137,14 @@ export default async function AdminDashboard() {
           <span className={styles.cardLabel}>На Wildberries</span>
         </div>
         <div className={styles.card}>
-          <span className={styles.cardValue}>{avgPrice.toLocaleString("ru-RU")} ₽</span>
-          <span className={styles.cardLabel}>Средняя цена</span>
+          <span className={styles.cardValue}>{totalCategories}</span>
+          <span className={styles.cardLabel}>Категорий</span>
         </div>
         <div className={styles.card}>
           <span className={styles.cardValue}>
-            {fullyComplete} / {totalProducts}
+            {modelsWithMultiple} / {totalModels}
           </span>
-          <span className={styles.cardLabel}>Полностью заполнено</span>
+          <span className={styles.cardLabel}>Моделей с 2+ цветами</span>
         </div>
       </div>
 
@@ -145,11 +155,11 @@ export default async function AdminDashboard() {
       <div className={styles.summaryBar}>
         <span className={styles.summaryItem}>
           <span className={`${styles.summaryDot} ${styles.summaryDotGood}`} />
-          {withColorName} с цветом
+          {totalCategories} категорий
         </span>
         <span className={styles.summaryItem}>
           <span className={`${styles.summaryDot} ${styles.summaryDotGood}`} />
-          {withComposition} с материалом
+          {linkedToModel} привязано к моделям
         </span>
         <span className={styles.summaryItem}>
           <span className={`${styles.summaryDot} ${styles.summaryDotGood}`} />
@@ -203,33 +213,33 @@ export default async function AdminDashboard() {
         </section>
       )}
 
-      {/* ——— Recent products ——— */}
+      {/* ——— Recent models ——— */}
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Последние добавленные</h2>
-          <Link href="/admin/products" className={styles.issueLink}>
-            Все товары →
+          <h2 className={styles.sectionTitle}>Последние модели</h2>
+          <Link href="/admin/models" className={styles.issueLink}>
+            Все модели →
           </Link>
         </div>
 
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Название</th>
-              <th>Цена</th>
+              <th>Модель</th>
+              <th>Вариантов</th>
               <th>Категория</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            {recent.map((p) => (
-              <tr key={p.id}>
-                <td>{p.name}</td>
-                <td>{p.price.toLocaleString("ru-RU")} ₽</td>
-                <td>{catNames.get(p.category) || p.category}</td>
+            {recentModels.map((m) => (
+              <tr key={m.id}>
+                <td>{m.name}</td>
+                <td>{m.variants.length}</td>
+                <td>{catNames.get(m.category) || m.category}</td>
                 <td>
                   <Link
-                    href={`/admin/products/${p.id}`}
+                    href={`/admin/models/${m.id}`}
                     className={styles.issueLink}
                   >
                     Редактировать →
@@ -248,23 +258,23 @@ export default async function AdminDashboard() {
           <thead>
             <tr>
               <th>Категория</th>
-              <th>Кол-во</th>
-              <th>%</th>
+              <th>Моделей</th>
+              <th>Вариантов</th>
               <th>Средняя цена</th>
             </tr>
           </thead>
           <tbody>
             {categories.map((cat) => {
               const catProducts = products.filter((p) => p.category === cat.slug);
+              const catModels = models.filter((m) => m.category === cat.slug);
               const catAvg = catProducts.length
                 ? Math.round(catProducts.reduce((s, p) => s + p.price, 0) / catProducts.length)
                 : 0;
-              const pct = ((catProducts.length / totalProducts) * 100).toFixed(1);
               return (
                 <tr key={cat.slug}>
                   <td>{cat.name}</td>
+                  <td>{catModels.length}</td>
                   <td>{catProducts.length}</td>
-                  <td>{pct}%</td>
                   <td>{catAvg.toLocaleString("ru-RU")} ₽</td>
                 </tr>
               );
