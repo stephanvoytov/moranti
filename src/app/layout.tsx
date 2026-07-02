@@ -131,7 +131,7 @@ export default async function RootLayout({
     // Styles: 'unsafe-inline' для dev-режима (Next.js Fast Refresh)
     "style-src 'self' 'unsafe-inline'",
     // Images: WB CDN + Яндекс.Метрика
-    "img-src 'self' https://*.wbbasket.ru https://*.geobasket.ru https://mc.yandex.ru data:",
+    "img-src 'self' https://*.wbbasket.ru https://*.geobasket.ru https://*.ozone.ru https://mc.yandex.ru data:",
     // Fonts: self-hosted via next/font
     "font-src 'self'",
     // Connections: same-origin + Яндекс.Метрика
