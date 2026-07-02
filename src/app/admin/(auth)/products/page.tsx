@@ -22,6 +22,7 @@ interface Product {
   rating?: number;
   archivedAt?: string | null;
   colorName?: string;
+  model?: { id: string; name: string } | null;
 }
 
 interface Pagination {
@@ -354,6 +355,7 @@ export default function AdminProductsPage() {
               </th>
               <th></th>
               <th>Название</th>
+              <th>Модель</th>
               <th>Цена</th>
               <th>Категория</th>
               <th>Артикул</th>
@@ -363,9 +365,9 @@ export default function AdminProductsPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} className={styles.loading}>Загрузка...</td></tr>
+              <tr><td colSpan={9} className={styles.loading}>Загрузка...</td></tr>
             ) : products.length === 0 ? (
-              <tr><td colSpan={8} className={styles.empty}>
+              <tr><td colSpan={9} className={styles.empty}>
                 {statusTab === "archived" ? "Нет архивных товаров" : "Нет товаров"}
               </td></tr>
             ) : (
@@ -407,6 +409,15 @@ export default function AdminProductsPage() {
                         {p.name}
                       </Link>
                       {isArchived && <span className={styles.archivedBadge}>Архив</span>}
+                    </td>
+                    <td>
+                      {p.model ? (
+                        <Link href={`/admin/models/${p.model.id}`} className={styles.modelLink}>
+                          {p.model.name}
+                        </Link>
+                      ) : (
+                        <span className={styles.noModel}>—</span>
+                      )}
                     </td>
                     <td className={styles.price}>{formatPrice(p.price)}</td>
                     <td><span className={styles.categoryBadge}>{catName(p.category)}</span></td>

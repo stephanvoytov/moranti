@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * limit,
       take: limit,
+      include: { model: { select: { id: true, name: true } } },
     }),
     prisma.product.count({ where }),
   ]));

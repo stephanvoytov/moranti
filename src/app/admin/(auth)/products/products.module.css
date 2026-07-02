@@ -729,6 +729,22 @@
   opacity: 0.55;
 }
 
+.modelLink {
+  color: var(--camel);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.modelLink:hover {
+  text-decoration: underline;
+}
+
+.noModel {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
 .archivedBadge {
   display: inline-block;
   font-family: var(--font-sans);
