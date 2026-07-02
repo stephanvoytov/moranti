@@ -63,10 +63,9 @@ export async function POST(request: NextRequest) {
         });
 
       case "assign-model": {
-        if (!modelId) throw new Error("modelId required for assign-model action");
         return prisma.product.updateMany({
           where: { id: { in: ids } },
-          data: { modelId },
+          data: { modelId: modelId || null },
         });
       }
 
