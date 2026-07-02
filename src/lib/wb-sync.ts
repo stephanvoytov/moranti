@@ -1,17 +1,15 @@
 /**
  * Серверная обёртка для запуска WB Sync из Next.js API.
- * Запускает sync-public.mjs, захватывает полный вывод,
+ * Запускает sync-all.mjs --wb-only, захватывает полный вывод,
  * сохраняет в историю синхронизации.
  */
 
 import { execSync } from "child_process";
 import path from "path";
-import { readFileSync, existsSync } from "fs";
 import { addSyncRun, getLastSyncRun, SyncRunRecord } from "./sync-history";
 
 const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
-const SYNC_SCRIPT = path.join(SCRIPTS_DIR, "sync-public.mjs");
-const SYNC_LOG_FILE = path.join(process.cwd(), "data", "sync-log.json");
+const SYNC_SCRIPT = path.join(SCRIPTS_DIR, "sync-all.mjs");
 
 function getDirectDbUrl(): string | undefined {
   return process.env.POSTGRES_URL_NON_POOLING
@@ -23,7 +21,7 @@ function getDirectDbUrl(): string | undefined {
 export type { SyncRunRecord };
 
 /**
- * Запускает синхронизацию с WB через sync-public.mjs.
+ * Запускает синхронизацию с WB через sync-all.mjs --wb-only.
  * Возвращает полную запись запуска с логом.
  */
 export function runWbSync(): SyncRunRecord {
@@ -33,10 +31,10 @@ export function runWbSync(): SyncRunRecord {
 
   try {
     const result = execSync(
-      `node "${SYNC_SCRIPT}" --sync-json --save-json`,
+      `node "${SYNC_SCRIPT}" --wb-only`,
       {
         cwd: process.cwd(),
-        timeout: 180_000,
+        timeout: 300_000,
         encoding: "utf-8",
         env: {
           ...process.env,
@@ -50,16 +48,6 @@ export function runWbSync(): SyncRunRecord {
   } catch (err: any) {
     stdout = err.stdout || "";
     stderr = err.stderr || "";
-    // Пытаемся прочитать лог, если скрипт частично выполнился
-    const record = buildRecord(startTime, stdout, stderr);
-    if (!record.error || existsSync(SYNC_LOG_FILE)) {
-      // Если лог есть — успех несмотря на ошибку exec
-      try {
-        return buildRecord(startTime, stdout, stderr);
-      } catch {}
-    }
-    addSyncRun(record);
-    return record;
   }
 
   const record = buildRecord(startTime, stdout, stderr);
@@ -75,24 +63,29 @@ function buildRecord(startTime: number, stdout: string, stderr: string): SyncRun
   let success = true;
   let error: string | undefined;
 
-  // Парсим лог sync-public.mjs
-  if (existsSync(SYNC_LOG_FILE)) {
+  // Парсим JSON-суммари с последней строки stdout
+  // sync-all.mjs выводит {"created":3,"updated":15,"archived":2,...}
+  const lines = stdout.trim().split("\n").filter(Boolean);
+  const lastLine = lines[lines.length - 1];
+  if (lastLine?.startsWith("{")) {
     try {
-      const raw = JSON.parse(readFileSync(SYNC_LOG_FILE, "utf-8"));
-      const s = raw.stats || {};
+      const s = JSON.parse(lastLine);
       stats = {
         added: s.created || 0,
-        updated: (s.pricesUpdated || 0) + (s.cardApplied || 0),
+        updated: s.updated || 0,
         archived: s.archived || 0,
-        skipped: s.skippedCard || 0,
-        errors: 0,
-        total: (s.created || 0) + (s.pricesUpdated || 0),
+        skipped: 0,
+        errors: s.errors || 0,
+        total: s.total || 0,
       };
-    } catch {}
+    } catch {
+      // ignore parse errors
+    }
   }
 
-  if (stderr) {
-    error = stderr.slice(0, 500);
+  if (stderr || stdout.includes("ERROR:")) {
+    const errLine = stderr || lines.find((l) => l.includes("ERROR:")) || "";
+    error = errLine.slice(0, 500);
     success = false;
   }
 

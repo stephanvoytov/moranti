@@ -11,7 +11,9 @@ interface Product {
   price: number;
   category: string;
   wbArticle: number;
+  ozonArticle: number;
   image: string;
+  ozonImage?: string;
   rating?: number;
 }
 
@@ -318,13 +320,23 @@ export default function AdminProductsPage() {
                   products.map((p) => (
                     <tr key={p.id}>
                       <td>
-                        {p.image && (
-                          <img
-                            src={p.image}
-                            alt=""
-                            className={styles.thumb}
-                          />
-                        )}
+                        <div className={styles.photoPair}>
+                          {p.wbArticle && p.image && (
+                            <div className={styles.photoItem}>
+                              <img src={p.image} alt="" className={styles.photoImg} />
+                              <span className={styles.photoLabel}>WB</span>
+                            </div>
+                          )}
+                          {p.ozonArticle && p.ozonImage && (
+                            <div className={styles.photoItem}>
+                              <img src={p.ozonImage} alt="" className={styles.photoImg} />
+                              <span className={styles.photoLabel}>Ozon</span>
+                            </div>
+                          )}
+                          {!p.image && !p.ozonImage && (
+                            <div className={styles.photoPlaceholder}>—</div>
+                          )}
+                        </div>
                       </td>
                       <td>
                         <Link
@@ -340,7 +352,12 @@ export default function AdminProductsPage() {
                       <td>
                         <span className={styles.categoryBadge}>{p.category}</span>
                       </td>
-                      <td className={styles.article}>{p.wbArticle}</td>
+                      <td className={styles.article}>
+                        {p.wbArticle && <span>WB: {p.wbArticle}</span>}
+                        {p.wbArticle && p.ozonArticle && <br />}
+                        {p.ozonArticle && <span>OZ: {p.ozonArticle}</span>}
+                        {!p.wbArticle && !p.ozonArticle && <span className={styles.muted}>—</span>}
+                      </td>
                       <td>{p.rating ? `${p.rating.toFixed(1)} ★` : "—"}</td>
                       <td>
                         <button

@@ -34,6 +34,8 @@ model Product {
   description       String
   image             String
   images            String[]
+  ozonImage         String?   // Фото с Ozon для админки
+  ozonImages        String[]  // Все фото с Ozon для админки
   marketplaces      Json      @default("[]")
   wbArticle         BigInt?   @unique
   ozonArticle       BigInt?   @unique
