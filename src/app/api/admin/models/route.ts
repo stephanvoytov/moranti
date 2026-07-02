@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
   const models = await prismaQuery(() =>
     prisma.model.findMany({
-      orderBy: { createdAt: "asc" },
+      orderBy: { sortOrder: "asc" },
       include: {
         variants: {
           where: { archivedAt: null },
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 
   // Auto-generate ID
   const lastModel = await prismaQuery(() =>
-    prisma.model.findFirst({ orderBy: { createdAt: "desc" }, select: { id: true } })
+    prisma.model.findFirst({ orderBy: { createdAt: "desc" }, select: { id: true, sortOrder: true } })
   );
   const lastNum = lastModel
     ? parseInt(lastModel.id.replace("model-", ""), 10) || 0
@@ -114,9 +114,58 @@ export async function POST(request: NextRequest) {
         composition: composition ?? null,
         dimensions: dimensions ?? null,
         image,
+        sortOrder: (lastModel?.sortOrder ?? 0) + 1,
       },
     })
   );
 
   return NextResponse.json(model, { status: 201 });
+}
+
+/* ——— PUT /api/admin/models ——— */
+
+const reorderSchema = z.object({
+  reorder: z.array(z.object({
+    id: z.string().min(1),
+    sortOrder: z.number().int().nonnegative(),
+  })).min(1),
+});
+
+export async function PUT(request: NextRequest) {
+  const csrf = csrfGuard(request);
+  if (csrf) return csrf;
+
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  const rl = enforceRateLimit(request);
+  if (rl) return rl;
+
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  const parsed = reorderSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+      { status: 400 },
+    );
+  }
+
+  await prismaQuery(async () => {
+    for (const item of parsed.data.reorder) {
+      await prisma.model.update({
+        where: { id: item.id },
+        data: { sortOrder: item.sortOrder },
+      });
+    }
+  });
+
+  return NextResponse.json({ success: true });
 }

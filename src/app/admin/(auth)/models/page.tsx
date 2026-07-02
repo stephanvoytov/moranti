@@ -1,22 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./models.module.css";
-import { CATEGORIES, CATEGORY_ORDER } from "@/lib/categories";
+import { CATEGORIES } from "@/lib/categories";
 import AdminButton from "@/components/admin/admin-button";
 import AdminPageHeader from "@/components/admin/admin-page-header";
 
-interface Product {
+interface Variant {
   id: string;
   name: string;
   price: number;
   category: string;
-  wbArticle: number | null;
-  ozonArticle: number | null;
-  colorName?: string | null;
-  image?: string | null;
+  wbArticle?: number;
+  ozonArticle?: number;
+  colorName?: string;
+  image?: string;
 }
 
 interface Model {
@@ -27,14 +27,22 @@ interface Model {
   description: string;
   composition: string | null;
   dimensions: string | null;
-  variants: Product[];
+  sortOrder: number;
+  variants: Variant[];
 }
 
 export default function AdminModelsPage() {
   const router = useRouter();
   const [models, setModels] = useState<Model[]>([]);
-  const [unassigned, setUnassigned] = useState<Product[]>([]);
+  const [unassigned, setUnassigned] = useState<Variant[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Drag reorder
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const dragNode = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/models?includeUnassigned=true")
@@ -50,28 +58,87 @@ export default function AdminModelsPage() {
       .catch(() => setLoading(false));
   }, [router]);
 
-  // Group models by category
-  const grouped = CATEGORY_ORDER.map((cat) => ({
-    slug: cat,
-    name: CATEGORIES.find((c) => c.slug === cat)?.namePlural || cat,
-    models: models.filter((m) => m.category === cat),
-  })).filter((g) => g.models.length > 0);
-
-  // Group unassigned products by category
-  const unassignedGrouped = CATEGORY_ORDER.map((cat) => ({
-    slug: cat,
-    name: CATEGORIES.find((c) => c.slug === cat)?.namePlural || cat,
-    products: unassigned.filter((p) => p.category === cat),
-  })).filter((g) => g.products.length > 0);
+  // ─── Stats ───
 
   const totalVariants = models.reduce((s, m) => s + m.variants.length, 0);
   const totalUnassigned = unassigned.length;
   const withWb = models.filter((m) => m.variants.some((v) => v.wbArticle != null && v.wbArticle > 0)).length;
   const withOzon = models.filter((m) => m.variants.some((v) => v.ozonArticle != null)).length;
 
-  function formatPrice(n: number) {
+  // ─── Category helpers ───
+
+  const catInfo = (slug: string) => CATEGORIES.find((c) => c.slug === slug);
+
+  // ─── Drag & drop ───
+
+  function handleDragStart(e: React.DragEvent, idx: number) {
+    dragNode.current = e.currentTarget as HTMLElement;
+    dragNode.current.classList.add(styles.dragging);
+    setDragIndex(idx);
+    e.dataTransfer.effectAllowed = "move";
+  }
+
+  function handleDragOver(e: React.DragEvent, idx: number) {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === idx) return;
+    const items = [...models];
+    const [moved] = items.splice(dragIndex, 1);
+    items.splice(idx, 0, moved);
+    setModels(items);
+    setDragIndex(idx);
+    setDirty(true);
+  }
+
+  function handleDragEnd() {
+    if (dragNode.current) dragNode.current.classList.remove(styles.dragging);
+    setDragIndex(null);
+  }
+
+  async function saveOrder() {
+    setSaving(true);
+    setSaved(false);
+    try {
+      const reorder = models.map((m, i) => ({ id: m.id, sortOrder: i }));
+      const res = await fetch("/api/admin/models", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reorder }),
+      });
+      if (res.ok) {
+        setDirty(false);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  // ─── Helpers ───
+
+  function formatPrice(n?: number) {
     return n ? n.toLocaleString("ru-RU") + " ₽" : "—";
   }
+
+  function heroImage(model: Model): string | undefined {
+    return model.variants.find((v) => v.image)?.image || undefined;
+  }
+
+  function catColor(slug: string): string {
+    const map: Record<string, string> = {
+      crossbody: "#8B6F5C",
+      "na-plecho": "#5B7B6F",
+      baguette: "#7B5B8B",
+      tote: "#8B7B5B",
+      saddle: "#8B5B5B",
+      backpack: "#5B6F8B",
+    };
+    return map[slug] || "#999";
+  }
+
+  // ─── Render ───
 
   if (loading) {
     return <div className={styles.page}><p className={styles.loading}>Загрузка...</p></div>;
@@ -81,7 +148,7 @@ export default function AdminModelsPage() {
     <div className={styles.page}>
       <AdminPageHeader
         title="Модели"
-        subtitle={`${models.length} моделей, ${totalVariants} вариантов${totalUnassigned > 0 ? ` · ${totalUnassigned} без модели` : ""}`}
+        subtitle={`${models.length} моделей, ${totalVariants} вариантов${totalUnassigned > 0 ? ` · ${totalUnassigned} без модели` : ""}${dirty ? " · несохранённые изменения" : ""}`}
       >
         <span className={styles.stat}>
           <span className={styles.statDot} style={{ background: "#8B6F5C" }} />
@@ -91,13 +158,25 @@ export default function AdminModelsPage() {
           <span className={styles.statDot} style={{ background: "#005BFF" }} />
           На Ozon: {withOzon}
         </span>
+        {dirty && (
+          <AdminButton variant="primary" onClick={saveOrder} loading={saving} disabled={saving}>
+            Сохранить порядок
+          </AdminButton>
+        )}
+        {saved && <span className={styles.savedBadge}>Сохранено</span>}
         <AdminButton variant="secondary" href="/admin/products">
-          Все товары
+          Товары
         </AdminButton>
         <AdminButton variant="primary" href="/admin/models/new">
           + Новая модель
         </AdminButton>
       </AdminPageHeader>
+
+      {dirty && (
+        <p className={styles.reorderHint}>
+          Перетащите карточки в нужном порядке и нажмите «Сохранить порядок»
+        </p>
+      )}
 
       {models.length === 0 && unassigned.length === 0 ? (
         <div className={styles.empty}>
@@ -106,135 +185,159 @@ export default function AdminModelsPage() {
             Создать первую модель
           </AdminButton>
         </div>
+      ) : models.length === 0 ? (
+        <p className={styles.empty}>Нет моделей</p>
       ) : (
         <>
-          {models.length > 0 && (
-            <div className={styles.modelList}>
-              <h2 className={styles.sectionTitle}>Модели</h2>
-              {grouped.map((group) => (
-                <section key={group.slug} className={styles.categorySection}>
-                  <h3 className={styles.categoryTitle}>
-                    {group.name}
-                    <span className={styles.categoryCount}>{group.models.length}</span>
-                  </h3>
+          {/* ─── Gallery grid ─── */}
+          <div className={styles.galleryGrid}>
+            {models.map((model, idx) => {
+              const hero = heroImage(model);
+              const info = catInfo(model.category);
 
-                  <div className={styles.modelCards}>
-                    {group.models.map((model) => {
-                      const hasWb = model.variants.some((v) => v.wbArticle != null && v.wbArticle > 0);
-                      const hasOzon = model.variants.some((v) => v.ozonArticle != null);
+              return (
+                <div
+                  key={model.id}
+                  className={`${styles.galleryCard} ${dragIndex === idx ? styles.galleryCardDrag : ""}`}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, idx)}
+                  onDragOver={(e) => handleDragOver(e, idx)}
+                  onDragEnd={handleDragEnd}
+                >
+                  {/* Drag handle */}
+                  <span className={styles.galleryDragHandle} aria-label="Перетащить">
+                    ⋮⋮
+                  </span>
 
-                      return (
-                        <Link
-                          key={model.id}
-                          href={`/admin/models/${model.id}`}
-                          className={styles.modelCard}
-                        >
-                          <div className={styles.modelCardHeader}>
-                            <h4 className={styles.modelName}>
-                              {model.name}
-                              {model.dimensions && (
-                                <span className={styles.modelDims}>{model.dimensions}</span>
-                              )}
-                            </h4>
-                            <div className={styles.modelMps}>
-                              {hasWb && <span className={styles.mpBadge} title="На Wildberries">WB</span>}
-                              {hasOzon && <span className={`${styles.mpBadge} ${styles.mpBadgeOzon}`} title="На Ozon">Ozon</span>}
-                            </div>
-                          </div>
+                  {/* Hero image */}
+                  <Link href={`/admin/models/${model.id}`} className={styles.galleryHero}>
+                    {hero ? (
+                      <img src={hero} alt={model.name} className={styles.galleryHeroImg} />
+                    ) : (
+                      <div className={styles.galleryHeroPlaceholder}>
+                        <span>Нет фото</span>
+                      </div>
+                    )}
+                  </Link>
 
-                          {model.composition && (
-                            <p className={styles.modelMaterial}>{model.composition}</p>
-                          )}
-
-                          <div className={styles.variantList}>
-                            {model.variants.slice(0, 4).map((v) => (
-                              <div key={v.id} className={styles.variantChip}>
-                                {v.image && (
-                                  <img src={v.image} alt="" className={styles.variantChipImg} />
-                                )}
-                                <span className={styles.variantChipName}>
-                                  {v.colorName || v.name.split(" ").slice(-1)[0]}
-                                </span>
-                                <span className={styles.variantChipPrice}>
-                                  {formatPrice(v.price)}
-                                </span>
-                              </div>
-                            ))}
-                            {model.variants.length > 4 && (
-                              <div className={styles.variantMore}>
-                                +{model.variants.length - 4}
-                              </div>
-                            )}
-                          </div>
-
-                          <div className={styles.modelCardFooter}>
-                            <span className={styles.variantCount}>
-                              {model.variants.length} {model.variants.length === 1 ? "вариант" : model.variants.length < 5 ? "варианта" : "вариантов"}
-                            </span>
-                            <span className={styles.modelArrow}>→</span>
-                          </div>
-                        </Link>
-                      );
-                    })}
+                  {/* Info */}
+                  <div className={styles.galleryInfo}>
+                    <Link href={`/admin/models/${model.id}`} className={styles.galleryName}>
+                      {model.name}
+                    </Link>
+                    <div className={styles.galleryMeta}>
+                      <span
+                        className={styles.galleryCat}
+                        style={{ borderColor: catColor(model.category) }}
+                      >
+                        {info?.name || model.category}
+                      </span>
+                      {model.dimensions && (
+                        <span className={styles.galleryDims}>{model.dimensions}</span>
+                      )}
+                    </div>
+                    {model.composition && (
+                      <span className={styles.galleryMaterial}>{model.composition}</span>
+                    )}
                   </div>
-                </section>
-              ))}
-            </div>
-          )}
 
-          {unassigned.length > 0 && (
-            <div className={styles.unassignedSection}>
-              <h2 className={styles.sectionTitle}>
-                Товары без модели
-                <span className={styles.categoryCount}>{unassigned.length}</span>
-              </h2>
-              <p className={styles.unassignedHint}>
-                Эти товары ещё не привязаны к моделям. Вы можете{" "}
-                <Link href="/admin/models/new">создать новую модель</Link> или
-                отредактировать существующую, чтобы добавить их.
-              </p>
-
-              {unassignedGrouped.map((group) => (
-                <section key={group.slug} className={styles.categorySection}>
-                  <h3 className={styles.categoryTitle}>
-                    {group.name}
-                    <span className={styles.categoryCount}>{group.products.length}</span>
-                  </h3>
-
-                  <div className={styles.unassignedGrid}>
-                    {group.products.map((p) => (
-                      <div key={p.id} className={styles.unassignedCard}>
-                        {p.image && (
-                          <img src={p.image} alt="" className={styles.unassignedImg} />
-                        )}
-                        <div className={styles.unassignedInfo}>
-                          <div className={styles.unassignedName}>{p.name}</div>
-                          <div className={styles.unassignedMeta}>
-                            <span>{formatPrice(p.price)}</span>
-                            {p.colorName && <span> · {p.colorName}</span>}
-                          </div>
-                          <div className={styles.unassignedArticles}>
-                            {p.wbArticle && <span className={styles.unassignedArt}>WB {p.wbArticle}</span>}
-                            {p.ozonArticle && <span className={styles.unassignedArt}>Ozon {p.ozonArticle}</span>}
-                          </div>
-                        </div>
-                        <div className={styles.unassignedActions}>
+                  {/* Variant strip */}
+                  {model.variants.length > 0 && (
+                    <div className={styles.galleryVariants}>
+                      <div className={styles.galleryVariantStrip}>
+                        {model.variants.map((v) => (
                           <Link
-                            href={`/admin/products/${p.id}`}
-                            className={styles.unassignedEditBtn}
-                            title="Редактировать товар"
+                            key={v.id}
+                            href={`/admin/products/${v.id}`}
+                            className={styles.galleryVariant}
+                            title={`${v.colorName || v.name} · ${formatPrice(v.price)}`}
                           >
-                            ✎
+                            {v.image ? (
+                              <img src={v.image} alt="" className={styles.galleryVariantImg} />
+                            ) : (
+                              <div className={styles.galleryVariantPlaceholder} />
+                            )}
                           </Link>
+                        ))}
+                      </div>
+                      <div className={styles.galleryVariantCount}>
+                        {model.variants.length} {model.variants.length === 1 ? "цвет" : "цвета"}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Footer badges */}
+                  <div className={styles.galleryFooter}>
+                    {model.variants.some((v) => v.wbArticle) && (
+                      <span className={styles.galleryBadge}>WB</span>
+                    )}
+                    {model.variants.some((v) => v.ozonArticle) && (
+                      <span className={`${styles.galleryBadge} ${styles.galleryBadgeOzon}`}>Ozon</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {/* ─── Unassigned products ─── */}
+      {unassigned.length > 0 && (
+        <div className={styles.unassignedSection}>
+          <h2 className={styles.sectionTitle}>
+            Товары без модели
+            <span className={styles.countBadge}>{unassigned.length}</span>
+          </h2>
+          <p className={styles.unassignedHint}>
+            Эти товары ещё не привязаны к моделям. Вы можете{" "}
+            <Link href="/admin/models/new">создать новую модель</Link> или
+            отредактировать существующую, чтобы добавить их.
+          </p>
+
+          {/* Grouped by category */}
+          {CATEGORIES.map((cat) => {
+            const items = unassigned.filter((p) => p.category === cat.slug);
+            if (items.length === 0) return null;
+            return (
+              <section key={cat.slug} className={styles.categorySection}>
+                <h3 className={styles.categoryTitle}>
+                  {cat.name}
+                  <span className={styles.countBadge}>{items.length}</span>
+                </h3>
+                <div className={styles.unassignedGrid}>
+                  {items.map((p) => (
+                    <div key={p.id} className={styles.unassignedCard}>
+                      {p.image && (
+                        <img src={p.image} alt="" className={styles.unassignedImg} />
+                      )}
+                      <div className={styles.unassignedInfo}>
+                        <Link href={`/admin/products/${p.id}`} className={styles.unassignedName}>
+                          {p.name}
+                        </Link>
+                        <div className={styles.unassignedMeta}>
+                          <span>{formatPrice(p.price)}</span>
+                          {p.colorName && <span> · {p.colorName}</span>}
+                        </div>
+                        <div className={styles.unassignedArticles}>
+                          {p.wbArticle && <span>WB {p.wbArticle}</span>}
+                          {p.ozonArticle && <span>Ozon {p.ozonArticle}</span>}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </section>
-              ))}
-            </div>
-          )}
-        </>
+                      <Link
+                        href={`/admin/products/${p.id}`}
+                        className={styles.unassignedEditBtn}
+                        title="Редактировать товар"
+                      >
+                        ✎
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
       )}
     </div>
   );
