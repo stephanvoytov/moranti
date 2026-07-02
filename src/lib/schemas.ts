@@ -120,6 +120,7 @@ export const productsQuerySchema = z.object({
   search: z.string().optional(),
   category: z.enum(VALID_CATEGORIES).optional(),
   archived: z.enum(["true", "false"]).optional(),
+  marketplace: z.enum(["wb", "ozon", "both"]).optional(),
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(200).optional().default(20),
 });

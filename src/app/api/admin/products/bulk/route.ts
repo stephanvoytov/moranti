@@ -12,8 +12,9 @@ import { z } from "zod";
 import prisma, { prismaQuery } from "@/lib/prisma";
 
 const bulkActionSchema = z.object({
-  action: z.enum(["archive", "unarchive", "delete"]),
+  action: z.enum(["archive", "unarchive", "delete", "assign-model"]),
   ids: z.array(z.string().min(1)).min(1, "At least one ID is required"),
+  modelId: z.string().optional(),
 });
 
 /* ——— POST /api/admin/products/bulk ——— */
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { action, ids } = parsed.data;
+  const { action, ids, modelId } = parsed.data;
 
   const result = await prismaQuery(async () => {
     switch (action) {
@@ -60,6 +61,14 @@ export async function POST(request: NextRequest) {
           where: { id: { in: ids } },
           data: { archivedAt: null },
         });
+
+      case "assign-model": {
+        if (!modelId) throw new Error("modelId required for assign-model action");
+        return prisma.product.updateMany({
+          where: { id: { in: ids } },
+          data: { modelId },
+        });
+      }
 
       case "delete": {
         // First unlink from models if linked
@@ -90,6 +99,7 @@ function getMessage(action: string, count: number): string {
     archive: ["товар архивирован", "товаров архивировано"],
     unarchive: ["товар разархивирован", "товаров разархивировано"],
     delete: ["товар удалён", "товаров удалено"],
+    "assign-model": ["товар привязан к модели", "товаров привязано к модели"],
   };
   const [one, few] = nouns[action] ?? ["обработано", "обработано"];
   return `${count} ${count === 1 ? one : few}`;

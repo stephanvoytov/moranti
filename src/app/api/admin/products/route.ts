@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const parsed = productsQuerySchema.safeParse(Object.fromEntries(searchParams));
-  const { search = "", category = "", archived = "", page = 1, limit = 20 } = parsed.data ?? {};
+  const { search = "", category = "", archived = "", marketplace = "", page = 1, limit = 20 } = parsed.data ?? {};
 
   const where: Record<string, unknown> = {};
   if (search) {
@@ -37,6 +37,14 @@ export async function GET(request: NextRequest) {
     where.archivedAt = { not: null };
   } else if (archived === "false") {
     where.archivedAt = null;
+  }
+  if (marketplace === "wb") {
+    where.wbArticle = { not: null };
+  } else if (marketplace === "ozon") {
+    where.ozonArticle = { not: null };
+  } else if (marketplace === "both") {
+    where.wbArticle = { not: null };
+    where.ozonArticle = { not: null };
   }
 
   const [items, total] = await prismaQuery(() => Promise.all([

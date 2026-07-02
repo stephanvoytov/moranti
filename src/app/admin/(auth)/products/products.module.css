@@ -723,6 +723,67 @@
   opacity: 0.9;
 }
 
+/* ─── Marketplace pills ─── */
+
+.mpPills {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.mpPill {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 7px 10px;
+  background: var(--white);
+  border: none;
+  border-right: 1px solid var(--border-light-gray);
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.mpPill:last-child {
+  border-right: none;
+}
+
+.mpPill:hover {
+  background: var(--card-bg);
+  color: var(--dark);
+}
+
+.mpPillActive {
+  background: var(--camel);
+  color: #fff;
+}
+
+.mpPillActive:hover {
+  background: var(--camel);
+  opacity: 0.9;
+}
+
+/* ─── Assign model select ─── */
+
+.assignSelect {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  outline: none;
+  background: var(--white);
+}
+
+.assignSelect:focus {
+  border-color: var(--dark);
+}
+
 /* ─── Archived row ─── */
 
 .archivedRow {

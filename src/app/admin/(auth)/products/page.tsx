@@ -33,7 +33,13 @@ interface Pagination {
 }
 
 type StatusTab = "active" | "archived" | "all";
-type ConfirmAction = "archive" | "unarchive" | "delete" | null;
+type ConfirmAction = "archive" | "unarchive" | "delete" | "assign-model" | null;
+
+interface ModelBrief {
+  id: string;
+  name: string;
+  category: string;
+}
 
 export default function AdminProductsPage() {
   const router = useRouter();
@@ -44,12 +50,18 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const [marketplace, setMarketplace] = useState("");
   const [statusTab, setStatusTab] = useState<StatusTab>("active");
 
   // Bulk selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+
+  // Assign model modal
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [assignModelId, setAssignModelId] = useState("");
+  const [models, setModels] = useState<ModelBrief[]>([]);
 
   // Reorder mode
   const [reorderMode, setReorderMode] = useState(false);
@@ -60,6 +72,7 @@ export default function AdminProductsPage() {
   const dragNode = useRef<HTMLElement | null>(null);
 
   const archivedParam = statusTab === "all" ? undefined : statusTab === "archived" ? "true" : "false";
+  const marketplaceParam = marketplace || undefined;
 
   const fetchProducts = useCallback(
     async (page = 1) => {
@@ -69,6 +82,7 @@ export default function AdminProductsPage() {
       if (search) params.set("search", search);
       if (category) params.set("category", category);
       if (archivedParam) params.set("archived", archivedParam);
+      if (marketplaceParam) params.set("marketplace", marketplaceParam);
 
       const res = await fetch(`/api/admin/products?${params}`);
       if (res.status === 401) { router.push("/admin/login"); return; }
@@ -78,7 +92,7 @@ export default function AdminProductsPage() {
       setSelectedIds(new Set());
       setLoading(false);
     },
-    [search, category, archivedParam, router],
+    [search, category, archivedParam, marketplaceParam, router],
   );
 
   useEffect(() => { fetchProducts(1); }, [fetchProducts]);
@@ -101,14 +115,15 @@ export default function AdminProductsPage() {
     }
   }
 
-  async function executeBulk(action: "archive" | "unarchive" | "delete") {
+  async function executeBulk(action: "archive" | "unarchive" | "delete" | "assign-model", extra?: Record<string, unknown>) {
     setBulkProcessing(true);
     setConfirmAction(null);
+    setShowAssignModal(false);
     try {
       const res = await fetch("/api/admin/products/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, ids: Array.from(selectedIds) }),
+        body: JSON.stringify({ action, ids: Array.from(selectedIds), ...extra }),
       });
       if (res.ok) {
         setSelectedIds(new Set());
@@ -119,6 +134,23 @@ export default function AdminProductsPage() {
     } finally {
       setBulkProcessing(false);
     }
+  }
+
+  // ─── Assign model ───
+
+  let modelsFetched = false;
+  async function fetchModelsOnce() {
+    if (modelsFetched && models.length > 0) return;
+    modelsFetched = true;
+    try {
+      const res = await fetch("/api/admin/models");
+      if (res.ok) {
+        const data = await res.json();
+        setModels((data.items || []).map((m: { id: string; name: string; category: string }) => ({
+          id: m.id, name: m.name, category: m.category,
+        })));
+      }
+    } catch { /* ignore */ }
   }
 
   // ─── Single delete ───
@@ -295,6 +327,22 @@ export default function AdminProductsPage() {
             </button>
           ))}
         </div>
+        <div className={styles.mpPills}>
+          {[
+            { value: "", label: "Любой МП" },
+            { value: "wb", label: "WB" },
+            { value: "ozon", label: "Ozon" },
+            { value: "both", label: "Оба" },
+          ].map((mp) => (
+            <button
+              key={mp.value}
+              className={`${styles.mpPill} ${marketplace === mp.value ? styles.mpPillActive : ""}`}
+              onClick={() => setMarketplace(mp.value)}
+            >
+              {mp.label}
+            </button>
+          ))}
+        </div>
         <input
           type="text"
           className={styles.searchInput}
@@ -332,6 +380,9 @@ export default function AdminProductsPage() {
                 Разархивировать
               </AdminButton>
             )}
+            <AdminButton variant="secondary" size="sm" onClick={() => { fetchModelsOnce(); setShowAssignModal(true); }} disabled={bulkProcessing}>
+              Назначить модель
+            </AdminButton>
             <AdminButton variant="danger" size="sm" onClick={() => setConfirmAction("delete")} disabled={bulkProcessing}>
               Удалить
             </AdminButton>
@@ -489,6 +540,38 @@ export default function AdminProductsPage() {
               ? `Разархивировать ${selectedIds.size} товаров? Они снова появятся в каталоге.`
               : `Вы уверены, что хотите удалить ${selectedIds.size} товаров? Это действие необратимо.`}
         </p>
+      </AdminModal>
+
+      {/* ─── Assign model modal ─── */}
+      <AdminModal
+        open={showAssignModal}
+        onClose={() => setShowAssignModal(false)}
+        title="Назначить модель"
+        actions={[
+          { label: "Отмена", onClick: () => setShowAssignModal(false) },
+          {
+            label: "Назначить",
+            onClick: () => executeBulk("assign-model", { modelId: assignModelId }),
+            variant: "primary",
+            disabled: !assignModelId || bulkProcessing,
+          },
+        ]}
+      >
+        <p style={{ marginBottom: 12 }}>
+          Выберите модель для {selectedIds.size} товаров:
+        </p>
+        <select
+          className={styles.assignSelect}
+          value={assignModelId}
+          onChange={(e) => setAssignModelId(e.target.value)}
+        >
+          <option value="">— выберите модель —</option>
+          {models.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.name} ({m.category})
+            </option>
+          ))}
+        </select>
       </AdminModal>
     </div>
   );
