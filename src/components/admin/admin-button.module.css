@@ -1,0 +1,100 @@
+/* ─── AdminButton ─── */
+
+.btn {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: opacity var(--transition-fast), background var(--transition-fast),
+    border-color var(--transition-fast);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+  line-height: 1;
+  border: 1px solid transparent;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ─── Variants ─── */
+
+.primary {
+  background: var(--dark);
+  color: var(--white);
+  border-color: var(--dark);
+}
+
+.primary:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.secondary {
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border-color: var(--border-light-gray);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--filter-bg);
+}
+
+.danger {
+  background: var(--error);
+  color: var(--white);
+}
+
+.danger:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: transparent;
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--card-bg);
+}
+
+/* ─── Sizes ─── */
+
+.sm {
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  padding: 6px 12px;
+}
+
+.md {
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 9px 18px;
+}
+
+/* ─── Loading ─── */
+
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.5s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

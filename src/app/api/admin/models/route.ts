@@ -24,11 +24,13 @@ const createModelSchema = z.object({
 
 /* ——— GET /api/admin/models ——— */
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
+
+  const includeUnassigned = request.nextUrl.searchParams.get("includeUnassigned") === "true";
 
   const models = await prismaQuery(() =>
     prisma.model.findMany({
@@ -47,7 +49,18 @@ export async function GET() {
     variants: m.variants.map((v) => serializeProduct(v as Record<string, unknown>)),
   }));
 
-  return NextResponse.json({ items: result });
+  let unassigned: Record<string, unknown>[] = [];
+  if (includeUnassigned) {
+    const products = await prismaQuery(() =>
+      prisma.product.findMany({
+        where: { modelId: null, archivedAt: null },
+        orderBy: [{ category: "asc" }, { createdAt: "asc" }],
+      })
+    );
+    unassigned = products.map((p) => serializeProduct(p as Record<string, unknown>));
+  }
+
+  return NextResponse.json({ items: result, unassigned });
 }
 
 /* ——— POST /api/admin/models ——— */

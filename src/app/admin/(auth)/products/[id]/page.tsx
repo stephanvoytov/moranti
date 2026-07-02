@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent, useRef, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import ProductCard from "@/components/ui/product-card";
+import AdminButton from "@/components/admin/admin-button";
 import styles from "./editor.module.css";
 
 interface ProductForm {
@@ -623,20 +624,12 @@ export default function ProductEditorPage() {
         {error && <p className={styles.errorMsg}>{error}</p>}
 
         <div className={styles.actions}>
-          <button
-            type="button"
-            className={styles.cancelBtn}
-            onClick={() => router.push("/admin/products")}
-          >
+          <AdminButton variant="ghost" onClick={() => router.push("/admin/products")}>
             Отмена
-          </button>
-          <button
-            type="submit"
-            className={styles.saveBtn}
-            disabled={saving || !form.name}
-          >
-            {saving ? "Сохранение..." : isNew ? "Создать" : "Сохранить"}
-          </button>
+          </AdminButton>
+          <AdminButton variant="primary" type="submit" disabled={saving || !form.name} loading={saving}>
+            {isNew ? "Создать" : "Сохранить"}
+          </AdminButton>
         </div>
       </form>
     </div>

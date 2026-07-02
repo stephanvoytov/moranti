@@ -3,18 +3,25 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { CATEGORIES } from "@/lib/categories";
+import AdminModal from "@/components/admin/admin-modal";
+import AdminButton from "@/components/admin/admin-button";
+import AdminPageHeader from "@/components/admin/admin-page-header";
 import styles from "./products.module.css";
 
 interface Product {
   id: string;
   name: string;
   price: number;
+  originalPrice?: number;
   category: string;
-  wbArticle: number;
-  ozonArticle: number;
-  image: string;
+  wbArticle?: number;
+  ozonArticle?: number;
+  image?: string;
   ozonImage?: string;
   rating?: number;
+  archivedAt?: string | null;
+  colorName?: string;
 }
 
 interface Pagination {
@@ -24,26 +31,34 @@ interface Pagination {
   totalPages: number;
 }
 
+type StatusTab = "active" | "archived" | "all";
+type ConfirmAction = "archive" | "unarchive" | "delete" | null;
+
 export default function AdminProductsPage() {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
-    page: 1,
-    limit: 20,
-    total: 0,
-    totalPages: 0,
+    page: 1, limit: 20, total: 0, totalPages: 0,
   });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const [statusTab, setStatusTab] = useState<StatusTab>("active");
 
-  // Reorder state
+  // Bulk selection
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+
+  // Reorder mode
   const [reorderMode, setReorderMode] = useState(false);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [savingOrder, setSavingOrder] = useState(false);
   const [orderSaved, setOrderSaved] = useState(false);
   const dragNode = useRef<HTMLElement | null>(null);
+
+  const archivedParam = statusTab === "all" ? undefined : statusTab === "archived" ? "true" : "false";
 
   const fetchProducts = useCallback(
     async (page = 1) => {
@@ -52,40 +67,60 @@ export default function AdminProductsPage() {
       params.set("page", String(page));
       if (search) params.set("search", search);
       if (category) params.set("category", category);
+      if (archivedParam) params.set("archived", archivedParam);
 
       const res = await fetch(`/api/admin/products?${params}`);
-      if (res.status === 401) {
-        router.push("/admin/login");
-        return;
-      }
+      if (res.status === 401) { router.push("/admin/login"); return; }
       const data = await res.json();
       setProducts(data.items);
       setPagination(data.pagination);
+      setSelectedIds(new Set());
       setLoading(false);
     },
-    [search, category, router],
+    [search, category, archivedParam, router],
   );
 
-  useEffect(() => {
-    async function load() {
-      const params = new URLSearchParams();
-      params.set("page", "1");
+  useEffect(() => { fetchProducts(1); }, [fetchProducts]);
 
-      try {
-        const res = await fetch(`/api/admin/products?${params}`);
-        if (res.status === 401) {
-          router.push("/admin/login");
-          return;
-        }
-        const data = await res.json();
-        setProducts(data.items);
-        setPagination(data.pagination);
-      } finally {
-        setLoading(false);
-      }
+  // ─── Bulk actions ───
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.size === products.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(products.map((p) => p.id)));
     }
-    load();
-  }, [router]);
+  }
+
+  async function executeBulk(action: "archive" | "unarchive" | "delete") {
+    setBulkProcessing(true);
+    setConfirmAction(null);
+    try {
+      const res = await fetch("/api/admin/products/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, ids: Array.from(selectedIds) }),
+      });
+      if (res.ok) {
+        setSelectedIds(new Set());
+        fetchProducts(pagination.page);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setBulkProcessing(false);
+    }
+  }
+
+  // ─── Single delete ───
 
   async function handleDelete(id: string) {
     if (!confirm("Удалить товар?")) return;
@@ -99,9 +134,8 @@ export default function AdminProductsPage() {
     setLoading(true);
     setReorderMode(true);
 
-    // Fetch all products
     const [productsRes, settingsRes] = await Promise.all([
-      fetch("/api/admin/products?page=1&limit=200"),
+      fetch("/api/admin/products?page=1&limit=200&archived=false"),
       fetch("/api/admin/settings"),
     ]);
 
@@ -114,7 +148,6 @@ export default function AdminProductsPage() {
     const settingsData = await settingsRes.json();
     const catalogOrder: string[] = settingsData.catalogOrder || [];
 
-    // Sort by catalogOrder
     const orderMap = new Map(catalogOrder.map((id: string, i: number) => [id, i]));
     const sorted = [...productsData.items].sort((a: Product, b: Product) => {
       const ai = orderMap.get(a.id);
@@ -144,7 +177,6 @@ export default function AdminProductsPage() {
   function handleDragOver(e: React.DragEvent, index: number) {
     e.preventDefault();
     if (dragIndex === null || dragIndex === index) return;
-
     const items = [...allProducts];
     const [moved] = items.splice(dragIndex, 1);
     items.splice(index, 0, moved);
@@ -153,20 +185,16 @@ export default function AdminProductsPage() {
   }
 
   function handleDragEnd() {
-    if (dragNode.current) {
-      dragNode.current.classList.remove(styles.dragging);
-    }
+    if (dragNode.current) dragNode.current.classList.remove(styles.dragging);
     setDragIndex(null);
   }
 
   async function saveOrder() {
     setSavingOrder(true);
     setOrderSaved(false);
-
     const order = allProducts.map((p) => p.id);
 
     try {
-      // Fetch current settings first, merge with new order
       const settingsRes = await fetch("/api/admin/settings");
       const settingsData = await settingsRes.json();
 
@@ -187,212 +215,270 @@ export default function AdminProductsPage() {
     }
   }
 
+  // ─── Helpers ───
+
+  function formatPrice(n?: number) {
+    return n != null ? n.toLocaleString("ru-RU") + " ₽" : "—";
+  }
+
+  const catName = (slug: string) => CATEGORIES.find((c) => c.slug === slug)?.name || slug;
+
+  // ─── Render ───
+
+  if (reorderMode) {
+    return (
+      <div className={styles.page}>
+        <AdminPageHeader
+          title="Порядок товаров"
+          subtitle={`${allProducts.length} активных товаров`}
+        >
+          {orderSaved && <span className={styles.savedBadge}>Сохранено</span>}
+          <AdminButton variant="primary" onClick={saveOrder} disabled={savingOrder} loading={savingOrder}>
+            Сохранить порядок
+          </AdminButton>
+          <AdminButton variant="ghost" onClick={exitReorderMode}>
+            Закрыть
+          </AdminButton>
+        </AdminPageHeader>
+        <p className={styles.reorderHint}>
+          Перетащите товары в нужном порядке и нажмите «Сохранить порядок»
+        </p>
+        <div className={styles.reorderList}>
+          {allProducts.map((p, idx) => (
+            <div
+              key={p.id}
+              className={`${styles.reorderItem} ${dragIndex === idx ? styles.reorderItemActive : ""}`}
+              draggable
+              onDragStart={(e) => handleDragStart(e, idx)}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDragEnd={handleDragEnd}
+            >
+              <span className={styles.reorderHandle} aria-label="Перетащить">⋮⋮</span>
+              <span className={styles.reorderNum}>{idx + 1}</span>
+              {p.image && <img src={p.image} alt="" className={styles.reorderThumb} />}
+              <span className={styles.reorderName}>{p.name}</span>
+              <span className={styles.reorderPrice}>{formatPrice(p.price)}</span>
+              <span className={styles.reorderBadge}>{catName(p.category)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Товары</h1>
-          {!reorderMode && (
-            <p className={styles.subtitle}>
-              {pagination.total} товаров
-            </p>
-          )}
-        </div>
-        <div className={styles.headerActions}>
-          {reorderMode ? (
-            <>
-              {orderSaved && <span className={styles.savedBadge}>Сохранено</span>}
-              <button
-                className={styles.saveOrderBtn}
-                onClick={saveOrder}
-                disabled={savingOrder}
-              >
-                {savingOrder ? "Сохранение..." : "Сохранить порядок"}
-              </button>
-              <button
-                className={styles.cancelReorderBtn}
-                onClick={exitReorderMode}
-              >
-                Закрыть
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                className={styles.reorderBtn}
-                onClick={enterReorderMode}
-              >
-                ≡ Управление порядком
-              </button>
-              <Link href="/admin/products/new" className={styles.addBtn}>
-                + Добавить товар
-              </Link>
-            </>
-          )}
-        </div>
-      </header>
+      {/* ─── Header ─── */}
+      <AdminPageHeader
+        title="Товары"
+        subtitle={`${pagination.total} товаров${selectedIds.size > 0 ? ` · выбрано ${selectedIds.size}` : ""}`}
+      >
+        <AdminButton variant="secondary" onClick={enterReorderMode}>
+          ≡ Управление порядком
+        </AdminButton>
+        <AdminButton variant="primary" href="/admin/products/new">
+          + Добавить товар
+        </AdminButton>
+      </AdminPageHeader>
 
-      {reorderMode ? (
-        <>
-          <p className={styles.reorderHint}>
-            Перетащите товары в нужном порядке и нажмите «Сохранить порядок»
-          </p>
-          <div className={styles.reorderList}>
-            {allProducts.map((p, idx) => (
-              <div
-                key={p.id}
-                className={`${styles.reorderItem} ${dragIndex === idx ? styles.reorderItemActive : ""}`}
-                draggable
-                onDragStart={(e) => handleDragStart(e, idx)}
-                onDragOver={(e) => handleDragOver(e, idx)}
-                onDragEnd={handleDragEnd}
-              >
-                <span className={styles.reorderHandle} aria-label="Перетащить">
-                  ⋮⋮
-                </span>
-                <span className={styles.reorderNum}>{idx + 1}</span>
-                {p.image && (
-                  <img src={p.image} alt="" className={styles.reorderThumb} />
-                )}
-                <span className={styles.reorderName}>{p.name}</span>
-                <span className={styles.reorderPrice}>
-                  {p.price.toLocaleString("ru-RU")} ₽
-                </span>
-                <span className={styles.reorderBadge}>{p.category}</span>
-              </div>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Filters */}
-          <div className={styles.filters}>
-            <input
-              type="text"
-              className={styles.searchInput}
-              placeholder="Поиск по названию, ID или артикулу..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <select
-              className={styles.categorySelect}
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+      {/* ─── Status tabs ─── */}
+      <div className={styles.filters}>
+        <div className={styles.statusTabs}>
+          {(["active", "all", "archived"] as const).map((tab) => (
+            <button
+              key={tab}
+              className={`${styles.statusTab} ${statusTab === tab ? styles.statusTabActive : ""}`}
+              onClick={() => { setStatusTab(tab); setSelectedIds(new Set()); }}
             >
-              <option value="">Все категории</option>
-              <option value="crossbody">Кросс-боди</option>
-              <option value="na-plecho">На плечо</option>
-              <option value="baguette">Багет</option>
-              <option value="tote">Тоут</option>
-              <option value="saddle">Седло</option>
-              <option value="backpack">Рюкзаки</option>
-            </select>
-          </div>
+              {tab === "active" ? "Активные" : tab === "archived" ? "Архивные" : "Все"}
+            </button>
+          ))}
+        </div>
+        <input
+          type="text"
+          className={styles.searchInput}
+          placeholder="Поиск по названию или ID..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <select
+          className={styles.categorySelect}
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option value="">Все категории</option>
+          {CATEGORIES.map((c) => (
+            <option key={c.slug} value={c.slug}>{c.name}</option>
+          ))}
+        </select>
+      </div>
 
-          {/* Table */}
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>Название</th>
-                  <th>Цена</th>
-                  <th>Категория</th>
-                  <th>Артикул</th>
-                  <th>Рейтинг</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={7} className={styles.loading}>
-                      Загрузка...
-                    </td>
-                  </tr>
-                ) : products.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className={styles.empty}>
-                      Нет товаров
-                    </td>
-                  </tr>
-                ) : (
-                  products.map((p) => (
-                    <tr key={p.id}>
-                      <td>
-                        <div className={styles.photoPair}>
-                          {p.wbArticle && p.image && (
-                            <div className={styles.photoItem}>
-                              <img src={p.image} alt="" className={styles.photoImg} />
-                              <span className={styles.photoLabel}>WB</span>
-                            </div>
-                          )}
-                          {p.ozonArticle && p.ozonImage && (
-                            <div className={styles.photoItem}>
-                              <img src={p.ozonImage} alt="" className={styles.photoImg} />
-                              <span className={styles.photoLabel}>Ozon</span>
-                            </div>
-                          )}
-                          {!p.image && !p.ozonImage && (
-                            <div className={styles.photoPlaceholder}>—</div>
-                          )}
-                        </div>
-                      </td>
-                      <td>
-                        <Link
-                          href={`/admin/products/${p.id}`}
-                          className={styles.productName}
-                        >
-                          {p.name}
-                        </Link>
-                      </td>
-                      <td className={styles.price}>
-                        {p.price.toLocaleString("ru-RU")} ₽
-                      </td>
-                      <td>
-                        <span className={styles.categoryBadge}>{p.category}</span>
-                      </td>
-                      <td className={styles.article}>
-                        {p.wbArticle && <span>WB: {p.wbArticle}</span>}
-                        {p.wbArticle && p.ozonArticle && <br />}
-                        {p.ozonArticle && <span>OZ: {p.ozonArticle}</span>}
-                        {!p.wbArticle && !p.ozonArticle && <span className={styles.muted}>—</span>}
-                      </td>
-                      <td>{p.rating ? `${p.rating.toFixed(1)} ★` : "—"}</td>
-                      <td>
-                        <button
-                          className={styles.deleteBtn}
-                          onClick={() => handleDelete(p.id)}
-                          title="Удалить"
-                        >
-                          ✕
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+      {/* ─── Bulk toolbar ─── */}
+      {selectedIds.size > 0 && (
+        <div className={styles.bulkToolbar}>
+          <span className={styles.bulkCount}>
+            Выбрано: {selectedIds.size}
+          </span>
+          <span className={styles.bulkSeparator} />
+          <div className={styles.bulkActions}>
+            {statusTab !== "archived" && (
+              <AdminButton variant="secondary" size="sm" onClick={() => setConfirmAction("archive")} disabled={bulkProcessing}>
+                Архивировать
+              </AdminButton>
+            )}
+            {statusTab === "archived" && (
+              <AdminButton variant="secondary" size="sm" onClick={() => setConfirmAction("unarchive")} disabled={bulkProcessing}>
+                Разархивировать
+              </AdminButton>
+            )}
+            <AdminButton variant="danger" size="sm" onClick={() => setConfirmAction("delete")} disabled={bulkProcessing}>
+              Удалить
+            </AdminButton>
+            {bulkProcessing && <span className={styles.bulkProgress}>Обработка...</span>}
           </div>
-
-          {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className={styles.pagination}>
-              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
-                (p) => (
-                  <button
-                    key={p}
-                    className={`${styles.pageBtn} ${p === pagination.page ? styles.pageActive : ""}`}
-                    onClick={() => fetchProducts(p)}
-                  >
-                    {p}
-                  </button>
-                ),
-              )}
-            </div>
-          )}
-        </>
+        </div>
       )}
+
+      {/* ─── Table ─── */}
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th className={styles.checkboxCol}>
+                <input
+                  type="checkbox"
+                  className={styles.checkbox}
+                  checked={products.length > 0 && selectedIds.size === products.length}
+                  onChange={toggleSelectAll}
+                />
+              </th>
+              <th></th>
+              <th>Название</th>
+              <th>Цена</th>
+              <th>Категория</th>
+              <th>Артикул</th>
+              <th>Рейтинг</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan={8} className={styles.loading}>Загрузка...</td></tr>
+            ) : products.length === 0 ? (
+              <tr><td colSpan={8} className={styles.empty}>
+                {statusTab === "archived" ? "Нет архивных товаров" : "Нет товаров"}
+              </td></tr>
+            ) : (
+              products.map((p) => {
+                const isSelected = selectedIds.has(p.id);
+                const isArchived = !!p.archivedAt;
+
+                return (
+                  <tr key={p.id} className={isArchived ? styles.archivedRow : ""}>
+                    <td className={styles.checkboxCol}>
+                      <input
+                        type="checkbox"
+                        className={styles.checkbox}
+                        checked={isSelected}
+                        onChange={() => toggleSelect(p.id)}
+                      />
+                    </td>
+                    <td>
+                      <div className={styles.photoPair}>
+                        {p.wbArticle && p.image && (
+                          <div className={styles.photoItem}>
+                            <img src={p.image} alt="" className={styles.photoImg} />
+                            <span className={styles.photoLabel}>WB</span>
+                          </div>
+                        )}
+                        {p.ozonArticle && p.ozonImage && (
+                          <div className={styles.photoItem}>
+                            <img src={p.ozonImage} alt="" className={styles.photoImg} />
+                            <span className={styles.photoLabel}>Ozon</span>
+                          </div>
+                        )}
+                        {!p.image && !p.ozonImage && (
+                          <div className={styles.photoPlaceholder}>—</div>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <Link href={`/admin/products/${p.id}`} className={styles.productName}>
+                        {p.name}
+                      </Link>
+                      {isArchived && <span className={styles.archivedBadge}>Архив</span>}
+                    </td>
+                    <td className={styles.price}>{formatPrice(p.price)}</td>
+                    <td><span className={styles.categoryBadge}>{catName(p.category)}</span></td>
+                    <td className={styles.article}>
+                      {p.wbArticle && <span>WB: {p.wbArticle}</span>}
+                      {p.wbArticle && p.ozonArticle && <br />}
+                      {p.ozonArticle && <span>OZ: {p.ozonArticle}</span>}
+                      {!p.wbArticle && !p.ozonArticle && <span className={styles.muted}>—</span>}
+                    </td>
+                    <td>{p.rating ? `${p.rating.toFixed(1)} ★` : "—"}</td>
+                    <td>
+                      <button
+                        className={styles.deleteBtn}
+                        onClick={() => handleDelete(p.id)}
+                        title="Удалить"
+                      >
+                        ✕
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ─── Pagination ─── */}
+      {pagination.totalPages > 1 && (
+        <div className={styles.pagination}>
+          {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              className={`${styles.pageBtn} ${p === pagination.page ? styles.pageActive : ""}`}
+              onClick={() => fetchProducts(p)}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ─── Confirmation modal ─── */}
+      <AdminModal
+        open={confirmAction !== null}
+        onClose={() => !bulkProcessing && setConfirmAction(null)}
+        title={
+          confirmAction === "archive" ? "Архивировать товары" :
+          confirmAction === "unarchive" ? "Разархивировать товары" :
+          "Удалить товары"
+        }
+        actions={[
+          { label: "Отмена", onClick: () => setConfirmAction(null), disabled: bulkProcessing },
+          {
+            label:
+              confirmAction === "archive" ? "Архивировать" :
+              confirmAction === "unarchive" ? "Разархивировать" :
+              "Удалить",
+            onClick: () => executeBulk(confirmAction!),
+            variant: confirmAction === "delete" ? "danger" : "primary",
+            disabled: bulkProcessing,
+          },
+        ]}
+      >
+        <p>
+          {confirmAction === "archive"
+            ? `Вы уверены, что хотите архивировать ${selectedIds.size} товаров? Они исчезнут из каталога, но данные сохранятся.`
+            : confirmAction === "unarchive"
+              ? `Разархивировать ${selectedIds.size} товаров? Они снова появятся в каталоге.`
+              : `Вы уверены, что хотите удалить ${selectedIds.size} товаров? Это действие необратимо.`}
+        </p>
+      </AdminModal>
     </div>
   );
 }

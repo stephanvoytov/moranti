@@ -282,3 +282,129 @@
 .modelCard:hover .modelArrow {
   transform: translateX(4px);
 }
+
+/* ─── Section titles ─── */
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--dark);
+  margin: 0 0 var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ─── Unassigned products section ─── */
+
+.unassignedSection {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border);
+}
+
+.unassignedHint {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: -12px 0 var(--space-md);
+}
+
+.unassignedHint a {
+  color: var(--camel);
+  text-decoration: underline;
+}
+
+.unassignedCount {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--camel);
+  font-weight: 400;
+}
+
+.unassignedGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px;
+}
+
+.unassignedCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.unassignedCard:hover {
+  border-color: var(--camel);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.unassignedImg {
+  width: 40px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.unassignedInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.unassignedName {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unassignedMeta {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.unassignedArticles {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.unassignedArt {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.unassignedActions {
+  flex-shrink: 0;
+}
+
+.unassignedEditBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.unassignedEditBtn:hover {
+  background: var(--camel);
+  color: #fff;
+}

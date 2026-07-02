@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import AdminButton from "@/components/admin/admin-button";
 import styles from "./editor.module.css";
 
 interface Variant {
@@ -307,12 +308,12 @@ export default function ModelEditorPage() {
         {error && <p className={styles.errorMsg}>{error}</p>}
 
         <div className={styles.actions}>
-          <button type="button" className={styles.cancelBtn} onClick={() => router.push("/admin/models")}>
+          <AdminButton variant="ghost" onClick={() => router.push("/admin/models")}>
             Отмена
-          </button>
-          <button type="submit" className={styles.saveBtn} disabled={saving || !name}>
-            {saving ? "Сохранение..." : isNew ? "Создать" : "Сохранить"}
-          </button>
+          </AdminButton>
+          <AdminButton variant="primary" type="submit" disabled={saving || !name} loading={saving}>
+            {isNew ? "Создать" : "Сохранить"}
+          </AdminButton>
         </div>
       </form>
 
@@ -324,13 +325,9 @@ export default function ModelEditorPage() {
               Варианты (цвета)
               <span className={styles.variantsCount}>{model.variants.length}</span>
             </h2>
-            <button
-              type="button"
-              className={styles.linkBtn}
-              onClick={openLinker}
-            >
+            <AdminButton variant="secondary" size="sm" onClick={openLinker}>
               + Добавить / убрать варианты
-            </button>
+            </AdminButton>
           </div>
 
           {model.variants.length === 0 ? (
@@ -381,14 +378,9 @@ export default function ModelEditorPage() {
                     )}
                   </span>
                   <span className={styles.variantActions}>
-                    <button
-                      type="button"
-                      className={styles.unlinkBtn}
-                      onClick={() => unlinkVariant(v.id)}
-                      title="Отвязать от модели"
-                    >
+                    <AdminButton variant="ghost" size="sm" onClick={() => unlinkVariant(v.id)} title="Отвязать от модели">
                       ✕
-                    </button>
+                    </AdminButton>
                   </span>
                 </div>
               ))}
@@ -456,21 +448,12 @@ export default function ModelEditorPage() {
                     Выбрано: {selectedVariantIds.size}
                   </span>
                   <div className={styles.linkerActions}>
-                    <button
-                      type="button"
-                      className={styles.cancelBtn}
-                      onClick={() => setShowLinker(false)}
-                    >
+                    <AdminButton variant="ghost" onClick={() => setShowLinker(false)}>
                       Отмена
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.saveBtn}
-                      onClick={saveVariants}
-                      disabled={saving}
-                    >
-                      {saving ? "Сохранение..." : "Сохранить"}
-                    </button>
+                    </AdminButton>
+                    <AdminButton variant="primary" onClick={saveVariants} disabled={saving} loading={saving}>
+                      Сохранить
+                    </AdminButton>
                   </div>
                 </div>
               </div>

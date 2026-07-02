@@ -677,3 +677,68 @@
   opacity: 0.5;
   pointer-events: none;
 }
+
+/* ─── Status tabs ─── */
+
+.statusTabs {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.statusTab {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 7px 14px;
+  background: var(--white);
+  border: none;
+  border-right: 1px solid var(--border-light-gray);
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.statusTab:last-child {
+  border-right: none;
+}
+
+.statusTab:hover {
+  background: var(--card-bg);
+  color: var(--dark);
+}
+
+.statusTabActive {
+  background: var(--dark);
+  color: var(--white);
+}
+
+.statusTabActive:hover {
+  background: var(--dark);
+  color: var(--white);
+  opacity: 0.9;
+}
+
+/* ─── Archived row ─── */
+
+.archivedRow {
+  opacity: 0.55;
+}
+
+.archivedBadge {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--text-muted);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-left: 6px;
+  vertical-align: middle;
+}

@@ -38,8 +38,8 @@ interface SyncRunRecord {
 const PLATFORM = {
   wb: {
     title: "Wildberries",
-    desc: "Цены, фото, характеристики, рейтинг — через search.wb.ru",
-    badge: "search.wb.ru",
+    desc: "Content API + Pricing API + Stocks API + Analytics API",
+    badge: "Official API",
     badgeClass: styles.badgeWb,
     btnClass: "",
     apiPath: "/api/admin/sync",
@@ -47,7 +47,7 @@ const PLATFORM = {
   },
   ozon: {
     title: "Ozon",
-    desc: "Цены, фото, характеристики — через Ozon Seller API",
+    desc: "Seller API v3/v4 — товары, цены, атрибуты, рейтинг",
     badge: "Seller API",
     badgeClass: styles.badgeOzon,
     btnClass: styles.btnOzon,

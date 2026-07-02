@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const parsed = productsQuerySchema.safeParse(Object.fromEntries(searchParams));
-  const { search = "", category = "", page = 1, limit = 20 } = parsed.data ?? {};
+  const { search = "", category = "", archived = "", page = 1, limit = 20 } = parsed.data ?? {};
 
   const where: Record<string, unknown> = {};
   if (search) {
@@ -32,6 +32,11 @@ export async function GET(request: NextRequest) {
   }
   if (category && VALID_CATEGORIES.includes(category as typeof VALID_CATEGORIES[number])) {
     where.category = category;
+  }
+  if (archived === "true") {
+    where.archivedAt = { not: null };
+  } else if (archived === "false") {
+    where.archivedAt = null;
   }
 
   const [items, total] = await prismaQuery(() => Promise.all([
