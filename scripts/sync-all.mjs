@@ -700,36 +700,25 @@ async function getExistingProducts(prisma) {
     byWbArticle: new Map(all.filter((p) => p.wbArticle).map((p) => [Number(p.wbArticle), p])),
     byOzonArticle: new Map(all.filter((p) => p.ozonArticle).map((p) => [Number(p.ozonArticle), p])),
     byId: new Map(all.map((p) => [p.id, p])),
+    bySku: new Map(all.filter((p) => p.sku).map((p) => [p.sku, p])),
     all,
   };
 }
 
-/**
- * Генерирует sku-подобный id для товаров без vendorCode
- * (например созданных вручную в админке).
- * Формат: manual-001, manual-002, …
- * @returns {{ id: string, slug: string }} — id = sku, slug из id
- */
-async function generateSku(prisma) {
-  // Ищем последний manual-*
+/** Генерирует mor-NNN id */
+async function generateId(prisma) {
   const last = await prisma.product.findFirst({
-    where: { id: { startsWith: "manual-" } },
     orderBy: { id: "desc" },
     select: { id: true },
   });
-  const num = last ? parseInt(last.id.replace("manual-", ""), 10) + 1 : 1;
-  const id = "manual-" + String(num).padStart(3, "0");
-  // Slug из id: manual-001 → manual-001 (чистый, без спецсимволов)
-  return { id, slug: id };
+  const num = last ? parseInt(last.id.replace("mor-", ""), 10) + 1 : 1;
+  return "mor-" + String(num).padStart(3, "0");
 }
 
-/**
- * Создаёт новый товар в БД.
- */
-/** Slug из sku: BalensaTaup → balensa-taup */
-function makeSlugFromSku(sku) {
-  if (!sku) return null;
-  return sku
+/** Slug из строки: BalensaTaup → balensa-taup */
+function makeSlug(s) {
+  if (!s) return null;
+  return s
     .replace(/([a-z])([A-Z])/g, "$1-$2")
     .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
     .toLowerCase()
@@ -740,20 +729,15 @@ function makeSlugFromSku(sku) {
 }
 
 async function createProduct(prisma, data) {
-  // id = sku (vendorCode / offer_id), или генерируем manual-*
-  let id = data.sku || null;
-  let slug = id ? makeSlugFromSku(id) : null;
-
-  if (!id || !slug) {
-    const gen = await generateSku(prisma);
-    id = gen.id;
-    slug = gen.slug;
-  }
+  const id = await generateId(prisma);
+  const sku = data.sku || null;
+  const slug = sku ? makeSlug(sku) : id;
 
   await prisma.product.create({
     data: {
       id,
       slug,
+      sku,
       name: data.name || "",
       price: data.price || 0,
       originalPrice: data.originalPrice || 0,
@@ -819,6 +803,7 @@ async function updateProduct(prisma, id, data) {
   if (data.wbCreatedAt !== undefined) updateData.wbCreatedAt = data.wbCreatedAt;
   if (data.wbUpdatedAt !== undefined) updateData.wbUpdatedAt = data.wbUpdatedAt;
   if (data.archivedAt !== undefined) updateData.archivedAt = data.archivedAt;
+  if (data.sku !== undefined) updateData.sku = data.sku;
 
   if (Object.keys(updateData).length === 0) return false;
 
@@ -1228,8 +1213,8 @@ async function main() {
         const article = card.nmID;
         const vendorCode = (card.vendorCode || "").trim();
 
-        // Match by id (sku) first, then by wbArticle
-        let db = vendorCode ? existing.byId.get(vendorCode) : null;
+        // Match by sku first, then by wbArticle
+        let db = vendorCode ? existing.bySku.get(vendorCode) : null;
         if (!db) db = existing.byWbArticle.get(article);
 
         const wbPrices = wbPriceMap.get(article) || null;
@@ -1308,8 +1293,8 @@ async function main() {
         const attrs = attrMap.get(offerId);
         const rating = ratingMap.get(productId);
 
-        // Match by id (sku) first, then by ozonArticle
-        let db = offerId ? existing.byId.get(offerId) : null;
+        // Match by sku first, then by ozonArticle
+        let db = offerId ? existing.bySku.get(offerId) : null;
         if (!db) db = existing.byOzonArticle.get(productId);
 
         if (!info) continue;

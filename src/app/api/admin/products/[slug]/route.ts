@@ -70,7 +70,7 @@ export async function PUT(
     );
   }
 
-  const { name, price, originalPrice, category, description, rating, reviewsCount, images, wbArticle, ozonArticle, composition, colorName, modelId } = parsed.data;
+  const { name, price, originalPrice, category, description, rating, reviewsCount, images, wbArticle, ozonArticle, composition, colorName, modelId, sku } = parsed.data;
 
   const data: Record<string, unknown> = {};
   if (name !== undefined) data.name = name.trim();
@@ -83,6 +83,7 @@ export async function PUT(
   if (composition !== undefined) data.composition = composition;
   if (colorName !== undefined) data.colorName = colorName;
   if (modelId !== undefined) data.modelId = modelId ?? null;
+  if (sku !== undefined) data.sku = sku ?? null;
 
   if (images !== undefined) {
     const filtered = images.filter(Boolean);

@@ -124,7 +124,7 @@ export default function ProductEditorPage() {
           category: data.category || "crossbody",
           description: data.description || "",
           images: data.images?.length ? data.images : data.image ? [data.image] : [],
-          sku: data.id || "",
+          sku: data.sku || "",
           wbArticle: String(data.wbArticle || ""),
           ozonArticle: String(data.ozonArticle || ""),
           rating: data.rating ? String(data.rating) : "",

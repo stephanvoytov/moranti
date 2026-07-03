@@ -115,38 +115,37 @@ export async function POST(request: NextRequest) {
 
   const images = inputImages.length > 0 ? inputImages : [];
 
-  // id = sku, или генерируем manual-*
-  let newId = inputSku?.trim() || "";
-  let slug = "";
+  // id = mor-NNN (внутренний, стабильный)
+  const last = await prismaQuery(() =>
+    prisma.product.findFirst({
+      orderBy: { id: "desc" },
+      select: { id: true },
+    })
+  );
+  const lastNum = last ? parseInt(last.id.replace("mor-", ""), 10) || 0 : 0;
+  const newId = "mor-" + String(lastNum + 1).padStart(3, "0");
 
-  if (newId) {
-    // Slug из id: BalensaTaup → balensa-taup
-    slug = newId
-      .replace(/([a-z])([A-Z])/g, "$1-$2")
-      .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
-      .toLowerCase()
-      .replace(/[/]+/g, "-")
-      .replace(/[^a-z0-9-]/g, "")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
-  } else {
-    const last = await prismaQuery(() =>
-      prisma.product.findFirst({
-        where: { id: { startsWith: "manual-" } },
-        orderBy: { id: "desc" },
-        select: { id: true },
-      })
-    );
-    const num = last ? parseInt(last.id.replace("manual-", ""), 10) + 1 : 1;
-    newId = "manual-" + String(num).padStart(3, "0");
-    slug = newId;
-  }
+  // sku — внешний идентификатор (если ввели)
+  const newSku = inputSku?.trim() || null;
+
+  // slug из sku, или из mor-NNN
+  let slug = newSku
+    ? newSku
+        .replace(/([a-z])([A-Z])/g, "$1-$2")
+        .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
+        .toLowerCase()
+        .replace(/[/]+/g, "-")
+        .replace(/[^a-z0-9-]/g, "")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "")
+    : newId;
 
   const product = await prismaQuery(() =>
     prisma.product.create({
       data: {
         id: newId,
         slug,
+        sku: newSku,
         name: name.trim(),
         price,
         originalPrice: originalPrice ?? price,

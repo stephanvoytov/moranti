@@ -31,6 +31,7 @@ export interface MarketplaceLink {
 export interface Product {
   id: string;
   slug: string;
+  sku?: string;
   name: string;
   price: number;
   originalPrice: number;
@@ -129,6 +130,7 @@ function mapProduct(p: PrismaProduct): Product {
   return {
     id: p.id,
     slug: p.slug,
+    sku: p.sku ?? undefined,
     name: p.name,
     price: p.price,
     originalPrice: p.originalPrice,

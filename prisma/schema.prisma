@@ -26,8 +26,9 @@ model Model {
 }
 
 model Product {
-  id                String    @id         // SKU — BalensaTaup
-  slug              String    @unique
+  id                String    @id         // mor-001 — внутренний, стабильный
+  slug              String    @unique     // URL — balensa-taup
+  sku               String?   @unique     // Внешний SKU (WB offer_id / Ozon offer_id)
   name              String
   price             Float
   originalPrice     Float
