@@ -26,14 +26,17 @@ const require = createRequire(import.meta.url);
 const { wbToCategory, CATEGORY_RU } = require("./wb-categories.js");
 const { generateName } = require("./name-generator.js");
 
+
 /* =============================================
    Config
    ============================================= */
 
 const WB_CONTENT_API = "https://content-api.wildberries.ru";
 const WB_PRICES_API = "https://discounts-prices-api.wildberries.ru";
+const WB_SEARCH_API = "https://search.wb.ru/exactmatch/ru/common/v18/search";
 const OZON_API = "https://api-seller.ozon.ru";
-const SUPPLIER_ID = 312222;
+// WB supplier ID для фильтрации результатов поиска (можно переопределить через WB_SUPPLIER_ID в .env)
+const SUPPLIER_ID = Number(process.env.WB_SUPPLIER_ID) || 312222;
 
 const ITEMS_PER_WB_CARDS = 100;
 const ITEMS_PER_OZON_BATCH = 100;
@@ -204,8 +207,9 @@ async function wbFetchAllCards(apiKey, trash = false) {
     ============================================= */
 
 async function wbFetchPrices(apiKey, nmIDs) {
-  if (!nmIDs || nmIDs.length === 0) return new Map();
+  if (!nmIDs || nmIDs.length === 0) return { priceMap: new Map(), errors: 0 };
   const priceMap = new Map();
+  let errors = 0;
   const BATCH = 100;
 
   log.write(`  Fetching WB prices for ${nmIDs.length} cards:`);
@@ -228,6 +232,7 @@ async function wbFetchPrices(apiKey, nmIDs) {
       log.write(` ${priceMap.size}/${nmIDs.length}`);
     } catch (err) {
       log.line(`\n  Price fetch error (batch ${i}): ${err.message}`);
+      errors++;
     }
 
     // Rate limit: не более 3 запросов в секунду
@@ -237,12 +242,95 @@ async function wbFetchPrices(apiKey, nmIDs) {
   }
 
   log.line(` — ${priceMap.size} priced`);
+  return { priceMap, errors };
+}
+
+/**
+ * Получает цены через публичное search API Wildberries (без API-ключа).
+ * Работает как fallback, когда WB_PRICES_API недоступен (401/429/не тот скоуп).
+ * Возвращает Map<nmID, {price, discountedPrice}>.
+ */
+async function wbFetchPublicPrices(nmIDs) {
+  if (!nmIDs || nmIDs.length === 0) return new Map();
+  const priceMap = new Map();
+
+  log.write(`  Fetching WB prices (search API) for ${nmIDs.length} cards:`);
+
+  // search API может отдавать 429 — делаем до 3 попыток с exponential backoff
+  async function searchFetch(url, attempt = 1) {
+    const resp = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT) });
+    if (resp.status === 429 && attempt <= 3) {
+      const delay = Math.min(1000 * Math.pow(2, attempt), 8000);
+      log.write(` 429 (retry ${attempt} in ${delay}ms)`);
+      await new Promise((r) => setTimeout(r, delay));
+      return searchFetch(url, attempt + 1);
+    }
+    if (!resp.ok) {
+      log.line(`\n  search API ${resp.status} (after ${attempt} attempts)`);
+      return null;
+    }
+    return resp.json();
+  }
+
+  // search API возвращает все товары продавца — достаточно одного запроса
+  try {
+    const result = await searchFetch(
+      `${WB_SEARCH_API}?appType=1&curr=rub&dest=-1257786&query=moranti&resultset=catalog&sort=popular&limit=100`
+    );
+    if (!result || !result.products) return priceMap;
+    const products = result.products;
+
+    for (const p of products) {
+      if (p.supplierId !== SUPPLIER_ID) continue;
+      const s = p.sizes?.[0];
+      const price = s?.price?.product;
+      const basic = s?.price?.basic;
+      const stockQty = s?.stock?.qty != null ? Number(s.stock.qty) : null;
+      if (price != null) {
+        priceMap.set(p.id, {
+          price: (basic ?? price) / 100,
+          discountedPrice: price / 100,
+          stock: stockQty, // null если нет данных, 0 если нет на складе
+        });
+      }
+    }
+
+    log.line(` — ${priceMap.size} products from search API`);
+
+    // Если не все nmID нашлись — пробуем вторую страницу
+    if (products.length >= 100) {
+      const result2 = await searchFetch(
+        `${WB_SEARCH_API}?appType=1&curr=rub&dest=-1257786&query=moranti&resultset=catalog&sort=popular&limit=100&page=2`
+      );
+      if (result2) {
+        const products2 = result2.products || [];
+        for (const p of products2) {
+          if (p.supplierId !== SUPPLIER_ID) continue;
+          const s = p.sizes?.[0];
+          const price = s?.price?.product;
+          const basic = s?.price?.basic;
+          const stockQty = s?.stock?.qty != null ? Number(s.stock.qty) : null;
+          if (price != null) {
+            priceMap.set(p.id, {
+              price: (basic ?? price) / 100,
+              discountedPrice: price / 100,
+              stock: stockQty,
+            });
+          }
+        }
+        log.line(`  → ${priceMap.size} total (after page 2)`);
+      }
+    }
+  } catch (err) {
+    log.line(`\n  search API error: ${err.message}`);
+  }
+
   return priceMap;
 }
 
 /* =============================================
     Pipeline 2: Ozon API — все товары
-   ============================================= */
+    ============================================= */
 
 async function ozonFetchAllProducts(clientId, apiKey) {
   log.write("  Fetching Ozon product list:");
@@ -366,6 +454,36 @@ async function ozonFetchRatings(clientId, apiKey, productIds) {
    ============================================= */
 
 /**
+ * Извлекает значение характеристики по имени из Content API карточки.
+ * Content API возвращает характеристики в двух форматах:
+ *   - Новый: [{ options: [{name, value}, ...], group_name: "..." }]
+ *   - Старый: [{ name, value }, ...] (card.json)
+ * @param {object} card
+ * @param {string} charName
+ * @returns {string|null}
+ */
+function extractCharByName(card, charName) {
+  const groups = card.characteristics || [];
+  for (const group of groups) {
+    // Новый формат Content API: group.options[]
+    if (group.options && Array.isArray(group.options)) {
+      for (const opt of group.options) {
+        if (opt.name === charName || opt.name?.toLowerCase() === charName.toLowerCase()) {
+          const vals = Array.isArray(opt.value) ? opt.value : [opt.value];
+          return vals.filter(Boolean).join(", ") || null;
+        }
+      }
+    }
+    // Старый формат (card.json / fallback)
+    if (group.name === charName || group.name?.toLowerCase() === charName.toLowerCase()) {
+      const vals = Array.isArray(group.value) ? group.value : [group.value];
+      return vals.filter(Boolean).join(", ") || null;
+    }
+  }
+  return null;
+}
+
+/**
  * Извлекает цвет из card.json-подобной структуры WB Content API.
  */
 function extractColorName(card) {
@@ -373,15 +491,7 @@ function extractColorName(card) {
   if (colors.length > 0) {
     return colors.map((c) => c.name).filter(Boolean).join(", ");
   }
-  // Fallback: из характеристик
-  const chars = card.characteristics || [];
-  for (const c of chars) {
-    if (c.name === "Цвет" || c.name === "Цвет товара") {
-      const vals = Array.isArray(c.value) ? c.value : [c.value];
-      return vals.filter(Boolean).join(", ");
-    }
-  }
-  return null;
+  return extractCharByName(card, "Цвет") || extractCharByName(card, "Цвет товара") || null;
 }
 
 /**
@@ -392,14 +502,7 @@ function extractComposition(card) {
   if (comps.length > 0) {
     return comps.map((c) => c.name).filter(Boolean).join("; ");
   }
-  const chars = card.characteristics || [];
-  for (const c of chars) {
-    if (c.name === "Состав") {
-      const vals = Array.isArray(c.value) ? c.value : [c.value];
-      return vals.filter(Boolean).join(", ");
-    }
-  }
-  return null;
+  return extractCharByName(card, "Состав") || null;
 }
 
 /**
@@ -407,16 +510,7 @@ function extractComposition(card) {
  */
 function extractDescription(card) {
   if (card.description) return card.description;
-
-  // Может быть в текстовых характеристиках
-  const chars = card.characteristics || [];
-  for (const c of chars) {
-    if (c.name === "Описание" || c.name === "Полное описание") {
-      const vals = Array.isArray(c.value) ? c.value : [c.value];
-      return vals.filter(Boolean).join("\n");
-    }
-  }
-  return "";
+  return extractCharByName(card, "Описание") || extractCharByName(card, "Полное описание") || "";
 }
 
 /**
@@ -433,15 +527,60 @@ function extractPhotoCount(card) {
 }
 
 /**
+ * Маппинг WB характеристики "Модель сумки" → категории Moranti.
+ * Content API возвращает в characteristics: { name: "Модель сумки", value: "кроссбоди" }
+ */
+const MODEL_CATEGORY_MAP = {
+  "кроссбоди": "crossbody",
+  "кросс-боди": "crossbody",
+  "кросс": "crossbody",
+  "багет": "baguette",
+  "седло": "saddle",
+  "тоут": "tote",
+  "шоппер": "tote",
+  "шопер": "tote",
+  "мешок": "tote",
+  "через плечо": "na-plecho",
+  "на плечо": "na-plecho",
+  "трансформер": "backpack",
+  "рюкзак": "backpack",
+  "деловая": "crossbody",
+  "такс": "baguette",
+  "саквояж": "baguette",
+  "модная": "crossbody",
+};
+
+/**
+ * Извлекает модель сумки из характеристики "Модель сумки" WB Content API.
+ * Парсит первое совпадение по MODEL_CATEGORY_MAP.
+ * Поддерживает оба формата Content API (options[] и прямой).
+ *
+ * @param {object} card — карточка товара из Content API
+ * @returns {string|null}
+ */
+function resolveModelFromCard(card) {
+  const raw = extractCharByName(card, "Модель сумки") || "";
+  if (!raw) return null;
+  const lower = raw.toLowerCase();
+  for (const [keyword, cat] of Object.entries(MODEL_CATEGORY_MAP)) {
+    if (lower.includes(keyword)) return cat;
+  }
+  return null;
+}
+
+/**
  * Нормализует категорию из WB Content API card.
- * Content API возвращает subjectID — прямой ключ для CATEGORY_MAP (1,2,3,5,6,7,8,25).
+ * Приоритет: 1) характеристика "Модель сумки" → 2) subjectID (CATEGORY_MAP).
  */
 function resolveCategory(card) {
+  // 1) Модель сумки из характеристики Content API (самый точный сигнал)
+  const fromModel = resolveModelFromCard(card);
+  if (fromModel) return fromModel;
+
+  // 2) Fallback: subjectID-based (для subjectID 1,2,3,5,6,7,8,25)
   const subjId = card.subjectID || card.subject_id || null;
   const subjName = card.subjectName || card.subject_name || null;
-  const objectId = card.objectID || card.object_id || null;
-  // subjectID из Content API — точный subjId для CATEGORY_MAP
-  return wbToCategory(objectId, subjName, subjId);
+  return wbToCategory(subjId, subjName, subjId);
 }
 
 /* =============================================
@@ -458,8 +597,13 @@ function ozonExtractColor(info, attrs) {
       }
     }
   }
-  // Fallback: color_image (только строка)
-  if (info?.color_image && typeof info.color_image === "string") return info.color_image;
+  // Fallback: color_image (строка или массив)
+  if (info?.color_image) {
+    if (Array.isArray(info.color_image)) {
+      return info.color_image.filter(Boolean).join(", ") || null;
+    }
+    if (typeof info.color_image === "string") return info.color_image;
+  }
   return null;
 }
 
@@ -488,7 +632,28 @@ function ozonExtractCharacteristics(attrs) {
 }
 
 function ozonExtractCategory(info, attrs) {
-  // Приоритет: атрибут id=20259 (назначение/тип сумки)
+  // Сначала проверяем НАЗВАНИЕ товара — оно точнее указывает модель
+  // (Ozon attribute 20259 может классифицировать все сумки как "кросс-боди"
+  // даже если это багет/седло/тоут)
+  const text = [
+    info?.category,
+    info?.name,
+    info?.offer_id,
+  ].filter(Boolean).join(" ").toLowerCase();
+
+  if (text) {
+    if (text.includes("шоппер") || text.includes("шопер") || text.includes("shopp")) return "tote";
+    if (text.includes("рюкзак") || text.includes("backpack") || text.includes("rucksack")) return "backpack";
+    // "седл" ДО "через плечо" — Sedlo содержит оба слова, седло важнее
+    if (text.includes("седл") || text.includes("седло") || text.includes("saddle") || text.includes("sedlo")) return "saddle";
+    if (text.includes("багет") || text.includes("baguette")) return "baguette";
+    if (text.includes("через плечо") || text.includes("na plecho") || text.includes("na-plecho")) return "na-plecho";
+    // "тоут" — однозначный признак, но ДО "плеч"/"на плечо" чтобы не спутать с "сумка на плечо, тоут"
+    if (text.includes("тоут") || text.includes("toute") || text.includes("tout ")) return "tote";
+  }
+
+  // Затем Ozon attribute id=20259 (назначение/тип сумки) — для товаров,
+  // где название не дало однозначной категории
   if (attrs?.attributes) {
     const typeAttr = attrs.attributes.find(a => a.id === 20259);
     if (typeAttr?.values?.length) {
@@ -516,23 +681,11 @@ function ozonExtractCategory(info, attrs) {
     }
   }
 
-  // Fallback: из названия товара
-  const text = [
-    info?.category,
-    info?.name,
-    info?.offer_id,
-  ].filter(Boolean).join(" ").toLowerCase();
-
-  if (!text) return null;
-
-  if (text.includes("шоппер") || text.includes("шопер") || text.includes("shopp")) return "tote";
-  if (text.includes("рюкзак") || text.includes("backpack") || text.includes("rucksack")) return "backpack";
-  // "седл" ДО "через плечо" — Sedlo содержит оба слова, седло важнее
-  if (text.includes("седл") || text.includes("седло") || text.includes("saddle") || text.includes("sedlo")) return "saddle";
-  if (text.includes("через плечо") || text.includes("na plecho") || text.includes("na-plecho")) return "na-plecho";
-  if (text.includes("багет") || text.includes("baguette")) return "baguette";
-  if (text.includes("кросс") || text.includes("crossbody") || text.includes("клатч") || text.includes("clutch")) return "crossbody";
-  if (text.includes("плеч") || text.includes("наплеч")) return "na-plecho";
+  // Если название не дало категории — пробуем слабые сигналы из названия
+  if (text) {
+    if (text.includes("кросс") || text.includes("crossbody") || text.includes("клатч") || text.includes("clutch")) return "crossbody";
+    if (text.includes("плеч") || text.includes("наплеч")) return "na-plecho";
+  }
 
   return null;
 }
@@ -551,21 +704,51 @@ async function getExistingProducts(prisma) {
   };
 }
 
-async function getNextId(prisma) {
-  const max = await prisma.product.findFirst({
+/**
+ * Генерирует sku-подобный id для товаров без vendorCode
+ * (например созданных вручную в админке).
+ * Формат: manual-001, manual-002, …
+ * @returns {{ id: string, slug: string }} — id = sku, slug из id
+ */
+async function generateSku(prisma) {
+  // Ищем последний manual-*
+  const last = await prisma.product.findFirst({
+    where: { id: { startsWith: "manual-" } },
     orderBy: { id: "desc" },
     select: { id: true },
   });
-  const num = max ? parseInt(max.id.replace("mor-", ""), 10) + 1 : 1;
-  const id = "mor-" + String(num).padStart(3, "0");
-  return { id, slug: `product-mor-${String(num).padStart(3, "0")}`, num };
+  const num = last ? parseInt(last.id.replace("manual-", ""), 10) + 1 : 1;
+  const id = "manual-" + String(num).padStart(3, "0");
+  // Slug из id: manual-001 → manual-001 (чистый, без спецсимволов)
+  return { id, slug: id };
 }
 
 /**
  * Создаёт новый товар в БД.
  */
+/** Slug из sku: BalensaTaup → balensa-taup */
+function makeSlugFromSku(sku) {
+  if (!sku) return null;
+  return sku
+    .replace(/([a-z])([A-Z])/g, "$1-$2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
+    .toLowerCase()
+    .replace(/[/]+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 async function createProduct(prisma, data) {
-  const { id, slug } = await getNextId(prisma);
+  // id = sku (vendorCode / offer_id), или генерируем manual-*
+  let id = data.sku || null;
+  let slug = id ? makeSlugFromSku(id) : null;
+
+  if (!id || !slug) {
+    const gen = await generateSku(prisma);
+    id = gen.id;
+    slug = gen.slug;
+  }
 
   await prisma.product.create({
     data: {
@@ -587,7 +770,6 @@ async function createProduct(prisma, data) {
       ozonOriginalPrice: data.ozonOriginalPrice ?? null,
       rating: data.rating ?? null,
       reviewsCount: data.reviewsCount ?? null,
-      imtId: data.imtId ?? null,
       colorName: data.colorName ?? null,
       composition: data.composition ?? null,
       inStock: data.inStock ?? true,
@@ -623,11 +805,12 @@ async function updateProduct(prisma, id, data) {
   if (data.images !== undefined) updateData.images = data.images;
   if (data.rating !== undefined) updateData.rating = data.rating;
   if (data.reviewsCount !== undefined) updateData.reviewsCount = data.reviewsCount;
-  if (data.imtId !== undefined) updateData.imtId = data.imtId;
   if (data.colorName !== undefined) updateData.colorName = data.colorName;
   if (data.composition !== undefined) updateData.composition = data.composition;
   if (data.inStock !== undefined) updateData.inStock = data.inStock;
   if (data.photoCount !== undefined) updateData.photoCount = data.photoCount;
+  if (data.wbStock !== undefined) updateData.wbStock = data.wbStock;
+  if (data.ozonStock !== undefined) updateData.ozonStock = data.ozonStock;
   if (data.ozonImage !== undefined) updateData.ozonImage = data.ozonImage;
   if (data.ozonImages !== undefined) updateData.ozonImages = data.ozonImages;
   if (data.characteristics !== undefined) updateData.characteristics = data.characteristics;
@@ -673,12 +856,19 @@ function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAttrs, oz
   if (prices.length > 0) data.price = Math.min(...prices);
   if (origPrices.length > 0) data.originalPrice = Math.min(...origPrices);
 
-  // ─── Наличие ───
-  const ozonStockQty = ozonInfo?.stocks?.stocks
-    ? ozonInfo.stocks.stocks.reduce((s, st) => s + Math.max(0, (st.present || 0) - (st.reserved || 0)), 0)
-    : 0;
-  const inStock = ozonStockQty > 0 || db?.inStock === true || db?.inStock === null || db?.inStock === undefined;
-  if (inStock !== (db?.inStock ?? true)) data.inStock = inStock;
+  // ─── Стоки (количество) — читаем, но НЕ меняем inStock ───
+  // WB stock из search API
+  if (wbPrices?.stock !== undefined) {
+    if (wbPrices.stock !== (db?.wbStock ?? null)) data.wbStock = wbPrices.stock;
+  }
+  // Ozon stock из ProductInfo
+  if (ozonInfo?.stocks?.stocks) {
+    const qty = ozonInfo.stocks.stocks.reduce(
+      (s, st) => s + Math.max(0, (st.present || 0) - (st.reserved || 0)), 0
+    );
+    if (qty !== (db?.ozonStock ?? null)) data.ozonStock = qty;
+  }
+  // inStock НЕ трогаем — archiveGoneProducts займётся теми кого нет на маркетплейсах
 
   // ─── Фото ───
   // Основные фото (для витрины): приоритет WB
@@ -688,8 +878,8 @@ function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAttrs, oz
     data.photoCount = photoCount;
     data.image = cdnImageUrl(article, 1);
     data.images = cdnImageUrls(article, photoCount);
-  } else if (ozonInfo?.images?.length && !db?.ozonImage && !db?.ozonImages?.length) {
-    // Ozon-only товары (без сохранённых Ozon-фото): первичная запись
+  } else if (ozonInfo?.images?.length && !db?.wbArticle && !db?.ozonImage) {
+    // Ozon-only товары (нет WB): записываем Ozon фото как основные
     data.photoCount = ozonInfo.images.length;
     data.image = ozonInfo.images[0];
     data.images = ozonInfo.images;
@@ -767,11 +957,6 @@ function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAttrs, oz
     }
   }
 
-  // ─── imtId ───
-  if (wbCard?.imtID && wbCard.imtID !== db?.imtId) {
-    data.imtId = wbCard.imtID;
-  }
-
   // ─── Характеристики ───
   const wbChars = wbCard?.characteristics || [];
   const ozonChars = ozonExtractCharacteristics(ozonAttrs);
@@ -797,10 +982,82 @@ function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAttrs, oz
    ============================================= */
 
 /**
+ * Создаёт/обновляет Model из WB imtId групп.
+ *
+ * После обработки WB-карточек собирает уникальные imtId из wbCards,
+ * для каждого создаёт Model (если нет) и привязывает все товары группы.
+ *
+ * Ozon-only товары без imtId не трогает — привязываются руками.
+ */
+async function syncModels(prisma, wbCards) {
+  // Собираем imtId → nmID из карточек
+  const imtGroups = new Map(); // imtId → { nmIDs: Set, name: string, category: string }
+  for (const card of wbCards) {
+    const imtId = card.imtID ?? card.imt_id;
+    if (!imtId) continue;
+    if (!imtGroups.has(imtId)) {
+      imtGroups.set(imtId, { nmIDs: new Set(), name: card.imt_name || "", category: resolveCategory(card) });
+    }
+    const g = imtGroups.get(imtId);
+    g.nmIDs.add(card.nmID);
+  }
+
+  if (imtGroups.size === 0) {
+    log.line("  No imtId groups found in WB cards");
+    return { created: 0, assigned: 0 };
+  }
+
+  let created = 0;
+  let assigned = 0;
+
+  for (const [imtId, group] of imtGroups) {
+    const bigIntId = BigInt(imtId);
+
+    // Ищем существующую модель по imtId
+    let model = await prisma.model.findFirst({ where: { imtId: bigIntId } });
+
+    if (!model) {
+      // Генерируем имя модели: первое слово из imt_name, fallback на "Модель {imtId}"
+      const modelName = group.name || `Модель ${imtId}`;
+      const slug = `model-wb-${imtId}`;
+      model = await prisma.model.create({
+        data: {
+          id: slug,
+          name: modelName,
+          slug,
+          category: group.category || "crossbody",
+          description: "",
+          imtId: bigIntId,
+        },
+      });
+      created++;
+      log.line(`  Created model: ${model.id} (${modelName})`);
+    }
+
+    // Привязываем неархивные товары к модели
+    for (const nmId of group.nmIDs) {
+      const product = await prisma.product.findFirst({ where: { wbArticle: nmId, archivedAt: null } });
+      if (product && product.modelId !== model.id) {
+        await prisma.product.update({
+          where: { id: product.id },
+          data: { modelId: model.id },
+        });
+        assigned++;
+        log.line(`  Assigned ${product.id} → ${model.id}`);
+      }
+    }
+  }
+
+  return { created, assigned };
+}
+
+/**
  * Архивирует товары, которых нет ни в WB (активных или trash),
  * ни в Ozon (любой видимости).
+ *
+ * @param {boolean} ozonChecked — true если Ozon API опрашивался (иначе Ozon-товары не трогаем)
  */
-async function archiveGoneProducts(prisma, dbProducts, wbArticles, ozonArticles, trashArticles) {
+async function archiveGoneProducts(prisma, dbProducts, wbArticles, ozonArticles, trashArticles, wbChecked = true, ozonChecked = true) {
   const wbSet = new Set(wbArticles);
   const trashSet = new Set(trashArticles);
   const ozonSet = new Set(ozonArticles);
@@ -814,35 +1071,38 @@ async function archiveGoneProducts(prisma, dbProducts, wbArticles, ozonArticles,
     const wbArt = db.wbArticle ? Number(db.wbArticle) : null;
     const ozonArt = db.ozonArticle ? Number(db.ozonArticle) : null;
 
-    const onWb = wbArt && wbSet.has(wbArt);
-    const onOzon = ozonArt && ozonSet.has(ozonArt);
+    // Если маркетплейс не опрашивался — товары с его артикулом не трогаем
+    if (!ozonChecked && ozonArt) continue;
+    if (!wbChecked && wbArt) continue;
+
+    const onWb = wbChecked && wbArt && wbSet.has(wbArt);
+    const onOzon = ozonChecked && ozonArt && ozonSet.has(ozonArt);
     const inWbTrash = wbArt && trashSet.has(wbArt);
 
-    if (onWb || onOzon) continue;
-
-    if (inWbTrash) {
-      // В корзине WB → архивируем
-      if (!flags.dry) {
-        await prisma.product.update({
-          where: { id: db.id },
-          data: { archivedAt: new Date() },
-        });
-      }
-      archived++;
-      log.line(`  Archived (WB trash): ${db.id} article=${wbArt} ${db.name}`);
-    } else {
-      // Нет нигде → out of stock (временно)
-      if (db.inStock !== false) {
+    if (onWb || onOzon) {
+      // Товар найден на маркетплейсе — снимаем архив если был
+      if (db.archivedAt) {
         if (!flags.dry) {
           await prisma.product.update({
             where: { id: db.id },
-            data: { inStock: false },
+            data: { archivedAt: null, inStock: true },
           });
         }
-        markedOutOfStock++;
-        log.line(`  Out of stock: ${db.id} article=${wbArt || ozonArt} ${db.name}`);
+        log.line(`  Restored: ${db.id} article=${wbArt || ozonArt} ${db.name}`);
       }
+      continue;
     }
+
+    // Не найден ни на одном маркетплейсе → архивируем
+    if (!flags.dry) {
+      await prisma.product.update({
+        where: { id: db.id },
+        data: { archivedAt: new Date(), inStock: false },
+      });
+    }
+    archived++;
+    const reason = inWbTrash ? 'WB trash' : 'not on marketplace';
+    log.line(`  Archived (${reason}): ${db.id} article=${wbArt || ozonArt} ${db.name}`);
   }
 
   return { archived, markedOutOfStock };
@@ -883,6 +1143,7 @@ async function main() {
     const stats = {
       wbCreated: 0,
       wbUpdated: 0,
+      ozonCreated: 0,
       ozonUpdated: 0,
       archived: 0,
       outOfStock: 0,
@@ -912,27 +1173,89 @@ async function main() {
 
       // ─── Fetch WB prices ───
       log.line("Fetching WB prices...");
-      const wbPriceMap = await wbFetchPrices(wbApiKey, wbArticles);
+      const wbPricesResult = await wbFetchPrices(wbApiKey, wbArticles);
+      let wbPriceMap = wbPricesResult.priceMap;
+      stats.errors += wbPricesResult.errors;
+
+      // Fallback: если Pricing API вернул менее 80% цен — используем публичное search API
+      if (wbPriceMap.size < wbArticles.length * 0.8) {
+        log.line(`  Pricing API returned only ${wbPriceMap.size}/${wbArticles.length} prices, trying search API fallback...`);
+        const publicPrices = await wbFetchPublicPrices(wbArticles);
+        for (const [nmId, priceData] of publicPrices) {
+          wbPriceMap.set(nmId, priceData);
+        }
+        log.line(`  Total prices after fallback: ${wbPriceMap.size}/${wbArticles.length}`);
+      }
+
+      // ─── Определяем inStock из search API ───
+      // search API возвращает stock.qty для товаров в выдаче.
+      // stock=0 → нет в наличии, stock>0 → в наличии, undefined → нет данных (не в выдаче)
+      for (const [nmId, priceData] of wbPriceMap) {
+        const db = existing.byWbArticle.get(nmId);
+        const inTrash = trashArticles.includes(nmId);
+        let newInStock;
+
+        if (inTrash) {
+          // В корзине — нет в наличии
+          newInStock = false;
+        } else if (priceData?.stock !== undefined && priceData?.stock !== null) {
+          // search API дал точный сток
+          newInStock = priceData.stock > 0;
+        } else if (priceData?.discountedPrice != null) {
+          // В search API с ценой но без stock — считаем в наличии
+          newInStock = true;
+        } else {
+          // Нет данных from search API — не трогаем
+          continue;
+        }
+
+        if (db && newInStock !== db.inStock) {
+          await updateProduct(prisma, db.id, { inStock: newInStock });
+          db.inStock = newInStock; // refresh snapshot для следующих фаз
+        }
+      }
+
+      // ─── Строим индекс vendorCode → nmID для matching по sku ───
+      const wbVendorToNm = new Map();
+      for (const card of wbCards) {
+        const vc = card.vendorCode?.trim();
+        if (vc) wbVendorToNm.set(vc, card.nmID);
+      }
 
       // ─── Process WB cards ───
       log.line("Processing WB cards...");
       for (const card of wbCards) {
         const article = card.nmID;
-        const db = existing.byWbArticle.get(article);
+        const vendorCode = (card.vendorCode || "").trim();
+
+        // Match by id (sku) first, then by wbArticle
+        let db = vendorCode ? existing.byId.get(vendorCode) : null;
+        if (!db) db = existing.byWbArticle.get(article);
+
         const wbPrices = wbPriceMap.get(article) || null;
+        const wbRating = card.rating != null ? { rating: card.rating, feedbacks: card.feedbacks ?? 0 } : null;
 
         if (db) {
-          // Update existing
-          const updates = mergeProductSources(card, wbPrices, null, null, null, null, db);
-          if (Object.keys(updates).length > 0) {
-            const ok = await updateProduct(prisma, db.id, updates);
+          // Update existing — ensure wbArticle is set
+          const ensureFields = {};
+          if (article && !db.wbArticle) ensureFields.wbArticle = BigInt(article);
+
+          const updates = mergeProductSources(card, wbPrices, wbRating, null, null, null, db);
+          const allUpdates = { ...ensureFields, ...updates };
+          if (Object.keys(allUpdates).length > 0) {
+            const ok = await updateProduct(prisma, db.id, allUpdates);
             if (ok) stats.wbUpdated++;
           }
         } else {
           // Create new
-          const updates = mergeProductSources(card, wbPrices, null, null, null, null, null);
+          const inTrash = trashArticles.includes(article);
+          const searchStock = wbPrices?.stock;
+          const defaultInStock = inTrash ? false : (searchStock != null ? searchStock > 0 : true);
+          const updates = mergeProductSources(card, wbPrices, wbRating, null, null, null, null);
           const id = await createProduct(prisma, {
             ...updates,
+            sku: vendorCode || null,
+            inStock: defaultInStock,
             wbArticle: article,
             name: updates.name || generateName({
               category: updates.category || resolveCategory(card),
@@ -945,7 +1268,7 @@ async function main() {
             wbCreatedAt: card.createdAt ? new Date(card.createdAt) : null,
             wbUpdatedAt: card.updatedAt ? new Date(card.updatedAt) : null,
           });
-          log.line(`  Created: ${id} article=${article}`);
+          log.line(`  Created: ${id} sku=${vendorCode} article=${article}`);
           stats.wbCreated++;
         }
       }
@@ -984,16 +1307,35 @@ async function main() {
         const info = infoMap.get(offerId);
         const attrs = attrMap.get(offerId);
         const rating = ratingMap.get(productId);
-        const db = existing.byOzonArticle.get(productId);
+
+        // Match by id (sku) first, then by ozonArticle
+        let db = offerId ? existing.byId.get(offerId) : null;
+        if (!db) db = existing.byOzonArticle.get(productId);
 
         if (!info) continue;
 
         if (db) {
-          // Update existing — merge Ozon data into existing product
+          // Update existing — ensure ozonArticle is set
+          const ensureFields = {};
+          if (productId && !db.ozonArticle) ensureFields.ozonArticle = BigInt(productId);
+
           const updates = mergeProductSources(null, null, null, info, attrs, rating, db);
-          if (Object.keys(updates).length > 0) {
-            const ok = await updateProduct(prisma, db.id, updates);
+          const allUpdates = { ...ensureFields, ...updates };
+          if (Object.keys(allUpdates).length > 0) {
+            const ok = await updateProduct(prisma, db.id, allUpdates);
             if (ok) stats.ozonUpdated++;
+          }
+
+          // ─── inStock из Ozon стоков (только для товаров без WB) ───
+          // Для товаров с WB статьёй inStock уже обновлён из WB search API выше.
+          if (!db.wbArticle && info.stocks?.stocks) {
+            const ozonInStock = info.stocks.stocks.some(
+              (s) => (s.present || 0) - (s.reserved || 0) > 0
+            );
+            if (ozonInStock !== db.inStock) {
+              await updateProduct(prisma, db.id, { inStock: ozonInStock });
+              stats.ozonUpdated++;
+            }
           }
         } else {
           // New product from Ozon (no WB card)
@@ -1003,6 +1345,7 @@ async function main() {
           const ozonComp = ozonExtractComposition(attrs);
 
           const id = await createProduct(prisma, {
+            sku: offerId || null,
             name: info.name || "",
             price: ozonPrice || 0,
             originalPrice: ozonOrigPrice || 0,
@@ -1023,8 +1366,8 @@ async function main() {
             nameAutoGenerated: true,
             descAutoGenerated: true,
           });
-          log.line(`  Created (Ozon): ${id} article=${productId}`);
-          stats.wbCreated++; // treat Ozon-only products as "created"
+          log.line(`  Created (Ozon): ${id} sku=${offerId} article=${productId}`);
+          stats.ozonCreated++;
         }
       }
 
@@ -1032,7 +1375,17 @@ async function main() {
     }
 
     // ═══════════════════════════════════════════
-    // PHASE 3: Archive & Restock
+    // PHASE 3: Sync Models (WB imtId → Model)
+    // ═══════════════════════════════════════════
+
+    if (!flags.ozonOnly && wbCards.length > 0) {
+      log.line("Syncing models from WB imtId...");
+      const modelResult = await syncModels(prisma, wbCards);
+      log.line(`  Models: ${modelResult.created} created, ${modelResult.assigned} assigned\n`);
+    }
+
+    // ═══════════════════════════════════════════
+    // PHASE 4: Archive & Restock
     // ═══════════════════════════════════════════
 
     log.line("Archiving removed products...");
@@ -1042,6 +1395,8 @@ async function main() {
       wbArticles,
       ozonArticles,
       trashArticles,
+      !flags.ozonOnly, // wbChecked — true если WB фаза запускалась
+      !flags.wbOnly,   // ozonChecked — true если Ozon фаза запускалась
     );
     stats.archived = archiveResult.archived;
     stats.outOfStock = archiveResult.markedOutOfStock;
@@ -1055,20 +1410,22 @@ async function main() {
     log.line("\n=== SUMMARY ===");
     log.line(`  WB created:      ${stats.wbCreated}`);
     log.line(`  WB updated:      ${stats.wbUpdated}`);
+    log.line(`  Ozon created:    ${stats.ozonCreated}`);
     log.line(`  Ozon updated:    ${stats.ozonUpdated}`);
     log.line(`  Archived:        ${stats.archived}`);
     log.line(`  Out of stock:    ${stats.outOfStock}`);
-    log.line(`  Duration:        ${duration}s`);
+    log.line(`  Errors:          ${stats.errors}`);
+    log.line(`  Duration:        ${duration}s}`);
     log.line(`  Mode:            ${flags.dry ? "DRY" : "live"}`);
 
     // JSON summary for wrapper scripts (last line)
     const summary = {
-      created: stats.wbCreated,
+      created: stats.wbCreated + stats.ozonCreated,
       updated: stats.wbUpdated + stats.ozonUpdated,
       archived: stats.archived,
       outOfStock: stats.outOfStock,
       errors: stats.errors,
-      total: stats.wbCreated + stats.wbUpdated + stats.ozonUpdated + stats.archived,
+      total: stats.wbCreated + stats.ozonCreated + stats.wbUpdated + stats.ozonUpdated,
       duration: parseFloat(duration),
     };
     console.log(JSON.stringify(summary));

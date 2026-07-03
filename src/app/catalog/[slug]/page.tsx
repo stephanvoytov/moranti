@@ -247,7 +247,7 @@ export default async function ProductPage({ params }: Props) {
             <ColorSwatches current={product} siblings={siblings} />
           ) : null}
 
-          {product.rating ? (
+          {product.rating && product.rating > 4 ? (
             <div className={styles.rating}>
               <span className={styles.stars}>
                 {"★".repeat(Math.round(product.rating))}

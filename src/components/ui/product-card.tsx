@@ -127,7 +127,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             </span>
           )}
         </div>
-        {product.rating ? (
+        {product.rating && product.rating > 4 ? (
           <div className={styles.rating}>
             <span className={styles.stars}>
               {"★".repeat(Math.round(product.rating))}

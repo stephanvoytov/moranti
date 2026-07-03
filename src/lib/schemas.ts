@@ -50,6 +50,7 @@ export const createProductSchema = z.object({
   reviewsCount: z.number().int().nonnegative().optional().nullable(),
   salesCount: z.number().int().nonnegative().optional().nullable(),
   slug: z.string().optional(),
+  sku: z.string().optional(),
   modelId: z.string().optional(),
 });
 
@@ -68,6 +69,7 @@ export const updateProductSchema = z.object({
   ozonArticle: z.number().int().positive().optional().nullable(),
   rating: z.number().min(0).max(5).optional().nullable(),
   reviewsCount: z.number().int().nonnegative().optional().nullable(),
+  sku: z.string().optional().nullable(),
   composition: z.string().optional(),
   colorName: z.string().optional(),
   modelId: z.string().optional().nullable(),

@@ -10,6 +10,7 @@ import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { createProductSchema, productsQuerySchema, VALID_CATEGORIES } from "@/lib/schemas";
 import prisma, { prismaQuery, serializeProduct } from "@/lib/prisma";
+import { invalidateCache } from "@/lib/data-cache";
 
 /* ——— GET /api/admin/products ——— */
 
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { name, price, originalPrice, category, description, wbArticle, ozonArticle, images: inputImages, rating, reviewsCount, slug: customSlug, modelId } = parsed.data;
+  const { name, price, originalPrice, category, description, wbArticle, ozonArticle, images: inputImages, rating, reviewsCount, sku: inputSku, modelId } = parsed.data;
 
   const marketplaces: { name: string; url: string; icon: string }[] = [];
   if (wbArticle) {
@@ -114,17 +115,32 @@ export async function POST(request: NextRequest) {
 
   const images = inputImages.length > 0 ? inputImages : [];
 
-  const lastProduct = await prismaQuery(() =>
-    prisma.product.findFirst({
-      orderBy: { createdAt: "desc" },
-      select: { id: true },
-    })
-  );
-  const lastNum = lastProduct
-    ? parseInt(lastProduct.id.replace("mor-", ""), 10) || 0
-    : 0;
-  const newId = `mor-${String(lastNum + 1).padStart(3, "0")}`;
-  const slug = customSlug || `product-mor-${String(lastNum + 1).padStart(3, "0")}`;
+  // id = sku, или генерируем manual-*
+  let newId = inputSku?.trim() || "";
+  let slug = "";
+
+  if (newId) {
+    // Slug из id: BalensaTaup → balensa-taup
+    slug = newId
+      .replace(/([a-z])([A-Z])/g, "$1-$2")
+      .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
+      .toLowerCase()
+      .replace(/[/]+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  } else {
+    const last = await prismaQuery(() =>
+      prisma.product.findFirst({
+        where: { id: { startsWith: "manual-" } },
+        orderBy: { id: "desc" },
+        select: { id: true },
+      })
+    );
+    const num = last ? parseInt(last.id.replace("manual-", ""), 10) + 1 : 1;
+    newId = "manual-" + String(num).padStart(3, "0");
+    slug = newId;
+  }
 
   const product = await prismaQuery(() =>
     prisma.product.create({
@@ -148,6 +164,9 @@ export async function POST(request: NextRequest) {
       },
     })
   );
+
+  invalidateCache("all-products");
+  invalidateCache("all-categories");
 
   return NextResponse.json(serializeProduct(product as Record<string, unknown>), { status: 201 });
 }

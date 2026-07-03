@@ -11,10 +11,12 @@ import styles from "./products.module.css";
 
 interface Product {
   id: string;
+  slug: string;
   name: string;
   price: number;
   originalPrice?: number;
   category: string;
+  sku?: string;
   wbArticle?: number;
   ozonArticle?: number;
   image?: string;
@@ -409,16 +411,17 @@ export default function AdminProductsPage() {
               <th>Модель</th>
               <th>Цена</th>
               <th>Категория</th>
-              <th>Артикул</th>
+              <th>SKU</th>
+              <th>Артикулы</th>
               <th>Рейтинг</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={9} className={styles.loading}>Загрузка...</td></tr>
+              <tr><td colSpan={10} className={styles.loading}>Загрузка...</td></tr>
             ) : products.length === 0 ? (
-              <tr><td colSpan={9} className={styles.empty}>
+              <tr><td colSpan={10} className={styles.empty}>
                 {statusTab === "archived" ? "Нет архивных товаров" : "Нет товаров"}
               </td></tr>
             ) : (
@@ -456,7 +459,7 @@ export default function AdminProductsPage() {
                       </div>
                     </td>
                     <td>
-                      <Link href={`/admin/products/${p.id}`} className={styles.productName}>
+                      <Link href={`/admin/products/${p.slug}`} className={styles.productName}>
                         {p.name}
                       </Link>
                       {isArchived && <span className={styles.archivedBadge}>Архив</span>}
@@ -472,6 +475,7 @@ export default function AdminProductsPage() {
                     </td>
                     <td className={styles.price}>{formatPrice(p.price)}</td>
                     <td><span className={styles.categoryBadge}>{catName(p.category)}</span></td>
+                    <td className={styles.sku}>{p.sku || <span className={styles.muted}>—</span>}</td>
                     <td className={styles.article}>
                       {p.wbArticle && <span>WB: {p.wbArticle}</span>}
                       {p.wbArticle && p.ozonArticle && <br />}

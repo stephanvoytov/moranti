@@ -10,6 +10,7 @@ import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
 import prisma, { prismaQuery } from "@/lib/prisma";
+import { invalidateCache } from "@/lib/data-cache";
 
 const bulkActionSchema = z.object({
   action: z.enum(["archive", "unarchive", "delete", "assign-model"]),
@@ -84,6 +85,10 @@ export async function POST(request: NextRequest) {
         throw new Error(`Unknown action: ${action}`);
     }
   });
+
+  // Сбросить кеш данных — изменился список товаров
+  invalidateCache("all-products");
+  invalidateCache("all-categories");
 
   return NextResponse.json({
     success: true,

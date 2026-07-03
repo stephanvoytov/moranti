@@ -78,8 +78,8 @@ function wbToCategory(subjectId, subjectName, subjId) {
     }
   }
 
-  // 4) Если ничего не подошло — crossbody (самая частая)
-  return "crossbody";
+  // 4) Если ничего не подошло — null (сохранит существующую категорию из БД)
+  return null;
 }
 
 module.exports = { CATEGORY_MAP, CATEGORY_RU, wbToCategory };

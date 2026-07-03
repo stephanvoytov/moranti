@@ -9,6 +9,7 @@ import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { runWbSync } from "@/lib/wb-sync";
 import { getSyncHistory } from "@/lib/sync-history";
+import { invalidateCache } from "@/lib/data-cache";
 
 export async function GET() {
   const session = await getSession();
@@ -34,6 +35,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = runWbSync();
+    // После синхронизации — сбросить все кеши данных
+    invalidateCache("all-products");
+    invalidateCache("all-categories");
     return NextResponse.json(result);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Sync failed";

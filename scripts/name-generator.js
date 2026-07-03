@@ -16,7 +16,8 @@ const { CATEGORY_RU } = require("./wb-categories");
  * @returns {string}
  */
 function generateName({ category, composition, wbName }) {
-  const base = CATEGORY_RU[category] || category;
+  const cat = category || "crossbody";
+  const base = CATEGORY_RU[cat] || cat;
 
   // Определяем мини
   const lower = (wbName || "").toLowerCase();

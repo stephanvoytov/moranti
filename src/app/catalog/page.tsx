@@ -3,6 +3,8 @@ import { getProducts, getCategories } from "@/data/products";
 import { readSettings } from "@/lib/settings";
 import CatalogPage from "./catalog-content";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Каталог кожаных сумок",
   description:
