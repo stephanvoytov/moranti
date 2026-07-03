@@ -690,6 +690,63 @@ function ozonExtractCategory(info, attrs) {
   return null;
 }
 
+/**
+ * Группирует Ozon товары по атрибуту 9048 (модель) и привязывает к модели.
+ * Если хотя бы один товар из группы уже имеет modelId (от WB) — наследуют все.
+ * Если нет — создаётся новая модель ozon-*.
+ */
+async function syncOzonModels(prisma, attrMap) {
+  const groups = new Map(); // "modelName" → [offerId, ...]
+  for (const [offerId, attrs] of attrMap) {
+    if (!attrs?.attributes) continue;
+    const modelAttr = attrs.attributes.find((a) => a.id === 9048);
+    if (!modelAttr?.values?.length) continue;
+    const vals = modelAttr.values.map((v) => v.value).filter(Boolean);
+    if (vals.length === 0) continue;
+    const key = vals.join(" ");
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(offerId);
+  }
+
+  let created = 0, assigned = 0;
+
+  for (const [modelName, offerIds] of groups) {
+    const products = await prisma.product.findMany({ where: { sku: { in: offerIds } } });
+    if (products.length === 0) continue;
+
+    // Если хоть один уже в модели — все наследуют
+    const existingModelId = products.find((p) => p.modelId)?.modelId;
+
+    if (existingModelId) {
+      for (const p of products) {
+        if (p.modelId !== existingModelId) {
+          await prisma.product.update({ where: { id: p.id }, data: { modelId: existingModelId } });
+          assigned++;
+        }
+      }
+    } else {
+      // Создаём новую Ozon-модель
+      const slug = "model-ozon-" + modelName
+        .toLowerCase().replace(/[/\s]+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-|-$/g, "");
+
+      let model = await prisma.model.findFirst({ where: { slug } });
+      if (!model) {
+        model = await prisma.model.create({
+          data: { id: slug, name: modelName, slug, category: products[0].category || "crossbody", description: "" },
+        });
+        created++;
+      }
+      for (const p of products) {
+        if (p.modelId !== model.id) {
+          await prisma.product.update({ where: { id: p.id }, data: { modelId: model.id } });
+          assigned++;
+        }
+      }
+    }
+  }
+  return { created, assigned };
+}
+
 /* =============================================
    DB operations
    ============================================= */
@@ -1357,6 +1414,12 @@ async function main() {
       }
 
       log.line(`  Ozon: ${stats.ozonUpdated} updated\n`);
+
+      // ─── Ozon Model Sync (attribute 9048) ───
+      const ozonModelResult = await syncOzonModels(prisma, attrMap);
+      if (ozonModelResult.created > 0 || ozonModelResult.assigned > 0) {
+        log.line(`  Ozon models: ${ozonModelResult.created} created, ${ozonModelResult.assigned} assigned`);
+      }
     }
 
     // ═══════════════════════════════════════════
@@ -1366,7 +1429,7 @@ async function main() {
     if (!flags.ozonOnly && wbCards.length > 0) {
       log.line("Syncing models from WB imtId...");
       const modelResult = await syncModels(prisma, wbCards);
-      log.line(`  Models: ${modelResult.created} created, ${modelResult.assigned} assigned\n`);
+      log.line(`  WB models: ${modelResult.created} created, ${modelResult.assigned} assigned\n`);
     }
 
     // ═══════════════════════════════════════════
