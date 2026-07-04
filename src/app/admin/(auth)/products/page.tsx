@@ -8,6 +8,7 @@ import AdminModal from "@/components/admin/admin-modal";
 import AdminButton from "@/components/admin/admin-button";
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import { useToast } from "@/lib/toast-context";
+import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import styles from "./products.module.css";
 
 interface Product {
@@ -514,9 +515,27 @@ export default function AdminProductsPage() {
                     <td><span className={styles.categoryBadge}>{catName(p.category)}</span></td>
                     <td className={styles.sku}>{p.sku || <span className={styles.muted}>—</span>}</td>
                     <td className={styles.article}>
-                      {p.wbArticle && <span>WB: {p.wbArticle}</span>}
+                      {p.wbArticle && (
+                        <a
+                          href={MARKETPLACE_URLS.wbProduct(p.wbArticle)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.articleLink}
+                        >
+                          WB: {p.wbArticle} ↗
+                        </a>
+                      )}
                       {p.wbArticle && p.ozonArticle && <br />}
-                      {p.ozonArticle && <span>OZ: {p.ozonArticle}</span>}
+                      {p.ozonArticle && (
+                        <a
+                          href={MARKETPLACE_URLS.ozonProduct(p.ozonArticle)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.articleLink}
+                        >
+                          OZ: {p.ozonArticle} ↗
+                        </a>
+                      )}
                       {!p.wbArticle && !p.ozonArticle && <span className={styles.muted}>—</span>}
                     </td>
                     <td>{p.rating ? `${p.rating.toFixed(1)} ★` : "—"}</td>
