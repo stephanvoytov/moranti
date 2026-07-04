@@ -6,6 +6,7 @@ import { getProducts, getCategories } from "@/data/products";
 import { getWbSyncStatus } from "@/lib/wb-sync";
 import Link from "next/link";
 import prisma, { prismaQuery } from "@/lib/prisma";
+import type { SyncRunRecord } from "@/lib/sync-history";
 import styles from "./dashboard.module.css";
 
 interface Issue {
@@ -22,7 +23,7 @@ function formatDate(ts: string) {
   }
 }
 
-function SyncSection({ sync }: { sync: ReturnType<typeof getWbSyncStatus> }) {
+function SyncSection({ sync }: { sync: SyncRunRecord | null }) {
 
   return (
     <section className={styles.syncSection}>
@@ -62,7 +63,7 @@ export default async function AdminDashboard() {
       include: { variants: { where: { archivedAt: null }, select: { id: true } } },
     })),
   ]);
-  const syncStatus = getWbSyncStatus();
+  const syncStatus = await getWbSyncStatus();
 
   const totalProducts = products.length;
   const totalCategories = categories.length;

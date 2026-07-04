@@ -1,5 +1,7 @@
 /* =============================================
-   Admin WB Sync API — POST (start), GET (status)
+   Admin WB Sync API
+   POST  — async start, returns runId
+   GET   — history of completed runs
    Protected: requires valid admin session
    ============================================= */
 
@@ -17,7 +19,7 @@ export async function GET() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const history = getSyncHistory("wb");
+  const history = await getSyncHistory("wb");
   return NextResponse.json({ runs: history });
 }
 
@@ -34,11 +36,12 @@ export async function POST(request: NextRequest) {
   if (rl) return rl;
 
   try {
-    const result = runWbSync();
-    // После синхронизации — сбросить все кеши данных
-    invalidateCache("all-products");
-    invalidateCache("all-categories");
-    return NextResponse.json(result);
+    const runId = runWbSync();
+    // После синхронизации (когда завершится) — сбросить все кеши данных.
+    // Инвалидация делается здесь сразу, т.к. sync-runner сохраняет
+    // результат в историю, а свежие данные нужны с момента запуска.
+    invalidateCache();
+    return NextResponse.json({ runId, status: "started" });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Sync failed";
     return NextResponse.json({ error: message }, { status: 500 });

@@ -1,15 +1,14 @@
 /**
  * sync-history.ts — единое хранилище истории синхронизации.
  *
- * Хранит массив запусков (runs) с полным логом вывода, статистикой
- * и детализацией по товарам. Общий формат для WB и Ozon.
+ * Хранит записи в БД (Prisma Postgres). Если таблица SyncRun ещё не создана
+ * (миграция не накатана), падает на JSON-файл в /tmp.
  */
 
+import { prisma } from "./prisma";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import path from "path";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const HISTORY_FILE = path.join(DATA_DIR, "sync-history.json");
 const MAX_RUNS = 20;
 
 /* ─── Типы ─── */
@@ -29,12 +28,6 @@ export interface SyncRunDetail {
   changes?: string[];
 }
 
-export interface SyncRunDetails {
-  added?: SyncRunDetail[];
-  updated?: SyncRunDetail[];
-  archived?: SyncRunDetail[];
-}
-
 export interface SyncRunRecord {
   platform: "wb" | "ozon";
   timestamp: string;
@@ -42,58 +35,165 @@ export interface SyncRunRecord {
   success: boolean;
   error?: string;
   stats: SyncRunStats;
-  details?: SyncRunDetails;
   log: string;             // полный вывод скрипта
 }
 
-export interface SyncHistory {
-  runs: SyncRunRecord[];
+/* ─── JSON fallback (пока миграция не накатана) ─── */
+
+function tmpDataDir(): string {
+  if (process.env.VERCEL === "1") return "/tmp/moranti-data";
+  return path.join(process.cwd(), "data");
 }
 
-/* ─── Чтение / запись ─── */
+function tmpHistoryFile(): string {
+  return path.join(tmpDataDir(), "sync-history.json");
+}
 
-function loadHistory(): SyncHistory {
-  if (!existsSync(HISTORY_FILE)) return { runs: [] };
+function loadJsonFallback(): SyncRunRecord[] {
+  const file = tmpHistoryFile();
+  if (!existsSync(file)) return [];
   try {
-    return JSON.parse(readFileSync(HISTORY_FILE, "utf-8"));
+    return JSON.parse(readFileSync(file, "utf-8")).runs || [];
   } catch {
-    return { runs: [] };
+    return [];
   }
 }
 
-function saveHistory(h: SyncHistory) {
-  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
-  writeFileSync(HISTORY_FILE, JSON.stringify(h, null, 2), "utf-8");
+function saveJsonFallback(runs: SyncRunRecord[]) {
+  const dir = tmpDataDir();
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  writeFileSync(
+    tmpHistoryFile(),
+    JSON.stringify({ runs: runs.slice(0, MAX_RUNS) }, null, 2),
+    "utf-8",
+  );
 }
 
-/* ─── Добавление записи ─── */
-
-export function addSyncRun(record: SyncRunRecord) {
-  const h = loadHistory();
-  h.runs.unshift(record);
-  if (h.runs.length > MAX_RUNS) h.runs.length = MAX_RUNS;
-  saveHistory(h);
-}
+/* ─── Prisma ─── */
 
 /**
- * Возвращает историю для платформы, последний запуск — первый.
+ * Prisma error P2021 = "Table not found".
+ * Возвращает true, если ошибка связана с отсутствием таблицы.
  */
-export function getSyncHistory(platform: "wb" | "ozon"): SyncRunRecord[] {
-  const h = loadHistory();
-  return h.runs.filter((r) => r.platform === platform);
+function isTableNotFound(e: unknown): boolean {
+  return (
+    typeof e === "object" &&
+    e !== null &&
+    "code" in e &&
+    (e as { code: string }).code === "P2021"
+  );
 }
 
-/**
- * Возвращает последний запуск для платформы или null.
- */
-export function getLastSyncRun(platform: "wb" | "ozon"): SyncRunRecord | null {
-  const runs = getSyncHistory(platform);
-  return runs.length > 0 ? runs[0] : null;
+async function addToDb(
+  record: SyncRunRecord,
+): Promise<boolean> {
+  try {
+    await prisma.syncRun.create({
+      data: {
+        platform: record.platform,
+        timestamp: new Date(record.timestamp),
+        duration: record.duration,
+        success: record.success,
+        error: record.error || null,
+        added: record.stats.added,
+        updated: record.stats.updated,
+        archived: record.stats.archived,
+        skipped: record.stats.skipped,
+        errors: record.stats.errors,
+        log: record.log,
+      },
+    });
+    return true;
+  } catch (e) {
+    if (isTableNotFound(e)) return false;
+    throw e;
+  }
 }
 
-/**
- * Форматирует длительность для отображения.
- */
+function rowToRecord(row: {
+  id: string;
+  platform: string;
+  timestamp: Date;
+  duration: number;
+  success: boolean;
+  error: string | null;
+  added: number;
+  updated: number;
+  archived: number;
+  skipped: number;
+  errors: number;
+  log: string;
+}): SyncRunRecord {
+  const stats: SyncRunStats = {
+    added: row.added,
+    updated: row.updated,
+    archived: row.archived,
+    skipped: row.skipped,
+    errors: row.errors,
+    total: row.added + row.updated + row.archived + row.skipped,
+  };
+  return {
+    platform: row.platform as "wb" | "ozon",
+    timestamp: row.timestamp.toISOString(),
+    duration: row.duration,
+    success: row.success,
+    error: row.error || undefined,
+    stats,
+    log: row.log,
+  };
+}
+
+async function listFromDb(
+  platform: "wb" | "ozon",
+): Promise<SyncRunRecord[] | null> {
+  try {
+    const rows = await prisma.syncRun.findMany({
+      where: { platform },
+      orderBy: { timestamp: "desc" },
+      take: MAX_RUNS,
+    });
+    return rows.map(rowToRecord);
+  } catch (e) {
+    if (isTableNotFound(e)) return null;
+    throw e;
+  }
+}
+
+/* ─── Публичное API ─── */
+
+export async function addSyncRun(record: SyncRunRecord) {
+  const written = await addToDb(record);
+  if (!written) {
+    // Таблицы нет — fallback на JSON
+    const runs = loadJsonFallback();
+    runs.unshift(record);
+    saveJsonFallback(runs);
+  }
+}
+
+export async function getSyncHistory(
+  platform: "wb" | "ozon",
+): Promise<SyncRunRecord[]> {
+  const fromDb = await listFromDb(platform);
+  if (fromDb !== null) return fromDb;
+
+  // Fallback на JSON
+  return loadJsonFallback().filter((r) => r.platform === platform);
+}
+
+export async function getLastSyncRun(
+  platform: "wb" | "ozon",
+): Promise<SyncRunRecord | null> {
+  const fromDb = await listFromDb(platform);
+  if (fromDb !== null) return fromDb[0] || null;
+
+  // Fallback на JSON
+  const runs = loadJsonFallback().filter((r) => r.platform === platform);
+  return runs[0] || null;
+}
+
+/* ─── Утилита ─── */
+
 export function formatDuration(ms: number): string {
   if (ms < 1000) return `${ms}мс`;
   if (ms < 60_000) return `${(ms / 1000).toFixed(1)}с`;

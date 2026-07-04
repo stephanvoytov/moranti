@@ -14,8 +14,8 @@ export async function GET() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const wb = getSyncHistory("wb");
-  const ozon = getSyncHistory("ozon");
+  const wb = await getSyncHistory("wb");
+  const ozon = await getSyncHistory("ozon");
 
   return NextResponse.json({ wb, ozon });
 }

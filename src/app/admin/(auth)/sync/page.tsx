@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./sync.module.css";
 import { formatDistanceToNow } from "@/lib/format-date";
 
-/* ─── Types (mirror of sync-history.ts) ─── */
+/* ─── Types ─── */
 
 interface SyncRunStats {
   added: number;
@@ -33,13 +33,42 @@ interface SyncRunRecord {
   log: string;
 }
 
+interface SyncProgress {
+  runId: string;
+  platform: "wb" | "ozon";
+  status: "running" | "completed" | "failed";
+  phase: string;
+  current: number;
+  total: number;
+  startedAt: string;
+  log?: string;
+  error?: string;
+}
+
+/* ─── Phase labels ─── */
+
+const PHASE_LABELS: Record<string, string> = {
+  "wb-prices": "Цены WB",
+  "wb-cards": "Карточки WB",
+  "wb-process": "Обработка товаров WB",
+  "ozon-list": "Список товаров Ozon",
+  "ozon-info": "Информация Ozon",
+  "ozon-attrs": "Атрибуты Ozon",
+  "ozon-ratings": "Рейтинги Ozon",
+  "ozon-process": "Обработка товаров Ozon",
+  "ozon-models": "Модели Ozon",
+  "wb-models": "Модели WB",
+  archive: "Архивация",
+  done: "Завершение",
+};
+
 /* ─── Platform config ─── */
 
 const PLATFORM = {
   wb: {
     title: "Wildberries",
-    desc: "Content API + Pricing API + Stocks API + Analytics API",
-    badge: "Official API",
+    desc: "Public Search API + Content API",
+    badge: "WB API",
     badgeClass: styles.badgeWb,
     btnClass: "",
     apiPath: "/api/admin/sync",
@@ -83,6 +112,10 @@ function fmtDate(ts: string) {
   }
 }
 
+function phaseLabel(phase: string): string {
+  return PHASE_LABELS[phase] || phase;
+}
+
 /* ─── Component ─── */
 
 export default function AdminSyncPage() {
@@ -92,14 +125,12 @@ export default function AdminSyncPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Sync state per platform
-  const [syncing, setSyncing] = useState<{ wb: boolean; ozon: boolean }>({ wb: false, ozon: false });
-  const [lastResult, setLastResult] = useState<{ wb?: SyncRunRecord; ozon?: SyncRunRecord }>({});
-
-  // Expandable sections per platform
-  const [expandedLog, setExpandedLog] = useState<"wb" | "ozon" | null>(null);
-  const [expandedHistory, setExpandedHistory] = useState<"wb" | "ozon" | null>(null);
-  const [expandedDetails, setExpandedDetails] = useState<"wb" | "ozon" | null>(null);
+  // Progress per platform
+  const [progress, setProgress] = useState<{ wb: SyncProgress | null; ozon: SyncProgress | null }>({
+    wb: null,
+    ozon: null,
+  });
+  const pollingRef = useRef<{ wb?: ReturnType<typeof setInterval>; ozon?: ReturnType<typeof setInterval> }>({});
 
   const loadHistory = useCallback(async () => {
     try {
@@ -118,37 +149,105 @@ export default function AdminSyncPage() {
     }
   }, [router]);
 
+  // Check for active runs on mount
   useEffect(() => {
     loadHistory();
+    checkActiveRun("wb");
+    checkActiveRun("ozon");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadHistory]);
 
-  async function handleSync(platform: "wb" | "ozon") {
-    setError("");
-    setSyncing((s) => ({ ...s, [platform]: true }));
-    setExpandedLog(null);
-    setExpandedHistory(null);
-    setExpandedDetails(null);
-
+  async function checkActiveRun(platform: "wb" | "ozon") {
     try {
-      const res = await fetch(PLATFORM[platform].apiPath, { method: "POST" });
-      const data: SyncRunRecord = await res.json();
-
-      if (res.ok) {
-        setLastResult((r) => ({ ...r, [platform]: data }));
-        // Refresh history
-        loadHistory();
-      } else {
-        setError((data as any).error || `Ошибка синхронизации ${PLATFORM[platform].title}`);
+      const res = await fetch(`/api/admin/sync/progress?platform=${platform}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.status === "running") {
+        setProgress((p) => ({ ...p, [platform]: data }));
+        startPolling(platform, data.runId);
       }
     } catch {
-      setError("Ошибка соединения");
-    } finally {
-      setSyncing((s) => ({ ...s, [platform]: false }));
+      // ignore
     }
   }
 
-  const wbLast = lastResult.wb || wbHistory[0] || null;
-  const ozonLast = lastResult.ozon || ozonHistory[0] || null;
+  function startPolling(platform: "wb" | "ozon", runId: string) {
+    // Clear existing polling
+    if (pollingRef.current[platform]) {
+      clearInterval(pollingRef.current[platform]!);
+    }
+    pollingRef.current[platform] = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/admin/sync/progress?runId=${runId}`);
+        if (!res.ok) {
+          stopPolling(platform);
+          return;
+        }
+        const data: SyncProgress = await res.json();
+
+        if (data.status === "running") {
+          setProgress((p) => ({ ...p, [platform]: data }));
+        } else {
+          // Complete or failed
+          stopPolling(platform);
+          setProgress((p) => ({ ...p, [platform]: data }));
+          // Refresh history after a short delay to let the DB update
+          setTimeout(() => {
+            loadHistory();
+            setProgress((p) => ({ ...p, [platform]: null }));
+          }, 500);
+        }
+      } catch {
+        stopPolling(platform);
+      }
+    }, 1500);
+  }
+
+  function stopPolling(platform: "wb" | "ozon") {
+    if (pollingRef.current[platform]) {
+      clearInterval(pollingRef.current[platform]!);
+      delete pollingRef.current[platform];
+    }
+  }
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current.wb) clearInterval(pollingRef.current.wb);
+      if (pollingRef.current.ozon) clearInterval(pollingRef.current.ozon);
+    };
+  }, []);
+
+  async function handleSync(platform: "wb" | "ozon") {
+    setError("");
+
+    try {
+      const res = await fetch(PLATFORM[platform].apiPath, { method: "POST" });
+      const data = await res.json();
+
+      if (res.ok) {
+        // Start polling for progress
+        const initial: SyncProgress = {
+          runId: data.runId,
+          platform,
+          status: "running",
+          phase: "starting",
+          current: 0,
+          total: 1,
+          startedAt: new Date().toISOString(),
+        };
+        setProgress((p) => ({ ...p, [platform]: initial }));
+        startPolling(platform, data.runId);
+      } else {
+        setError(data.error || `Ошибка синхронизации ${PLATFORM[platform].title}`);
+      }
+    } catch {
+      setError("Ошибка соединения");
+    }
+  }
+
+  const wbLast = wbHistory[0] || null;
+  const ozonLast = ozonHistory[0] || null;
 
   return (
     <div className={styles.page}>
@@ -174,15 +273,9 @@ export default function AdminSyncPage() {
           platform="wb"
           config={PLATFORM.wb}
           lastRun={wbLast}
-          syncing={syncing.wb}
-          disabled={syncing.wb || syncing.ozon}
+          progress={progress.wb}
+          disabled={!!progress.wb || !!progress.ozon}
           onSync={() => handleSync("wb")}
-          expandedLog={expandedLog === "wb"}
-          expandedHistory={expandedHistory === "wb"}
-          expandedDetails={expandedDetails === "wb"}
-          onToggleLog={() => setExpandedLog(expandedLog === "wb" ? null : "wb")}
-          onToggleHistory={() => setExpandedHistory(expandedHistory === "wb" ? null : "wb")}
-          onToggleDetails={() => setExpandedDetails(expandedDetails === "wb" ? null : "wb")}
           history={wbHistory}
         />
 
@@ -191,15 +284,9 @@ export default function AdminSyncPage() {
           platform="ozon"
           config={PLATFORM.ozon}
           lastRun={ozonLast}
-          syncing={syncing.ozon}
-          disabled={syncing.wb || syncing.ozon}
+          progress={progress.ozon}
+          disabled={!!progress.wb || !!progress.ozon}
           onSync={() => handleSync("ozon")}
-          expandedLog={expandedLog === "ozon"}
-          expandedHistory={expandedHistory === "ozon"}
-          expandedDetails={expandedDetails === "ozon"}
-          onToggleLog={() => setExpandedLog(expandedLog === "ozon" ? null : "ozon")}
-          onToggleHistory={() => setExpandedHistory(expandedHistory === "ozon" ? null : "ozon")}
-          onToggleDetails={() => setExpandedDetails(expandedDetails === "ozon" ? null : "ozon")}
           history={ozonHistory}
         />
       </div>
@@ -213,31 +300,39 @@ function PlatformCard({
   platform,
   config,
   lastRun,
-  syncing,
+  progress,
   disabled,
   onSync,
-  expandedLog,
-  expandedHistory,
-  expandedDetails,
-  onToggleLog,
-  onToggleHistory,
-  onToggleDetails,
   history,
 }: {
   platform: "wb" | "ozon";
   config: (typeof PLATFORM)["wb"];
   lastRun: SyncRunRecord | null;
-  syncing: boolean;
+  progress: SyncProgress | null;
   disabled: boolean;
   onSync: () => void;
-  expandedLog: boolean;
-  expandedHistory: boolean;
-  expandedDetails: boolean;
-  onToggleLog: () => void;
-  onToggleHistory: () => void;
-  onToggleDetails: () => void;
   history: SyncRunRecord[];
 }) {
+  const isRunning = progress?.status === "running";
+
+  // Expand state per card
+  const [expandedLog, setExpandedLog] = useState(false);
+  const [expandedHistory, setExpandedHistory] = useState(false);
+  const [expandedDetails, setExpandedDetails] = useState(false);
+
+  // Auto-collapse when starting a new run
+  useEffect(() => {
+    if (isRunning) {
+      setExpandedLog(false);
+      setExpandedHistory(false);
+      setExpandedDetails(false);
+    }
+  }, [isRunning]);
+
+  // Determine progress percent
+  const progressPct =
+    progress && progress.total > 0 ? Math.min(100, Math.round((progress.current / progress.total) * 100)) : 0;
+
   return (
     <section className={styles.card} style={{ borderTopColor: config.accent }}>
       {/* Header */}
@@ -250,7 +345,7 @@ function PlatformCard({
       </div>
 
       {/* Status */}
-      {lastRun && (
+      {lastRun && !isRunning && (
         <div className={styles.statusRow}>
           <span className={lastRun.success ? styles.statusOk : styles.statusFail}>
             {lastRun.success ? "✓" : "✗"}
@@ -264,12 +359,12 @@ function PlatformCard({
         </div>
       )}
 
-      {!lastRun && !syncing && (
+      {!lastRun && !isRunning && (
         <div className={styles.neverRun}>Синхронизация ещё не запускалась</div>
       )}
 
-      {/* Stats */}
-      {lastRun && lastRun.success && (
+      {/* Stats (only when not running and last run was successful) */}
+      {lastRun && lastRun.success && !isRunning && (
         <div className={styles.statsGrid}>
           <StatCard value={lastRun.stats.added} label="Добавлено" />
           <StatCard value={lastRun.stats.updated} label="Обновлено" />
@@ -282,8 +377,36 @@ function PlatformCard({
       )}
 
       {/* Error message */}
-      {lastRun && !lastRun.success && lastRun.error && (
+      {lastRun && !lastRun.success && lastRun.error && !isRunning && (
         <div className={styles.errorMsg}>{lastRun.error}</div>
+      )}
+
+      {/* ─── Progress Bar ─── */}
+      {isRunning && progress && (
+        <div className={styles.progressSection}>
+          <div className={styles.progressLabel}>
+            <span className={styles.progressPhase}>{phaseLabel(progress.phase)}</span>
+            <span className={styles.progressCount}>
+              {progress.current}/{progress.total}
+            </span>
+          </div>
+          <div className={styles.progressTrack}>
+            <div
+              className={styles.progressBar}
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          <div className={styles.progressLog}>
+            {progress.log && (
+              <pre className={styles.progressLogPre}><code>{progress.log}</code></pre>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Error from current run */}
+      {progress?.status === "failed" && progress.error && (
+        <div className={styles.errorMsg}>{progress.error}</div>
       )}
 
       {/* Actions */}
@@ -293,7 +416,7 @@ function PlatformCard({
           onClick={onSync}
           disabled={disabled}
         >
-          {syncing ? (
+          {isRunning ? (
             <><span className={styles.btnSpinner} /> Синхронизация...</>
           ) : (
             `Запустить синхронизацию`
@@ -301,17 +424,10 @@ function PlatformCard({
         </button>
       </div>
 
-      {syncing && (
-        <div className={styles.progress}>
-          <div className={styles.spinner} />
-          <span>Загрузка данных с {config.title}...</span>
-        </div>
-      )}
-
-      {/* ─── Collapsible: Details (changes per product) ─── */}
-      {lastRun?.details && (lastRun.details.updated?.length || lastRun.details.added?.length) && (
+      {/* ─── Details (changes per product) ─── */}
+      {lastRun?.details && !isRunning && (lastRun.details.updated?.length || lastRun.details.added?.length) && (
         <div className={styles.collapsible}>
-          <button className={styles.collapseToggle} onClick={onToggleDetails}>
+          <button className={styles.collapseToggle} onClick={() => setExpandedDetails(!expandedDetails)}>
             <span className={styles.collapseArrow}>{expandedDetails ? "▼" : "▶"}</span>
             Подробности по товарам
             {lastRun.details.updated && (
@@ -361,10 +477,10 @@ function PlatformCard({
         </div>
       )}
 
-      {/* ─── Collapsible: Log ─── */}
-      {lastRun?.log && (
+      {/* ─── Log ─── */}
+      {lastRun?.log && !isRunning && (
         <div className={styles.collapsible}>
-          <button className={styles.collapseToggle} onClick={onToggleLog}>
+          <button className={styles.collapseToggle} onClick={() => setExpandedLog(!expandedLog)}>
             <span className={styles.collapseArrow}>{expandedLog ? "▼" : "▶"}</span>
             Лог синхронизации
             <span className={styles.collapseCount}>
@@ -378,10 +494,10 @@ function PlatformCard({
         </div>
       )}
 
-      {/* ─── Collapsible: History ─── */}
-      {history.length > 0 && (
+      {/* ─── History ─── */}
+      {history.length > 0 && !isRunning && (
         <div className={styles.collapsible}>
-          <button className={styles.collapseToggle} onClick={onToggleHistory}>
+          <button className={styles.collapseToggle} onClick={() => setExpandedHistory(!expandedHistory)}>
             <span className={styles.collapseArrow}>{expandedHistory ? "▼" : "▶"}</span>
             История запусков
             <span className={styles.collapseCount}>всего {history.length}</span>

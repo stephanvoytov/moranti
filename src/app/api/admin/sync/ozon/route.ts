@@ -1,5 +1,7 @@
 /* =============================================
-   Admin Ozon Sync API — POST (start), GET (status)
+   Admin Ozon Sync API
+   POST  — async start, returns runId
+   GET   — history of completed runs
    Protected: requires valid admin session
    ============================================= */
 
@@ -17,7 +19,7 @@ export async function GET() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const history = getSyncHistory("ozon");
+  const history = await getSyncHistory("ozon");
   return NextResponse.json({ runs: history });
 }
 
@@ -34,11 +36,10 @@ export async function POST(request: NextRequest) {
   if (rl) return rl;
 
   try {
-    const result = runOzonSync();
-    // После синхронизации — сбросить все кеши данных
-    invalidateCache("all-products");
-    invalidateCache("all-categories");
-    return NextResponse.json(result);
+    const runId = runOzonSync();
+    // Сбрасываем кеш сразу (следующий запрос возьмёт свежие данные из БД)
+    invalidateCache();
+    return NextResponse.json({ runId, status: "started" });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Ozon sync failed";
     return NextResponse.json({ error: message }, { status: 500 });

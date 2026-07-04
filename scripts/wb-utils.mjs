@@ -65,6 +65,17 @@ export function getVolPart(article) {
 }
 
 /**
+ * Выбирает CDN-хост для артикула WB (детерминированно, по vol).
+ * @param {number} article
+ * @returns {string}
+ */
+export function pickCdnHost(article) {
+  const vol = Math.floor(article / 100000);
+  if (!CDN_HOSTS || CDN_HOSTS.length === 0) return "https://basket-01.wbbasket.ru";
+  return CDN_HOSTS[vol % CDN_HOSTS.length];
+}
+
+/**
  * Promise-задержка.
  * @param {number} ms — миллисекунды
  * @returns {Promise<void>}
@@ -183,19 +194,8 @@ export async function batchFetchCardJson(articles, opts = {}) {
  */
 export function cardCdnUrl(article, index, size = "c516x688") {
   const { vol, part } = getVolPart(article);
-  return (
-    "https://kgd-basket-cdn-01bl.geobasket.ru/vol" +
-    vol +
-    "/part" +
-    part +
-    "/" +
-    article +
-    "/images/" +
-    size +
-    "/" +
-    index +
-    ".webp"
-  );
+  const host = pickCdnHost(article);
+  return host + "/vol" + vol + "/part" + part + "/" + article + "/images/" + size + "/" + index + ".webp";
 }
 
 /**
