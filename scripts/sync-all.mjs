@@ -523,20 +523,42 @@ async function main() {
   const ozonApiKey = process.env.OZON_API_KEY;
 
   if (!wbApiKey && !flags.ozonOnly) {
-    console.error("ERROR: WB_API_KEY not set in .env");
+    console.error("ERROR: WB_API_KEY не задан.");
+    console.error("  Локально: добавь WB_API_KEY=... в .env.local");
+    console.error("  Vercel:   добавь WB_API_KEY в Settings → Environment Variables");
     process.exit(1);
   }
   if ((!ozonClientId || !ozonApiKey) && !flags.wbOnly) {
-    console.error("ERROR: OZON_CLIENT_ID and OZON_API_KEY must be set in .env");
+    console.error("ERROR: OZON_CLIENT_ID и OZON_API_KEY не заданы.");
+    console.error("  Локально: добавь в .env.local");
+    console.error("  Vercel:   добавь в Settings → Environment Variables");
     process.exit(1);
   }
 
   const prisma = new PrismaClient();
 
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  /** Ретрай на случай если БД временно недоступна */
+  async function prismaRetry(fn) {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        return await fn();
+      } catch (e) {
+        if (attempt < 3) {
+          console.log(`  DB retry ${attempt}/3 after ${attempt}s...`);
+          await sleep(attempt * 1000);
+        } else {
+          throw e;
+        }
+      }
+    }
+  }
+
   try {
     // ─── Load existing products from DB ───
     log.line("Loading existing products from DB...");
-    const existing = await getExistingProducts(prisma);
+    const existing = await prismaRetry(() => getExistingProducts(prisma));
     log.line(`  ${existing.all.length} products in DB\n`);
 
     const stats = {
