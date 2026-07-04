@@ -1,7 +1,11 @@
 #!/usr/bin/env node
-import dotenv from "dotenv";
-dotenv.config({ path: ".env" });
-dotenv.config({ path: ".env.local" });
+try {
+  const { default: dotenv } = await import("dotenv");
+  dotenv.config({ path: ".env" });
+  dotenv.config({ path: ".env.local" });
+} catch {
+  // dotenv не установлен (Vercel) — env vars уже в process.env
+}
 /**
  * sync-all.mjs — Единый скрипт синхронизации Moranti.
  *
