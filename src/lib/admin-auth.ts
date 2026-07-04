@@ -18,8 +18,15 @@ const SALT = process.env.AUTH_SALT || "moranti-admin-salt-v1";
 
 /* ——— Crypto helpers ——— */
 
+/** Кэш производного ключа — PBKDF2 100k итераций только один раз. */
+let _cachedKey: Buffer | null = null;
+let _cachedPassword: string | null = null;
+
 function deriveKey(password: string): Buffer {
-  return crypto.pbkdf2Sync(password, SALT, KEY_ITERATIONS, KEY_LENGTH, "sha256");
+  if (_cachedKey && _cachedPassword === password) return _cachedKey;
+  _cachedPassword = password;
+  _cachedKey = crypto.pbkdf2Sync(password, SALT, KEY_ITERATIONS, KEY_LENGTH, "sha256");
+  return _cachedKey;
 }
 
 function encrypt(data: string, key: Buffer): string {
@@ -90,6 +97,22 @@ export async function getSession(): Promise<{ createdAt: number; expiresAt: numb
 export function setSessionCookie(token: string): string {
   const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
   return `${COOKIE_NAME}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_TTL_MS / 1_000}${secure}`;
+}
+
+/**
+ * Проверить валидность сессионного токена (без чтения кук).
+ * Используется в proxy.ts для быстрой проверки без загрузки next/headers.
+ */
+export function validateToken(token: string): boolean {
+  const key = deriveKey(getAdminPassword());
+  const raw = decrypt(token, key);
+  if (!raw) return false;
+  try {
+    const session = JSON.parse(raw);
+    return Date.now() <= session.expiresAt;
+  } catch {
+    return false;
+  }
 }
 
 export function clearSession(): Response {

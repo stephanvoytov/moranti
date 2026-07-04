@@ -5,12 +5,13 @@
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";
-import { login } from "@/lib/admin-auth";
+import { login, setSessionCookie } from "@/lib/admin-auth";
 import { loginSchema } from "@/lib/schemas";
 import { enforceRateLimit, getClientIp } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { rateLimitResponse } from "@/lib/rate-limit";
 
-const LOGIN_OPTS = { max: 5, windowMs: 15_000 };
+const LOGIN_OPTS = { max: 15, windowMs: 60_000 };
 
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request);
@@ -38,15 +39,12 @@ export async function POST(request: NextRequest) {
 
     logger.info("Login successful", { ip });
 
-    const response = NextResponse.json({ ok: true });
-    response.cookies.set("admin_session", session, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 86400, // 24h
+    // Используем единый setSessionCookie из admin-auth
+    const cookieHeader = setSessionCookie(session);
+    return new NextResponse(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { "Set-Cookie": cookieHeader, "Content-Type": "application/json" },
     });
-    return response;
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }

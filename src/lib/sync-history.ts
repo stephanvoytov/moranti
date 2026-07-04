@@ -5,9 +5,10 @@
  * (миграция не накатана), падает на JSON-файл в /tmp.
  */
 
-import { prisma } from "./prisma";
+import { prisma, prismaQuery } from "./prisma";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import path from "path";
+import { logger } from "./logger";
 
 const MAX_RUNS = 20;
 
@@ -71,6 +72,52 @@ function saveJsonFallback(runs: SyncRunRecord[]) {
 
 /* ─── Prisma ─── */
 
+/** Флаг: пробовали создать таблицу? */
+let tableEnsured = false;
+
+/**
+ * Создаёт таблицу SyncRun, если её нет.
+ * Выполняется один раз при первом обращении к Prisma для sync-history.
+ * Позволяет работать без миграции (на Vercel deploy).
+ */
+async function ensureTable(): Promise<boolean> {
+  if (tableEnsured) return true;
+  try {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "SyncRun" (
+        "id" TEXT NOT NULL,
+        "platform" TEXT NOT NULL,
+        "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "duration" INTEGER NOT NULL,
+        "success" BOOLEAN NOT NULL,
+        "error" TEXT,
+        "added" INTEGER NOT NULL DEFAULT 0,
+        "updated" INTEGER NOT NULL DEFAULT 0,
+        "archived" INTEGER NOT NULL DEFAULT 0,
+        "skipped" INTEGER NOT NULL DEFAULT 0,
+        "errors" INTEGER NOT NULL DEFAULT 0,
+        "log" TEXT NOT NULL DEFAULT '',
+        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT "SyncRun_pkey" PRIMARY KEY ("id")
+      )
+    `);
+    // Создаём индекс (если не существовало — создаст, если существовал — игнор)
+    try {
+      await prisma.$executeRawUnsafe(
+        `CREATE INDEX IF NOT EXISTS "SyncRun_platform_timestamp_idx" ON "SyncRun"("platform", "timestamp")`,
+      );
+    } catch { /* ignore — индекс может уже быть */ }
+    tableEnsured = true;
+    logger.info("SyncRun table ensured");
+    return true;
+  } catch (e) {
+    logger.warn("Cannot create SyncRun table, using JSON fallback", {
+      error: (e as Error)?.message,
+    });
+    return false;
+  }
+}
+
 /**
  * Prisma error P2021 = "Table not found".
  * Возвращает true, если ошибка связана с отсутствием таблицы.
@@ -87,6 +134,7 @@ function isTableNotFound(e: unknown): boolean {
 async function addToDb(
   record: SyncRunRecord,
 ): Promise<boolean> {
+  if (!(await ensureTable())) return false;
   try {
     await prisma.syncRun.create({
       data: {
@@ -146,6 +194,7 @@ function rowToRecord(row: {
 async function listFromDb(
   platform: "wb" | "ozon",
 ): Promise<SyncRunRecord[] | null> {
+  if (!(await ensureTable())) return null;
   try {
     const rows = await prisma.syncRun.findMany({
       where: { platform },

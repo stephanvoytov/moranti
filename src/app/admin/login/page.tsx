@@ -25,8 +25,11 @@ export default function AdminLoginPage() {
       if (res.ok) {
         localStorage.setItem("moranti_admin", "1");
         router.push("/admin");
+      } else if (res.status === 429) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || "Слишком много попыток. Подождите минуту.");
       } else {
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         setError(data.error || "Неверный пароль");
       }
     } catch {
