@@ -443,7 +443,20 @@ export default function AdminProductsPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={10} className={styles.loading}>Загрузка...</td></tr>
+              Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i} className={styles.skeletonRow}>
+                  <td><div className={`${styles.skeleton}`} style={{ width: 16, height: 16 }} /></td>
+                  <td><div className={`${styles.skeleton} ${styles.skeletonPhoto}`} /></td>
+                  <td><div className={`${styles.skeleton}`} style={{ height: 14, width: '55%', borderRadius: 3 }} /></td>
+                  <td><div className={`${styles.skeleton}`} style={{ height: 14, width: '40%', borderRadius: 3 }} /></td>
+                  <td><div className={`${styles.skeleton}`} style={{ height: 14, width: 50, borderRadius: 3 }} /></td>
+                  <td><div className={`${styles.skeleton} ${styles.skeletonBadge}`} /></td>
+                  <td><div className={`${styles.skeleton}`} style={{ height: 14, width: 60, borderRadius: 3 }} /></td>
+                  <td><div className={`${styles.skeleton}`} style={{ height: 14, width: '45%', borderRadius: 3 }} /></td>
+                  <td><div className={`${styles.skeleton}`} style={{ height: 14, width: 35, borderRadius: 3 }} /></td>
+                  <td><div style={{ width: 24, height: 24 }} /></td>
+                </tr>
+              ))
             ) : products.length === 0 ? (
               <tr><td colSpan={10} className={styles.empty}>
                 {statusTab === "archived" ? "Нет архивных товаров" : "Нет товаров"}

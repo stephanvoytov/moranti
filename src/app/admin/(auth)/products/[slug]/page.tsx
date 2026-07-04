@@ -75,6 +75,7 @@ export default function ProductEditorPage() {
   const { toast } = useToast();
   const [dirty, setDirty] = useState(false);
   const [neighbors, setNeighbors] = useState<{ slug: string; name: string }[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Real-time preview product object for ProductCard
   const previewProduct = useMemo(() => ({
@@ -177,6 +178,47 @@ export default function ProductEditorPage() {
   function updateField(field: keyof ProductForm, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
     setDirty(true);
+    // Clear error on change
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }
+
+  function validateField(field: keyof ProductForm, value: string): string | null {
+    if (field === "name" && !value.trim()) return "Название обязательно";
+    if (field === "price") {
+      const num = Number(value);
+      if (!value) return "Цена обязательна";
+      if (isNaN(num) || num < 1) return "Цена должна быть ≥ 1";
+    }
+    if (field === "originalPrice" && value) {
+      const num = Number(value);
+      if (isNaN(num) || num < 0) return "Некорректная цена";
+    }
+    if (field === "rating" && value) {
+      const num = Number(value);
+      if (isNaN(num) || num < 0 || num > 5) return "Рейтинг от 0 до 5";
+    }
+    if (field === "reviewsCount" && value) {
+      const num = Number(value);
+      if (isNaN(num) || num < 0) return "Некорректное число";
+    }
+    if (field === "wbArticle" && value && isNaN(Number(value))) return "Только цифры";
+    if (field === "ozonArticle" && value && isNaN(Number(value))) return "Только цифры";
+    return null;
+  }
+
+  function handleBlur(field: keyof ProductForm, value: string) {
+    const err = validateField(field, value);
+    setFieldErrors((prev) => {
+      if (err) return { ...prev, [field]: err };
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
   }
 
   /* ——— Image management ——— */
@@ -326,7 +368,35 @@ export default function ProductEditorPage() {
   }
 
   if (loading) {
-    return <div className={styles.loading}>Загрузка...</div>;
+    return (
+      <div className={`${styles.loading} ${styles.page}`}>
+        <div className={`${styles.skeleton} ${styles.loadingHeader}`} />
+        <div className={styles.loadingGrid}>
+          <div className={styles.loadingColumn}>
+            <div className={`${styles.skeleton} ${styles.loadingField}`} />
+            <div className={styles.loadingRow}>
+              <div className={`${styles.skeleton} ${styles.loadingField}`} />
+              <div className={`${styles.skeleton} ${styles.loadingField}`} />
+            </div>
+            <div className={`${styles.skeleton} ${styles.loadingField}`} />
+            <div className={`${styles.skeleton} ${styles.loadingField}`} />
+            <div className={`${styles.skeleton} ${styles.loadingFieldTall}`} />
+            <div className={styles.loadingRow}>
+              <div className={`${styles.skeleton} ${styles.loadingField}`} />
+              <div className={`${styles.skeleton} ${styles.loadingField}`} />
+            </div>
+          </div>
+          <div className={styles.loadingColumn}>
+            <div className={`${styles.skeleton} ${styles.loadingPreview}`} />
+            <div className={styles.loadingRow}>
+              <div className={`${styles.skeleton} ${styles.loadingField}`} />
+              <div className={`${styles.skeleton} ${styles.loadingField}`} />
+              <div className={`${styles.skeleton} ${styles.loadingField}`} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error && !form.name && !isNew) {
@@ -382,11 +452,13 @@ export default function ProductEditorPage() {
               Название *
               <input
                 type="text"
-                className={styles.input}
+                className={`${styles.input}${fieldErrors.name ? " " + styles.inputError : ""}`}
                 value={form.name}
                 onChange={(e) => updateField("name", e.target.value)}
+                onBlur={(e) => handleBlur("name", e.target.value)}
                 required
               />
+              {fieldErrors.name && <p className={styles.fieldError}>{fieldErrors.name}</p>}
             </label>
 
             <div className={styles.row}>
@@ -394,22 +466,26 @@ export default function ProductEditorPage() {
                 Цена *
                 <input
                   type="number"
-                  className={styles.input}
+                  className={`${styles.input}${fieldErrors.price ? " " + styles.inputError : ""}`}
                   value={form.price}
                   onChange={(e) => updateField("price", e.target.value)}
+                  onBlur={(e) => handleBlur("price", e.target.value)}
                   min="1"
                   required
                 />
+                {fieldErrors.price && <p className={styles.fieldError}>{fieldErrors.price}</p>}
               </label>
               <label className={styles.label}>
                 Оригинал
                 <input
                   type="number"
-                  className={styles.input}
+                  className={`${styles.input}${fieldErrors.originalPrice ? " " + styles.inputError : ""}`}
                   value={form.originalPrice}
                   onChange={(e) => updateField("originalPrice", e.target.value)}
+                  onBlur={(e) => handleBlur("originalPrice", e.target.value)}
                   min="0"
                 />
+                {fieldErrors.originalPrice && <p className={styles.fieldError}>{fieldErrors.originalPrice}</p>}
               </label>
             </div>
 
@@ -490,21 +566,25 @@ export default function ProductEditorPage() {
                 Артикул WB
                 <input
                   type="number"
-                  className={styles.input}
+                  className={`${styles.input}${fieldErrors.wbArticle ? " " + styles.inputError : ""}`}
                   value={form.wbArticle}
                   onChange={(e) => updateField("wbArticle", e.target.value)}
+                  onBlur={(e) => handleBlur("wbArticle", e.target.value)}
                   placeholder="969008238"
                 />
+                {fieldErrors.wbArticle && <p className={styles.fieldError}>{fieldErrors.wbArticle}</p>}
               </label>
               <label className={styles.label}>
                 Артикул Ozon
                 <input
                   type="number"
-                  className={styles.input}
+                  className={`${styles.input}${fieldErrors.ozonArticle ? " " + styles.inputError : ""}`}
                   value={form.ozonArticle}
                   onChange={(e) => updateField("ozonArticle", e.target.value)}
+                  onBlur={(e) => handleBlur("ozonArticle", e.target.value)}
                   placeholder="..."
                 />
+                {fieldErrors.ozonArticle && <p className={styles.fieldError}>{fieldErrors.ozonArticle}</p>}
               </label>
             </div>
 
@@ -526,13 +606,15 @@ export default function ProductEditorPage() {
                 Рейтинг
                 <input
                   type="number"
-                  className={styles.input}
+                  className={`${styles.input}${fieldErrors.rating ? " " + styles.inputError : ""}`}
                   value={form.rating}
                   onChange={(e) => updateField("rating", e.target.value)}
+                  onBlur={(e) => handleBlur("rating", e.target.value)}
                   min="0"
                   max="5"
                   step="0.1"
                 />
+                {fieldErrors.rating && <p className={styles.fieldError}>{fieldErrors.rating}</p>}
               </label>
               <label className={styles.label}>
                 Отзывов
@@ -703,7 +785,12 @@ export default function ProductEditorPage() {
         {error && <p className={styles.errorMsg}>{error}</p>}
 
         <div className={styles.actions}>
-          <AdminButton variant="ghost" onClick={() => router.push("/admin/products")}>
+          <AdminButton variant="ghost" onClick={() => {
+            const from = document.referrer && document.referrer.includes(window.location.origin + "/admin")
+              ? document.referrer
+              : "/admin/products";
+            router.push(from);
+          }}>
             Отмена
           </AdminButton>
           <AdminButton variant="primary" type="submit" disabled={saving || !form.name} loading={saving}>

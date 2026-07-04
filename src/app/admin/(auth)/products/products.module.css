@@ -876,3 +876,51 @@
 .lightboxClose:hover {
   background: rgba(0, 0, 0, 0.8);
 }
+
+/* ─── Skeleton ─── */
+
+.skeleton {
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+  background: linear-gradient(90deg, var(--card-bg) 25%, #e8e6e2 50%, var(--card-bg) 75%);
+  background-size: 200% 100%;
+  border-radius: var(--radius-md);
+}
+
+@keyframes skeletonPulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeletonRow {
+  display: contents;
+}
+
+.skeletonRow td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-light-gray);
+}
+
+.skeletonPhoto {
+  width: 60px;
+  height: 80px;
+  border-radius: 2px;
+}
+
+.skeletonText {
+  height: 14px;
+  width: 60%;
+  border-radius: 3px;
+}
+
+.skeletonTextShort {
+  height: 14px;
+  width: 35%;
+  border-radius: 3px;
+}
+
+.skeletonBadge {
+  display: inline-block;
+  height: 22px;
+  width: 80px;
+  border-radius: var(--radius-pill);
+}
