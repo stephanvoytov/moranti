@@ -601,3 +601,319 @@
   min-width: 40px;
   text-align: right;
 }
+
+/* =============================================
+   Log Feed — структурированная лента событий
+   ============================================= */
+
+.logFeed {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-sm);
+}
+
+.logFeedToggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 6px 4px;
+  width: 100%;
+  text-align: left;
+  transition: color 0.2s;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.logFeedToggle:hover {
+  color: var(--dark);
+}
+
+.logFeedBody {
+  margin-top: var(--space-xs);
+  animation: fadeIn 0.2s ease;
+}
+
+/* ─── Filter bar ─── */
+
+.logFilterBar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.logFilterBtn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 4px 10px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.logFilterBtn:hover {
+  border-color: var(--text-muted);
+  color: var(--text-secondary);
+}
+
+.logFilterBtnActive {
+  background: var(--dark);
+  border-color: var(--dark);
+  color: var(--white);
+}
+
+.logFilterBtnActive:hover {
+  background: var(--dark);
+  color: var(--white);
+}
+
+.logFilterCount {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  font-size: 8px;
+  min-width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.logFilterBtnActive .logFilterCount {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ─── Event list ─── */
+
+.logEventList {
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--border);
+}
+
+.logEmpty {
+  padding: var(--space-md);
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--white);
+  border-radius: var(--radius-md);
+}
+
+/* ─── Single event row ─── */
+
+.logEvent {
+  font-family: var(--font-body);
+  font-size: 11px;
+  line-height: 1.4;
+  background: var(--white);
+  transition: background 0.1s;
+}
+
+.logEvent:hover {
+  background: var(--card-bg);
+}
+
+.logEventMain {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+}
+
+.logEventIcon {
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.logEventTime {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  min-width: 48px;
+}
+
+.logEventText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logEvent:hover .logEventText {
+  white-space: normal;
+  overflow: visible;
+}
+
+.logEventProduct {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-right: 3px;
+}
+
+.logEventExpand {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.1s;
+}
+
+.logEventExpand:hover {
+  border-color: var(--text-secondary);
+  color: var(--dark);
+}
+
+/* ─── Event type variants ─── */
+
+.logEvent_phase .logEventIcon {
+  color: #6366f1;
+}
+
+.logEvent_updated .logEventIcon {
+  color: #059669;
+}
+
+.logEvent_created .logEventIcon {
+  color: #059669;
+}
+
+.logEvent_error {
+  background: #fef2f2;
+}
+
+.logEvent_error .logEventIcon {
+  color: #dc2626;
+}
+
+.logEvent_error .logEventText {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.logEvent_warn .logEventIcon {
+  color: #d97706;
+}
+
+.logEvent_warn .logEventText {
+  color: #92400e;
+}
+
+.logEvent_info .logEventIcon {
+  color: var(--text-muted);
+}
+
+.logEvent_summary {
+  background: #f8fafc;
+  border-top: 1px solid var(--border);
+}
+
+.logEvent_summary .logEventIcon {
+  color: var(--dark);
+  font-weight: 700;
+}
+
+.logEvent_summary .logEventText {
+  font-weight: 500;
+}
+
+/* ─── Expanded changes ─── */
+
+.logEventChanges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 0 10px 6px 30px;
+}
+
+.logChangeTag {
+  display: inline-block;
+  padding: 1px 6px;
+  background: #f0f9ff;
+  color: #0369a1;
+  border-radius: 3px;
+  font-family: var(--font-sans);
+  font-size: 9px;
+  letter-spacing: 0.3px;
+}
+
+/* ─── Raw log toggle ─── */
+
+.logRawToggle {
+  margin-top: 8px;
+}
+
+.logRawBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 4px 6px;
+  transition: color 0.15s;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.logRawBtn:hover {
+  color: var(--text-secondary);
+}
+
+.logRawViewer {
+  margin-top: 6px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  font-family: "Cascadia Code", "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  font-size: 10px;
+  line-height: 1.5;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  max-height: 240px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+}
+
+/* ─── Error text inside events ─── */
+
+.logEventErrorText {
+  color: #dc2626;
+  font-weight: 500;
+}

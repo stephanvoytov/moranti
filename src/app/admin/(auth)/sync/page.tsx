@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./sync.module.css";
 import { formatDistanceToNow } from "@/lib/format-date";
@@ -43,6 +43,183 @@ interface SyncProgress {
   startedAt: string;
   log?: string;
   error?: string;
+}
+
+/* ─── Log Event Types ─── */
+
+type LogEventType = "phase" | "updated" | "created" | "error" | "warn" | "info" | "summary";
+
+interface LogEvent {
+  type: LogEventType;
+  text: string;
+  raw?: string;                // исходная строка
+  product?: string;            // mor-001
+  productName?: string;        // Название товара
+  changes?: string[];          // ["price", "rating"]
+  phase?: string;              // wb-cards
+  current?: number;
+  total?: number;
+}
+
+/* ─── Парсинг сырого лога в структурированные события ─── */
+
+const PHASE_NAMES: Record<string, string> = {
+  "wb-cards": "Карточки WB",
+  "wb-trash": "Корзина WB",
+  "wb-prices": "Цены WB",
+  "wb-process": "Обработка WB",
+  "ozon-list": "Список Ozon",
+  "ozon-info": "Информация Ozon",
+  "ozon-attrs": "Атрибуты Ozon",
+  "ozon-ratings": "Рейтинги Ozon",
+  "ozon-process": "Обработка Ozon",
+  "ozon-models": "Модели Ozon",
+  "wb-models": "Модели WB",
+  "archive": "Архивация",
+  "done": "Готово",
+};
+
+const CHANGE_LABELS: Record<string, string> = {
+  "price": "цена",
+  "originalPrice": "цена без скидки",
+  "rating": "рейтинг",
+  "reviewsCount": "отзывы",
+  "images": "фото",
+  "image": "главное фото",
+  "composition": "состав",
+  "colorName": "цвет",
+  "name": "название",
+  "category": "категория",
+  "salesCount": "продажи",
+  "wbPrice": "цена WB",
+  "wbOriginalPrice": "цена WB без скидки",
+  "ozonPrice": "цена Ozon",
+  "ozonOriginalPrice": "цена Ozon без скидки",
+  "photoCount": "количество фото",
+  "inStock": "наличие",
+  "description": "описание",
+  "characteristics": "характеристики",
+};
+
+function formatChangeLabel(key: string): string {
+  return CHANGE_LABELS[key] || key;
+}
+
+function parseLogToEvents(log: string): LogEvent[] {
+  if (!log) return [];
+  const lines = log.split("\n");
+  const events: LogEvent[] = [];
+  let lastPhase: string | undefined;
+  let phaseAdded = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    // [PROGRESS] — смена фазы
+    const progMatch = trimmed.match(/\[PROGRESS\]\s*(\{.*\})/);
+    if (progMatch) {
+      try {
+        const data = JSON.parse(progMatch[1]);
+        if (data.phase && data.phase !== lastPhase) {
+          lastPhase = data.phase;
+          phaseAdded = false;
+        }
+        if (data.phase === lastPhase && !phaseAdded) {
+          phaseAdded = true;
+          events.push({
+            type: "phase",
+            text: PHASE_NAMES[data.phase] || data.phase,
+            phase: data.phase,
+            current: data.current ?? 0,
+            total: data.total ?? 0,
+            raw: trimmed,
+          });
+        }
+        continue;
+      } catch { /* not json */ }
+    }
+
+    // [DETAIL] updated — обновление товара
+    const detailMatch = trimmed.match(/\[DETAIL\]\s*(\{.*\})/);
+    if (detailMatch) {
+      try {
+        const data = JSON.parse(detailMatch[1]);
+        if (data.action === "updated" && data.product) {
+          events.push({
+            type: "updated",
+            text: `${data.name || data.product}`,
+            product: data.product,
+            productName: data.name || "",
+            changes: data.changes || [],
+            raw: trimmed,
+          });
+          continue;
+        }
+        if (data.action === "created" && data.product) {
+          events.push({
+            type: "created",
+            text: `${data.name || data.product}`,
+            product: data.product,
+            productName: data.name || "",
+            raw: trimmed,
+          });
+          continue;
+        }
+      } catch { /* not json */ }
+    }
+
+    // ERROR — ошибка
+    if (/ERROR:/i.test(trimmed)) {
+      events.push({
+        type: "error",
+        text: trimmed.replace(/^\[?\d{2}:\d{2}:\d{2}\]?\s*/, ""),
+        raw: trimmed,
+      });
+      continue;
+    }
+
+    // WARN — предупреждение
+    if (/WARN:/i.test(trimmed)) {
+      events.push({
+        type: "warn",
+        text: trimmed.replace(/^\[?\d{2}:\d{2}:\d{2}\]?\s*/, ""),
+        raw: trimmed,
+      });
+      continue;
+    }
+
+    // JSON-суммари (финальные статы)
+    if (trimmed.startsWith("{")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (parsed.created !== undefined || parsed.updated !== undefined) {
+          events.push({
+            type: "summary",
+            text: trimmed,
+            raw: trimmed,
+          });
+          continue;
+        }
+      } catch { /* not json */ }
+    }
+
+    // Обычная информационная строка (пропускаем слишком длинные технические строки)
+    if (
+      trimmed.length < 200 &&
+      !trimmed.startsWith("[") &&
+      !trimmed.includes("node:") &&
+      !trimmed.startsWith("at ")
+    ) {
+      events.push({
+        type: "info",
+        text: trimmed,
+        raw: trimmed,
+      });
+    }
+  }
+
+  return events;
 }
 
 /* ─── Phase labels ─── */
@@ -316,14 +493,12 @@ function PlatformCard({
   const isRunning = progress?.status === "running";
 
   // Expand state per card
-  const [expandedLog, setExpandedLog] = useState(false);
   const [expandedHistory, setExpandedHistory] = useState(false);
   const [expandedDetails, setExpandedDetails] = useState(false);
 
   // Auto-collapse when starting a new run
   useEffect(() => {
     if (isRunning) {
-      setExpandedLog(false);
       setExpandedHistory(false);
       setExpandedDetails(false);
     }
@@ -477,23 +652,6 @@ function PlatformCard({
         </div>
       )}
 
-      {/* ─── Log ─── */}
-      {lastRun?.log && !isRunning && (
-        <div className={styles.collapsible}>
-          <button className={styles.collapseToggle} onClick={() => setExpandedLog(!expandedLog)}>
-            <span className={styles.collapseArrow}>{expandedLog ? "▼" : "▶"}</span>
-            Лог синхронизации
-            <span className={styles.collapseCount}>
-              {(lastRun.log.match(/\n/g) || []).length + 1} строк
-            </span>
-          </button>
-
-          {expandedLog && (
-            <pre className={styles.logViewer}><code>{lastRun.log}</code></pre>
-          )}
-        </div>
-      )}
-
       {/* ─── History ─── */}
       {history.length > 0 && !isRunning && (
         <div className={styles.collapsible}>
@@ -534,6 +692,198 @@ function StatCard({ value, label, accent }: { value: number; label: string; acce
     <div className={`${styles.statCard} ${accent ? styles.statCardAccent : ""}`}>
       <span className={styles.statValue}>{value}</span>
       <span className={styles.statLabel}>{label}</span>
+    </div>
+  );
+}
+
+/* ─── Log Feed — структурированная лента событий ─── */
+
+type LogFilter = "all" | "changes" | "errors" | "progress";
+
+function LogFeed({ log }: { log: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const [filter, setFilter] = useState<LogFilter>("all");
+  const [showRaw, setShowRaw] = useState(false);
+
+  const events = useMemo(() => parseLogToEvents(log), [log]);
+
+  const filtered = useMemo(() => {
+    switch (filter) {
+      case "changes":
+        return events.filter((e) => e.type === "updated" || e.type === "created");
+      case "errors":
+        return events.filter((e) => e.type === "error" || e.type === "warn");
+      case "progress":
+        return events.filter((e) => e.type === "phase" || e.type === "summary");
+      default:
+        return events;
+    }
+  }, [events, filter]);
+
+  const counts = useMemo(() => {
+    const c = { updated: 0, created: 0, errors: 0, warns: 0, phases: 0 };
+    for (const e of events) {
+      if (e.type === "updated") c.updated++;
+      else if (e.type === "created") c.created++;
+      else if (e.type === "error") c.errors++;
+      else if (e.type === "warn") c.warns++;
+      else if (e.type === "phase") c.phases++;
+    }
+    return c;
+  }, [events]);
+
+  const filterOptions: { key: LogFilter; label: string; count?: number }[] = [
+    { key: "all", label: "Всё" },
+    { key: "changes", label: "Изменения", count: counts.updated + counts.created },
+    { key: "errors", label: "Ошибки", count: counts.errors + counts.warns },
+    { key: "progress", label: "Прогресс", count: counts.phases },
+  ];
+
+  return (
+    <div className={styles.logFeed}>
+      {/* Toggle */}
+      <button
+        className={styles.logFeedToggle}
+        onClick={() => setExpanded(!expanded)}
+      >
+        <span className={styles.collapseArrow}>{expanded ? "▼" : "▶"}</span>
+        Лог синхронизации
+        <span className={styles.collapseCount}>
+          {events.length} соб.
+        </span>
+      </button>
+
+      {expanded && (
+        <div className={styles.logFeedBody}>
+          {/* Filter bar */}
+          <div className={styles.logFilterBar}>
+            {filterOptions.map((opt) => (
+              <button
+                key={opt.key}
+                className={`${styles.logFilterBtn} ${filter === opt.key ? styles.logFilterBtnActive : ""}`}
+                onClick={() => setFilter(opt.key)}
+              >
+                {opt.label}
+                {opt.count !== undefined && opt.count > 0 && (
+                  <span className={styles.logFilterCount}>{opt.count}</span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Event list */}
+          <div className={styles.logEventList}>
+            {filtered.length === 0 && (
+              <div className={styles.logEmpty}>Нет событий этого типа</div>
+            )}
+            {filtered.map((event, i) => (
+              <LogEventRow key={i} event={event} />
+            ))}
+          </div>
+
+          {/* Toggle raw log */}
+          <div className={styles.logRawToggle}>
+            <button
+              className={styles.logRawBtn}
+              onClick={() => setShowRaw(!showRaw)}
+            >
+              {showRaw ? "▲ Скрыть технический лог" : "▼ Показать технический лог"}
+            </button>
+            {showRaw && (
+              <pre className={styles.logRawViewer}><code>{log}</code></pre>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Log Event Row ─── */
+
+function LogEventRow({ event }: { event: LogEvent }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const typeClass = styles[`logEvent_${event.type}`] || "";
+
+  const icon = {
+    phase: "⟳",
+    updated: "✓",
+    created: "+",
+    error: "✗",
+    warn: "⚠",
+    info: "·",
+    summary: "Σ",
+  }[event.type];
+
+  const timeStr = (() => {
+    if (event.raw) {
+      const m = event.raw.match(/^\[?(\d{2}:\d{2}:\d{2})\]?/);
+      if (m) return m[1];
+    }
+    return "";
+  })();
+
+  return (
+    <div className={`${styles.logEvent} ${typeClass}`}>
+      <div className={styles.logEventMain}>
+        <span className={styles.logEventIcon}>{icon}</span>
+        {timeStr && <span className={styles.logEventTime}>{timeStr}</span>}
+        <span className={styles.logEventText}>
+          {event.type === "updated" && event.productName && (
+            <><span className={styles.logEventProduct}>{event.product}</span> «{event.productName}»</>
+          )}
+          {event.type === "created" && event.productName && (
+            <><span className={styles.logEventProduct}>{event.product}</span> «{event.productName}»</>
+          )}
+          {event.type === "phase" && (
+            <><strong>{event.text}</strong>{event.current !== undefined && event.total ? ` · ${event.current}/${event.total}` : ""}</>
+          )}
+          {event.type === "error" && (
+            <span className={styles.logEventErrorText}>{event.text}</span>
+          )}
+          {event.type === "warn" && (
+            <span>{event.text}</span>
+          )}
+          {event.type === "summary" && (
+            <span>Итог: {(() => {
+              try {
+                const s = JSON.parse(event.text);
+                const parts: string[] = [];
+                if (s.created) parts.push(`+${s.created} создано`);
+                if (s.updated) parts.push(`~${s.updated} обновлено`);
+                if (s.archived) parts.push(`-${s.archived} архивировано`);
+                if (s.errors) parts.push(`✗ ${s.errors} ошибок`);
+                if (s.skipped) parts.push(`— ${s.skipped} пропущено`);
+                return parts.join(", ") || "нет изменений";
+              } catch { return event.text; }
+            })()}</span>
+          )}
+          {event.type === "info" && (
+            <span>{event.text}</span>
+          )}
+        </span>
+
+        {/* Expand toggle for updated items with changes */}
+        {event.type === "updated" && event.changes && event.changes.length > 0 && (
+          <button
+            className={styles.logEventExpand}
+            onClick={() => setExpanded(!expanded)}
+            title="Подробнее"
+          >
+            {expanded ? "−" : "+"}
+          </button>
+        )}
+      </div>
+
+      {/* Expanded changes */}
+      {expanded && event.type === "updated" && event.changes && event.changes.length > 0 && (
+        <div className={styles.logEventChanges}>
+          {event.changes.map((ch) => (
+            <span key={ch} className={styles.logChangeTag}>{formatChangeLabel(ch)}</span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
