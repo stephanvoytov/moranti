@@ -137,6 +137,11 @@
   gap: 2px;
 }
 
+.photoWrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .photoImg {
   width: 80px;
   height: 106px;
@@ -151,6 +156,38 @@
 .photoImg:hover {
   opacity: 0.8;
 }
+
+/* ─── Archive corner overlay ─── */
+
+.archiveCorner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 24px 24px 0;
+  border-color: transparent #dc2626 transparent transparent;
+  pointer-events: none;
+}
+
+.archiveCorner::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: -18px;
+  width: 10px;
+  height: 2px;
+  background: #fff;
+  transform: rotate(45deg);
+  box-shadow: 0 6px 0 #fff;
+}
+
+.photoArchived .photoImg {
+  opacity: 0.65;
+}
+
+/* ─── Photo label ─── */
 
 .photoLabel {
   font-family: var(--font-sans);
@@ -171,6 +208,26 @@
   font-size: 11px;
   background: var(--card-bg);
   border-radius: 4px;
+}
+
+/* ─── Marketplace badge directly on photo ─── */
+
+.photoMpBadge {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  font-family: var(--font-sans);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 5px;
+  border-radius: 2px;
+  line-height: 1.2;
+  color: #fff;
+  pointer-events: none;
+  opacity: 0.85;
+  background: rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
 }
 
 .muted {

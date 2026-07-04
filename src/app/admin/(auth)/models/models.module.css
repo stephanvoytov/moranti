@@ -208,6 +208,12 @@
   text-decoration: none;
 }
 
+.cardThumbWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 .cardImg {
   width: 100%;
   height: 100%;
@@ -219,6 +225,92 @@
   width: 100%;
   height: 100%;
   background: var(--card-bg);
+}
+
+/* ─── Archive corner on thumbnail ─── */
+
+.cardArchiveCorner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 18px 18px 0;
+  border-color: transparent #dc2626 transparent transparent;
+  pointer-events: none;
+}
+
+.cardArchiveCorner::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  right: -13px;
+  width: 8px;
+  height: 2px;
+  background: #fff;
+  transform: rotate(45deg);
+  box-shadow: 0 5px 0 #fff;
+}
+
+/* ─── Archived card ─── */
+
+.cardArchived {
+  opacity: 0.55;
+}
+
+.cardNameRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.cardArchivedBadge {
+  font-family: var(--font-sans);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  background: #dc2626;
+  color: #fff;
+  padding: 1px 4px;
+  border-radius: 2px;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.cardArtArchived {
+  opacity: 0.4;
+}
+
+/* ─── Marketplace badge on thumbnail ─── */
+
+.cardMpBadge {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  font-family: var(--font-sans);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 1px 3px;
+  border-radius: 2px;
+  line-height: 1.2;
+  color: #fff;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.cardMpBadgeWb {
+  background: #8B6F5C;
+}
+
+.cardMpBadgeOzon {
+  background: #005BFF;
+}
+
+.cardMpBadgeBoth {
+  background: #4B5563;
 }
 
 /* ─── Card info ─── */

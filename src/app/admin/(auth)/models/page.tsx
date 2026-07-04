@@ -18,6 +18,7 @@ interface ProductBrief {
   colorName?: string;
   image?: string;
   modelId?: string | null;
+  archivedAt?: string | null;
 }
 
 interface ModelBrief {
@@ -299,46 +300,58 @@ export default function AdminModelsKanban() {
                   <div className={styles.colEmpty}>Нет товаров</div>
                 )}
 
-                {col.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`${styles.card} ${dragItem?.productId === item.id ? styles.cardDrag : ""}`}
-                    draggable
-                    onDragStart={() => handleDragStart(item.id, col.id)}
-                    onDragEnd={handleDragEnd}
-                  >
-                    {/* Thumbnail */}
-                    <Link
-                      href={`/admin/products/${item.id}`}
-                      className={styles.cardThumb}
-                      onClick={(e) => e.stopPropagation()}
+                {col.items.map((item) => {
+                  const isArchived = !!item.archivedAt;
+                  return (
+                    <div
+                      key={item.id}
+                      className={`${styles.card} ${isArchived ? styles.cardArchived : ""} ${dragItem?.productId === item.id ? styles.cardDrag : ""}`}
+                      draggable
+                      onDragStart={() => handleDragStart(item.id, col.id)}
+                      onDragEnd={handleDragEnd}
                     >
-                      {item.image ? (
-                        <img src={item.image} alt="" className={styles.cardImg} />
-                      ) : (
-                        <div className={styles.cardPlaceholder} />
-                      )}
-                    </Link>
-
-                    {/* Info */}
-                    <div className={styles.cardInfo}>
-                      <Link href={`/admin/products/${item.id}`} className={styles.cardName}>
-                        {item.name || "—"}
+                      {/* Thumbnail */}
+                      <Link
+                        href={`/admin/products/${item.id}`}
+                        className={styles.cardThumb}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {item.image ? (
+                          <div className={styles.cardThumbWrapper}>
+                            <img src={item.image} alt="" className={styles.cardImg} />
+                            {isArchived && <div className={styles.cardArchiveCorner} title="В архиве" />}
+                            <span className={`${styles.cardMpBadge} ${item.ozonArticle ? (item.wbArticle ? styles.cardMpBadgeBoth : styles.cardMpBadgeOzon) : styles.cardMpBadgeWb}`}>
+                              {item.wbArticle && item.ozonArticle ? "W+O" : item.ozonArticle ? "OZ" : "WB"}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className={styles.cardPlaceholder} />
+                        )}
                       </Link>
-                      <div className={styles.cardMeta}>
-                        <span className={styles.cardPrice}>{formatPrice(item.price)}</span>
-                        {item.colorName && <span className={styles.cardColor}>{item.colorName}</span>}
-                      </div>
-                      <div className={styles.cardArticles}>
-                        {item.wbArticle && <span className={styles.cardArt}>WB</span>}
-                        {item.ozonArticle && <span className={`${styles.cardArt} ${styles.cardArtOzon}`}>Ozon</span>}
-                      </div>
-                    </div>
 
-                    {/* Drag handle */}
-                    <span className={styles.cardDragHandle} aria-label="Перетащить">⠿</span>
-                  </div>
-                ))}
+                      {/* Info */}
+                      <div className={styles.cardInfo}>
+                        <div className={styles.cardNameRow}>
+                          <Link href={`/admin/products/${item.id}`} className={styles.cardName}>
+                            {item.name || "—"}
+                          </Link>
+                          {isArchived && <span className={styles.cardArchivedBadge}>A</span>}
+                        </div>
+                        <div className={styles.cardMeta}>
+                          <span className={styles.cardPrice}>{formatPrice(item.price)}</span>
+                          {item.colorName && <span className={styles.cardColor}>{item.colorName}</span>}
+                        </div>
+                        <div className={styles.cardArticles}>
+                          {item.wbArticle && <span className={`${styles.cardArt} ${isArchived ? styles.cardArtArchived : ""}`}>WB</span>}
+                          {item.ozonArticle && <span className={`${styles.cardArt} ${styles.cardArtOzon} ${isArchived ? styles.cardArtArchived : ""}`}>Ozon</span>}
+                        </div>
+                      </div>
+
+                      {/* Drag handle */}
+                      <span className={styles.cardDragHandle} aria-label="Перетащить">⠿</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );

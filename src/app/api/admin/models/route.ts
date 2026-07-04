@@ -37,7 +37,6 @@ export async function GET(request: NextRequest) {
       orderBy: { sortOrder: "asc" },
       include: {
         variants: {
-          where: { archivedAt: null },
           orderBy: { createdAt: "asc" },
         },
       },
@@ -53,7 +52,7 @@ export async function GET(request: NextRequest) {
   if (includeUnassigned) {
     const products = await prismaQuery(() =>
       prisma.product.findMany({
-        where: { modelId: null, archivedAt: null },
+        where: { modelId: null },
         orderBy: [{ category: "asc" }, { createdAt: "asc" }],
       })
     );

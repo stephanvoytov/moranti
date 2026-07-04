@@ -483,17 +483,16 @@ export default function AdminProductsPage() {
                           src={p.image}
                           label="WB"
                           hasArticle={!!p.wbArticle}
+                          isArchived={isArchived}
                           onLightbox={() => setLightboxImage(p.image ?? null)}
                         />
                         <AdminProductPhoto
                           src={p.ozonImage}
                           label="Ozon"
                           hasArticle={!!p.ozonArticle}
+                          isArchived={isArchived}
                           onLightbox={() => setLightboxImage(p.ozonImage ?? null)}
                         />
-                        {!p.image && !p.ozonImage && (
-                          <div className={styles.photoPlaceholder}>—</div>
-                        )}
                       </div>
                     </td>
                     <td>
@@ -661,28 +660,35 @@ function AdminProductPhoto({
   label,
   hasArticle,
   onLightbox,
+  isArchived,
 }: {
   src?: string | null;
   label: string;
   hasArticle: boolean;
   onLightbox: () => void;
+  isArchived?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
-
-  // Показываем только если есть article и src
-  if (!hasArticle || !src) return null;
-  if (failed) return null; // не показываем битое фото
+  const show = hasArticle && src && !failed;
 
   return (
-    <div className={styles.photoItem}>
-      <img
-        src={src}
-        alt=""
-        className={styles.photoImg}
-        onClick={onLightbox}
-        onError={() => setFailed(true)}
-        title="Увеличить"
-      />
+    <div className={`${styles.photoItem} ${isArchived ? styles.photoArchived : ""}`}>
+      {show ? (
+        <div className={styles.photoWrapper}>
+          <img
+            src={src}
+            alt=""
+            className={styles.photoImg}
+            onClick={onLightbox}
+            onError={() => setFailed(true)}
+            title="Увеличить"
+          />
+          {isArchived && <div className={styles.archiveCorner} title="В архиве" />}
+          <span className={styles.photoMpBadge}>{label}</span>
+        </div>
+      ) : (
+        hasArticle && <div className={styles.photoPlaceholder}>{isArchived ? "A" : "—"}</div>
+      )}
       <span className={styles.photoLabel}>{label}</span>
     </div>
   );
