@@ -7,6 +7,7 @@
 import {
   extractPhotoCount,
   extractImageUrls,
+  toGeoUrl,
   cdnImageUrl,
   cdnImageUrls,
   resolveCategory,
@@ -78,11 +79,11 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
     const article = wbCard.nmID;
     data.photoCount = photoCount;
 
-    // Приоритет: реальные URL из API (работают всегда)
+    // Приоритет: реальные URL из API, с заменой хоста на Geo CDN (CORS)
     const realUrls = extractImageUrls(wbCard, "big");
     if (realUrls && realUrls.length > 0) {
-      data.image = realUrls[0];
-      data.images = realUrls;
+      data.image = toGeoUrl(realUrls[0]);
+      data.images = realUrls.map(toGeoUrl).filter(Boolean);
     } else {
       // Fallback: генерируем из article + photoCount
       data.image = cdnImageUrl(article, 1);

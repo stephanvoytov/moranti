@@ -8,6 +8,9 @@
  */
 
 import { CDN_HOSTS } from "../wb-utils.mjs";
+
+/** Geo CDN — единственный хост с CORS-заголовками */
+const GEO_CDN_HOST = "kgd-basket-cdn-01bl.geobasket.ru";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const { wbToCategory } = require("../wb-categories.js");
@@ -54,8 +57,7 @@ export function getVolPart(article) {
  */
 export function cdnImageUrl(article, index = 1, size = "big") {
   const { vol, part } = getVolPart(article);
-  const host = pickCdnHost(article);
-  return `${host}/vol${vol}/part${part}/${article}/images/${size}/${index}.webp`;
+  return `https://${GEO_CDN_HOST}/vol${vol}/part${part}/${article}/images/${size}/${index}.webp`;
 }
 
 /**
@@ -166,6 +168,23 @@ export function extractPhotoCount(card) {
  * @param {string} [size="big"] — размер: big, c516x688, c246x328
  * @returns {string[]|null} — массив URL или null если нет фото
  */
+/**
+ * Заменяет хост WB CDN на Geo CDN (с CORS-заголовками).
+ *
+ * WB Content API возвращает URL вида:
+ *   https://basket-15.wbbasket.ru/vol.../big/1.webp
+ *
+ * Заменяем на:
+ *   https://kgd-basket-cdn-01bl.geobasket.ru/vol.../big/1.webp
+ *
+ * @param {string|null} url — исходный URL
+ * @returns {string|null} — URL с Geo CDN или as-is если не распознан
+ */
+export function toGeoUrl(url) {
+  if (!url) return null;
+  return url.replace(/https:\/\/basket-\d+\.wbbasket\.ru/, `https://${GEO_CDN_HOST}`);
+}
+
 export function extractImageUrls(card, size = "big") {
   if (!card) return null;
   const media = card.media;
