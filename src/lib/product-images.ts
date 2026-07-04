@@ -7,26 +7,14 @@
 /** Размер фото на WB CDN */
 export const WB_IMAGE_SIZE = "big";
 
-/** CDN-хосты WB с детерминированным выбором по vol. */
-export const CDN_HOSTS = [
-  "https://kgd-basket-cdn-01bl.geobasket.ru",
-  "https://basket-01.wbbasket.ru",
-  "https://basket-02.wbbasket.ru",
-  "https://basket-05.wbbasket.ru",
-  "https://basket-08.wbbasket.ru",
-  "https://basket-10.wbbasket.ru",
-  "https://basket-12.wbbasket.ru",
-  "https://basket-15.wbbasket.ru",
-];
-
 /**
- * Выбирает CDN-хост для артикула WB (детерминированно, по vol).
+ * Единый хост CDN Wildberries.
+ *
+ * ВАЖНО: используем один хост, а не массив с ротацией — разные баскет-хосты
+ * могут иметь разный набор фото. Единый хост гарантирует загрузку всех фото.
+ * Для скрипта синхронизации (wb-utils.mjs) своя ротация — там это не критично.
  */
-export function pickCdnHost(article: number): string {
-  const vol = Math.floor(article / 100000);
-  if (!CDN_HOSTS || CDN_HOSTS.length === 0) return "https://basket-01.wbbasket.ru";
-  return CDN_HOSTS[vol % CDN_HOSTS.length];
-}
+const CDN_HOST = "kgd-basket-cdn-01bl.geobasket.ru";
 
 /**
  * Вычисляет vol/part для CDN-пути по артикулу WB.
@@ -50,8 +38,7 @@ export function cdnImageUrl(
   size = WB_IMAGE_SIZE,
 ): string {
   const { vol, part } = getVolPart(article);
-  const host = pickCdnHost(article);
-  return `${host}/vol${vol}/part${part}/${article}/images/${size}/${index}.webp`;
+  return `https://${CDN_HOST}/vol${vol}/part${part}/${article}/images/${size}/${index}.webp`;
 }
 
 /**

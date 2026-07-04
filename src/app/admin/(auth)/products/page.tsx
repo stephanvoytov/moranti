@@ -478,30 +478,18 @@ export default function AdminProductsPage() {
                     </td>
                     <td>
                       <div className={styles.photoPair}>
-                        {p.wbArticle && p.image && (
-                          <div className={styles.photoItem}>
-                            <img
-                              src={p.image}
-                              alt=""
-                              className={styles.photoImg}
-                              onClick={() => setLightboxImage(p.image ?? null)}
-                              title="Увеличить"
-                            />
-                            <span className={styles.photoLabel}>WB</span>
-                          </div>
-                        )}
-                        {p.ozonArticle && p.ozonImage && (
-                          <div className={styles.photoItem}>
-                            <img
-                              src={p.ozonImage}
-                              alt=""
-                              className={styles.photoImg}
-                              onClick={() => setLightboxImage(p.ozonImage ?? null)}
-                              title="Увеличить"
-                            />
-                            <span className={styles.photoLabel}>Ozon</span>
-                          </div>
-                        )}
+                        <AdminProductPhoto
+                          src={p.image}
+                          label="WB"
+                          hasArticle={!!p.wbArticle}
+                          onLightbox={() => setLightboxImage(p.image ?? null)}
+                        />
+                        <AdminProductPhoto
+                          src={p.ozonImage}
+                          label="Ozon"
+                          hasArticle={!!p.ozonArticle}
+                          onLightbox={() => setLightboxImage(p.ozonImage ?? null)}
+                        />
                         {!p.image && !p.ozonImage && (
                           <div className={styles.photoPlaceholder}>—</div>
                         )}
@@ -643,6 +631,40 @@ export default function AdminProductsPage() {
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ─── Фото товара с обработкой ошибок загрузки ─── */
+
+function AdminProductPhoto({
+  src,
+  label,
+  hasArticle,
+  onLightbox,
+}: {
+  src?: string | null;
+  label: string;
+  hasArticle: boolean;
+  onLightbox: () => void;
+}) {
+  const [failed, setFailed] = useState(false);
+
+  // Показываем только если есть article и src
+  if (!hasArticle || !src) return null;
+  if (failed) return null; // не показываем битое фото
+
+  return (
+    <div className={styles.photoItem}>
+      <img
+        src={src}
+        alt=""
+        className={styles.photoImg}
+        onClick={onLightbox}
+        onError={() => setFailed(true)}
+        title="Увеличить"
+      />
+      <span className={styles.photoLabel}>{label}</span>
     </div>
   );
 }
