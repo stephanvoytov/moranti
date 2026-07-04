@@ -9,7 +9,7 @@ import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
-import prisma, { prismaQuery, serializeProduct } from "@/lib/prisma";
+import prisma, { prismaQuery, serializeProduct, serializeModel } from "@/lib/prisma";
 import { VALID_CATEGORIES } from "@/lib/schemas";
 
 const updateModelSchema = z.object({
@@ -56,7 +56,7 @@ export async function GET(
   }
 
   return NextResponse.json({
-    ...model,
+    ...serializeModel(model as Record<string, unknown>),
     variants: model.variants.map((v) => serializeProduct(v as Record<string, unknown>)),
   });
 }
@@ -115,7 +115,7 @@ export async function PUT(
     prisma.model.update({ where: { id }, data })
   );
 
-  return NextResponse.json(updated);
+  return NextResponse.json(serializeModel(updated as Record<string, unknown>));
 }
 
 /* ——— DELETE /api/admin/models/[id] ——— */

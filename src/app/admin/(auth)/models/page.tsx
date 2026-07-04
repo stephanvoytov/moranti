@@ -43,6 +43,7 @@ export default function AdminModelsKanban() {
   const [models, setModels] = useState<ModelBrief[]>([]);
   const [unassigned, setUnassigned] = useState<ProductBrief[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Dragging state
   const [dragItem, setDragItem] = useState<{ productId: string; fromCol: string } | null>(null);
@@ -56,14 +57,20 @@ export default function AdminModelsKanban() {
   const savingCount = useRef(0);
 
   const fetchData = useCallback(async () => {
+    setError(null);
     try {
       const res = await fetch("/api/admin/models?includeUnassigned=true");
       if (res.status === 401) return router.push("/admin/login");
+      if (!res.ok) {
+        setError(`Ошибка загрузки: ${res.status}`);
+        return;
+      }
       const data = await res.json();
       setModels(data.items || []);
       setUnassigned(data.unassigned || []);
-    } catch { /* ignore */ }
-    finally { setLoading(false); }
+    } catch {
+      setError("Не удалось загрузить данные. Сервер БД холодный?");
+    } finally { setLoading(false); }
   }, [router]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -212,6 +219,22 @@ export default function AdminModelsKanban() {
 
   if (loading) {
     return <div className={styles.page}><p className={styles.loading}>Загрузка...</p></div>;
+  }
+
+  if (error) {
+    return (
+      <div className={styles.page}>
+        <header className={styles.header}>
+          <h1 className={styles.title}>Распределение товаров по моделям</h1>
+        </header>
+        <div className={styles.error}>
+          <p>{error}</p>
+          <button className={styles.retryBtn} onClick={fetchData}>
+            Повторить
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -9,7 +9,7 @@ import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
-import prisma, { prismaQuery, serializeProduct } from "@/lib/prisma";
+import prisma, { prismaQuery, serializeProduct, serializeModel } from "@/lib/prisma";
 import { VALID_CATEGORIES } from "@/lib/schemas";
 
 const createModelSchema = z.object({
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
   );
 
   const result = models.map((m) => ({
-    ...m,
+    ...serializeModel(m as Record<string, unknown>),
     variants: m.variants.map((v) => serializeProduct(v as Record<string, unknown>)),
   }));
 

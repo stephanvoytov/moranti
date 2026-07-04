@@ -5,10 +5,10 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const MAX_RETRIES = 2;
-const BASE_DELAY = 500; // ms
-const MAX_DELAY = 2000; // ms
-const QUERY_TIMEOUT = 5_000; // ms — не ждать TCP таймаут 30+ секунд
+const MAX_RETRIES = 3;
+const BASE_DELAY = 1_000; // ms
+const MAX_DELAY = 5_000; // ms
+const QUERY_TIMEOUT = 15_000; // ms — Prisma Postgres free tier cold-start 3-6s
 
 /**
  * Throw if promise doesn't settle within `ms` milliseconds.
@@ -91,4 +91,13 @@ export function serializeProduct(p: Record<string, unknown>): Record<string, unk
   if (p.wbArticle != null) p.wbArticle = Number(p.wbArticle);
   if (p.ozonArticle != null) p.ozonArticle = Number(p.ozonArticle);
   return p;
+}
+
+/**
+ * Конвертирует BigInt поля Prisma Model в Number для JSON-сериализации.
+ * Нужно перед возвратом из API-роутов, т.к. JSON.stringify не поддерживает BigInt.
+ */
+export function serializeModel(m: Record<string, unknown>): Record<string, unknown> {
+  if (m.imtId != null) m.imtId = Number(m.imtId);
+  return m;
 }
