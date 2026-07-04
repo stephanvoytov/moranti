@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import AdminButton from "@/components/admin/admin-button";
+import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import styles from "./editor.module.css";
 
 interface Variant {
@@ -359,7 +360,7 @@ export default function ModelEditorPage() {
                   <span className={styles.variantPrice}>{formatPrice(v.price)}</span>
                   <span className={styles.variantWb}>
                     {v.wbArticle > 0 ? (
-                      <a href={`https://www.wildberries.ru/catalog/${v.wbArticle}/detail.aspx`}
+                      <a href={MARKETPLACE_URLS.wbProduct(v.wbArticle)}
                          target="_blank" className={styles.articleLink}>
                         {v.wbArticle}
                       </a>
@@ -369,7 +370,7 @@ export default function ModelEditorPage() {
                   </span>
                   <span className={styles.variantOzon}>
                     {v.ozonArticle ? (
-                      <a href={`https://www.ozon.ru/product/${v.ozonArticle}/`}
+                      <a href={MARKETPLACE_URLS.ozonProduct(v.ozonArticle)}
                          target="_blank" className={styles.articleLink}>
                         {v.ozonArticle}
                       </a>

@@ -141,7 +141,7 @@ moranti/
 ├── public/images/
 │   ├── icons/                # wb.svg, ozon.svg, ym.svg
 │   └── products/             # Загруженные фото товаров
-├── scripts/                  # sync-wb.mjs, wb-categories.js
+├── scripts/                  # sync-all.mjs, wb-categories.js
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx        # Root layout + шрифты + SEO + метрика

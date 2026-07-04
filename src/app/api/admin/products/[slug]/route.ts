@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import { updateProductSchema, VALID_CATEGORIES } from "@/lib/schemas";
 import prisma, { prismaQuery, serializeProduct } from "@/lib/prisma";
 import { invalidateCache } from "@/lib/data-cache";
@@ -106,14 +107,14 @@ export async function PUT(
   if (wbNum && wbNum > 0) {
     marketplaces.push({
       name: "Wildberries",
-      url: `https://www.wildberries.ru/catalog/${wbNum}/detail.aspx`,
+      url: MARKETPLACE_URLS.wbProduct(Number(wbNum)),
       icon: "/images/icons/wb.svg",
     });
   }
   if (ozonNum) {
     marketplaces.push({
       name: "Ozon",
-      url: `https://www.ozon.ru/product/${ozonNum}/`,
+      url: MARKETPLACE_URLS.ozonProduct(Number(ozonNum)),
       icon: "/images/icons/ozon.svg",
     });
   }

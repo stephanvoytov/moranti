@@ -21,21 +21,30 @@
   margin-bottom: var(--space-lg);
 }
 
+.logoMark {
+  width: 32px;
+  height: 2px;
+  background: var(--camel);
+  margin: 0 auto var(--space-md);
+  border-radius: 1px;
+}
+
 .title {
   font-family: var(--font-serif);
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 400;
   color: var(--dark);
   margin: 0;
+  letter-spacing: 1px;
 }
 
 .subtitle {
   font-family: var(--font-sans);
-  font-size: 13px;
-  color: var(--muted);
+  font-size: 11px;
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 2px;
-  margin: var(--space-xs) 0 0;
+  letter-spacing: 2.5px;
+  margin: var(--space-sm) 0 0;
 }
 
 .form {

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, FormEvent, useRef, useMemo } from "react";
+import { useState, useEffect, FormEvent, useRef, useMemo, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import ProductCard from "@/components/ui/product-card";
 import AdminButton from "@/components/admin/admin-button";
+import { useToast } from "@/lib/toast-context";
 import styles from "./editor.module.css";
 
 interface ProductForm {
@@ -71,6 +72,9 @@ export default function ProductEditorPage() {
   const [imgDragIndex, setImgDragIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imgDragNode = useRef<HTMLDivElement | null>(null);
+  const { toast } = useToast();
+  const [dirty, setDirty] = useState(false);
+  const [neighbors, setNeighbors] = useState<{ slug: string; name: string }[]>([]);
 
   // Real-time preview product object for ProductCard
   const previewProduct = useMemo(() => ({
@@ -143,8 +147,36 @@ export default function ProductEditorPage() {
     load();
   }, [isNew, params.slug, router]);
 
+  // ─── Load neighbors (Prev/Next navigation) ───
+  useEffect(() => {
+    if (isNew) return;
+    fetch("/api/admin/products?limit=999&fields=slug,name,category")
+      .then((r) => r.json())
+      .then((data) => {
+        const items: { slug: string; name: string }[] =
+          (data.items || data.products || []).map((p: { slug: string; name: string }) => ({
+            slug: p.slug,
+            name: p.name,
+          }));
+        setNeighbors(items);
+      })
+      .catch(() => {});
+  }, [isNew]);
+
+  // ─── Beforeunload on dirty ───
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
+
   function updateField(field: keyof ProductForm, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
+    setDirty(true);
   }
 
   /* ——— Image management ——— */
@@ -154,6 +186,7 @@ export default function ProductEditorPage() {
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
+    setDirty(true);
   }
 
   function addImageUrl(url: string) {
@@ -164,6 +197,7 @@ export default function ProductEditorPage() {
     }));
     setUrlInputValue("");
     setShowUrlInput(false);
+    setDirty(true);
   }
 
   function moveImage(from: number, to: number) {
@@ -174,6 +208,7 @@ export default function ProductEditorPage() {
       images.splice(to, 0, moved);
       return { ...prev, images };
     });
+    setDirty(true);
   }
 
   function handleImgDragStart(e: React.DragEvent, index: number) {
@@ -272,13 +307,19 @@ export default function ProductEditorPage() {
       });
 
       if (res.ok) {
+        setDirty(false);
+        toast.success(isNew ? "Товар создан" : "Товар сохранён");
         router.push("/admin/products");
       } else {
         const data = await res.json();
-        setError(data.error || "Ошибка сохранения");
+        const msg = data.error || "Ошибка сохранения";
+        setError(msg);
+        toast.error(msg);
       }
     } catch {
-      setError("Ошибка соединения");
+      const msg = "Ошибка соединения";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -295,15 +336,48 @@ export default function ProductEditorPage() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>
-          {isNew ? "Новый товар" : "Редактировать товар"}
-        </h1>
+        <div className={styles.headerRow}>
+          <h1 className={styles.title}>
+            {isNew ? "Новый товар" : "Редактировать товар"}
+          </h1>
+          {!isNew && neighbors.length > 0 && (
+            <div className={styles.navBtns}>
+              {(() => {
+                const idx = neighbors.findIndex((n) => n.slug === params.slug);
+                const prev = idx > 0 ? neighbors[idx - 1] : null;
+                const next = idx < neighbors.length - 1 ? neighbors[idx + 1] : null;
+                return (
+                  <>
+                    <button
+                      className={styles.navBtn}
+                      disabled={!prev}
+                      onClick={() => { if (prev) router.push(`/admin/products/${prev.slug}`); }}
+                      title={prev?.name || "Нет предыдущего"}
+                    >
+                      ← {prev?.name?.slice(0, 24) || "—"}
+                    </button>
+                    <button
+                      className={styles.navBtn}
+                      disabled={!next}
+                      onClick={() => { if (next) router.push(`/admin/products/${next.slug}`); }}
+                      title={next?.name || "Нет следующего"}
+                    >
+                      {next?.name?.slice(0, 24) || "—"} →
+                    </button>
+                  </>
+                );
+              })()}
+            </div>
+          )}
+        </div>
       </header>
 
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.grid}>
           {/* Left column — fields */}
           <div className={styles.mainFields}>
+            <h3 className={styles.sectionTitle}>Основное</h3>
+
             <label className={styles.label}>
               Название *
               <input
@@ -374,6 +448,8 @@ export default function ProductEditorPage() {
               </label>
             )}
 
+            <h3 className={styles.sectionTitle}>Описание и внешний вид</h3>
+
             <label className={styles.label}>
               Описание
               <textarea
@@ -384,40 +460,30 @@ export default function ProductEditorPage() {
               />
             </label>
 
-            <label className={styles.label}>
-              Цвет
-              <input
-                type="text"
-                className={styles.input}
-                value={form.colorName}
-                onChange={(e) => updateField("colorName", e.target.value)}
-                placeholder="Бежевый"
-              />
-            </label>
-
-            <label className={styles.label}>
-              Материал
-              <input
-                type="text"
-                className={styles.input}
-                value={form.composition}
-                onChange={(e) => updateField("composition", e.target.value)}
-                placeholder="Натуральная кожа"
-              />
-            </label>
-
             <div className={styles.row}>
               <label className={styles.label}>
-                SKU (vendorCode / offer_id)
+                Цвет
                 <input
                   type="text"
                   className={styles.input}
-                  value={form.sku}
-                  onChange={(e) => updateField("sku", e.target.value)}
-                  placeholder="BalensaTaup"
+                  value={form.colorName}
+                  onChange={(e) => updateField("colorName", e.target.value)}
+                  placeholder="Бежевый"
+                />
+              </label>
+              <label className={styles.label}>
+                Материал
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={form.composition}
+                  onChange={(e) => updateField("composition", e.target.value)}
+                  placeholder="Натуральная кожа"
                 />
               </label>
             </div>
+
+            <h3 className={styles.sectionTitle}>Маркетплейсы</h3>
 
             <div className={styles.row}>
               <label className={styles.label}>
@@ -441,6 +507,19 @@ export default function ProductEditorPage() {
                 />
               </label>
             </div>
+
+            <label className={styles.label}>
+              SKU (vendorCode / offer_id)
+              <input
+                type="text"
+                className={styles.input}
+                value={form.sku}
+                onChange={(e) => updateField("sku", e.target.value)}
+                placeholder="BalensaTaup"
+              />
+            </label>
+
+            <h3 className={styles.sectionTitle}>Характеристики</h3>
 
             <div className={styles.row}>
               <label className={styles.label}>

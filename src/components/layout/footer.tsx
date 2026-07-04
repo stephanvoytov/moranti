@@ -1,3 +1,4 @@
+import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import styles from "./footer.module.css";
 
 export default function Footer() {
@@ -29,8 +30,8 @@ export default function Footer() {
           </div>
           <div className={styles.col}>
             <h4>Магазины</h4>
-            <a href="https://www.wildberries.ru/brands/moranti" target="_blank" rel="noopener noreferrer">Wildberries</a>
-            <a href="https://www.ozon.ru/seller/moranti/?miniapp=seller_4205030" target="_blank" rel="noopener noreferrer">Ozon</a>
+            <a href={MARKETPLACE_URLS.wbSeller} target="_blank" rel="noopener noreferrer">Wildberries</a>
+            <a href={MARKETPLACE_URLS.ozonSeller} target="_blank" rel="noopener noreferrer">Ozon</a>
             <a href="https://www.instagram.com/_utrends/" target="_blank" rel="noopener noreferrer">Instagram</a>
             <a href="https://vk.com/moranti_bags" target="_blank" rel="noopener noreferrer">VK</a>
           </div>

@@ -11,6 +11,7 @@ import { enforceRateLimit } from "@/lib/rate-limit";
 import { createProductSchema, productsQuerySchema, VALID_CATEGORIES } from "@/lib/schemas";
 import prisma, { prismaQuery, serializeProduct } from "@/lib/prisma";
 import { invalidateCache } from "@/lib/data-cache";
+import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 
 /* ——— GET /api/admin/products ——— */
 
@@ -101,14 +102,14 @@ export async function POST(request: NextRequest) {
   if (wbArticle) {
     marketplaces.push({
       name: "Wildberries",
-      url: `https://www.wildberries.ru/catalog/${wbArticle}/detail.aspx`,
+      url: MARKETPLACE_URLS.wbProduct(wbArticle),
       icon: "/images/icons/wb.svg",
     });
   }
   if (ozonArticle) {
     marketplaces.push({
       name: "Ozon",
-      url: `https://www.ozon.ru/product/${ozonArticle}/`,
+      url: MARKETPLACE_URLS.ozonProduct(ozonArticle),
       icon: "/images/icons/ozon.svg",
     });
   }

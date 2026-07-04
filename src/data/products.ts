@@ -10,6 +10,7 @@ import prisma, { prismaQuery } from "@/lib/prisma";
 import { cacheGet } from "@/lib/data-cache";
 import { logger } from "@/lib/logger";
 import { generateProductImages } from "@/lib/product-images";
+import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 
 /** Загрузить JSON fallback при недоступности БД */
 function loadJsonFallback<T>(file: string): T | null {
@@ -102,7 +103,7 @@ function mapProduct(p: PrismaProduct): Product {
   if (wbArt && !storedMps.some((m) => m.name === "Wildberries")) {
     marketplaces.push({
       name: "Wildberries",
-      url: `https://www.wildberries.ru/catalog/${wbArt}/detail.aspx`,
+      url: MARKETPLACE_URLS.wbProduct(wbArt),
       icon: "/images/icons/wb.svg",
     });
   }
@@ -110,7 +111,7 @@ function mapProduct(p: PrismaProduct): Product {
   if (ozonArt && !storedMps.some((m) => m.name === "Ozon")) {
     marketplaces.push({
       name: "Ozon",
-      url: `https://www.ozon.ru/product/${ozonArt}/`,
+      url: MARKETPLACE_URLS.ozonProduct(ozonArt),
       icon: "/images/icons/ozon.svg",
     });
   }

@@ -7,6 +7,7 @@ import { CATEGORIES } from "@/lib/categories";
 import AdminModal from "@/components/admin/admin-modal";
 import AdminButton from "@/components/admin/admin-button";
 import AdminPageHeader from "@/components/admin/admin-page-header";
+import { useToast } from "@/lib/toast-context";
 import styles from "./products.module.css";
 
 interface Product {
@@ -45,6 +46,7 @@ interface ModelBrief {
 
 export default function AdminProductsPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1, limit: 20, total: 0, totalPages: 0,
@@ -73,6 +75,9 @@ export default function AdminProductsPage() {
   const [orderSaved, setOrderSaved] = useState(false);
   const dragNode = useRef<HTMLElement | null>(null);
 
+  // Lightbox
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+
   const archivedParam = statusTab === "all" ? undefined : statusTab === "archived" ? "true" : "false";
   const marketplaceParam = marketplace || undefined;
 
@@ -98,6 +103,16 @@ export default function AdminProductsPage() {
   );
 
   useEffect(() => { fetchProducts(1); }, [fetchProducts]);
+
+  // ─── Lightbox keyboard ───
+  useEffect(() => {
+    if (!lightboxImage) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxImage(null);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [lightboxImage]);
 
   // ─── Bulk actions ───
 
@@ -130,9 +145,13 @@ export default function AdminProductsPage() {
       if (res.ok) {
         setSelectedIds(new Set());
         fetchProducts(pagination.page);
+        const labels = { archive: "Архивировано", unarchive: "Разархивировано", delete: "Удалено", "assign-model": "Модель назначена" };
+        toast.success(`${labels[action]} ${selectedIds.size} товаров`);
+      } else {
+        toast.error("Ошибка при выполнении операции");
       }
     } catch {
-      // ignore
+      toast.error("Ошибка соединения");
     } finally {
       setBulkProcessing(false);
     }
@@ -160,7 +179,12 @@ export default function AdminProductsPage() {
   async function handleDelete(id: string) {
     if (!confirm("Удалить товар?")) return;
     const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
-    if (res.ok) fetchProducts(pagination.page);
+    if (res.ok) {
+      fetchProducts(pagination.page);
+      toast.success("Товар удалён");
+    } else {
+      toast.error("Ошибка при удалении");
+    }
   }
 
   // ─── Reorder mode ───
@@ -443,13 +467,25 @@ export default function AdminProductsPage() {
                       <div className={styles.photoPair}>
                         {p.wbArticle && p.image && (
                           <div className={styles.photoItem}>
-                            <img src={p.image} alt="" className={styles.photoImg} />
+                            <img
+                              src={p.image}
+                              alt=""
+                              className={styles.photoImg}
+                              onClick={() => setLightboxImage(p.image ?? null)}
+                              title="Увеличить"
+                            />
                             <span className={styles.photoLabel}>WB</span>
                           </div>
                         )}
                         {p.ozonArticle && p.ozonImage && (
                           <div className={styles.photoItem}>
-                            <img src={p.ozonImage} alt="" className={styles.photoImg} />
+                            <img
+                              src={p.ozonImage}
+                              alt=""
+                              className={styles.photoImg}
+                              onClick={() => setLightboxImage(p.ozonImage ?? null)}
+                              title="Увеличить"
+                            />
                             <span className={styles.photoLabel}>Ozon</span>
                           </div>
                         )}
@@ -577,6 +613,23 @@ export default function AdminProductsPage() {
           ))}
         </select>
       </AdminModal>
+
+      {/* ─── Lightbox ─── */}
+      {lightboxImage && (
+        <div
+          className={styles.lightboxOverlay}
+          onClick={() => setLightboxImage(null)}
+        >
+          <img src={lightboxImage} alt="" className={styles.lightboxImage} />
+          <button
+            className={styles.lightboxClose}
+            onClick={() => setLightboxImage(null)}
+            aria-label="Закрыть"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }

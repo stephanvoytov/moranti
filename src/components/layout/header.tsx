@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useFavorites } from "@/lib/favorites-context";
+import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import styles from "./header.module.css";
 
 export default function Header() {
@@ -31,10 +32,10 @@ export default function Header() {
           <Link href="/catalog" onClick={() => setMenuOpen(false)}>
             Каталог
           </Link>
-          <a href="https://www.wildberries.ru/brands/moranti" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
+          <a href={MARKETPLACE_URLS.wbSeller} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
             Wildberries
           </a>
-          <a href="https://www.ozon.ru/seller/moranti/?miniapp=seller_4205030" target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
+          <a href={MARKETPLACE_URLS.ozonSeller} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
             Ozon
           </a>
         </nav>

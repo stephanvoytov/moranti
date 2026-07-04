@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/lib/toast-context";
 import styles from "./settings.module.css";
 
 interface SettingsForm {
@@ -62,6 +63,7 @@ const emptyForm: SettingsForm = {
 
 export default function AdminSettingsPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [form, setForm] = useState<SettingsForm>(emptyForm);
   const [rawSettings, setRawSettings] = useState<Record<string, unknown>>({});
   const [jsonText, setJsonText] = useState("");
@@ -208,13 +210,18 @@ export default function AdminSettingsPage() {
 
       if (res.ok) {
         setSaved(true);
+        toast.success("Настройки сохранены");
         setTimeout(() => setSaved(false), 3000);
       } else {
         const data = await res.json();
-        setError(data.error || "Ошибка сохранения");
+        const msg = data.error || "Ошибка сохранения";
+        setError(msg);
+        toast.error(msg);
       }
     } catch {
-      setError("Ошибка соединения или невалидный JSON");
+      const msg = "Ошибка соединения или невалидный JSON";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }

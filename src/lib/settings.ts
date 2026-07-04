@@ -8,6 +8,7 @@ import path from "path";
 import prisma, { prismaQuery } from "@/lib/prisma";
 import { cacheGet } from "@/lib/data-cache";
 import { logger } from "@/lib/logger";
+import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 
 export interface SiteSettings {
   hero: { title: string; tagline: string; subtitle: string; image: string };
@@ -39,7 +40,7 @@ const DEFAULTS: SiteSettings = {
   yandexMetrikaId: "",
   categoryImages: {},
   social: { instagram: "", vk: "", telegram: "", whatsapp: "" },
-  marketplaces: { wildberries: "", ozon: "" },
+  marketplaces: { wildberries: MARKETPLACE_URLS.wbSeller, ozon: MARKETPLACE_URLS.ozonSeller },
   seo: { defaultTitle: "Moranti", defaultDescription: "" },
   updatedAt: new Date().toISOString(),
 };

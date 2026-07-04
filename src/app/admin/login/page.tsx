@@ -40,8 +40,9 @@ export default function AdminLoginPage() {
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.header}>
+          <div className={styles.logoMark} aria-hidden="true" />
           <h1 className={styles.title}>Moranti</h1>
-          <p className={styles.subtitle}>Админ-панель</p>
+          <p className={styles.subtitle}>Панель управления</p>
         </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>

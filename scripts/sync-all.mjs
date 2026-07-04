@@ -353,6 +353,7 @@ async function ozonFetchAllProducts(clientId, apiKey) {
       allItems.push({
         offerId: String(item.offer_id || ""),
         productId: Number(item.product_id || 0),
+        productSku: Number(item.sku) || 0,
       });
     }
     log.write(` ${allItems.length}`);
@@ -861,6 +862,7 @@ async function updateProduct(prisma, id, data) {
   if (data.wbUpdatedAt !== undefined) updateData.wbUpdatedAt = data.wbUpdatedAt;
   if (data.archivedAt !== undefined) updateData.archivedAt = data.archivedAt;
   if (data.sku !== undefined) updateData.sku = data.sku;
+  if (data.ozonArticle !== undefined) updateData.ozonArticle = data.ozonArticle;
 
   if (Object.keys(updateData).length === 0) return false;
 
@@ -1099,10 +1101,11 @@ async function syncModels(prisma, wbCards) {
  *
  * @param {boolean} ozonChecked — true если Ozon API опрашивался (иначе Ozon-товары не трогаем)
  */
-async function archiveGoneProducts(prisma, dbProducts, wbArticles, ozonArticles, trashArticles, wbChecked = true, ozonChecked = true) {
+async function archiveGoneProducts(prisma, dbProducts, wbArticles, ozonItems, trashArticles, wbChecked = true, ozonChecked = true) {
   const wbSet = new Set(wbArticles);
   const trashSet = new Set(trashArticles);
-  const ozonSet = new Set(ozonArticles);
+  const ozonProductIdSet = new Set((ozonItems || []).map((i) => i.productId).filter(Boolean));
+  const ozonSkuSet = new Set((ozonItems || []).map((i) => i.productSku).filter(Boolean));
   let archived = 0;
   let markedOutOfStock = 0;
 
@@ -1118,7 +1121,7 @@ async function archiveGoneProducts(prisma, dbProducts, wbArticles, ozonArticles,
     if (!wbChecked && wbArt) continue;
 
     const onWb = wbChecked && wbArt && wbSet.has(wbArt);
-    const onOzon = ozonChecked && ozonArt && ozonSet.has(ozonArt);
+    const onOzon = ozonChecked && ozonArt && (ozonSkuSet.has(ozonArt) || ozonProductIdSet.has(ozonArt));
     const inWbTrash = wbArt && trashSet.has(wbArt);
 
     if (onWb || onOzon) {
@@ -1194,6 +1197,7 @@ async function main() {
 
     let wbArticles = [];
     let ozonArticles = [];
+    let ozonItems = [];
     let trashArticles = [];
     let wbCards = [];
     let wbTrashCards = [];
@@ -1324,7 +1328,7 @@ async function main() {
 
     if (!flags.wbOnly) {
       log.line("[Ozon] Fetching product list...");
-      const ozonItems = await ozonFetchAllProducts(ozonClientId, ozonApiKey);
+      ozonItems = await ozonFetchAllProducts(ozonClientId, ozonApiKey);
       ozonArticles = ozonItems.map((i) => i.productId).filter((id) => id > 0);
       log.line(`  ${ozonItems.length} Ozon products\n`);
 
@@ -1344,22 +1348,63 @@ async function main() {
 
       // ─── Process Ozon products ───
       log.line("Processing Ozon products...");
-      for (const { offerId, productId } of ozonItems) {
+
+      // In-memory трекер занятых ozonArticle: value → product.id
+      // Освобождаем и занимаем значения по мере обработки, чтобы не было NOT unique.
+      const ozonLocks = new Map();
+      for (const p of existing.all) {
+        if (p.ozonArticle) ozonLocks.set(Number(p.ozonArticle), p.id);
+      }
+      const skippedOzonFixes = [];
+
+      for (const { offerId, productId, productSku } of ozonItems) {
         if (!offerId && !productId) continue;
         const info = infoMap.get(offerId);
         const attrs = attrMap.get(offerId);
         const rating = ratingMap.get(productId);
 
-        // Match by sku first, then by ozonArticle
+        // Public SKU: v3/product/list.sku — номер в URL товара на Ozon.
+        // info.sources[].sku НЕ используем — sources может содержать
+        // несколько вариантов (цвета/размеры) одной группы, и [0] не всегда наш.
+        const publicSku = productSku || info?.sources?.[0]?.sku || 0;
+
+        // Match by offer_id → public SKU → product_id (legacy)
         let db = offerId ? existing.bySku.get(offerId) : null;
+        if (!db && publicSku) db = existing.byOzonArticle.get(Number(publicSku));
         if (!db) db = existing.byOzonArticle.get(productId);
 
         if (!info) continue;
 
         if (db) {
-          // Update existing — ensure ozonArticle is set
+          // Update existing — ensure ozonArticle is correct
           const ensureFields = {};
-          if (productId && !db.ozonArticle) ensureFields.ozonArticle = BigInt(productId);
+          if (publicSku && (!db.ozonArticle || Number(db.ozonArticle) !== Number(publicSku))) {
+            const newVal = Number(publicSku);
+            const oldVal = db.ozonArticle ? Number(db.ozonArticle) : 0;
+
+            if (oldVal !== newVal) {
+              // Освобождаем старое значение (если оно было)
+              if (oldVal) ozonLocks.delete(oldVal);
+
+              // Проверяем, не занято ли новое значение (в БД или другим фиксом в этом проходе)
+              const lockHolder = ozonLocks.get(newVal);
+              if (lockHolder) {
+                log.line(`  ⚠️ Skip ozonArticle for ${db.id}: ${newVal} held by ${lockHolder}`);
+                // Возвращаем старый лок (не смогли переехать)
+                if (oldVal) ozonLocks.set(oldVal, db.id);
+                skippedOzonFixes.push({ db, newVal, oldVal });
+              } else {
+                // Занимаем новое значение
+                ozonLocks.set(newVal, db.id);
+                ensureFields.ozonArticle = BigInt(publicSku);
+                if (oldVal) {
+                  log.line(`  Fix ozonArticle for ${db.id}: ${oldVal} → ${newVal}`);
+                } else {
+                  log.line(`  Set ozonArticle for ${db.id}: — → ${newVal}`);
+                }
+              }
+            }
+          }
 
           const updates = mergeProductSources(null, null, null, info, attrs, rating, db);
           const allUpdates = { ...ensureFields, ...updates };
@@ -1399,7 +1444,7 @@ async function main() {
             images: info.images || [],
             ozonImage: info.images?.[0] || null,
             ozonImages: info.images || [],
-            ozonArticle: productId,
+            ozonArticle: publicSku || productId,
             photoCount: info.images?.length || 1,
             colorName: ozonExtractColor(info, attrs),
             composition: ozonComp,
@@ -1408,8 +1453,25 @@ async function main() {
             nameAutoGenerated: true,
             descAutoGenerated: true,
           });
-          log.line(`  Created (Ozon): ${id} sku=${offerId} article=${productId}`);
+          log.line(`  Created (Ozon): ${id} offer=${offerId} sku=${publicSku || productId}`);
           stats.ozonCreated++;
+        }
+      }
+
+      // ─── Второй проход: фиксы, пропущенные из-за конфликта блокировок ───
+      if (skippedOzonFixes.length > 0) {
+        log.line(`  Second pass: retrying ${skippedOzonFixes.length} skipped ozonArticle fixes...`);
+        for (const { db, newVal, oldVal } of skippedOzonFixes) {
+          if (ozonLocks.has(newVal)) {
+            log.line(`    Still skipped ${db.id}: ${newVal} held by ${ozonLocks.get(newVal)}`);
+          } else {
+            ozonLocks.set(newVal, db.id);
+            const ok = await updateProduct(prisma, db.id, { ozonArticle: BigInt(newVal) });
+            if (ok) {
+              log.line(`    Fix ozonArticle for ${db.id}: ${oldVal} → ${newVal} (2nd pass)`);
+              stats.ozonUpdated++;
+            }
+          }
         }
       }
 
@@ -1441,7 +1503,7 @@ async function main() {
       prisma,
       existing.all,
       wbArticles,
-      ozonArticles,
+      ozonItems,
       trashArticles,
       !flags.ozonOnly, // wbChecked — true если WB фаза запускалась
       !flags.wbOnly,   // ozonChecked — true если Ozon фаза запускалась

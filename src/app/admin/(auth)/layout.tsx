@@ -5,6 +5,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/admin-auth";
 import AdminSidebar from "./sidebar";
+import AdminToastWrapper from "./toast-wrapper";
 import styles from "./layout.module.css";
 
 export default async function AdminAuthLayout({
@@ -16,9 +17,11 @@ export default async function AdminAuthLayout({
   if (!session) redirect("/admin/login");
 
   return (
-    <div className={styles.layout}>
-      <AdminSidebar />
-      <main className={styles.content}>{children}</main>
-    </div>
+    <AdminToastWrapper>
+      <div className={styles.layout}>
+        <AdminSidebar />
+        <main className={styles.content}>{children}</main>
+      </div>
+    </AdminToastWrapper>
   );
 }
