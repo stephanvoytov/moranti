@@ -6,6 +6,7 @@
 
 import {
   extractPhotoCount,
+  extractImageUrls,
   cdnImageUrl,
   cdnImageUrls,
   resolveCategory,
@@ -76,8 +77,17 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
     const photoCount = extractPhotoCount(wbCard);
     const article = wbCard.nmID;
     data.photoCount = photoCount;
-    data.image = cdnImageUrl(article, 1);
-    data.images = cdnImageUrls(article, photoCount);
+
+    // Приоритет: реальные URL из API (работают всегда)
+    const realUrls = extractImageUrls(wbCard, "big");
+    if (realUrls && realUrls.length > 0) {
+      data.image = realUrls[0];
+      data.images = realUrls;
+    } else {
+      // Fallback: генерируем из article + photoCount
+      data.image = cdnImageUrl(article, 1);
+      data.images = cdnImageUrls(article, photoCount);
+    }
   } else if (ozonInfo?.images?.length && !db?.wbArticle && !db?.ozonImage) {
     data.photoCount = ozonInfo.images.length;
     data.image = ozonInfo.images[0];

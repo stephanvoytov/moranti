@@ -158,6 +158,38 @@ export function extractPhotoCount(card) {
   return 1;
 }
 
+/**
+ * Извлекает реальные URL фото из WB card (media.photo[]).
+ * WB Content API возвращает готовые URL — они 100% рабочие.
+ *
+ * @param {object} card — card.json из Content API
+ * @param {string} [size="big"] — размер: big, c516x688, c246x328
+ * @returns {string[]|null} — массив URL или null если нет фото
+ */
+export function extractImageUrls(card, size = "big") {
+  if (!card) return null;
+  const media = card.media;
+  if (!media) return null;
+
+  // Новый формат: media.photo[] = [{ big: "url", c516x688: "url", ... }]
+  if (Array.isArray(media.photo)) {
+    const urls = media.photo
+      .map((p) => (p && p[size]) ? p[size] : null)
+      .filter(Boolean);
+    if (urls.length > 0) return urls;
+  }
+
+  // Старый формат: photos[] = [{ url: "..." }]
+  if (Array.isArray(card.photos)) {
+    const urls = card.photos
+      .map((p) => p?.url || null)
+      .filter(Boolean);
+    if (urls.length > 0) return urls;
+  }
+
+  return null;
+}
+
 // ============================================================
 // WB category resolution
 // ============================================================
