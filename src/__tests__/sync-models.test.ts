@@ -14,6 +14,7 @@ function createMockPrisma(): {
   model: {
     findFirst: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
   };
   product: {
     findFirst: ReturnType<typeof vi.fn>;
@@ -25,6 +26,7 @@ function createMockPrisma(): {
     model: {
       findFirst: vi.fn(),
       create: vi.fn(),
+      update: vi.fn(),
     },
     product: {
       findFirst: vi.fn(),
@@ -62,9 +64,15 @@ describe("syncModels", () => {
   it("создаёт модель из imtId и привязывает товар", async () => {
     prisma.model.findFirst.mockResolvedValue(null);
     prisma.model.create.mockResolvedValue({ id: "model-wb-12345", slug: "model-wb-12345" });
-    prisma.product.findFirst.mockResolvedValue({ id: "mor-001", modelId: null });
+    prisma.product.findMany.mockResolvedValue([
+      { id: "mor-001", wbArticle: 111, sku: "mor-001", name: "Birkin Tote", modelId: null },
+      { id: "mor-002", wbArticle: 222, sku: "mor-002", name: "Birkin Tote", modelId: null },
+    ]);
 
-    const cards = [{ nmID: 111, imtID: 12345, imt_name: "Birkin", category: "tote" }];
+    const cards = [
+      { nmID: 111, imtID: 12345, imt_name: "Birkin", category: "tote" },
+      { nmID: 222, imtID: 12345, imt_name: "Birkin", category: "tote" },
+    ];
     const result = await syncModels(prisma, cards, resolveCategory, log, { dry: false });
 
     expect(result.created).toBe(1);
@@ -74,8 +82,8 @@ describe("syncModels", () => {
         data: expect.objectContaining({ imtId: BigInt(12345) }),
       }),
     );
-    expect(prisma.product.update).toHaveBeenCalledTimes(1);
-    expect(result.assigned).toBe(1);
+    expect(prisma.product.update).toHaveBeenCalledTimes(2);
+    expect(result.assigned).toBe(2);
   });
 
   it("нет imtId — ничего не делает", async () => {
@@ -89,9 +97,15 @@ describe("syncModels", () => {
 
   it("существующая модель — не создаёт заново", async () => {
     prisma.model.findFirst.mockResolvedValue({ id: "model-wb-12345", slug: "model-wb-12345" });
-    prisma.product.findFirst.mockResolvedValue({ id: "mor-001", modelId: "model-wb-12345" });
+    prisma.product.findMany.mockResolvedValue([
+      { id: "mor-001", wbArticle: 111, sku: "mor-001", name: "Birkin Tote", modelId: "model-wb-12345" },
+      { id: "mor-002", wbArticle: 222, sku: "mor-002", name: "Birkin Tote", modelId: "model-wb-12345" },
+    ]);
 
-    const cards = [{ nmID: 111, imtID: 12345, imt_name: "Birkin" }];
+    const cards = [
+      { nmID: 111, imtID: 12345, imt_name: "Birkin" },
+      { nmID: 222, imtID: 12345, imt_name: "Birkin" },
+    ];
     const result = await syncModels(prisma, cards, resolveCategory, log, { dry: false });
 
     expect(result.created).toBe(0);
@@ -103,15 +117,21 @@ describe("syncModels", () => {
   it("dry mode — не пишет в БД", async () => {
     prisma.model.findFirst.mockResolvedValue(null);
     prisma.model.create.mockResolvedValue({ id: "model-wb-12345" });
-    prisma.product.findFirst.mockResolvedValue({ id: "mor-001", modelId: null });
+    prisma.product.findMany.mockResolvedValue([
+      { id: "mor-001", wbArticle: 111, sku: "mor-001", name: "Birkin Tote", modelId: null },
+      { id: "mor-002", wbArticle: 222, sku: "mor-002", name: "Birkin Tote", modelId: null },
+    ]);
 
-    const cards = [{ nmID: 111, imtID: 12345, imt_name: "Birkin" }];
+    const cards = [
+      { nmID: 111, imtID: 12345, imt_name: "Birkin" },
+      { nmID: 222, imtID: 12345, imt_name: "Birkin" },
+    ];
     const result = await syncModels(prisma, cards, resolveCategory, log, { dry: true });
 
-    expect(result.created).toBe(1);
-    expect(prisma.model.create).toHaveBeenCalled(); // создание модели всегда пишет
-    // но assign пропускается (dry)
-    expect(result.assigned).toBe(1); // counted but not written
+    expect(result.created).toBe(1);               // created инкрементится
+    expect(prisma.model.create).not.toHaveBeenCalled(); // dry блокирует create
+    expect(result.assigned).toBe(0);               // model === null → assign не выполняется
+    expect(prisma.product.update).not.toHaveBeenCalled(); // ничего не пишем
   });
 });
 

@@ -372,7 +372,8 @@ describe("mergeProductSources", () => {
 
     it("fallback на БД если нет ни WB ни Ozon", () => {
       const r = mergeProductSources(null, null, null, null, null, null, { category: "backpack" });
-      expect(r.category).toBe("backpack");
+      // Функция возвращает только изменившиеся поля. Если категория совпадает с БД — не эмитится.
+      expect(r.category).toBeUndefined();
     });
   });
 
@@ -643,10 +644,10 @@ describe("mergeProductSources", () => {
         null, null, null, null, null, null,
         { category: "crossbody", composition: null, colorName: null, wbPrice: null, ozonPrice: null, price: 0, originalPrice: 0 },
       );
-      // Эти поля всегда проставляются (даже при null):
-      expect(r.category).toBe("crossbody");
-      expect(r.composition).toBe(null);
-      expect(r.colorName).toBe(null);
+      // Функция возвращает только изменившиеся поля. Если значения совпадают с БД — не эмитятся.
+      expect(r.category).toBeUndefined();
+      expect(r.composition).toBeUndefined();
+      expect(r.colorName).toBeUndefined();
       // А эти — нет (нужны источники данных):
       expect(r.rating).toBeUndefined();
       expect(r.wbPrice).toBeUndefined();
