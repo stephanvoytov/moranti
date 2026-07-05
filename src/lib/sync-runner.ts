@@ -20,11 +20,10 @@ import type { SyncRunRecord, SyncRunDetail } from "./sync-history";
 // Явные импорты для Vercel File Tracer — включает SDK в Lambda
 // (нужны для scripts/sync-modules/*.mjs в child_process)
 import { WildberriesSDK } from "daytona-wildberries-typescript-sdk";
-import "ozon-seller-sdk";
+import { ApiError } from "ozon-seller-sdk";
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-const _ensureSdkInBundle: typeof WildberriesSDK = WildberriesSDK;
-/* eslint-enable */
+// Использование — защита от tree-shake / Vercel tracer
+[WildberriesSDK, ApiError];
 
 const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
 const SYNC_SCRIPT = path.join(SCRIPTS_DIR, "sync-all.mjs");
