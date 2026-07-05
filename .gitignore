@@ -65,9 +65,25 @@ scripts/scrape-wb.mjs
 scripts/update-db-from-scrape.mjs
 scripts/compare-results.mjs
 scripts/test-*.mjs
+scripts/diagnose-*.mjs
+
+# one-time migration scripts
+scripts/rename-models.mjs
+
+# VPS infrastructure
+docker-compose.vps.yml
+docker-compose.yml
+scripts/init-vps-db/
 
 # scraped data artifacts
 /data/wb-scrape-result.json
 
 # runtime sync log
 /data/sync-log.json
+
+# DB dumps
+*.dump
+backup-*.json
+
+# Debug / temp scripts
+_tmp_*

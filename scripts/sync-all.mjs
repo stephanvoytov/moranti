@@ -58,6 +58,8 @@ const { generateName } = require("./name-generator.js");
 
 const WB_CONTENT_API = "https://content-api.wildberries.ru";
 const WB_SEARCH_API = "https://search.wb.ru/exactmatch/ru/common/v18/search";
+const WB_ANALYTICS_API = "https://seller-analytics-api.wildberries.ru";
+const WB_PRICES_API = "https://discounts-prices-api.wildberries.ru";
 const OZON_API = "https://api-seller.ozon.ru";
 const SUPPLIER_ID = Number(process.env.WB_SUPPLIER_ID) || 312222;
 
@@ -87,6 +89,8 @@ const SKIP_PHASE = flags.fromPhase ? new Set() : null;
 const PHASES = [
   "wb-cards",
   "wb-prices",
+  "wb-official-prices",
+  "wb-analytics",
   "wb-process",
   "ozon-list",
   "ozon-info",
@@ -317,6 +321,9 @@ async function wbFetchPublicPrices(nmIDs) {
   return priceMap;
 }
 
+import { wbFetchAnalytics } from "./sync-modules/analytics.mjs";
+import { wbFetchOfficialPrices } from "./sync-modules/prices.mjs";
+
 async function ozonFetchAllProducts(clientId, apiKey) {
   log.write("  Fetching Ozon product list:");
   let lastId = null;
@@ -519,6 +526,8 @@ async function main() {
 
   // ─── Проверка ключей ───
   const wbApiKey = process.env.WB_API_KEY;
+  const wbAnalyticsKey = process.env.WB_ANALYTICS_API_KEY;
+  const wbPricesKey = process.env.WB_PRICES_API_KEY;
   const ozonClientId = process.env.OZON_CLIENT_ID;
   const ozonApiKey = process.env.OZON_API_KEY;
 
@@ -574,6 +583,7 @@ async function main() {
     let wbCards = [];
     let wbTrashCards = [];
     let wbPriceMap = new Map();
+    let wbAnalyticsMap = new Map();
     let infoMap, attrMap, ratingMap;
 
     // ═══════════════════════════════════════════
@@ -602,28 +612,36 @@ async function main() {
         log.line("Fetching WB prices (search API)...");
         wbPriceMap = await wbFetchPublicPrices(wbArticles);
         log.progress("wb-prices", 1, 1);
+      }
 
-        // Определяем inStock из search API
-        for (const [nmId, priceData] of wbPriceMap) {
-          const db = existing.byWbArticle.get(nmId);
-          const inTrash = trashArticles.includes(nmId);
-          let newInStock;
-
-          if (inTrash) {
-            newInStock = false;
-          } else if (priceData?.stock !== undefined && priceData?.stock !== null) {
-            newInStock = priceData.stock > 0;
-          } else if (priceData?.discountedPrice != null) {
-            newInStock = true;
-          } else {
-            continue;
-          }
-
-          if (db && newInStock !== db.inStock) {
-            await updateProduct(prisma, db.id, { inStock: newInStock });
-            db.inStock = newInStock;
-          }
+      if (shouldRun("wb-official-prices") && wbPricesKey) {
+        log.progress("wb-official-prices", 0, 1);
+        const officialPrices = await wbFetchOfficialPrices(wbPricesKey, log);
+        // Мержим официальные цены в wbPriceMap (приоритет над search API)
+        // Сохраняем stock из search API (official API не возвращает стоки)
+        let mergedCount = 0;
+        for (const [nmId, op] of officialPrices) {
+          const existing = wbPriceMap.get(nmId);
+          wbPriceMap.set(nmId, {
+            price: op.price,
+            discountedPrice: op.discountedPrice,
+            stock: existing?.stock ?? null,
+          });
+          mergedCount++;
         }
+        log.line(`  Merged official prices for ${mergedCount} products`);
+        log.progress("wb-official-prices", 1, 1);
+      } else if (shouldRun("wb-official-prices") && !wbPricesKey) {
+        log.line("[SKIP] WB_PRICES_API_KEY не задан — цены только из публичного search API (~14 товаров)");
+      }
+
+      if (shouldRun("wb-analytics") && wbAnalyticsKey) {
+        log.progress("wb-analytics", 0, 1);
+        log.line("Fetching WB analytics (ratings)...");
+        wbAnalyticsMap = await wbFetchAnalytics(wbArticles, wbAnalyticsKey, log);
+        log.progress("wb-analytics", 1, 1);
+      } else if (shouldRun("wb-analytics") && !wbAnalyticsKey) {
+        log.line("[SKIP] WB_ANALYTICS_API_KEY не задан — рейтинг только из Content API, сток только из search API");
       }
 
       if (shouldRun("wb-process")) {
@@ -645,9 +663,14 @@ async function main() {
           if (!db) db = existing.byWbArticle.get(article);
 
           const wbPrices = wbPriceMap.get(article) || null;
-          const wbRating = card.rating != null
-            ? { rating: card.rating, feedbacks: card.feedbacks ?? 0 }
-            : null;
+
+          // WB rating: аналитика (productRating) приоритетнее Content API (card.rating)
+          const analytics = wbAnalyticsMap.get(article) || null;
+          const wbRating = analytics?.productRating != null
+            ? { rating: analytics.productRating, feedbacks: card.feedbacks ?? 0 }
+            : (card.rating != null
+              ? { rating: card.rating, feedbacks: card.feedbacks ?? 0 }
+              : null);
 
           if (db) {
             const ensureFields = {};
@@ -665,14 +688,10 @@ async function main() {
               stats.wbSkipped++;
             }
           } else {
-            const inTrash = trashArticles.includes(article);
-            const searchStock = wbPrices?.stock;
-            const defaultInStock = inTrash ? false : (searchStock != null ? searchStock > 0 : true);
             const updates = mergeProductSources(card, wbPrices, wbRating, null, null, null, null);
             const id = await createProduct(prisma, {
               ...updates,
               sku: vendorCode || null,
-              inStock: defaultInStock,
               wbArticle: article,
               name: updates.name || generateName({
                 category: updates.category || resolveCategory(card),
@@ -912,6 +931,7 @@ async function main() {
     log.line(`  WB created:      ${stats.wbCreated}`);
     log.line(`  WB updated:      ${stats.wbUpdated}`);
     log.line(`  WB skipped:      ${stats.wbSkipped}`);
+    log.line(`  WB analytics:    ${wbAnalyticsMap.size} products`);
     log.line(`  Ozon created:    ${stats.ozonCreated}`);
     log.line(`  Ozon updated:    ${stats.ozonUpdated}`);
     log.line(`  Ozon skipped:    ${stats.ozonSkipped}`);

@@ -64,15 +64,30 @@ export async function syncModels(prisma, wbCards, resolveCategory, log, flags) {
     // Если модель уже существует — работаем с ней (не трогаем одиночные legacy)
     let model = await prisma.model.findFirst({ where: { imtId: bigIntId } });
 
+    // Категория модели — мажоритарная от товаров в группе (не от первого)
+    const catCounts = new Map();
+    for (const p of variantProducts) {
+      catCounts.set(p.category, (catCounts.get(p.category) || 0) + 1);
+    }
+    let majorityCat = group.category || "crossbody";
+    let maxCount = 0;
+    for (const [cat, count] of catCounts) {
+      if (count > maxCount) { maxCount = count; majorityCat = cat; }
+    }
+
     if (model) {
-      // Существующая модель: обновляем имя (если изменилось)
+      // Существующая модель: обновляем имя + категорию
       const skus = variantProducts.map(p => p.sku).filter(Boolean);
       const names = [...new Set(variantProducts.map(p => p.name).filter(Boolean))];
-      const newName = deriveModelName(skus, names, group.category);
-      if (newName !== model.name) {
+      const newName = deriveModelName(skus, names, majorityCat);
+      const updates = {};
+      if (newName !== model.name) updates.name = newName;
+      if (majorityCat !== model.category) updates.category = majorityCat;
+      if (Object.keys(updates).length > 0) {
         if (!flags.dry) {
-          await prisma.model.update({ where: { id: model.id }, data: { name: newName } });
-          log.line(`  Renamed: ${model.id} → "${newName}"`);
+          await prisma.model.update({ where: { id: model.id }, data: updates });
+          if (updates.name) log.line(`  Renamed: ${model.id} → "${newName}"`);
+          if (updates.category) log.line(`  Re-categorized: ${model.id} → "${majorityCat}"`);
         }
       }
     } else {
@@ -84,7 +99,7 @@ export async function syncModels(prisma, wbCards, resolveCategory, log, flags) {
 
       const skus = variantProducts.map(p => p.sku).filter(Boolean);
       const names = [...new Set(variantProducts.map(p => p.name).filter(Boolean))];
-      const modelName = deriveModelName(skus, names, group.category);
+      const modelName = deriveModelName(skus, names, majorityCat);
       const slug = `model-wb-${imtId}`;
 
       if (!flags.dry) {
@@ -93,7 +108,7 @@ export async function syncModels(prisma, wbCards, resolveCategory, log, flags) {
             id: slug,
             name: modelName,
             slug,
-            category: group.category || "crossbody",
+            category: majorityCat,
             description: "",
             imtId: bigIntId,
           },
@@ -181,16 +196,23 @@ export async function syncOzonModels(prisma, attrMap, log) {
         continue;
       }
 
+      // Мажоритарная категория
+      const catCounts = new Map();
+      for (const p of products) catCounts.set(p.category, (catCounts.get(p.category) || 0) + 1);
+      let majorityCat = products[0].category || "crossbody";
+      let maxCount = 0;
+      for (const [cat, c] of catCounts) { if (c > maxCount) { maxCount = c; majorityCat = cat; } }
+
       const skus = products.map(p => p.sku).filter(Boolean);
       const names = [...new Set(products.map(p => p.name).filter(Boolean))];
-      const modelName = deriveModelName(skus, names, products[0].category);
+      const modelName = deriveModelName(skus, names, majorityCat);
       const slug = "model-ozon-" + modelName
         .toLowerCase().replace(/[/\s]+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-|-$/g, "");
 
       let model = await prisma.model.findFirst({ where: { slug } });
       if (!model) {
         model = await prisma.model.create({
-          data: { id: slug, name: modelName, slug, category: products[0].category || "crossbody", description: "" },
+          data: { id: slug, name: modelName, slug, category: majorityCat, description: "" },
         });
         created++;
         log.line(`  Created Ozon model: ${model.id} ("${modelName}")`);

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import styles from "./models.module.css";
 import { CATEGORIES } from "@/lib/categories";
 import { resolveColor } from "@/lib/color-map";
-import { MARKETPLACE_FAVICONS } from "@/lib/marketplaces";
+import { MARKETPLACE_FAVICONS, MARKETPLACE_URLS } from "@/lib/marketplaces";
 import AdminButton from "@/components/admin/admin-button";
 import AdminModal from "@/components/admin/admin-modal";
 
@@ -333,22 +333,27 @@ export default function AdminModelsKanban() {
                                 <div className={`${styles.cardImgSlot} ${styles.cardImgSlotWb} ${wbOos ? styles.cardSlotOos : ""}`}>
                                   <img src={item.image} alt="" className={styles.cardImgSlotInner} />
                                   <img src={MARKETPLACE_FAVICONS.wb} alt="" className={styles.cardSlotBadge} />
-                                  {wbOos && <div className={styles.cardSlotOosOverlay}>ЗАКОНЧИЛОСЬ</div>}
+                                  {wbOos && <div className={styles.cardSlotOosOverlay}>НЕТ</div>}
                                 </div>
                                 <div className={`${styles.cardImgSlot} ${styles.cardImgSlotOzon} ${ozonOos ? styles.cardSlotOos : ""}`}>
                                   <img src={item.ozonImage} alt="" className={styles.cardImgSlotInner} />
                                   <img src={MARKETPLACE_FAVICONS.ozon} alt="" className={styles.cardSlotBadge} />
-                                  {ozonOos && <div className={styles.cardSlotOosOverlay}>ЗАКОНЧИЛОСЬ</div>}
+                                  {ozonOos && <div className={styles.cardSlotOosOverlay}>НЕТ</div>}
                                 </div>
                               </>
                             ) : (
                               <div className={`${styles.cardImgSlot} ${styles.cardImgSlotSingle} ${wbOos ? styles.cardSlotOos : ""}`}>
                                 <img src={item.image} alt="" className={styles.cardImgSlotInner} />
                                 <img src={MARKETPLACE_FAVICONS.wb} alt="" className={styles.cardSlotBadge} />
-                                {wbOos && <div className={styles.cardSlotOosOverlay}>ЗАКОНЧИЛОСЬ</div>}
+                                {wbOos && <div className={styles.cardSlotOosOverlay}>НЕТ</div>}
                               </div>
                             )}
-                            {isArchived && <div className={styles.cardArchiveCorner} title="В архиве" />}
+                            {isArchived && (
+                              <>
+                                <div className={styles.cardArchiveCorner} title="В архиве" />
+                                <div className={styles.cardArchiveOverlay}>АРХИВ</div>
+                              </>
+                            )}
                           </div>
                         ) : (
                           <div className={styles.cardPlaceholder} />
@@ -373,14 +378,14 @@ export default function AdminModelsKanban() {
                         )}
                         <div className={styles.cardArticles}>
                           {item.wbArticle && (
-                            <span className={`${styles.cardArt} ${isArchived ? styles.cardArtArchived : ""}`}>
+                            <a href={MARKETPLACE_URLS.wbProduct(item.wbArticle)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className={`${styles.cardArt} ${isArchived ? styles.cardArtArchived : ""} ${wbOos ? styles.cardArtOos : ""}`}>
                               WB{item.wbStock != null && item.wbStock > 0 ? ' ' + item.wbStock + ' шт' : ''}
-                            </span>
+                            </a>
                           )}
                           {item.ozonArticle && (
-                            <span className={`${styles.cardArt} ${styles.cardArtOzon} ${isArchived ? styles.cardArtArchived : ""}`}>
+                            <a href={MARKETPLACE_URLS.ozonProduct(item.ozonArticle)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className={`${styles.cardArt} ${styles.cardArtOzon} ${isArchived ? styles.cardArtArchived : ""} ${ozonOos ? styles.cardArtOos : ""}`}>
                               Ozon{item.ozonStock != null && item.ozonStock > 0 ? ' ' + item.ozonStock + ' шт' : ''}
-                            </span>
+                            </a>
                           )}
                         </div>
                       </div>
