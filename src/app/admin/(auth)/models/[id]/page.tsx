@@ -9,10 +9,13 @@ import styles from "./editor.module.css";
 
 interface Variant {
   id: string;
+  slug: string;
   name: string;
   price: number;
   wbArticle: number;
   ozonArticle?: number;
+  wbStock?: number;
+  ozonStock?: number;
   colorName?: string;
   composition?: string;
   image?: string;
@@ -353,27 +356,41 @@ export default function ModelEditorPage() {
                     {v.colorName || "—"}
                   </span>
                   <span className={styles.variantName}>
-                    <Link href={`/admin/products/${v.id}`} className={styles.variantLink}>
+                    <Link href={`/admin/products/${v.slug}`} className={styles.variantLink}>
                       {v.name}
                     </Link>
                   </span>
                   <span className={styles.variantPrice}>{formatPrice(v.price)}</span>
                   <span className={styles.variantWb}>
                     {v.wbArticle > 0 ? (
-                      <a href={MARKETPLACE_URLS.wbProduct(v.wbArticle)}
-                         target="_blank" className={styles.articleLink}>
-                        {v.wbArticle}
-                      </a>
+                      <>
+                        <a href={MARKETPLACE_URLS.wbProduct(v.wbArticle)}
+                           target="_blank" className={styles.articleLink}>
+                          {v.wbArticle}
+                        </a>
+                        {v.wbStock !== undefined && (
+                          <span className={v.wbStock > 0 ? styles.stockIn : styles.stockOut}>
+                            {v.wbStock > 0 ? ` ${v.wbStock} шт` : ' нет'}
+                          </span>
+                        )}
+                      </>
                     ) : (
                       <span className={styles.missing}>—</span>
                     )}
                   </span>
                   <span className={styles.variantOzon}>
                     {v.ozonArticle ? (
-                      <a href={MARKETPLACE_URLS.ozonProduct(v.ozonArticle)}
-                         target="_blank" className={styles.articleLink}>
-                        {v.ozonArticle}
-                      </a>
+                      <>
+                        <a href={MARKETPLACE_URLS.ozonProduct(v.ozonArticle)}
+                           target="_blank" className={styles.articleLink}>
+                          {v.ozonArticle}
+                        </a>
+                        {v.ozonStock !== undefined && (
+                          <span className={v.ozonStock > 0 ? styles.stockIn : styles.stockOut}>
+                            {v.ozonStock > 0 ? ` ${v.ozonStock} шт` : ' нет'}
+                          </span>
+                        )}
+                      </>
                     ) : (
                       <span className={styles.missing}>—</span>
                     )}

@@ -7,6 +7,8 @@
  * - numbers/titlecase split: Sopp01GR45/30 → sopp01-gr45-30
  * - уникальность гарантируется через usedSlugs
  */
+import { config } from "dotenv";
+config({ path: ".env.local" });
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -43,7 +45,7 @@ async function main() {
   let updated = 0;
 
   for (const p of products) {
-    let slug = slugFromSku(p.id);
+    let slug = slugFromSku(p.sku || p.id);
 
     // Ensure uniqueness
     let finalSlug = slug;

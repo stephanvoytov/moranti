@@ -78,7 +78,7 @@
 .tableWrap {
   background: var(--white);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: var(--shadow-soft);
 }
 
@@ -143,8 +143,8 @@
 }
 
 .photoImg {
-  width: 80px;
-  height: 106px;
+  width: 130px;
+  height: 173px;
   object-fit: cover;
   border-radius: 4px;
   display: block;
@@ -187,47 +187,65 @@
   opacity: 0.65;
 }
 
-/* ─── Photo label ─── */
+/* ─── Photo muted label (in-placeholder) ─── */
 
-.photoLabel {
+.photoMutedLabel {
   font-family: var(--font-sans);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-muted);
   line-height: 1;
+  opacity: 0.5;
 }
 
 .photoPlaceholder {
-  width: 80px;
-  height: 106px;
+  width: 130px;
+  height: 173px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 4px;
   color: var(--text-muted);
   font-size: 11px;
   background: var(--card-bg);
   border-radius: 4px;
 }
 
-/* ─── Marketplace badge directly on photo ─── */
+/* ─── Marketplace favicon badge on photo ─── */
 
 .photoMpBadge {
   position: absolute;
   bottom: 4px;
   left: 4px;
-  font-family: var(--font-sans);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  padding: 2px 5px;
-  border-radius: 2px;
-  line-height: 1.2;
-  color: #fff;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
   pointer-events: none;
   opacity: 0.85;
-  background: rgba(0, 0, 0, 0.5);
-  text-transform: uppercase;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* ─── Out of stock dimming ─── */
+
+.photoOutOfStock .photoImg {
+  opacity: 0.35;
+}
+
+.photoOosOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #fff;
+  pointer-events: none;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 
 .muted {
@@ -276,6 +294,34 @@
 .articleLink:hover {
   color: var(--dark);
   text-decoration: underline;
+}
+
+/* ─── Marketplace cell ─── */
+
+.mpCell {
+  min-width: 140px;
+}
+
+.mpRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  line-height: 1.6;
+}
+
+/* ─── Stock badges ─── */
+
+.stockBadge {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 3px;
+  line-height: 1.4;
+  white-space: nowrap;
+  background: #e8f5e9;
+  color: #2e7d32;
 }
 
 .loading,
@@ -972,8 +1018,8 @@
 }
 
 .skeletonPhoto {
-  width: 80px;
-  height: 106px;
+  width: 100px;
+  height: 133px;
   border-radius: 4px;
 }
 

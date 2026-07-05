@@ -8,7 +8,7 @@ import AdminModal from "@/components/admin/admin-modal";
 import AdminButton from "@/components/admin/admin-button";
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import { useToast } from "@/lib/toast-context";
-import { MARKETPLACE_URLS } from "@/lib/marketplaces";
+import { MARKETPLACE_URLS, MARKETPLACE_FAVICONS } from "@/lib/marketplaces";
 import styles from "./products.module.css";
 
 interface Product {
@@ -21,6 +21,8 @@ interface Product {
   sku?: string;
   wbArticle?: number;
   ozonArticle?: number;
+  wbStock?: number;
+  ozonStock?: number;
   image?: string;
   ozonImage?: string;
   rating?: number;
@@ -437,7 +439,7 @@ export default function AdminProductsPage() {
               <th>Цена</th>
               <th>Категория</th>
               <th>SKU</th>
-              <th>Артикулы</th>
+              <th>Маркетплейсы</th>
               <th>Рейтинг</th>
               <th></th>
             </tr>
@@ -481,15 +483,17 @@ export default function AdminProductsPage() {
                       <div className={styles.photoPair}>
                         <AdminProductPhoto
                           src={p.image}
-                          label="WB"
+                          favicon={MARKETPLACE_FAVICONS.wb}
                           hasArticle={!!p.wbArticle}
+                          inStock={p.wbStock == null || p.wbStock > 0}
                           isArchived={isArchived}
                           onLightbox={() => setLightboxImage(p.image ?? null)}
                         />
                         <AdminProductPhoto
                           src={p.ozonImage}
-                          label="Ozon"
+                          favicon={MARKETPLACE_FAVICONS.ozon}
                           hasArticle={!!p.ozonArticle}
+                          inStock={p.ozonStock == null || p.ozonStock > 0}
                           isArchived={isArchived}
                           onLightbox={() => setLightboxImage(p.ozonImage ?? null)}
                         />
@@ -513,28 +517,37 @@ export default function AdminProductsPage() {
                     <td className={styles.price}>{formatPrice(p.price)}</td>
                     <td><span className={styles.categoryBadge}>{catName(p.category)}</span></td>
                     <td className={styles.sku}>{p.sku || <span className={styles.muted}>—</span>}</td>
-                    <td className={styles.article}>
-                      {p.wbArticle && (
-                        <a
-                          href={MARKETPLACE_URLS.wbProduct(p.wbArticle)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.articleLink}
-                        >
-                          WB: {p.wbArticle} ↗
-                        </a>
-                      )}
-                      {p.wbArticle && p.ozonArticle && <br />}
-                      {p.ozonArticle && (
-                        <a
-                          href={MARKETPLACE_URLS.ozonProduct(p.ozonArticle)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.articleLink}
-                        >
-                          OZ: {p.ozonArticle} ↗
-                        </a>
-                      )}
+                    <td className={styles.mpCell}>
+                      {p.wbArticle ? (
+                        <div className={styles.mpRow}>
+                          <a
+                            href={MARKETPLACE_URLS.wbProduct(p.wbArticle)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.articleLink}
+                          >
+                            WB: {p.wbArticle} ↗
+                          </a>
+                          {p.wbStock != null && p.wbStock > 0 && (
+                            <span className={styles.stockBadge}>{p.wbStock} шт</span>
+                          )}
+                        </div>
+                      ) : null}
+                      {p.ozonArticle ? (
+                        <div className={styles.mpRow}>
+                          <a
+                            href={MARKETPLACE_URLS.ozonProduct(p.ozonArticle)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.articleLink}
+                          >
+                            OZ: {p.ozonArticle} ↗
+                          </a>
+                          {p.ozonStock != null && p.ozonStock > 0 && (
+                            <span className={styles.stockBadge}>{p.ozonStock} шт</span>
+                          )}
+                        </div>
+                      ) : null}
                       {!p.wbArticle && !p.ozonArticle && <span className={styles.muted}>—</span>}
                     </td>
                     <td>{p.rating ? `${p.rating.toFixed(1)} ★` : "—"}</td>
@@ -657,24 +670,28 @@ export default function AdminProductsPage() {
 
 function AdminProductPhoto({
   src,
-  label,
+  favicon,
   hasArticle,
+  inStock,
   onLightbox,
   isArchived,
 }: {
   src?: string | null;
-  label: string;
+  favicon: string;
   hasArticle: boolean;
+  inStock: boolean;
   onLightbox: () => void;
   isArchived?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
   const show = hasArticle && src && !failed;
+  const isPlaceholder = hasArticle && (!src || failed);
+  const isOutOfStock = hasArticle && !inStock;
 
   return (
     <div className={`${styles.photoItem} ${isArchived ? styles.photoArchived : ""}`}>
       {show ? (
-        <div className={styles.photoWrapper}>
+        <div className={`${styles.photoWrapper} ${isOutOfStock ? styles.photoOutOfStock : ""}`}>
           <img
             src={src}
             alt=""
@@ -684,12 +701,23 @@ function AdminProductPhoto({
             title="Увеличить"
           />
           {isArchived && <div className={styles.archiveCorner} title="В архиве" />}
-          <span className={styles.photoMpBadge}>{label}</span>
+          <img src={favicon} alt="" className={styles.photoMpBadge} />
+          {isOutOfStock && <div className={styles.photoOosOverlay}>ЗАКОНЧИЛОСЬ</div>}
+        </div>
+      ) : isPlaceholder ? (
+        <div className={styles.photoPlaceholder}>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.2" opacity="0.4">
+            <rect x="2" y="2" width="16" height="16" rx="2" />
+            <circle cx="7" cy="7" r="2" />
+            <path d="M2 14l4-4 3 3 3-4 6 6" />
+          </svg>
+          <span>{isArchived ? "архив" : "нет фото"}</span>
         </div>
       ) : (
-        hasArticle && <div className={styles.photoPlaceholder}>{isArchived ? "A" : "—"}</div>
+        <div className={styles.photoPlaceholder}>
+          <span className={styles.photoMutedLabel}>нет артикула</span>
+        </div>
       )}
-      <span className={styles.photoLabel}>{label}</span>
     </div>
   );
 }

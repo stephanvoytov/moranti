@@ -1,7 +1,7 @@
 /* =============================================
    Admin Products API — GET (single), PUT, DELETE
    Protected: requires valid admin session
-   Source: Prisma (Supabase Postgres)
+   Source: Prisma (Postgres)
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";

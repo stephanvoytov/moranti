@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import ProductCard from "@/components/ui/product-card";
 import AdminButton from "@/components/admin/admin-button";
 import { useToast } from "@/lib/toast-context";
+import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import styles from "./editor.module.css";
 
 interface ProductForm {
@@ -62,6 +63,7 @@ export default function ProductEditorPage() {
   const isNew = params.slug === "new";
 
   const [form, setForm] = useState<ProductForm>(emptyForm);
+  const [productData, setProductData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -122,6 +124,7 @@ export default function ProductEditorPage() {
         if (res.status === 401) { router.push("/admin/login"); return; }
         const data = await res.json();
         if (data.error) { setError(data.error); return; }
+        setProductData(data);
         setForm({
           name: data.name || "",
           price: String(data.price || ""),
@@ -563,7 +566,14 @@ export default function ProductEditorPage() {
 
             <div className={styles.row}>
               <label className={styles.label}>
-                Артикул WB
+                <div className={styles.mpFieldHeader}>
+                  Артикул WB
+                  {productData?.wbArticle ? (
+                    <a href={MARKETPLACE_URLS.wbProduct(Number(productData.wbArticle))} target="_blank" rel="noopener noreferrer" className={styles.mpFieldLink}>
+                      ↗ Открыть на WB
+                    </a>
+                  ) : null}
+                </div>
                 <input
                   type="number"
                   className={`${styles.input}${fieldErrors.wbArticle ? " " + styles.inputError : ""}`}
@@ -573,9 +583,21 @@ export default function ProductEditorPage() {
                   placeholder="969008238"
                 />
                 {fieldErrors.wbArticle && <p className={styles.fieldError}>{fieldErrors.wbArticle}</p>}
+                {productData?.wbStock !== undefined && (
+                  <p className={`${styles.mpStock} ${Number(productData.wbStock) > 0 ? styles.mpStockGreen : styles.mpStockNone}`}>
+                    {Number(productData.wbStock) > 0 ? `✓ ${productData.wbStock} шт в наличии` : '✗ нет на складе WB'}
+                  </p>
+                )}
               </label>
               <label className={styles.label}>
-                Артикул Ozon
+                <div className={styles.mpFieldHeader}>
+                  Артикул Ozon
+                  {productData?.ozonArticle ? (
+                    <a href={MARKETPLACE_URLS.ozonProduct(Number(productData.ozonArticle))} target="_blank" rel="noopener noreferrer" className={styles.mpFieldLink}>
+                      ↗ Открыть на Ozon
+                    </a>
+                  ) : null}
+                </div>
                 <input
                   type="number"
                   className={`${styles.input}${fieldErrors.ozonArticle ? " " + styles.inputError : ""}`}
@@ -585,6 +607,11 @@ export default function ProductEditorPage() {
                   placeholder="..."
                 />
                 {fieldErrors.ozonArticle && <p className={styles.fieldError}>{fieldErrors.ozonArticle}</p>}
+                {productData?.ozonStock !== undefined && (
+                  <p className={`${styles.mpStock} ${Number(productData.ozonStock) > 0 ? styles.mpStockGreen : styles.mpStockNone}`}>
+                    {Number(productData.ozonStock) > 0 ? `✓ ${productData.ozonStock} шт в наличии` : '✗ нет на складе Ozon'}
+                  </p>
+                )}
               </label>
             </div>
 

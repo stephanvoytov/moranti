@@ -8,7 +8,7 @@ const globalForPrisma = globalThis as unknown as {
 const MAX_RETRIES = 3;
 const BASE_DELAY = 1_000; // ms
 const MAX_DELAY = 5_000; // ms
-const QUERY_TIMEOUT = 15_000; // ms — Prisma Postgres free tier cold-start 3-6s
+const QUERY_TIMEOUT = 15_000; // ms — таймаут запроса к Postgres (VPS)
 
 /**
  * Throw if promise doesn't settle within `ms` milliseconds.
@@ -25,7 +25,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 
 /**
  * Retry a Prisma query with exponential backoff when connection fails.
- * Retries: 2 попытки с задержками 500ms → 1000ms.
+ * 3 попытки с задержками 1s → 2s → 4s (max 5s).
  * JSON fallback в products.ts / settings.ts перехватывает окончательную ошибку.
  */
 export async function prismaQuery<T>(
@@ -77,6 +77,13 @@ export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL?.includes("?")
+          ? process.env.DATABASE_URL
+          : process.env.DATABASE_URL + "?connection_limit=10&pool_timeout=10",
+      },
+    },
   });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

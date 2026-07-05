@@ -5,18 +5,25 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./models.module.css";
 import { CATEGORIES } from "@/lib/categories";
+import { resolveColor } from "@/lib/color-map";
+import { MARKETPLACE_FAVICONS } from "@/lib/marketplaces";
 import AdminButton from "@/components/admin/admin-button";
 import AdminModal from "@/components/admin/admin-modal";
 
 interface ProductBrief {
   id: string;
+  slug: string;
   name: string;
   price: number;
   category: string;
+  sku?: string;
   wbArticle?: number;
   ozonArticle?: number;
+  wbStock?: number;
+  ozonStock?: number;
   colorName?: string;
   image?: string;
+  ozonImage?: string;
   modelId?: string | null;
   archivedAt?: string | null;
 }
@@ -70,7 +77,7 @@ export default function AdminModelsKanban() {
       setModels(data.items || []);
       setUnassigned(data.unassigned || []);
     } catch {
-      setError("Не удалось загрузить данные. Сервер БД холодный?");
+      setError("Не удалось загрузить данные. Сервер БД не отвечает?");
     } finally { setLoading(false); }
   }, [router]);
 
@@ -149,7 +156,7 @@ export default function AdminModelsKanban() {
     } else {
       setModels((prev) => prev.map((m) =>
         m.id === toCol
-          ? { ...m, variants: [...m.variants, { id: productId, name: "", price: 0, category: "", image: "" }] }
+          ? { ...m, variants: [...m.variants, { id: productId, slug: "", name: "", price: 0, category: "", image: "" }] }
           : m
       ));
     }
@@ -302,6 +309,9 @@ export default function AdminModelsKanban() {
 
                 {col.items.map((item) => {
                   const isArchived = !!item.archivedAt;
+                  const canSwap = !!(item.ozonImage && item.wbArticle);
+                  const wbOos = item.wbStock != null && item.wbStock <= 0;
+                  const ozonOos = item.ozonStock != null && item.ozonStock <= 0;
                   return (
                     <div
                       key={item.id}
@@ -312,38 +322,66 @@ export default function AdminModelsKanban() {
                     >
                       {/* Thumbnail */}
                       <Link
-                        href={`/admin/products/${item.id}`}
+                        href={`/admin/products/${item.slug}`}
                         className={styles.cardThumb}
                         onClick={(e) => e.stopPropagation()}
                       >
                         {item.image ? (
-                          <div className={styles.cardThumbWrapper}>
-                            <img src={item.image} alt="" className={styles.cardImg} />
+                          <div className={`${styles.cardThumbWrapper} ${canSwap ? styles.cardSwap : ""}`}>
+                            {canSwap ? (
+                              <>
+                                <div className={`${styles.cardImgSlot} ${styles.cardImgSlotWb} ${wbOos ? styles.cardSlotOos : ""}`}>
+                                  <img src={item.image} alt="" className={styles.cardImgSlotInner} />
+                                  <img src={MARKETPLACE_FAVICONS.wb} alt="" className={styles.cardSlotBadge} />
+                                  {wbOos && <div className={styles.cardSlotOosOverlay}>ЗАКОНЧИЛОСЬ</div>}
+                                </div>
+                                <div className={`${styles.cardImgSlot} ${styles.cardImgSlotOzon} ${ozonOos ? styles.cardSlotOos : ""}`}>
+                                  <img src={item.ozonImage} alt="" className={styles.cardImgSlotInner} />
+                                  <img src={MARKETPLACE_FAVICONS.ozon} alt="" className={styles.cardSlotBadge} />
+                                  {ozonOos && <div className={styles.cardSlotOosOverlay}>ЗАКОНЧИЛОСЬ</div>}
+                                </div>
+                              </>
+                            ) : (
+                              <div className={`${styles.cardImgSlot} ${styles.cardImgSlotSingle} ${wbOos ? styles.cardSlotOos : ""}`}>
+                                <img src={item.image} alt="" className={styles.cardImgSlotInner} />
+                                <img src={MARKETPLACE_FAVICONS.wb} alt="" className={styles.cardSlotBadge} />
+                                {wbOos && <div className={styles.cardSlotOosOverlay}>ЗАКОНЧИЛОСЬ</div>}
+                              </div>
+                            )}
                             {isArchived && <div className={styles.cardArchiveCorner} title="В архиве" />}
-                            <span className={`${styles.cardMpBadge} ${item.ozonArticle ? (item.wbArticle ? styles.cardMpBadgeBoth : styles.cardMpBadgeOzon) : styles.cardMpBadgeWb}`}>
-                              {item.wbArticle && item.ozonArticle ? "W+O" : item.ozonArticle ? "OZ" : "WB"}
-                            </span>
                           </div>
                         ) : (
                           <div className={styles.cardPlaceholder} />
                         )}
                       </Link>
 
-                      {/* Info */}
+                      {/* Info — каждая на своей строке */}
                       <div className={styles.cardInfo}>
                         <div className={styles.cardNameRow}>
-                          <Link href={`/admin/products/${item.id}`} className={styles.cardName}>
+                          <Link href={`/admin/products/${item.slug}`} className={styles.cardName}>
                             {item.name || "—"}
                           </Link>
                           {isArchived && <span className={styles.cardArchivedBadge}>A</span>}
                         </div>
-                        <div className={styles.cardMeta}>
-                          <span className={styles.cardPrice}>{formatPrice(item.price)}</span>
-                          {item.colorName && <span className={styles.cardColor}>{item.colorName}</span>}
-                        </div>
+                        {item.sku && <div className={styles.cardSku}>SKU: {item.sku}</div>}
+                        <div className={styles.cardPrice}>{formatPrice(item.price)}</div>
+                        {item.colorName && (
+                          <div className={styles.cardColor}>
+                            <span className={styles.cardColorDot} style={{ background: resolveColor(item.colorName) }} />
+                            {item.colorName}
+                          </div>
+                        )}
                         <div className={styles.cardArticles}>
-                          {item.wbArticle && <span className={`${styles.cardArt} ${isArchived ? styles.cardArtArchived : ""}`}>WB</span>}
-                          {item.ozonArticle && <span className={`${styles.cardArt} ${styles.cardArtOzon} ${isArchived ? styles.cardArtArchived : ""}`}>Ozon</span>}
+                          {item.wbArticle && (
+                            <span className={`${styles.cardArt} ${isArchived ? styles.cardArtArchived : ""}`}>
+                              WB{item.wbStock != null && item.wbStock > 0 ? ' ' + item.wbStock + ' шт' : ''}
+                            </span>
+                          )}
+                          {item.ozonArticle && (
+                            <span className={`${styles.cardArt} ${styles.cardArtOzon} ${isArchived ? styles.cardArtArchived : ""}`}>
+                              Ozon{item.ozonStock != null && item.ozonStock > 0 ? ' ' + item.ozonStock + ' шт' : ''}
+                            </span>
+                          )}
                         </div>
                       </div>
 

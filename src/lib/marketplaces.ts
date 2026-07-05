@@ -4,6 +4,12 @@
    на маркетплейсы. Импортируется везде.
    ============================================= */
 
+/** Favicon URLs для бейджей на фото */
+export const MARKETPLACE_FAVICONS = {
+  wb: "https://www.wildberries.ru/favicon.ico",
+  ozon: "https://www.ozon.ru/favicon.ico",
+} as const;
+
 export const MARKETPLACE_URLS = {
   /** Страница продавца Moranti на Wildberries */
   wbSeller: "https://www.wildberries.ru/seller/312222",

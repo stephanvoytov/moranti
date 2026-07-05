@@ -64,9 +64,9 @@
 /* ─── Column ─── */
 
 .column {
-  min-width: 270px;
-  max-width: 290px;
-  width: 290px;
+  min-width: 360px;
+  max-width: 440px;
+  width: 440px;
   background: var(--card-bg);
   border-radius: var(--radius-md);
   display: flex;
@@ -116,7 +116,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
+  max-width: 240px;
   display: block;
   line-height: 1.3;
 }
@@ -171,8 +171,8 @@
 .card {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
+  gap: 14px;
+  padding: 14px 16px;
   background: var(--white);
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
@@ -198,10 +198,10 @@
 /* ─── Thumbnail ─── */
 
 .cardThumb {
-  width: 52px;
-  height: 68px;
+  width: 130px;
+  height: 173px;
   flex-shrink: 0;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   border: 1px solid var(--border-light-gray);
   display: block;
@@ -214,17 +214,123 @@
   height: 100%;
 }
 
-.cardImg {
+/* ─── Image slot (wrapper for img + its badge) ─── */
+
+.cardImgSlot {
+  position: absolute;
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.cardImgSlotInner {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
+/* ─── Slot positions — default ─── */
+
+.cardImgSlotSingle,
+.cardImgSlotWb {
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.cardImgSlotOzon {
+  width: 48px;
+  height: 64px;
+  bottom: 4px;
+  right: 4px;
+  z-index: 2;
+  border-radius: 4px;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+}
+
+/* ─── Hover swap ─── */
+
+.cardSwap:hover .cardImgSlotWb {
+  width: 48px;
+  height: 64px;
+  top: auto;
+  bottom: 4px;
+  right: 4px;
+  left: auto;
+  z-index: 2;
+  border-radius: 4px;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+}
+
+.cardSwap:hover .cardImgSlotOzon {
+  width: 100%; height: 100%;
+  top: 0; left: 0;
+  bottom: auto; right: auto;
+  z-index: 1;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
 .cardPlaceholder {
   width: 100%;
   height: 100%;
   background: var(--card-bg);
+}
+
+/* ─── Favicon badge on image slot ─── */
+
+.cardSlotBadge {
+  position: absolute;
+  bottom: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  pointer-events: none;
+  opacity: 0.85;
+  z-index: 5;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.cardImgSlotWb .cardSlotBadge,
+.cardImgSlotSingle .cardSlotBadge {
+  /* WB slot — large image, badge bottom-left */
+}
+
+/* Ozon badge — small slot, badge smaller */
+.cardImgSlotOzon .cardSlotBadge {
+  bottom: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+}
+
+/* ─── Out of stock dimming + overlay ─── */
+
+.cardSlotOos .cardImgSlotInner {
+  opacity: 0.35;
+}
+
+.cardSlotOosOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #fff;
+  pointer-events: none;
+  z-index: 5;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 
 /* ─── Archive corner on thumbnail ─── */
@@ -236,21 +342,22 @@
   width: 0;
   height: 0;
   border-style: solid;
-  border-width: 0 18px 18px 0;
+  border-width: 0 28px 28px 0;
   border-color: transparent #dc2626 transparent transparent;
   pointer-events: none;
+  z-index: 10;
 }
 
 .cardArchiveCorner::after {
   content: "";
   position: absolute;
-  top: 3px;
-  right: -13px;
-  width: 8px;
+  top: 5px;
+  right: -20px;
+  width: 12px;
   height: 2px;
   background: #fff;
   transform: rotate(45deg);
-  box-shadow: 0 5px 0 #fff;
+  box-shadow: 0 7px 0 #fff;
 }
 
 /* ─── Archived card ─── */
@@ -283,100 +390,98 @@
   opacity: 0.4;
 }
 
-/* ─── Marketplace badge on thumbnail ─── */
-
-.cardMpBadge {
-  position: absolute;
-  bottom: 2px;
-  left: 2px;
-  font-family: var(--font-sans);
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  padding: 1px 3px;
-  border-radius: 2px;
-  line-height: 1.2;
-  color: #fff;
-  pointer-events: none;
-  opacity: 0.85;
-}
-
-.cardMpBadgeWb {
-  background: #8B6F5C;
-}
-
-.cardMpBadgeOzon {
-  background: #005BFF;
-}
-
-.cardMpBadgeBoth {
-  background: #4B5563;
-}
-
 /* ─── Card info ─── */
 
 .cardInfo {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .cardName {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-primary);
   text-decoration: none;
-  display: block;
-  white-space: nowrap;
+  display: -webkit-inline-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
   font-weight: 500;
+  line-height: 1.35;
 }
 
 .cardName:hover {
   text-decoration: underline;
 }
 
-.cardMeta {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 1px;
+.cardSku {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.3;
+  margin-top: 2px;
 }
 
 .cardPrice {
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 13px;
+  margin-top: 3px;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
 .cardColor {
   font-family: var(--font-body);
-  font-size: 10px;
-  color: var(--text-muted);
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.cardColorDot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,0.08);
 }
 
 .cardArticles {
   display: flex;
-  gap: 3px;
-  margin-top: 1px;
+  gap: 6px;
+  margin-top: 6px;
 }
 
 .cardArt {
   font-family: var(--font-sans);
-  font-size: 8px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-  padding: 1px 4px;
-  border-radius: 2px;
-  background: #8B6F5C;
+  letter-spacing: 0.4px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: #7B6F9C;
   color: #fff;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.3;
+  white-space: nowrap;
 }
 
 .cardArtOzon {
   background: #005BFF;
+}
+
+.cardStockGreen {
+  color: #b7e6b3;
+}
+
+.cardStockNone {
+  color: rgba(255,255,255,0.5);
 }
 
 /* ─── Drag handle ─── */

@@ -1,6 +1,6 @@
 /* =============================================
    Moranti — Server-side TTL cache
-   In-memory кеш для данных с Supabase.
+   In-memory кеш для данных из Postgres.
    TTL = 5 минут.
 
    Кеширует не только результат, но и in-flight промис,

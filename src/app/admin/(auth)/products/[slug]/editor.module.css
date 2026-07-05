@@ -467,6 +467,46 @@
   opacity: 0.85;
 }
 
+/* ─── Marketplace field header (label + link) ─── */
+
+.mpFieldHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.mpFieldLink {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--camel);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.mpFieldLink:hover {
+  text-decoration: underline;
+  color: var(--dark);
+}
+
+/* ─── Stock status below MP inputs ─── */
+
+.mpStock {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  margin: 4px 0 0;
+  font-weight: 500;
+}
+
+.mpStockGreen {
+  color: #2e7d32;
+}
+
+.mpStockNone {
+  color: #999;
+}
+
 /* ─── Hint ─── */
 .hint {
   font-family: var(--font-body);

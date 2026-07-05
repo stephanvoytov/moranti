@@ -338,6 +338,23 @@
 .variantWb,
 .variantOzon {
   font-variant-numeric: tabular-nums;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stockIn {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.stockOut {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  color: #999;
 }
 
 .articleLink {

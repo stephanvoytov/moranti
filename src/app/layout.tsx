@@ -98,7 +98,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Yandex Metrika ID: из админки или .env.local
-  // Таймаут 2 секунды — если Supabase холодная, не блокируем рендер
+  // Таймаут 2 секунды — если БД не отвечает, не блокируем рендер
   let ymId: string | undefined;
   try {
     const settings = await Promise.race([
@@ -130,8 +130,8 @@ export default async function RootLayout({
     `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
     // Styles: 'unsafe-inline' для dev-режима (Next.js Fast Refresh)
     "style-src 'self' 'unsafe-inline'",
-    // Images: WB CDN + Яндекс.Метрика
-    "img-src 'self' https://*.wbbasket.ru https://*.geobasket.ru https://*.ozone.ru https://mc.yandex.ru data:",
+    // Images: WB CDN + Яндекс.Метрика + фавиконки маркетплейсов
+    "img-src 'self' https://*.wbbasket.ru https://*.geobasket.ru https://*.ozone.ru https://www.wildberries.ru https://www.ozon.ru https://mc.yandex.ru data:",
     // Fonts: self-hosted via next/font
     "font-src 'self'",
     // Connections: same-origin + Яндекс.Метрика

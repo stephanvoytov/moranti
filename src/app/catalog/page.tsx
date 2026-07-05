@@ -3,7 +3,8 @@ import { getProducts, getCategories } from "@/data/products";
 import { readSettings } from "@/lib/settings";
 import CatalogPage from "./catalog-content";
 
-export const dynamic = "force-dynamic";
+// ISR: 1 час. Принудительный сброс кэша — через revalidatePath в sync-runner.ts
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Каталог кожаных сумок",

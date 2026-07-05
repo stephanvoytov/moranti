@@ -122,11 +122,18 @@ function mapProduct(p: PrismaProduct): Product {
     }
   }
 
-  // Generate image URLs from wbArticle + photoCount (single source of truth)
+  // Приоритет: реальные URL из БД (от WB API). Fallback — генерация из article + photoCount.
   const photoCount = p.photoCount || p.images?.length || 1;
-  const computed = generateProductImages(p.wbArticle ? Number(p.wbArticle) : null, photoCount);
-  const image = computed?.image || p.image || "";
-  const images = computed?.images?.length ? computed.images : p.images;
+  const hasRealImages = Array.isArray(p.images) && p.images.length > 0;
+  let image: string, images: string[];
+  if (hasRealImages) {
+    image = p.image || p.images[0] || "";
+    images = p.images;
+  } else {
+    const computed = generateProductImages(p.wbArticle ? Number(p.wbArticle) : null, photoCount);
+    image = computed?.image || "";
+    images = computed?.images || [];
+  }
 
   return {
     id: p.id,
@@ -198,7 +205,7 @@ export async function getProduct(slug: string): Promise<Product | null> {
       );
       if (row) return mapProduct(row);
     } catch {
-      // DB cold-start — fallback ниже
+      // DB недоступна — fallback на JSON
     }
     const fallback = loadJsonFallback<{ products: Product[] }>("products.json");
     return fallback?.products?.find((p) => p.slug === slug) ?? null;
