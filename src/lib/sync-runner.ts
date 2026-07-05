@@ -1,7 +1,6 @@
 /**
  * sync-runner.ts — асинхронный запуск sync-all.mjs с прогрессом.
  *
- * Заменяет синхронный execSync в wb-sync.ts / ozon-sync.ts.
  * Запускает скрипт через child_process.exec, захватывает вывод
  * построчно, парсит [PROGRESS]-строки и обновляет in-memory состояние.
  *
@@ -22,7 +21,6 @@ import type { SyncRunRecord, SyncRunDetail } from "./sync-history";
 import { WildberriesSDK } from "daytona-wildberries-typescript-sdk";
 import { ApiError } from "ozon-seller-sdk";
 
-// Использование — защита от tree-shake / Vercel tracer
 [WildberriesSDK, ApiError];
 
 const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
@@ -34,11 +32,12 @@ export interface SyncProgress {
   runId: string;
   platform: "wb" | "ozon";
   status: "running" | "completed" | "failed";
-  phase: string;               // wb-cards, wb-prices, ozon-list, ozon-info, ozon-ratings, ozon-process, wb-models, ozon-models, archive
-  phaseLabel: string;          // "Получение карточек WB…"
-  current: number;             // прогресс внутри фазы
-  total: number;               // всего в фазе
-  log: string;                 // накопленный вывод (raw)
+  phase: string;
+  phaseLabel: string;
+  current: number;
+  total: number;
+  log: string;
+  error?: string;
   details: { updated: SyncRunDetail[]; added: SyncRunDetail[] };
   startedAt: number;
 }
@@ -46,7 +45,7 @@ export interface SyncProgress {
 /* ─── In-memory store ─── */
 
 const running = new Map<string, SyncProgress>();
-const activePlatformRun = new Map<string, string>(); // platform → runId
+const activePlatformRun = new Map<string, string>();
 let runCounter = 0;
 
 function nextRunId(platform: string): string {
@@ -121,13 +120,75 @@ function parseDetailLine(line: string): { updated?: SyncRunDetail; added?: SyncR
   }
 }
 
+/* ─── Очистка зависшего запуска ─── */
+
+function clearStaleRun(platform: "wb" | "ozon") {
+  const active = activePlatformRun.get(platform);
+  if (active && running.has(active)) {
+    running.delete(active);
+    activePlatformRun.delete(platform);
+  }
+}
+
+/** Извлечь первую значимую ошибку из лога */
+function extractError(log: string, stderr: string, err: Error | null): string | undefined {
+  if (err) {
+    const msg = err.message || "";
+    // Пропускаем технические node:internal/... строки
+    if (msg.includes("ERR_MODULE_NOT_FOUND")) {
+      const m = msg.match(/Cannot find package '([^']+)'/);
+      return m ? `Пакет не найден: ${m[1]}. Проверьте установку зависимостей.` : `Ошибка модуля: ${msg.slice(0, 200)}`;
+    }
+    return msg.slice(0, 500);
+  }
+
+  // Ищем FATAL: в логе
+  for (const line of log.split("\n")) {
+    const t = line.trim();
+    if (t.startsWith("FATAL:") || t.startsWith("ERROR:")) {
+      // Пропускаем технический трейс
+      const clean = t.replace(/^FATAL:\s*/, "").replace(/^ERROR:\s*/, "").slice(0, 300);
+      if (!clean.includes("node:internal") && !clean.startsWith("at ")) {
+        return clean;
+      }
+    }
+  }
+
+  // Prisma ошибки
+  const prismaMatch = log.match(/PrismaClient\w+Error:\s*([^\n]+)/);
+  if (prismaMatch) return prismaMatch[1].trim().slice(0, 300);
+
+  // ERR_MODULE_NOT_FOUND в логе
+  if (log.includes("ERR_MODULE_NOT_FOUND")) {
+    const m = log.match(/Cannot find package '([^']+)'/);
+    if (m) return `Пакет не найден: ${m[1]}`;
+    return "Ошибка загрузки модуля";
+  }
+
+  // stderr
+  if (stderr) {
+    const lines = stderr.split("\n").filter(l => l.trim() && !l.includes("node:internal") && !l.startsWith("at "));
+    if (lines.length > 0) return lines[0].slice(0, 300);
+  }
+
+  return undefined;
+}
+
 /* ─── Запуск синхронизации ─── */
 
 export function startSync(platform: "wb" | "ozon"): string {
   // Проверка: не запущен ли уже sync для этой платформы
   const active = activePlatformRun.get(platform);
-  if (active && running.has(active) && running.get(active)!.status === "running") {
-    throw new Error(`Sync already running for ${platform} (runId: ${active})`);
+  const STALE_TIMEOUT = 5 * 60 * 1000;
+  if (active && running.has(active)) {
+    const p = running.get(active)!;
+    if (p.status === "running") {
+      if (Date.now() - p.startedAt > STALE_TIMEOUT) {
+        clearStaleRun(platform);
+      } else {
+        throw new Error(`Sync already running for ${platform} (runId: ${active})`);
+      }
+    }
   }
 
   const runId = nextRunId(platform);
@@ -154,7 +215,7 @@ export function startSync(platform: "wb" | "ozon"): string {
     {
       cwd: process.cwd(),
       timeout: 300_000,
-      maxBuffer: 10 * 1024 * 1024, // 10MB для полного лога
+      maxBuffer: 10 * 1024 * 1024,
       env: {
         ...process.env,
         NODE_PATH: process.env.NODE_PATH || path.join(process.cwd(), "node_modules"),
@@ -170,6 +231,9 @@ export function startSync(platform: "wb" | "ozon"): string {
 
       p.log += stdout || "";
       if (stderr) p.log += "\n" + stderr;
+
+      // Сохраняем stderr для extractError
+      const _stderr = stderr || "";
 
       // Парсим JSON-суммари с последней строки
       const lines = stdout.trim().split("\n").filter(Boolean);
@@ -189,12 +253,8 @@ export function startSync(platform: "wb" | "ozon"): string {
         } catch { /* ignore */ }
       }
 
-      const success = !err && !stdout.includes("ERROR:");
-      const errorMsg = err
-        ? (stderr || err.message).slice(0, 500)
-        : stdout.includes("ERROR:")
-          ? stdout.split("\n").find(l => l.includes("ERROR:"))?.slice(0, 500)
-          : undefined;
+      const success = !err && !stdout.includes("ERROR:") && !stdout.includes("FATAL:");
+      const errorMsg = extractError(p.log, _stderr, err);
 
       // Сохраняем в историю
       const record: SyncRunRecord = {
@@ -215,22 +275,38 @@ export function startSync(platform: "wb" | "ozon"): string {
       };
       await addSyncRun(record);
 
-      // Сброс кэша данных + ISR, чтобы изменения появились сразу
+      // Сброс кэша данных + ISR
       invalidateCache();
       try {
         revalidatePath("/catalog");
         revalidatePath("/");
       } catch {
-        // revalidatePath может упасть вне request-контекста — игнорируем
+        // revalidatePath может упасть вне request-контекста
       }
 
       // Финальный статус
       p.status = success ? "completed" : "failed";
+      p.error = errorMsg;
       p.phase = "done";
       p.phaseLabel = success ? "Завершено" : "Ошибка";
       p.current = p.total;
+
+      // Очищаем activePlatformRun
+      activePlatformRun.delete(platform);
     },
   );
+
+  // Обработка ошибки запуска (синхронная)
+  child.on("error", (execErr) => {
+    const p = running.get(runId);
+    if (!p) return;
+    p.log += `\nОшибка запуска: ${execErr.message}`;
+    p.status = "failed";
+    p.error = execErr.message.slice(0, 300);
+    p.phase = "done";
+    p.phaseLabel = "Ошибка";
+    activePlatformRun.delete(platform);
+  });
 
   // Построчный разбор stdout
   child.stdout?.on("data", (chunk: string) => {
@@ -241,14 +317,12 @@ export function startSync(platform: "wb" | "ozon"): string {
     const lines = chunk.split("\n");
 
     for (const line of lines) {
-      // Парсим прогресс
       const prog = parseProgressLine(line);
       if (prog) {
         Object.assign(p, prog);
         continue;
       }
 
-      // Парсим детали
       const detail = parseDetailLine(line);
       if (detail) {
         if (detail.updated) p.details.updated.push(detail.updated);
@@ -261,11 +335,6 @@ export function startSync(platform: "wb" | "ozon"): string {
   child.stderr?.on("data", (chunk: string) => {
     const p = running.get(runId);
     if (p) p.log += chunk;
-  });
-
-  child.on("exit", () => {
-    // Убираем из active после того как callback exec отработал
-    setTimeout(() => activePlatformRun.delete(platform), 1000);
   });
 
   return runId;
@@ -281,6 +350,10 @@ export function getActiveRunId(platform: "wb" | "ozon"): string | null {
   const runId = activePlatformRun.get(platform);
   if (runId && running.has(runId)) return runId;
   return null;
+}
+
+export function clearSyncState(platform: "wb" | "ozon") {
+  clearStaleRun(platform);
 }
 
 /* ─── Re-export для совместимости ─── */

@@ -434,7 +434,65 @@
   }
 }
 
-/* ─── Log viewer ─── */
+/* ─── Live Log — живой вывод с автоскроллом ─── */
+
+.liveLog {
+  margin-top: 4px;
+}
+
+.liveLogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.liveLogCount {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.liveLogScrollBtn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.liveLogScrollBtn:hover {
+  border-color: var(--text-muted);
+  color: var(--dark);
+}
+
+.liveLogPre {
+  font-family: "Cascadia Code", "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: #fafafa;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  max-height: 220px;
+  overflow-y: auto;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.liveLogPre code {
+  font-family: inherit;
+}
+
+/* ─── Legacy log viewer ─── */
 
 .logViewer {
   background: #1a1a2e;

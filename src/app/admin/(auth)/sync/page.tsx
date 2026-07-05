@@ -364,15 +364,16 @@ export default function AdminSyncPage() {
 
         if (data.status === "running") {
           setProgress((p) => ({ ...p, [platform]: data }));
-        } else {
-          // Complete or failed
+        } else if (data.status === "failed") {
           stopPolling(platform);
           setProgress((p) => ({ ...p, [platform]: data }));
-          // Refresh history after a short delay to let the DB update
-          setTimeout(() => {
-            loadHistory();
-            setProgress((p) => ({ ...p, [platform]: null }));
-          }, 500);
+          // При ошибке логи остаются на экране, история грузится в фоне
+          setTimeout(() => loadHistory(), 500);
+        } else {
+          // completed — очищаем прогресс, показываем историю
+          stopPolling(platform);
+          setProgress((p) => ({ ...p, [platform]: null }));
+          setTimeout(() => loadHistory(), 500);
         }
       } catch {
         stopPolling(platform);
@@ -451,7 +452,7 @@ export default function AdminSyncPage() {
           config={PLATFORM.wb}
           lastRun={wbLast}
           progress={progress.wb}
-          disabled={!!progress.wb || !!progress.ozon}
+          disabled={progress.wb?.status === "running" || progress.ozon?.status === "running"}
           onSync={() => handleSync("wb")}
           history={wbHistory}
         />
@@ -462,7 +463,7 @@ export default function AdminSyncPage() {
           config={PLATFORM.ozon}
           lastRun={ozonLast}
           progress={progress.ozon}
-          disabled={!!progress.wb || !!progress.ozon}
+          disabled={progress.wb?.status === "running" || progress.ozon?.status === "running"}
           onSync={() => handleSync("ozon")}
           history={ozonHistory}
         />
@@ -551,37 +552,45 @@ function PlatformCard({
         </div>
       )}
 
+      {/* Log from last run (collapsible) */}
+      {lastRun && lastRun.log && !isRunning && !progress && (
+        <LogFeed log={lastRun.log} />
+      )}
+
       {/* Error message */}
-      {lastRun && !lastRun.success && lastRun.error && !isRunning && (
+      {lastRun && !lastRun.success && lastRun.error && !isRunning && !progress && (
         <div className={styles.errorMsg}>{lastRun.error}</div>
       )}
 
-      {/* ─── Progress Bar ─── */}
-      {isRunning && progress && (
+      {/* ─── Progress / Log Section ─── */}
+      {progress && (isRunning || progress.status === "failed") && (
         <div className={styles.progressSection}>
-          <div className={styles.progressLabel}>
-            <span className={styles.progressPhase}>{phaseLabel(progress.phase)}</span>
-            <span className={styles.progressCount}>
-              {progress.current}/{progress.total}
-            </span>
-          </div>
-          <div className={styles.progressTrack}>
-            <div
-              className={styles.progressBar}
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-          <div className={styles.progressLog}>
-            {progress.log && (
-              <pre className={styles.progressLogPre}><code>{progress.log}</code></pre>
-            )}
-          </div>
-        </div>
-      )}
+          {/* Progress bar (only during running) */}
+          {isRunning && (
+            <>
+              <div className={styles.progressLabel}>
+                <span className={styles.progressPhase}>{phaseLabel(progress.phase)}</span>
+                <span className={styles.progressCount}>
+                  {progress.current}/{progress.total}
+                </span>
+              </div>
+              <div className={styles.progressTrack}>
+                <div
+                  className={styles.progressBar}
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+            </>
+          )}
 
-      {/* Error from current run */}
-      {progress?.status === "failed" && progress.error && (
-        <div className={styles.errorMsg}>{progress.error}</div>
+          {/* Error banner (only when failed) */}
+          {progress.status === "failed" && progress.error && (
+            <div className={styles.errorMsg}>{progress.error}</div>
+          )}
+
+          {/* Живой лог — сырой вывод, автоскролл ↓ */}
+          <LiveLog log={progress.log || ""} />
+        </div>
       )}
 
       {/* Actions */}
@@ -593,8 +602,10 @@ function PlatformCard({
         >
           {isRunning ? (
             <><span className={styles.btnSpinner} /> Синхронизация...</>
+          ) : progress?.status === "failed" ? (
+            "↻ Повторить"
           ) : (
-            `Запустить синхронизацию`
+            "Запустить синхронизацию"
           )}
         </button>
       </div>
@@ -692,6 +703,54 @@ function StatCard({ value, label, accent }: { value: number; label: string; acce
     <div className={`${styles.statCard} ${accent ? styles.statCardAccent : ""}`}>
       <span className={styles.statValue}>{value}</span>
       <span className={styles.statLabel}>{label}</span>
+    </div>
+  );
+}
+
+/* ─── Live Log — сырой вывод с автоскроллом ─── */
+
+function LiveLog({ log, className }: { log: string; className?: string }) {
+  const ref = useRef<HTMLPreElement>(null);
+  const [autoScroll, setAutoScroll] = useState(true);
+
+  // Автоскролл к последним строкам при добавлении новых строк
+  useEffect(() => {
+    if (autoScroll && ref.current) {
+      ref.current.scrollTop = ref.current.scrollHeight;
+    }
+  }, [log, autoScroll]);
+
+  // Ручной скролл вверх отключает автоскролл
+  const handleScroll = useCallback(() => {
+    if (!ref.current) return;
+    const el = ref.current;
+    const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+    setAutoScroll(isAtBottom);
+  }, []);
+
+  // Считаем строки для компактного заголовка
+  const lineCount = useMemo(() => log.split("\n").filter(Boolean).length, [log]);
+
+  return (
+    <div className={styles.liveLog}>
+      <div className={styles.liveLogHeader}>
+        <span className={styles.liveLogCount}>{lineCount} строк</span>
+        {!autoScroll && (
+          <button className={styles.liveLogScrollBtn} onClick={() => {
+            ref.current?.scrollTo({ top: ref.current.scrollHeight, behavior: "smooth" });
+            setAutoScroll(true);
+          }}>
+            ↓ К последним
+          </button>
+        )}
+      </div>
+      <pre
+        ref={ref}
+        className={`${styles.liveLogPre} ${className || ""}`}
+        onScroll={handleScroll}
+      >
+        <code>{log || "Ожидание вывода…"}</code>
+      </pre>
     </div>
   );
 }
