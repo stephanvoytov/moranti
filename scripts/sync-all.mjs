@@ -802,17 +802,6 @@ async function main() {
             } else {
               stats.ozonSkipped++;
             }
-
-            if (!db.wbArticle && info.stocks?.stocks) {
-              const ozonInStock = info.stocks.stocks.some(
-                (s) => (s.present || 0) - (s.reserved || 0) > 0
-              );
-              if (ozonInStock !== db.inStock) {
-                await updateProduct(prisma, db.id, { inStock: ozonInStock });
-                stats.ozonUpdated++;
-                log.detail("updated", db.id, db.name, ["inStock"]);
-              }
-            }
           } else {
             const ozonPrice = info.price != null ? Number(info.price) : null;
             const ozonOrigPrice = info.old_price != null ? Number(info.old_price) : null;

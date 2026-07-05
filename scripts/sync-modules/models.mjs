@@ -8,9 +8,12 @@
  */
 
 import { toBigInt } from "./transform.mjs";
+import { deriveModelName } from "./model-naming.mjs";
 
 /**
  * Создаёт/обновляет Model из WB imtId групп.
+ * Одиночные товары (1 шт.) модель не получают — остаются нераспределёнными.
+ * Название модели формируется из префикса SKU товаров.
  *
  * @param {import("@prisma/client").PrismaClient} prisma
  * @param {Array} wbCards
@@ -25,7 +28,7 @@ export async function syncModels(prisma, wbCards, resolveCategory, log, flags) {
     const imtId = card.imtID ?? card.imt_id;
     if (!imtId) continue;
     if (!imtGroups.has(imtId)) {
-      imtGroups.set(imtId, { nmIDs: new Set(), name: card.imt_name || "", category: resolveCategory(card) });
+      imtGroups.set(imtId, { nmIDs: new Set(), category: resolveCategory(card) });
     }
     const g = imtGroups.get(imtId);
     g.nmIDs.add(card.nmID);
@@ -36,44 +39,92 @@ export async function syncModels(prisma, wbCards, resolveCategory, log, flags) {
     return { created: 0, assigned: 0 };
   }
 
+  // Собираем все nmID и достаём товары из БД одним массивом
+  const allNmIds = [...new Set([...imtGroups.values()].flatMap(g => [...g.nmIDs]))];
+  const dbProducts = await prisma.product.findMany({
+    where: { wbArticle: { in: allNmIds }, archivedAt: null },
+    select: { id: true, wbArticle: true, sku: true, name: true, modelId: true },
+  });
+
+  // Индекс: wbArticle → product
+  const productByArticle = new Map();
+  for (const p of dbProducts) {
+    const art = Number(p.wbArticle);
+    if (art) productByArticle.set(art, p);
+  }
+
   let created = 0;
   let assigned = 0;
+  let skipped = 0;
 
   for (const [imtId, group] of imtGroups) {
     const bigIntId = toBigInt(imtId);
+    const variantProducts = [...group.nmIDs].map(n => productByArticle.get(n)).filter(Boolean);
 
+    // Если модель уже существует — работаем с ней (не трогаем одиночные legacy)
     let model = await prisma.model.findFirst({ where: { imtId: bigIntId } });
 
-    if (!model) {
-      const modelName = group.name || `Модель ${imtId}`;
-      const slug = `model-wb-${imtId}`;
-      model = await prisma.model.create({
-        data: {
-          id: slug,
-          name: modelName,
-          slug,
-          category: group.category || "crossbody",
-          description: "",
-          imtId: bigIntId,
-        },
-      });
-      created++;
-      log.line(`  Created model: ${model.id} (${modelName})`);
-    }
-
-    for (const nmId of group.nmIDs) {
-      const product = await prisma.product.findFirst({ where: { wbArticle: nmId, archivedAt: null } });
-      if (product && product.modelId !== model.id) {
+    if (model) {
+      // Существующая модель: обновляем имя (если изменилось)
+      const skus = variantProducts.map(p => p.sku).filter(Boolean);
+      const names = [...new Set(variantProducts.map(p => p.name).filter(Boolean))];
+      const newName = deriveModelName(skus, names, group.category);
+      if (newName !== model.name) {
         if (!flags.dry) {
-          await prisma.product.update({
-            where: { id: product.id },
-            data: { modelId: model.id },
-          });
+          await prisma.model.update({ where: { id: model.id }, data: { name: newName } });
+          log.line(`  Renamed: ${model.id} → "${newName}"`);
         }
-        assigned++;
-        log.line(`  Assigned ${product.id} → ${model.id}`);
+      }
+    } else {
+      // Новая модель: создаём только если ≥2 товаров в БД
+      if (variantProducts.length < 2) {
+        skipped++;
+        continue;
+      }
+
+      const skus = variantProducts.map(p => p.sku).filter(Boolean);
+      const names = [...new Set(variantProducts.map(p => p.name).filter(Boolean))];
+      const modelName = deriveModelName(skus, names, group.category);
+      const slug = `model-wb-${imtId}`;
+
+      if (!flags.dry) {
+        model = await prisma.model.create({
+          data: {
+            id: slug,
+            name: modelName,
+            slug,
+            category: group.category || "crossbody",
+            description: "",
+            imtId: bigIntId,
+          },
+        });
+        created++;
+        log.line(`  Created model: ${model.id} ("${modelName}")`);
+      } else {
+        created++;
+        log.line(`  Would create: ${slug} ("${modelName}")`);
       }
     }
+
+    // Assign: привязываем товары к модели
+    if (model) {
+      for (const p of variantProducts) {
+        if (p.modelId !== model.id) {
+          if (!flags.dry) {
+            await prisma.product.update({
+              where: { id: p.id },
+              data: { modelId: model.id },
+            });
+          }
+          assigned++;
+          log.line(`  Assigned ${p.id} → ${model.id}`);
+        }
+      }
+    }
+  }
+
+  if (skipped > 0) {
+    log.line(`  Skipped (single variant): ${skipped} groups`);
   }
 
   return { created, assigned };
@@ -81,6 +132,7 @@ export async function syncModels(prisma, wbCards, resolveCategory, log, flags) {
 
 /**
  * Группирует Ozon товары по атрибуту 9048 (модель) и привязывает к модели.
+ * Одиночные товары (1 шт.) модель не получают.
  *
  * @param {import("@prisma/client").PrismaClient} prisma
  * @param {Map} attrMap — offerId → attrs
@@ -103,9 +155,13 @@ export async function syncOzonModels(prisma, attrMap, log) {
 
   let created = 0;
   let assigned = 0;
+  let skipped = 0;
 
-  for (const [modelName, offerIds] of groups) {
-    const products = await prisma.product.findMany({ where: { sku: { in: offerIds } } });
+  for (const [ozonModelName, offerIds] of groups) {
+    const products = await prisma.product.findMany({
+      where: { sku: { in: offerIds } },
+      select: { id: true, sku: true, name: true, modelId: true, category: true },
+    });
     if (products.length === 0) continue;
 
     const existingModelId = products.find((p) => p.modelId)?.modelId;
@@ -115,9 +171,19 @@ export async function syncOzonModels(prisma, attrMap, log) {
         if (p.modelId !== existingModelId) {
           await prisma.product.update({ where: { id: p.id }, data: { modelId: existingModelId } });
           assigned++;
+          log.line(`  Assigned ${p.id} → ${existingModelId} (Ozon)`);
         }
       }
     } else {
+      // Создаём только если ≥2 товаров
+      if (products.length < 2) {
+        skipped++;
+        continue;
+      }
+
+      const skus = products.map(p => p.sku).filter(Boolean);
+      const names = [...new Set(products.map(p => p.name).filter(Boolean))];
+      const modelName = deriveModelName(skus, names, products[0].category);
       const slug = "model-ozon-" + modelName
         .toLowerCase().replace(/[/\s]+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-|-$/g, "");
 
@@ -127,14 +193,20 @@ export async function syncOzonModels(prisma, attrMap, log) {
           data: { id: slug, name: modelName, slug, category: products[0].category || "crossbody", description: "" },
         });
         created++;
+        log.line(`  Created Ozon model: ${model.id} ("${modelName}")`);
       }
       for (const p of products) {
         if (p.modelId !== model.id) {
           await prisma.product.update({ where: { id: p.id }, data: { modelId: model.id } });
           assigned++;
+          log.line(`  Assigned ${p.id} → ${model.id} (Ozon)`);
         }
       }
     }
+  }
+
+  if (skipped > 0) {
+    log.line(`  Skipped Ozon (single variant): ${skipped} groups`);
   }
 
   return { created, assigned };

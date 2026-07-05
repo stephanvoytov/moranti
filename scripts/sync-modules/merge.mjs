@@ -59,8 +59,8 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
   // Display price = min across available
   const prices = [wbPrice, ozonPriceVal].filter((p) => p != null);
   const origPrices = [wbOrigPrice, ozonOrigPriceVal].filter((p) => p != null);
-  if (prices.length > 0) data.price = Math.min(...prices);
-  if (origPrices.length > 0) data.originalPrice = Math.min(...origPrices);
+  if (prices.length > 0) { const np = Math.min(...prices); if (np !== db?.price) data.price = np; }
+  if (origPrices.length > 0) { const np = Math.min(...origPrices); if (np !== db?.originalPrice) data.originalPrice = np; }
 
   // ─── Стоки (количество) — читаем, но НЕ меняем inStock ───
   if (wbPrices?.stock !== undefined) {
@@ -73,26 +73,47 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
     if (qty !== (db?.ozonStock ?? null)) data.ozonStock = qty;
   }
 
+  // ─── inStock из стоков ───
+  const finalWb = data.wbStock !== undefined ? data.wbStock : (db?.wbStock ?? null);
+  const finalOz = data.ozonStock !== undefined ? data.ozonStock : (db?.ozonStock ?? null);
+  if (finalWb !== null || finalOz !== null) {
+    let newInStock;
+    if (finalWb !== null && finalOz !== null) {
+      // Оба источника: в наличии если хоть где-то есть сток
+      newInStock = finalWb > 0 || finalOz > 0;
+    } else if (finalWb !== null) {
+      // Только WB
+      newInStock = finalWb > 0;
+    } else {
+      // Только Ozon
+      newInStock = finalOz > 0;
+    }
+    if (newInStock !== db?.inStock) data.inStock = newInStock;
+  }
+
   // ─── Фото ───
   if (wbCard) {
     const photoCount = extractPhotoCount(wbCard);
     const article = wbCard.nmID;
-    data.photoCount = photoCount;
+    if (photoCount !== db?.photoCount) data.photoCount = photoCount;
 
     // Приоритет: реальные URL из API, с заменой хоста на Geo CDN (CORS)
     const realUrls = extractImageUrls(wbCard, "big");
+    let newImage, newImages;
     if (realUrls && realUrls.length > 0) {
-      data.image = toGeoUrl(realUrls[0]);
-      data.images = realUrls.map(toGeoUrl).filter(Boolean);
+      newImage = toGeoUrl(realUrls[0]);
+      newImages = realUrls.map(toGeoUrl).filter(Boolean);
     } else {
       // Fallback: генерируем из article + photoCount
-      data.image = cdnImageUrl(article, 1);
-      data.images = cdnImageUrls(article, photoCount);
+      newImage = cdnImageUrl(article, 1);
+      newImages = cdnImageUrls(article, photoCount);
     }
+    if (newImage !== db?.image) data.image = newImage;
+    if (JSON.stringify(newImages) !== JSON.stringify(db?.images || [])) data.images = newImages;
   } else if (ozonInfo?.images?.length && !db?.wbArticle && !db?.ozonImage) {
-    data.photoCount = ozonInfo.images.length;
-    data.image = ozonInfo.images[0];
-    data.images = ozonInfo.images;
+    if (ozonInfo.images.length !== db?.photoCount) data.photoCount = ozonInfo.images.length;
+    if (ozonInfo.images[0] !== db?.image) data.image = ozonInfo.images[0];
+    if (JSON.stringify(ozonInfo.images) !== JSON.stringify(db?.images || [])) data.images = ozonInfo.images;
   }
 
   // ─── Ozon-фото (для админки, отдельно) ───
@@ -106,16 +127,19 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
   // ─── Категория (приоритет WB) ───
   const wbCat = wbCard ? resolveCategory(wbCard) : null;
   const ozonCat = ozonInfo ? ozonExtractCategory(ozonInfo, ozonAttrs) : null;
-  data.category = wbCat || ozonCat || db?.category || "crossbody";
+  const newCat = wbCat || ozonCat || db?.category || "crossbody";
+  if (newCat !== db?.category) data.category = newCat;
 
   // ─── Состав и цвет (любой не null) ───
   const wbComp = wbCard ? extractComposition(wbCard) : null;
   const ozonComp = ozonInfo ? ozonExtractComposition(ozonAttrs) : null;
-  data.composition = wbComp || ozonComp || db?.composition || null;
+  const newComp = wbComp || ozonComp || db?.composition || null;
+  if (newComp !== db?.composition) data.composition = newComp;
 
   const wbColor = wbCard ? extractColorName(wbCard) : null;
   const ozonColor = ozonInfo ? ozonExtractColor(ozonInfo, ozonAttrs) : null;
-  data.colorName = wbColor || ozonColor || db?.colorName || null;
+  const newColor = wbColor || ozonColor || db?.colorName || null;
+  if (newColor !== db?.colorName) data.colorName = newColor;
 
   // ─── Рейтинг (weighted avg) ───
   const wbRatingVal = wbRating?.rating ?? db?.rating ?? null;
@@ -171,6 +195,7 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
   const wbChars = wbCard?.characteristics || [];
   const ozonChars = ozonExtractCharacteristics(ozonAttrs);
   if (wbChars.length > 0 || ozonChars.length > 0) {
+    const sortOpts = (a, b) => (a.name || '').localeCompare(b.name || '');
     const merged = [];
     if (wbChars.length > 0) {
       merged.push({
@@ -178,13 +203,37 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
         options: wbChars.map((c) => ({
           name: c.name || String(c.id || ""),
           value: Array.isArray(c.value) ? c.value.join(", ") : String(c.value || ""),
-        })),
+        })).sort(sortOpts),
       });
     }
     if (ozonChars.length > 0) {
-      merged.push({ group_name: "Ozon", options: ozonChars });
+      merged.push({
+        group_name: "Ozon",
+        options: [...ozonChars].sort(sortOpts),
+      });
     }
-    data.characteristics = merged;
+    // Сохраняем группы из db, которых нет в merged (например, Wildberries в Ozon-фазе)
+    const dbChars = db?.characteristics || [];
+    const mergedGroupNames = new Set(merged.map((g) => g.group_name));
+    const otherDbGroups = dbChars
+      .filter((g) => !mergedGroupNames.has(g.group_name))
+      .map((g) => ({
+        group_name: g.group_name,
+        options: [...(g.options || [])].sort(sortOpts),
+      }));
+    const combined = [...merged, ...otherDbGroups];
+
+    // Строим db-эквивалент для сравнения (сортированный)
+    const dbEquivalent = combined.map((g) => {
+      const dbGroup = dbChars.find((dbg) => dbg.group_name === g.group_name);
+      return {
+        group_name: g.group_name,
+        options: [...(dbGroup?.options || [])].sort(sortOpts),
+      };
+    });
+    if (JSON.stringify(combined) !== JSON.stringify(dbEquivalent)) {
+      data.characteristics = combined;
+    }
   }
 
   return data;

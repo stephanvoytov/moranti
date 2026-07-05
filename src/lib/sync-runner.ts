@@ -13,6 +13,8 @@
 
 import { exec, ChildProcess } from "child_process";
 import path from "path";
+import { revalidatePath } from "next/cache";
+import { invalidateCache } from "@/lib/data-cache";
 import { addSyncRun, getLastSyncRun } from "./sync-history";
 import type { SyncRunRecord, SyncRunDetail } from "./sync-history";
 
@@ -204,6 +206,15 @@ export function startSync(platform: "wb" | "ozon"): string {
         log: p.log,
       };
       await addSyncRun(record);
+
+      // Сброс кэша данных + ISR, чтобы изменения появились сразу
+      invalidateCache();
+      try {
+        revalidatePath("/catalog");
+        revalidatePath("/");
+      } catch {
+        // revalidatePath может упасть вне request-контекста — игнорируем
+      }
 
       // Финальный статус
       p.status = success ? "completed" : "failed";
