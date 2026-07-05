@@ -17,9 +17,10 @@ import { revalidatePath } from "next/cache";
 import { invalidateCache } from "@/lib/data-cache";
 import { addSyncRun, getLastSyncRun } from "./sync-history";
 import type { SyncRunRecord, SyncRunDetail } from "./sync-history";
-// Явный импорт для Vercel File Tracer — включает SDK в Lambda
-// (нужен для scripts/sync-modules/prices.mjs и stocks.mjs в child_process)
+// Явные импорты для Vercel File Tracer — включает SDK в Lambda
+// (нужны для scripts/sync-modules/*.mjs в child_process)
 import { WildberriesSDK } from "daytona-wildberries-typescript-sdk";
+import "ozon-seller-sdk";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 const _ensureSdkInBundle: typeof WildberriesSDK = WildberriesSDK;
@@ -157,6 +158,7 @@ export function startSync(platform: "wb" | "ozon"): string {
       maxBuffer: 10 * 1024 * 1024, // 10MB для полного лога
       env: {
         ...process.env,
+        NODE_PATH: process.env.NODE_PATH || path.join(process.cwd(), "node_modules"),
         DATABASE_URL: getDirectDbUrl(),
         POSTGRES_PRISMA_URL: getDirectDbUrl(),
         POSTGRES_URL_NON_POOLING: getDirectDbUrl(),
