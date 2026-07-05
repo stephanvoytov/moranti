@@ -59,11 +59,9 @@ const { generateName } = require("./name-generator.js");
 const WB_CONTENT_API = "https://content-api.wildberries.ru";
 const WB_ANALYTICS_API = "https://seller-analytics-api.wildberries.ru";
 const WB_PRICES_API = "https://discounts-prices-api.wildberries.ru";
-const OZON_API = "https://api-seller.ozon.ru";
 const SUPPLIER_ID = Number(process.env.WB_SUPPLIER_ID) || 312222;
 
 const ITEMS_PER_WB_CARDS = 100;
-const ITEMS_PER_OZON_BATCH = 100;
 const FETCH_TIMEOUT = 30000;
 
 const flags = {
@@ -177,33 +175,7 @@ async function wbFetch(baseUrl, path, options = {}, attempt = 1) {
   return resp.json();
 }
 
-async function ozonFetch(path, body, clientId, apiKey, attempt = 1) {
-  const url = OZON_API + path;
-  const resp = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Client-Id": clientId,
-      "Api-Key": apiKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(FETCH_TIMEOUT),
-  });
 
-  if (resp.status === 429 && attempt <= 3) {
-    const delay = Math.min(1000 * Math.pow(2, attempt) * attempt, 30000);
-    log.line(`  429 (attempt ${attempt}): retry ${delay}ms`);
-    await new Promise((r) => setTimeout(r, delay));
-    return ozonFetch(path, body, clientId, apiKey, attempt + 1);
-  }
-
-  if (!resp.ok) {
-    const text = await resp.text().catch(() => "");
-    throw new Error(`Ozon API ${resp.status} — ${url}\n${text.slice(0, 300)}`);
-  }
-
-  return resp.json();
-}
 
 // ============================================================
 // Fetch functions
@@ -248,78 +220,11 @@ import { wbFetchAnalytics } from "./sync-modules/analytics.mjs";
 import { wbFetchOfficialPrices } from "./sync-modules/prices.mjs";
 import { wbFetchStocks } from "./sync-modules/stocks.mjs";
 
-async function ozonFetchAllProducts(clientId, apiKey) {
-  log.write("  Fetching Ozon product list:");
-  let lastId = null;
-  const allItems = [];
-
-  while (true) {
-    const body = { filter: { visibility: "ALL" }, limit: 1000 };
-    if (lastId) body.last_id = lastId;
-    const data = await ozonFetch("/v3/product/list", body, clientId, apiKey);
-    const items = data?.result?.items || [];
-
-    for (const item of items) {
-      allItems.push({
-        offerId: String(item.offer_id || ""),
-        productId: Number(item.product_id || 0),
-        productSku: Number(item.sku) || 0,
-      });
-    }
-    log.write(` ${allItems.length}`);
-
-    lastId = data?.result?.last_id;
-    if (!lastId || items.length < 1000) break;
-    await new Promise((r) => setTimeout(r, 200));
-  }
-
-  log.line(` — ${allItems.length} products`);
-  return allItems;
-}
-
-async function ozonFetchProductInfo(clientId, apiKey, offerIds) {
-  if (offerIds.length === 0) return new Map();
-  const results = [];
-
-  for (let i = 0; i < offerIds.length; i += ITEMS_PER_OZON_BATCH) {
-    const chunk = offerIds.slice(i, i + ITEMS_PER_OZON_BATCH);
-    const data = await ozonFetch(
-      "/v3/product/info/list",
-      { offer_id: chunk, visibility: "ALL" },
-      clientId,
-      apiKey,
-    );
-    results.push(...(data.items || []));
-    await new Promise((r) => setTimeout(r, 100));
-  }
-
-  const infoMap = new Map();
-  for (const item of results) infoMap.set(String(item.offer_id), item);
-  log.line(`  Info: ${infoMap.size} products`);
-  return infoMap;
-}
-
-async function ozonFetchProductAttributes(clientId, apiKey, offerIds) {
-  if (offerIds.length === 0) return new Map();
-  const results = [];
-
-  for (let i = 0; i < offerIds.length; i += ITEMS_PER_OZON_BATCH) {
-    const chunk = offerIds.slice(i, i + ITEMS_PER_OZON_BATCH);
-    const data = await ozonFetch(
-      "/v4/product/info/attributes",
-      { filter: { offer_id: chunk }, limit: 100 },
-      clientId,
-      apiKey,
-    );
-    results.push(...(data.result || []));
-    await new Promise((r) => setTimeout(r, 100));
-  }
-
-  const attrMap = new Map();
-  for (const item of results) attrMap.set(String(item.offer_id), item);
-  log.line(`  Attributes: ${attrMap.size} products`);
-  return attrMap;
-}
+import {
+  ozonFetchAllProducts,
+  ozonFetchProductInfo,
+  ozonFetchProductAttributes,
+} from "./sync-modules/ozon.mjs";
 
 // ============================================================
 // DB operations
@@ -629,7 +534,7 @@ async function main() {
       if (shouldRun("ozon-list")) {
         log.progress("ozon-list", 0, 1);
         log.line("[Ozon] Fetching product list...");
-        ozonItems = await ozonFetchAllProducts(ozonClientId, ozonApiKey);
+        ozonItems = await ozonFetchAllProducts(ozonClientId, ozonApiKey, log);
         ozonArticles = ozonItems.map((i) => i.productId).filter((id) => id > 0);
         log.line(`  ${ozonItems.length} Ozon products\n`);
         log.progress("ozon-list", 1, 1);
@@ -645,14 +550,14 @@ async function main() {
         if (shouldRun("ozon-info")) {
           log.progress("ozon-info", 0, 1);
           fetches.push(
-            ozonFetchProductInfo(ozonClientId, ozonApiKey, offerIdList)
+            ozonFetchProductInfo(ozonClientId, ozonApiKey, offerIdList, log)
               .then((r) => { infoMap = r; log.progress("ozon-info", 1, 1); return r; })
           );
         }
         if (shouldRun("ozon-attrs")) {
           log.progress("ozon-attrs", 0, 1);
           fetches.push(
-            ozonFetchProductAttributes(ozonClientId, ozonApiKey, offerIdList)
+            ozonFetchProductAttributes(ozonClientId, ozonApiKey, offerIdList, log)
               .then((r) => { attrMap = r; log.progress("ozon-attrs", 1, 1); return r; })
           );
         }
