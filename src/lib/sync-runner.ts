@@ -17,9 +17,13 @@ import { revalidatePath } from "next/cache";
 import { invalidateCache } from "@/lib/data-cache";
 import { addSyncRun, getLastSyncRun } from "./sync-history";
 import type { SyncRunRecord, SyncRunDetail } from "./sync-history";
-// Явный импорт для Vercel — чтобы трейсер включил SDK в Lambda
-// (нужен для scripts/sync-modules/prices.mjs и stocks.mjs)
-import "daytona-wildberries-typescript-sdk";
+// Явный импорт для Vercel File Tracer — включает SDK в Lambda
+// (нужен для scripts/sync-modules/prices.mjs и stocks.mjs в child_process)
+import { WildberriesSDK } from "daytona-wildberries-typescript-sdk";
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+const _ensureSdkInBundle: typeof WildberriesSDK = WildberriesSDK;
+/* eslint-enable */
 
 const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
 const SYNC_SCRIPT = path.join(SCRIPTS_DIR, "sync-all.mjs");
