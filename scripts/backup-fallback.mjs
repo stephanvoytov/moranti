@@ -9,6 +9,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { readFileSync, writeFileSync } from 'fs';
 
 function log(msg) {
@@ -29,7 +30,9 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL || "" }),
+});
 
 // ——— 2. Retry-обёртка ———
 async function retry(fn) {

@@ -1,4 +1,12 @@
+/**
+ * prisma.ts — PrismaClient singleton с driver adapter (Prisma 7).
+ *
+ * Использует @prisma/adapter-pg для подключения к Postgres.
+ * Все read-запросы должны идти через prismaQuery() — ретрай 3× с exponential backoff.
+ */
+
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { logger } from "@/lib/logger";
 
 const globalForPrisma = globalThis as unknown as {
@@ -8,12 +16,31 @@ const globalForPrisma = globalThis as unknown as {
 const MAX_RETRIES = 3;
 const BASE_DELAY = 1_000; // ms
 const MAX_DELAY = 5_000; // ms
-const QUERY_TIMEOUT = 15_000; // ms — таймаут запроса к Postgres (VPS)
+const QUERY_TIMEOUT = 15_000; // ms
 
-/**
- * Throw if promise doesn't settle within `ms` milliseconds.
- * The underlying operation continues but we stop waiting for it.
- */
+/* ─── Driver adapter ─── */
+
+function createAdapter() {
+  const url = process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || "";
+  return new PrismaPg({ connectionString: url });
+}
+
+/* ─── PrismaClient singleton ─── */
+
+function createPrismaClient() {
+  return new PrismaClient({
+    adapter: createAdapter(),
+    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+  });
+}
+
+export const prisma =
+  globalForPrisma.prisma ?? createPrismaClient();
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+
+/* ─── Таймаут запроса ─── */
+
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
     promise,
@@ -23,11 +50,8 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   ]);
 }
 
-/**
- * Retry a Prisma query with exponential backoff when connection fails.
- * 3 попытки с задержками 1s → 2s → 4s (max 5s).
- * JSON fallback в products.ts / settings.ts перехватывает окончательную ошибку.
- */
+/* ─── Ретрай с exponential backoff ─── */
+
 export async function prismaQuery<T>(
   fn: () => Promise<T>,
   timeoutMs: number = QUERY_TIMEOUT,
@@ -57,7 +81,7 @@ export async function prismaQuery<T>(
         (err as Error)?.message?.includes("timed out after");
 
       if (!isConnectionError) {
-        throw err; // Not a connection issue — throw immediately
+        throw err;
       }
 
       if (attempt < MAX_RETRIES) {
@@ -73,38 +97,17 @@ export async function prismaQuery<T>(
   throw lastError;
 }
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL?.includes("?")
-          ? process.env.DATABASE_URL
-          : process.env.DATABASE_URL + "?connection_limit=10&pool_timeout=10",
-      },
-    },
-  });
+/* ─── Сериализация BigInt для JSON ─── */
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-
-export default prisma;
-
-/**
- * Конвертирует BigInt поля Prisma Product в Number для JSON-сериализации.
- * Нужно перед возвратом из API-роутов, т.к. JSON.stringify не поддерживает BigInt.
- */
 export function serializeProduct(p: Record<string, unknown>): Record<string, unknown> {
   if (p.wbArticle != null) p.wbArticle = Number(p.wbArticle);
   if (p.ozonArticle != null) p.ozonArticle = Number(p.ozonArticle);
   return p;
 }
 
-/**
- * Конвертирует BigInt поля Prisma Model в Number для JSON-сериализации.
- * Нужно перед возвратом из API-роутов, т.к. JSON.stringify не поддерживает BigInt.
- */
 export function serializeModel(m: Record<string, unknown>): Record<string, unknown> {
   if (m.imtId != null) m.imtId = Number(m.imtId);
   return m;
 }
+
+export default prisma;

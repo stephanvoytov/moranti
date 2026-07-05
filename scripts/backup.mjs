@@ -1,11 +1,14 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { readFileSync, writeFileSync } from 'fs';
 
 const env = readFileSync('.env.local', 'utf8');
 const m = env.match(/DATABASE_URL="([^"]+)"/);
 if (m) process.env.DATABASE_URL = m[1];
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL || "" }),
+});
 
 function withTimeout(promise, ms) {
   return Promise.race([

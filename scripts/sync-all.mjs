@@ -28,6 +28,7 @@ try {
 
 import { writeFileSync, existsSync, readFileSync, mkdirSync } from "fs";
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 // --- Imports из модулей ---
 import {
@@ -417,7 +418,9 @@ async function main() {
     process.exit(1);
   }
 
-  const prisma = new PrismaClient();
+  const prisma = new PrismaClient({
+    adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || "" }),
+  });
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
