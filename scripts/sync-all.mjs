@@ -57,7 +57,6 @@ const { generateName } = require("./name-generator.js");
 // ============================================================
 
 const WB_CONTENT_API = "https://content-api.wildberries.ru";
-const WB_SEARCH_API = "https://search.wb.ru/exactmatch/ru/common/v18/search";
 const WB_ANALYTICS_API = "https://seller-analytics-api.wildberries.ru";
 const WB_PRICES_API = "https://discounts-prices-api.wildberries.ru";
 const OZON_API = "https://api-seller.ozon.ru";
@@ -88,14 +87,13 @@ const SKIP_PHASE = flags.fromPhase ? new Set() : null;
 
 const PHASES = [
   "wb-cards",
-  "wb-prices",
   "wb-official-prices",
+  "wb-stocks",
   "wb-analytics",
   "wb-process",
   "ozon-list",
   "ozon-info",
   "ozon-attrs",
-  "ozon-ratings",
   "ozon-process",
   "wb-models",
   "ozon-models",
@@ -246,83 +244,9 @@ async function wbFetchAllCards(apiKey, trash = false) {
   return allCards;
 }
 
-async function wbFetchPublicPrices(nmIDs) {
-  if (!nmIDs || nmIDs.length === 0) return new Map();
-  const priceMap = new Map();
-
-  log.write(`  Fetching WB prices (search API) for ${nmIDs.length} cards:`);
-
-  async function searchFetch(url, attempt = 1) {
-    const resp = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT) });
-    if (resp.status === 429 && attempt <= 3) {
-      const delay = Math.min(1000 * Math.pow(2, attempt), 8000);
-      log.write(` 429 (retry ${attempt} in ${delay}ms)`);
-      await new Promise((r) => setTimeout(r, delay));
-      return searchFetch(url, attempt + 1);
-    }
-    if (!resp.ok) {
-      log.line(`\n  search API ${resp.status} (after ${attempt} attempts)`);
-      return null;
-    }
-    return resp.json();
-  }
-
-  try {
-    const result = await searchFetch(
-      `${WB_SEARCH_API}?appType=1&curr=rub&dest=-1257786&query=moranti&resultset=catalog&sort=popular&limit=100`
-    );
-    if (!result || !result.products) return priceMap;
-    const products = result.products;
-
-    for (const p of products) {
-      if (p.supplierId !== SUPPLIER_ID) continue;
-      const s = p.sizes?.[0];
-      const price = s?.price?.product;
-      const basic = s?.price?.basic;
-      const stockQty = s?.stock?.qty != null ? Number(s.stock.qty) : null;
-      if (price != null) {
-        priceMap.set(p.id, {
-          price: (basic ?? price) / 100,
-          discountedPrice: price / 100,
-          stock: stockQty,
-        });
-      }
-    }
-
-    log.line(` — ${priceMap.size} products from search API`);
-
-    if (products.length >= 100) {
-      const result2 = await searchFetch(
-        `${WB_SEARCH_API}?appType=1&curr=rub&dest=-1257786&query=moranti&resultset=catalog&sort=popular&limit=100&page=2`
-      );
-      if (result2) {
-        const products2 = result2.products || [];
-        for (const p of products2) {
-          if (p.supplierId !== SUPPLIER_ID) continue;
-          const s = p.sizes?.[0];
-          const price = s?.price?.product;
-          const basic = s?.price?.basic;
-          const stockQty = s?.stock?.qty != null ? Number(s.stock.qty) : null;
-          if (price != null) {
-            priceMap.set(p.id, {
-              price: (basic ?? price) / 100,
-              discountedPrice: price / 100,
-              stock: stockQty,
-            });
-          }
-        }
-        log.line(`  → ${priceMap.size} total (after page 2)`);
-      }
-    }
-  } catch (err) {
-    log.line(`\n  search API error: ${err.message}`);
-  }
-
-  return priceMap;
-}
-
 import { wbFetchAnalytics } from "./sync-modules/analytics.mjs";
 import { wbFetchOfficialPrices } from "./sync-modules/prices.mjs";
+import { wbFetchStocks } from "./sync-modules/stocks.mjs";
 
 async function ozonFetchAllProducts(clientId, apiKey) {
   log.write("  Fetching Ozon product list:");
@@ -395,32 +319,6 @@ async function ozonFetchProductAttributes(clientId, apiKey, offerIds) {
   for (const item of results) attrMap.set(String(item.offer_id), item);
   log.line(`  Attributes: ${attrMap.size} products`);
   return attrMap;
-}
-
-async function ozonFetchRatings(clientId, apiKey, productIds) {
-  if (productIds.length === 0) return new Map();
-  const results = [];
-
-  for (let i = 0; i < productIds.length; i += 100) {
-    const chunk = productIds.slice(i, i + 100);
-    const data = await ozonFetch(
-      "/v1/product/rating-by-sku",
-      { skus: chunk.map(String) },
-      clientId,
-      apiKey,
-    );
-    results.push(...(data.products || []));
-    await new Promise((r) => setTimeout(r, 100));
-  }
-
-  const ratingMap = new Map();
-  for (const item of results) {
-    ratingMap.set(Number(item.sku), {
-      rating: item.rating != null ? item.rating / 20 : null,
-    });
-  }
-  log.line(`  Ratings: ${ratingMap.size} products`);
-  return ratingMap;
 }
 
 // ============================================================
@@ -583,8 +481,9 @@ async function main() {
     let wbCards = [];
     let wbTrashCards = [];
     let wbPriceMap = new Map();
+    let wbStockMap = new Map();
     let wbAnalyticsMap = new Map();
-    let infoMap, attrMap, ratingMap;
+    let infoMap, attrMap;
 
     // ═══════════════════════════════════════════
     // PHASE 1: Wildberries
@@ -607,32 +506,36 @@ async function main() {
         log.progress("wb-trash", 1, 1);
       }
 
-      if (shouldRun("wb-prices")) {
-        log.progress("wb-prices", 0, 1);
-        log.line("Fetching WB prices (search API)...");
-        wbPriceMap = await wbFetchPublicPrices(wbArticles);
-        log.progress("wb-prices", 1, 1);
-      }
-
       if (shouldRun("wb-official-prices") && wbPricesKey) {
         log.progress("wb-official-prices", 0, 1);
-        const officialPrices = await wbFetchOfficialPrices(wbPricesKey, log);
-        // Мержим официальные цены в wbPriceMap (приоритет над search API)
-        // Сохраняем stock из search API (official API не возвращает стоки)
-        let mergedCount = 0;
-        for (const [nmId, op] of officialPrices) {
-          const existing = wbPriceMap.get(nmId);
-          wbPriceMap.set(nmId, {
-            price: op.price,
-            discountedPrice: op.discountedPrice,
-            stock: existing?.stock ?? null,
-          });
-          mergedCount++;
-        }
-        log.line(`  Merged official prices for ${mergedCount} products`);
+        log.line("Fetching WB official prices (via SDK)...");
+        wbPriceMap = await wbFetchOfficialPrices(wbPricesKey, log);
         log.progress("wb-official-prices", 1, 1);
       } else if (shouldRun("wb-official-prices") && !wbPricesKey) {
-        log.line("[SKIP] WB_PRICES_API_KEY не задан — цены только из публичного search API (~14 товаров)");
+        log.line("[SKIP] WB_PRICES_API_KEY не задан — цены не обновляются");
+      }
+
+      if (shouldRun("wb-stocks") && wbAnalyticsKey) {
+        log.progress("wb-stocks", 0, 1);
+        log.line("Fetching WB stocks (via SDK)...");
+        wbStockMap = await wbFetchStocks(wbArticles, wbAnalyticsKey, log);
+        // Накладываем стоки на wbPriceMap
+        let mergedCount = 0;
+        for (const [nmId, stock] of wbStockMap) {
+          const existing = wbPriceMap.get(nmId);
+          if (existing) {
+            wbPriceMap.set(nmId, { ...existing, stock });
+            mergedCount++;
+          } else {
+            wbPriceMap.set(nmId, { price: null, discountedPrice: null, stock });
+          }
+        }
+        if (mergedCount > 0) {
+          log.line(`  Overlaid stocks for ${mergedCount} products`);
+        }
+        log.progress("wb-stocks", 1, 1);
+      } else if (shouldRun("wb-stocks") && !wbAnalyticsKey) {
+        log.line("[SKIP] WB_ANALYTICS_API_KEY не задан — стоки не обновляются");
       }
 
       if (shouldRun("wb-analytics") && wbAnalyticsKey) {
@@ -641,7 +544,7 @@ async function main() {
         wbAnalyticsMap = await wbFetchAnalytics(wbArticles, wbAnalyticsKey, log);
         log.progress("wb-analytics", 1, 1);
       } else if (shouldRun("wb-analytics") && !wbAnalyticsKey) {
-        log.line("[SKIP] WB_ANALYTICS_API_KEY не задан — рейтинг только из Content API, сток только из search API");
+        log.line("[SKIP] WB_ANALYTICS_API_KEY не задан — рейтинг и стоки только из Content API");
       }
 
       if (shouldRun("wb-process")) {
@@ -734,8 +637,8 @@ async function main() {
 
       const offerIdList = ozonItems.map((i) => i.offerId).filter(Boolean);
 
-      // Ozon info + attrs + ratings — параллельно
-      if (shouldRun("ozon-info") || shouldRun("ozon-attrs") || shouldRun("ozon-ratings")) {
+      // Ozon info + attrs — параллельно
+      if (shouldRun("ozon-info") || shouldRun("ozon-attrs")) {
         log.line("[Ozon] Fetching product details (parallel)...");
 
         const fetches = [];
@@ -753,14 +656,6 @@ async function main() {
               .then((r) => { attrMap = r; log.progress("ozon-attrs", 1, 1); return r; })
           );
         }
-        if (shouldRun("ozon-ratings")) {
-          log.progress("ozon-ratings", 0, 1);
-          fetches.push(
-            ozonFetchRatings(ozonClientId, ozonApiKey, ozonArticles)
-              .then((r) => { ratingMap = r; log.progress("ozon-ratings", 1, 1); return r; })
-          );
-        }
-
         await Promise.all(fetches);
         log.line("");
       }
@@ -782,7 +677,6 @@ async function main() {
           if (!offerId && !productId) continue;
           const info = infoMap?.get(offerId);
           const attrs = attrMap?.get(offerId);
-          const rating = ratingMap?.get(productId);
 
           const publicSku = productSku || info?.sources?.[0]?.sku || 0;
 
@@ -810,7 +704,7 @@ async function main() {
               }
             }
 
-            const updates = mergeProductSources(null, null, null, info, attrs, rating, db);
+            const updates = mergeProductSources(null, null, null, info, attrs, null, db);
             const allUpdates = { ...ensureFields, ...updates };
             if (Object.keys(allUpdates).length > 0) {
               const ok = await updateProduct(prisma, db.id, allUpdates);
@@ -844,7 +738,7 @@ async function main() {
               photoCount: info.images?.length || 1,
               colorName: ozonExtractColor(info, attrs),
               composition: ozonComp,
-              rating: rating?.rating ?? null,
+              rating: null,
               inStock: info.stocks?.stocks?.some(
                 (s) => (s.present || 0) - (s.reserved || 0) > 0
               ) ?? true,

@@ -38,7 +38,7 @@ const { generateName } = require("../name-generator.js");
  * @param {object|null} wbRating — { rating, feedbacks } из WB
  * @param {object|null} ozonInfo — v3/product/info/list
  * @param {object|null} ozonAttrs — v4/product/info/attributes
- * @param {object|null} ozonRating — { rating } из Ozon rating API
+ * @param {object|null} ozonRating — IGNORED (Ozon content rating, не звёздный рейтинг)
  * @param {object|null} db — существующая запись из БД (DBProduct)
  * @returns {object} — только изменившиеся поля (MergedProductData)
  */
@@ -124,10 +124,13 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
     if (JSON.stringify(allOzon) !== JSON.stringify(db?.ozonImages || [])) data.ozonImages = allOzon;
   }
 
-  // ─── Категория (приоритет WB) ───
+  // ─── Категория (приоритет WB, не перезаписывается Ozon) ───
   const wbCat = wbCard ? resolveCategory(wbCard) : null;
   const ozonCat = ozonInfo ? ozonExtractCategory(ozonInfo, ozonAttrs) : null;
-  const newCat = wbCat || ozonCat || db?.category || "crossbody";
+  const newCat = wbCat
+    || (db?.wbArticle && !wbCard ? (db?.category || ozonCat) : ozonCat)
+    || db?.category
+    || "crossbody";
   if (newCat !== db?.category) data.category = newCat;
 
   // ─── Состав и цвет (любой не null) ───
@@ -141,32 +144,21 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
   const newColor = wbColor || ozonColor || db?.colorName || null;
   if (newColor !== db?.colorName) data.colorName = newColor;
 
-  // ─── Рейтинг (weighted avg) ───
+  // ─── Рейтинг ───
+  // Используем ТОЛЬКО WB feedbackRating (реальный звёздный рейтинг отзывов 1-5).
+  // Ozon content rating (0-100, качество карточки) НЕ является звёздным рейтингом
+  // и НЕ участвует в расчёте — см. sync-all.mjs ozonFetchRatings().
   const wbRatingVal = wbRating?.rating ?? db?.rating ?? null;
   const wbFeedbacks = wbRating?.feedbacks ?? db?.reviewsCount ?? 0;
-  const ozonRatingVal = ozonRating?.rating ?? null;
   const ozonReviewsCount = ozonInfo?.reviews_count != null ? Number(ozonInfo.reviews_count) : 0;
 
-  if (wbRatingVal != null || ozonRatingVal != null) {
-    let combRat, combRC;
-
-    if (wbRatingVal != null && ozonRatingVal != null && wbFeedbacks > 0 && ozonReviewsCount > 0) {
-      const total = wbFeedbacks + ozonReviewsCount;
-      combRat = (wbRatingVal * wbFeedbacks + ozonRatingVal * ozonReviewsCount) / total;
-      combRC = total;
-    } else if (wbRatingVal != null) {
-      combRat = wbRatingVal;
-      combRC = wbFeedbacks;
-    } else if (ozonRatingVal != null) {
-      combRat = ozonRatingVal;
-      combRC = ozonReviewsCount;
-    }
-
-    if (combRat != null) {
-      combRat = Math.round(combRat * 10) / 10;
-      if (combRat !== db?.rating) data.rating = combRat;
-      if (combRC !== db?.reviewsCount) data.reviewsCount = combRC;
-    }
+  if (wbRatingVal != null) {
+    const totalRC = wbFeedbacks + ozonReviewsCount;
+    if (wbRatingVal !== db?.rating) data.rating = Math.round(wbRatingVal * 10) / 10;
+    if (totalRC !== (db?.reviewsCount ?? 0)) data.reviewsCount = totalRC;
+  } else if (ozonReviewsCount > 0) {
+    // Нет WB рейтинга, но есть Ozon отзывы — обновляем только счётчик
+    if (ozonReviewsCount !== (db?.reviewsCount ?? 0)) data.reviewsCount = ozonReviewsCount;
   }
 
   // ─── Название ───

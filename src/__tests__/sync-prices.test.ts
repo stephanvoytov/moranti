@@ -1,18 +1,43 @@
 /**
- * Тесты для wbFetchOfficialPrices — парсинг WB Prices & Discounts API.
+ * Тесты для wbFetchOfficialPrices — WB Prices API через SDK.
  *
  * Покрытие:
  *   ✓ нет apiKey
  *   ✓ парсинг listGoods (цены /100)
- *   ✓ URL и query params (host, path, limit, offset)
- *   ✓ пагинация (offset progression, 2500 → 3 запроса)
+ *   ✓ пагинация (offset progression, 2500 → 3 запроса через SDK)
  *   ✓ sizes[0] отсутствует, price отсутствует
- *   ✓ 429 rate limit + retry
- *   ✓ 4xx/network error → log.line, не падает
+ *   ✓ SDK ошибка → log.line, не падает
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { wbFetchOfficialPrices } from "../../scripts/sync-modules/prices.mjs";
+
+// ─── Mock SDK ───
+const mockGetGoodsFilter = vi.fn();
+const mockSDKConstructor = vi.fn();
+
+vi.mock("daytona-wildberries-typescript-sdk", () => {
+  class MockWildberriesSDK {
+    constructor(config) {
+      mockSDKConstructor(config);
+      this.products = {
+        getGoodsFilter: mockGetGoodsFilter,
+      };
+    }
+  }
+
+  return {
+    WildberriesSDK: MockWildberriesSDK,
+    RateLimitError: class RateLimitError extends Error {
+      constructor(msg, retryAfter) {
+        super(msg);
+        this.retryAfter = retryAfter;
+      }
+    },
+    AuthenticationError: class AuthenticationError extends Error {},
+    NetworkError: class NetworkError extends Error {},
+  };
+});
 
 function makeSpyLog() {
   return {
@@ -25,16 +50,8 @@ function makeSpyLog() {
 
 beforeEach(() => {
   vi.restoreAllMocks();
+  mockGetGoodsFilter.mockReset();
 });
-
-function mockFetch(status, body) {
-  globalThis.fetch = vi.fn().mockResolvedValue({
-    status,
-    ok: status >= 200 && status < 300,
-    json: () => Promise.resolve(body),
-    text: () => Promise.resolve(typeof body === "string" ? body : JSON.stringify(body)),
-  });
-}
 
 function priceGood(nmID, priceKop, discountedKop, techSize = "ONE") {
   return {
@@ -67,16 +84,19 @@ describe("wbFetchOfficialPrices", () => {
 
   // ─── Успешный парсинг ───
   it("парсит ответ с одним товаром — цена /100", async () => {
-    mockFetch(200, { data: { listGoods: [priceGood(98486, 50000, 35000)] } });
+    mockGetGoodsFilter.mockResolvedValue({
+      data: { listGoods: [priceGood(98486, 50000, 35000)] },
+    });
+
     const result = await wbFetchOfficialPrices("test-key");
     expect(result.size).toBe(1);
     expect(result.get(98486).price).toBe(500);
     expect(result.get(98486).discountedPrice).toBe(350);
-    expect(result.get(98486).stock).toBeNull();
+    expect(result.get(98486)).not.toHaveProperty("stock");
   });
 
   it("несколько товаров — маппится по nmID", async () => {
-    mockFetch(200, {
+    mockGetGoodsFilter.mockResolvedValue({
       data: {
         listGoods: [
           priceGood(111, 100000, 80000),
@@ -85,6 +105,7 @@ describe("wbFetchOfficialPrices", () => {
         ],
       },
     });
+
     const result = await wbFetchOfficialPrices("key");
     expect(result.size).toBe(3);
     expect(result.get(111).price).toBe(1000);
@@ -94,37 +115,48 @@ describe("wbFetchOfficialPrices", () => {
 
   // ─── Копейки ───
   it("деление на 100: 100 копеек → 1 рубль", async () => {
-    mockFetch(200, { data: { listGoods: [priceGood(1, 100, 99)] } });
+    mockGetGoodsFilter.mockResolvedValue({
+      data: { listGoods: [priceGood(1, 100, 99)] },
+    });
     const result = await wbFetchOfficialPrices("key");
     expect(result.get(1).price).toBe(1);
     expect(result.get(1).discountedPrice).toBe(0.99);
   });
 
   it("большое число копеек: 999999 → 9999.99", async () => {
-    mockFetch(200, { data: { listGoods: [priceGood(1, 999999, 888888)] } });
+    mockGetGoodsFilter.mockResolvedValue({
+      data: { listGoods: [priceGood(1, 999999, 888888)] },
+    });
     const result = await wbFetchOfficialPrices("key");
     expect(result.get(1).price).toBe(9999.99);
     expect(result.get(1).discountedPrice).toBe(8888.88);
   });
 
-  // ─── URL и query params ───
-  it("GET запрос на правильный URL с limit и offset", async () => {
-    mockFetch(200, { data: { listGoods: [] } });
+  // ─── SDK вызывается с правильными параметрами ───
+  it("передаёт limit и offset в SDK", async () => {
+    mockGetGoodsFilter.mockResolvedValue({ data: { listGoods: [] } });
     await wbFetchOfficialPrices("my-token");
 
-    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
-    const [url, init] = globalThis.fetch.mock.calls[0];
-    expect(url).toMatch(/^https:\/\/discounts-prices-api\.wildberries\.ru\/api\/v2\/list\/goods\/filter/);
-    expect(new URL(url).searchParams.get("limit")).toBe("1000");
-    expect(new URL(url).searchParams.get("offset")).toBe("0");
-    // method не указан → undefined = GET по умолчанию
-    expect(init.method ?? "GET").toBe("GET");
-    expect(init.headers.Authorization).toBe("my-token");
+    expect(mockGetGoodsFilter).toHaveBeenCalledTimes(1);
+    expect(mockGetGoodsFilter).toHaveBeenCalledWith({
+      limit: 1000,
+      offset: 0,
+    });
+  });
+
+  it("передаёт apiKey в конструктор SDK", async () => {
+    mockGetGoodsFilter.mockResolvedValue({ data: { listGoods: [] } });
+
+    await wbFetchOfficialPrices("custom-api-key");
+
+    expect(mockSDKConstructor).toHaveBeenCalledWith(
+      expect.objectContaining({ apiKey: "custom-api-key" })
+    );
   });
 
   // ─── Пропуск товаров без sizes ───
   it("товар без sizes[0] — пропускается", async () => {
-    mockFetch(200, {
+    mockGetGoodsFilter.mockResolvedValue({
       data: {
         listGoods: [
           { nmID: 1, sizes: [] },
@@ -139,7 +171,7 @@ describe("wbFetchOfficialPrices", () => {
   });
 
   it("sizes[0] без price — пропускается", async () => {
-    mockFetch(200, {
+    mockGetGoodsFilter.mockResolvedValue({
       data: {
         listGoods: [
           { nmID: 1, sizes: [{ sizeID: 1, techSizeName: "ONE" }] },
@@ -153,111 +185,110 @@ describe("wbFetchOfficialPrices", () => {
   });
 
   // ─── Пустой ответ ───
-  it("пустой listGoods — пагинация завершается", async () => {
-    mockFetch(200, { data: { listGoods: [] } });
+  it("пустой listGoods — пагинация завершается (один вызов SDK)", async () => {
+    mockGetGoodsFilter.mockResolvedValue({ data: { listGoods: [] } });
     expect((await wbFetchOfficialPrices("key")).size).toBe(0);
+    expect(mockGetGoodsFilter).toHaveBeenCalledTimes(1);
   });
 
   it("data отсутствует — пустой результат", async () => {
-    mockFetch(200, {});
+    mockGetGoodsFilter.mockResolvedValue({});
     expect((await wbFetchOfficialPrices("key")).size).toBe(0);
   });
 
   it("data.listGoods отсутствует — пустой результат", async () => {
-    mockFetch(200, { data: {} });
+    mockGetGoodsFilter.mockResolvedValue({ data: {} });
     expect((await wbFetchOfficialPrices("key")).size).toBe(0);
   });
 
   // ─── Пагинация ───
-  it("пагинация: 2500 товаров → 3 запроса, offset: 0→1000→2000", async () => {
-    const capturedUrls = [];
-    globalThis.fetch = vi.fn().mockImplementation((url) => {
-      capturedUrls.push(url);
-      const offset = parseInt(new URL(url).searchParams.get("offset") || "0", 10);
+  it("пагинация: 2500 товаров → 3 запроса к SDK, offset: 0→1000→2000", async () => {
+    const capturedParams = [];
+    mockGetGoodsFilter.mockImplementation((params) => {
+      capturedParams.push({ ...params });
+      const offset = params.offset || 0;
       const remaining = 2500 - offset;
       const count = Math.min(remaining, 1000);
-      const goods = Array.from({ length: count }, (_, i) => priceGood(offset + i + 1, 50000, 40000));
-      return Promise.resolve({
-        status: 200,
-        ok: true,
-        json: () => Promise.resolve({ data: { listGoods: goods } }),
-      });
+      const goods = Array.from({ length: count }, (_, i) =>
+        priceGood(offset + i + 1, 50000, 40000)
+      );
+      return Promise.resolve({ data: { listGoods: goods } });
     });
 
     const result = await wbFetchOfficialPrices("key");
-    expect(globalThis.fetch).toHaveBeenCalledTimes(3);
+    expect(mockGetGoodsFilter).toHaveBeenCalledTimes(3);
     expect(result.size).toBe(2500);
 
-    const offsets = capturedUrls.map((u) => new URL(u).searchParams.get("offset"));
-    expect(offsets).toEqual(["0", "1000", "2000"]);
+    expect(capturedParams[0]).toEqual({ limit: 1000, offset: 0 });
+    expect(capturedParams[1]).toEqual({ limit: 1000, offset: 1000 });
+    expect(capturedParams[2]).toEqual({ limit: 1000, offset: 2000 });
   });
 
-  it("пагинация: ровно 1000 товаров → 1 запрос", async () => {
-    // Возвращаем 1000 на первый запрос, пустой на второй (чтобы выйти из while)
-    globalThis.fetch = vi
-      .fn()
+  it("пагинация: ровно 1000 товаров → 1 запрос (второй с пустым ответом)", async () => {
+    mockGetGoodsFilter
       .mockResolvedValueOnce({
-        status: 200, ok: true,
-        json: () =>
-          Promise.resolve({
-            data: {
-              listGoods: Array.from({ length: 1000 }, (_, i) => priceGood(i + 1, 10000, 8000)),
-            },
-          }),
+        data: {
+          listGoods: Array.from({ length: 1000 }, (_, i) =>
+            priceGood(i + 1, 10000, 8000)
+          ),
+        },
       })
-      .mockResolvedValueOnce({
-        status: 200, ok: true,
-        json: () => Promise.resolve({ data: { listGoods: [] } }),
-      });
+      .mockResolvedValueOnce({ data: { listGoods: [] } });
+
     expect((await wbFetchOfficialPrices("key")).size).toBe(1000);
-    expect(globalThis.fetch).toHaveBeenCalledTimes(2); // второй запрос заканчивает пагинацию
+    expect(mockGetGoodsFilter).toHaveBeenCalledTimes(2);
   });
 
   it("пагинация: 1 товар → 1 запрос", async () => {
-    mockFetch(200, { data: { listGoods: [priceGood(1, 10000, 8000)] } });
+    mockGetGoodsFilter.mockResolvedValue({
+      data: { listGoods: [priceGood(1, 10000, 8000)] },
+    });
     const result = await wbFetchOfficialPrices("key");
     expect(result.size).toBe(1);
-    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    expect(mockGetGoodsFilter).toHaveBeenCalledTimes(1);
   });
 
-  // ─── Rate limit 429 ───
-  it("429 rate limit — retry 1s", async () => {
-    globalThis.fetch = vi
-      .fn()
-      .mockResolvedValueOnce({ status: 429, ok: false, text: () => Promise.resolve("too many") })
-      .mockResolvedValueOnce({
-        status: 200, ok: true,
-        json: () => Promise.resolve({ data: { listGoods: [priceGood(1, 10000, 8000)] } }),
-      });
-
-    vi.useFakeTimers();
-    const promise = wbFetchOfficialPrices("key");
-    await vi.advanceTimersByTimeAsync(1000);
-    const result = await promise;
-    vi.useRealTimers();
-
-    expect(result.size).toBe(1);
-    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
-  });
-
-  // ─── Ошибки ───
-  it("4xx ошибка — log.line с кодом, не падает", async () => {
-    mockFetch(401, { error: true, errorText: "Unauthorized" });
-    const log = makeSpyLog();
-
-    const result = await wbFetchOfficialPrices("bad-key", log);
-    expect(result.size).toBe(0);
-    expect(log.line).toHaveBeenCalledWith(expect.stringContaining("401"));
-    expect(log.line.mock.calls[0][0]).toMatch(/Official prices API 401/);
-  });
-
-  it("network error — log.line с сообщением, не падает", async () => {
-    globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
+  // ─── Ошибки SDK ───
+  it("SDK выбрасывает ошибку — log.line с сообщением, не падает", async () => {
+    mockGetGoodsFilter.mockRejectedValue(new Error("API rate limit exceeded"));
     const log = makeSpyLog();
 
     const result = await wbFetchOfficialPrices("key", log);
     expect(result.size).toBe(0);
-    expect(log.line).toHaveBeenCalledWith(expect.stringContaining("Network error"));
-    expect(log.line.mock.calls[0][0]).toMatch(/Official prices API error/);
+    expect(log.line).toHaveBeenCalledWith(
+      expect.stringContaining("API rate limit exceeded")
+    );
+  });
+
+  it("AuthenticationError от SDK — log.line, не падает", async () => {
+    const { AuthenticationError } = await import(
+      "daytona-wildberries-typescript-sdk"
+    );
+    mockGetGoodsFilter.mockRejectedValue(
+      new AuthenticationError("Invalid API key")
+    );
+    const log = makeSpyLog();
+
+    const result = await wbFetchOfficialPrices("bad-key", log);
+    expect(result.size).toBe(0);
+    expect(log.line).toHaveBeenCalledWith(
+      expect.stringContaining("Invalid API key")
+    );
+  });
+
+  it("NetworkError от SDK — log.line, не падает", async () => {
+    const { NetworkError } = await import(
+      "daytona-wildberries-typescript-sdk"
+    );
+    mockGetGoodsFilter.mockRejectedValue(
+      new NetworkError("connect ECONNREFUSED")
+    );
+    const log = makeSpyLog();
+
+    const result = await wbFetchOfficialPrices("key", log);
+    expect(result.size).toBe(0);
+    expect(log.line).toHaveBeenCalledWith(
+      expect.stringContaining("connect ECONNREFUSED")
+    );
   });
 });

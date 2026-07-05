@@ -1,23 +1,24 @@
 /**
- * prices.mjs — WB Prices & Discounts API (официальные цены).
+ * prices.mjs — WB Prices & Discounts API (официальные цены) через SDK.
  *
- * Эндпоинт: GET /api/v2/list/goods/filter
- * Документация: https://dev.wildberries.ru/openapi/work-with-products#tag/Ceny-i-skidki
+ * Использует daytona-wildberries-typescript-sdk:
+ *   sdk.products.getGoodsFilter() → GET /api/v2/list/goods/filter
  *
- * Схема ответа: { data: { listGoods: [
- *   { nmID, vendorCode, sizes: [{ price, discountedPrice }], … }
- * ] } }
+ * SDK обеспечивает:
+ *   - Rate limiting (100 req/min, per-endpoint)
+ *   - Retry с exponential backoff на 429/5xx
+ *   - Typed errors (RateLimitError, AuthenticationError, NetworkError, etc.)
  *
- * Цены приходят в копейках → делим на 100.
- * Стоков этот API не возвращает.
+ * Цены приходят в копейках → функция делит на 100.
+ * Стоков этот API не возвращает (stock всегда null).
  *
  * Требует токен категории «Цены и скидки» (WB_PRICES_API_KEY).
- * Rate limit: 10 запросов / 6 сек (персональный/сервисный).
  *
  * @module sync-modules/prices
  */
 
-const WB_PRICES_API = "https://discounts-prices-api.wildberries.ru";
+import { WildberriesSDK } from "daytona-wildberries-typescript-sdk";
+
 const FETCH_TIMEOUT = 30000;
 
 /** Логгер по умолчанию — тихий, для тестов. */
@@ -29,44 +30,35 @@ const noopLog = {
 };
 
 /**
- * Получение цен через официальное API Wildberries (Цены и скидки).
+ * Получение цен через Wildberries SDK (обёртка над discounts-prices-api).
  *
  * @param {string}  apiKey — токен категории «Цены и скидки»
  * @param {object}  log    — логгер (опционально, по умолчанию noop)
- * @returns {Promise<Map<number, {price: number, discountedPrice: number, stock: null}>>}
+ * @returns {Promise<Map<number, {price: number, discountedPrice: number}>>}
  */
 export async function wbFetchOfficialPrices(apiKey, log = noopLog) {
   if (!apiKey) return new Map();
+
+  const sdk = new WildberriesSDK({
+    apiKey,
+    timeout: FETCH_TIMEOUT,
+  });
+
   const priceMap = new Map();
 
-  log.write("  Fetching WB official prices (discounts-prices-api):");
+  log.write("  Fetching WB official prices (via SDK)...");
 
-  let offset = 0;
-  const LIMIT = 1000;
+  try {
+    let offset = 0;
+    const LIMIT = 1000;
 
-  while (true) {
-    const url = `${WB_PRICES_API}/api/v2/list/goods/filter?limit=${LIMIT}&offset=${offset}`;
-
-    try {
-      const resp = await fetch(url, {
-        headers: { Authorization: apiKey },
-        signal: AbortSignal.timeout(FETCH_TIMEOUT),
+    while (true) {
+      const response = await sdk.products.getGoodsFilter({
+        limit: LIMIT,
+        offset,
       });
 
-      if (resp.status === 429) {
-        log.write(" 429 (rate limit, waiting 1s)");
-        await new Promise((r) => setTimeout(r, 1000));
-        continue;
-      }
-
-      if (!resp.ok) {
-        const text = await resp.text().catch(() => "");
-        log.line(`\n  Official prices API ${resp.status}: ${text.slice(0, 200)}`);
-        break;
-      }
-
-      const data = await resp.json();
-      const goods = data?.data?.listGoods || [];
+      const goods = response?.data?.listGoods || [];
 
       if (goods.length === 0) break; // пагинация завершена
 
@@ -76,7 +68,6 @@ export async function wbFetchOfficialPrices(apiKey, log = noopLog) {
           priceMap.set(g.nmID, {
             price: size.price / 100,
             discountedPrice: size.discountedPrice / 100,
-            stock: null, // из этого API нет стоков
           });
         }
       }
@@ -85,12 +76,12 @@ export async function wbFetchOfficialPrices(apiKey, log = noopLog) {
 
       if (goods.length < LIMIT) break; // последняя страница
       offset += LIMIT;
-    } catch (err) {
-      log.line(`\n  Official prices API error: ${err.message}`);
-      break;
     }
+
+    log.line(` — ${priceMap.size} products via SDK`);
+  } catch (err) {
+    log.line(`\n  SDK prices API error: ${err.message}`);
   }
 
-  log.line(` — ${priceMap.size} products from official prices API`);
   return priceMap;
 }

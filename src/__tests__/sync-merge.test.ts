@@ -116,7 +116,7 @@ describe("mergeProductSources — интеграция с WB", () => {
     expect(result.originalPrice).toBe(4990);
   });
 
-  it("обновляет рейтинг из wbRating (weighted avg с одним источником)", () => {
+  it("обновляет рейтинг из wbRating (единственный источник звёзд)", () => {
     const wbCard = makeWbCard();
     const wbPrices = makeWbPrices();
     const wbRating = makeWbRating({ rating: 4.2, feedbacks: 10 });
@@ -126,6 +126,24 @@ describe("mergeProductSources — интеграция с WB", () => {
 
     expect(result.rating).toBe(4.2);
     expect(result.reviewsCount).toBe(10);
+  });
+
+  it("игнорирует Ozon content rating — не звёздный рейтинг", () => {
+    const wbCard = makeWbCard();
+    const wbPrices = makeWbPrices();
+    const wbRating = makeWbRating({ rating: 4.5, feedbacks: 14 });
+    const db = makeDb({ rating: null, reviewsCount: null });
+
+    // ozonRating = content rating (0-100), не звёздный
+    const ozonRating = { rating: 95 }; // content quality score
+    const ozonInfo = { reviews_count: 7 };
+
+    const result = mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, null, ozonRating, db);
+
+    // Рейтинг только от WB, Ozon content rating не влияет
+    expect(result.rating).toBe(4.5);
+    // Количество отзывов суммируется (реальные counts)
+    expect(result.reviewsCount).toBe(21); // 14 wb + 7 ozon
   });
 
   it("обновляет inStock если wbPrices.stock > 0", () => {
@@ -246,6 +264,37 @@ describe("mergeProductSources — интеграция с WB", () => {
 
     const result = mergeProductSources(wbCard, wbPrices, wbRating, null, null, null, db);
     expect(Object.keys(result)).toHaveLength(0);
+  });
+
+  // ─── Ozon-фаза не перезаписывает категорию товаров с wbArticle ───
+  it("Ozon-фаза не меняет category если у товара есть wbArticle", () => {
+    const db = makeDb({ wbArticle: 123456789n, category: "crossbody" });
+    const ozonInfo = {
+      category: "Сумки",
+      name: "Сумка-багет Balensa",
+      price: 5000,
+    };
+    const ozonAttrs = {
+      attributes: [
+        { id: 20259, values: [{ value: "Багет" }] },
+      ],
+    };
+    // wbCard = null → симуляция Ozon-фазы
+    const result = mergeProductSources(null, null, null, ozonInfo, ozonAttrs, null, db);
+    // Категория НЕ должна измениться — у товара есть wbArticle
+    expect(result.category).toBeUndefined();
+  });
+
+  it("Ozon-фаза проставляет category если у товара нет wbArticle", () => {
+    const db = makeDb({ wbArticle: null, category: "crossbody" });
+    const ozonInfo = {
+      category: "Сумки",
+      name: "Сумка-багет Ozon-Only",
+      price: 5000,
+    };
+    const result = mergeProductSources(null, null, null, ozonInfo, null, null, db);
+    // Без wbArticle — Ozon может установить категорию
+    expect(result.category).toBe("baguette");
   });
 
   it("wbCard = null — не падает, возвращает дефолты", () => {
