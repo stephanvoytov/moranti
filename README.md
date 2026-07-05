@@ -72,9 +72,9 @@ http://localhost:3001/admin
 
 ## Архитектура
 
-### Данные: Prisma Postgres
+### Данные: Postgres на VPS
 
-Все данные читаются через Prisma из Postgres (db.prisma.io).
+Все данные читаются через Prisma из Postgres (собственный VPS).
 JSON-файлы — только бекап, не source of truth.
 
 | Функция | Описание |
@@ -85,7 +85,7 @@ JSON-файлы — только бекап, не source of truth.
 | `readSettings()` | Настройки сайта |
 
 Кэш в памяти: `src/lib/data-cache.ts` — TTL 300s, дедикап in-flight промисов.
-Ретрай: `prismaQuery()` — 2 попытки, 500ms→1000ms (холодный старт Prisma Postgres).
+Ретрай: `prismaQuery()` — 3 попытки, 1s→2s→4s (exponential backoff).
 
 ### Страницы
 
