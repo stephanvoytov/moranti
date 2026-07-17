@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "scripts/sync-all.mjs": {
+      "includeFiles": "node_modules/**"
+    }
+  }
+}
