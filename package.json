@@ -10,7 +10,8 @@
     "test": "vitest run",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
-    "prisma:seed": "prisma db seed"
+    "prisma:seed": "prisma db seed",
+    "postinstall": "prisma generate"   // ← добавлено
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
@@ -20,6 +21,7 @@
     "next": "16.2.10",
     "ozon-seller-sdk": "^1.0.3",
     "pg": "^8.22.0",
+    "prisma": "^7.8.0",                  // ← перенесено из devDependencies
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "zod": "^4.4.3"
@@ -34,7 +36,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "jsdom": "^29.1.1",
-    "prisma": "^7.8.0",
     "typescript": "^5",
     "vitest": "^4.1.9"
   }
