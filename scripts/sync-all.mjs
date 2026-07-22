@@ -27,6 +27,7 @@ try {
  */
 
 import { writeFileSync, existsSync, readFileSync, mkdirSync } from "fs";
+import { fileURLToPath } from "url";
 
 // --- Imports из модулей ---
 import {
@@ -836,4 +837,22 @@ async function main() {
   }
 }
 
-main();
+/* ─── Экспорт для встраивания в серверный процесс ─── */
+
+/* ─── Экспорт для встраивания в серверный процесс ─── */
+
+export async function runWbSync() {
+  Object.assign(flags, { wbOnly: true, ozonOnly: false, dry: false, fromPhase: null });
+  if (!process.env.WB_API_KEY) throw new Error("WB_API_KEY не задан");
+  await main();
+}
+
+export async function runOzonSync() {
+  Object.assign(flags, { wbOnly: false, ozonOnly: true, dry: false, fromPhase: null });
+  if (!process.env.OZON_CLIENT_ID || !process.env.OZON_API_KEY) throw new Error("OZON_CLIENT_ID/OZON_API_KEY не заданы");
+  await main();
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main();
+}

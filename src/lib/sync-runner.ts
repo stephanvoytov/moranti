@@ -1,8 +1,8 @@
 /**
  * sync-runner.ts — асинхронный запуск sync-all.mjs с прогрессом.
  *
- * Запускает скрипт через child_process.exec, захватывает вывод
- * построчно, парсит [PROGRESS]-строки и обновляет in-memory состояние.
+ * Запускает sync-all.mjs в том же процессе через import() вместо child_process,
+ * потому что на Vercel node_modules недоступны дочерним процессам на файловой системе.
  *
  * API:
  *   startSync(platform) → runId
@@ -10,14 +10,12 @@
  *   getActiveRunId(platform) → string | null
  */
 
-import { exec, ChildProcess } from "child_process";
 import path from "path";
 import { revalidatePath } from "next/cache";
 import { invalidateCache } from "@/lib/data-cache";
 import { addSyncRun, getLastSyncRun } from "./sync-history";
 import type { SyncRunRecord, SyncRunDetail } from "./sync-history";
-// Явные импорты для Vercel File Tracer — включает SDK и Prisma адаптер в Lambda
-// (нужны для scripts/sync-all.mjs и scripts/sync-modules/*.mjs в child_process)
+// Явные импорты для Vercel File Tracer — включает SDK в Lambda
 import { WildberriesSDK } from "daytona-wildberries-typescript-sdk";
 import { ApiError } from "ozon-seller-sdk";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -25,8 +23,7 @@ import { PrismaClient } from "@prisma/client";
 
 [WildberriesSDK, ApiError, PrismaPg, PrismaClient];
 
-const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
-const SYNC_SCRIPT = path.join(SCRIPTS_DIR, "sync-all.mjs");
+const SYNC_SCRIPT = path.join(process.cwd(), "scripts", "sync-all.mjs");
 
 /* ─── Типы прогресса ─── */
 
@@ -54,15 +51,6 @@ function nextRunId(platform: string): string {
   runCounter++;
   const ts = Date.now().toString(36);
   return `${platform}-${ts}-${runCounter}`;
-}
-
-/* ─── DB URL ─── */
-
-function getDirectDbUrl(): string | undefined {
-  return process.env.POSTGRES_URL_NON_POOLING
-    || process.env.DIRECT_URL
-    || process.env.POSTGRES_PRISMA_URL
-    || process.env.DATABASE_URL;
 }
 
 /* ─── Фазы и их подписи ─── */
@@ -122,33 +110,12 @@ function parseDetailLine(line: string): { updated?: SyncRunDetail; added?: SyncR
   }
 }
 
-/* ─── Очистка зависшего запуска ─── */
-
-function clearStaleRun(platform: "wb" | "ozon") {
-  const active = activePlatformRun.get(platform);
-  if (active && running.has(active)) {
-    running.delete(active);
-    activePlatformRun.delete(platform);
-  }
-}
-
 /** Извлечь первую значимую ошибку из лога */
-function extractError(log: string, stderr: string, err: Error | null): string | undefined {
-  if (err) {
-    const msg = err.message || "";
-    // Пропускаем технические node:internal/... строки
-    if (msg.includes("ERR_MODULE_NOT_FOUND")) {
-      const m = msg.match(/Cannot find package '([^']+)'/);
-      return m ? `Пакет не найден: ${m[1]}. Проверьте установку зависимостей.` : `Ошибка модуля: ${msg.slice(0, 200)}`;
-    }
-    return msg.slice(0, 500);
-  }
-
+function extractError(log: string): string | undefined {
   // Ищем FATAL: в логе
   for (const line of log.split("\n")) {
     const t = line.trim();
     if (t.startsWith("FATAL:") || t.startsWith("ERROR:")) {
-      // Пропускаем технический трейс
       const clean = t.replace(/^FATAL:\s*/, "").replace(/^ERROR:\s*/, "").slice(0, 300);
       if (!clean.includes("node:internal") && !clean.startsWith("at ")) {
         return clean;
@@ -156,24 +123,42 @@ function extractError(log: string, stderr: string, err: Error | null): string | 
     }
   }
 
+  // MODULE_NOT_FOUND ошибки
+  const moduleMatch = log.match(/Cannot find (?:module|package) '([^']+)'/);
+  if (moduleMatch) return `Пакет не найден: ${moduleMatch[1]}. Проверьте установку зависимостей.`;
+
   // Prisma ошибки
   const prismaMatch = log.match(/PrismaClient\w+Error:\s*([^\n]+)/);
   if (prismaMatch) return prismaMatch[1].trim().slice(0, 300);
 
-  // ERR_MODULE_NOT_FOUND в логе
+  // ERR_MODULE_NOT_FOUND
   if (log.includes("ERR_MODULE_NOT_FOUND")) {
     const m = log.match(/Cannot find package '([^']+)'/);
     if (m) return `Пакет не найден: ${m[1]}`;
     return "Ошибка загрузки модуля";
   }
 
-  // stderr
-  if (stderr) {
-    const lines = stderr.split("\n").filter(l => l.trim() && !l.includes("node:internal") && !l.startsWith("at "));
-    if (lines.length > 0) return lines[0].slice(0, 300);
-  }
-
   return undefined;
+}
+
+/* ─── Парсинг статистики из вывода ─── */
+
+function parseStats(log: string) {
+  const lines = log.split("\n").filter(Boolean);
+  const lastLine = lines[lines.length - 1];
+  if (lastLine?.startsWith("{")) {
+    try {
+      const s = JSON.parse(lastLine);
+      return {
+        added: s.created || 0,
+        updated: s.updated || 0,
+        archived: s.archived || 0,
+        skipped: s.skipped || 0,
+        errors: s.errors || 0,
+      };
+    } catch { /* ignore */ }
+  }
+  return { added: 0, updated: 0, archived: 0, skipped: 0, errors: 0 };
 }
 
 /* ─── Запуск синхронизации ─── */
@@ -194,7 +179,6 @@ export function startSync(platform: "wb" | "ozon"): string {
   }
 
   const runId = nextRunId(platform);
-  const flag = platform === "wb" ? "--wb-only" : "--ozon-only";
 
   const progress: SyncProgress = {
     runId,
@@ -212,134 +196,140 @@ export function startSync(platform: "wb" | "ozon"): string {
   running.set(runId, progress);
   activePlatformRun.set(platform, runId);
 
-  const child = exec(
-    `node "${SYNC_SCRIPT}" ${flag}`,
-    {
-      cwd: process.cwd(),
-      timeout: 300_000,
-      maxBuffer: 10 * 1024 * 1024,
-      env: {
-        ...process.env,
-        NODE_PATH: process.env.NODE_PATH || path.join(process.cwd(), "node_modules"),
-        DATABASE_URL: getDirectDbUrl(),
-        POSTGRES_PRISMA_URL: getDirectDbUrl(),
-        POSTGRES_URL_NON_POOLING: getDirectDbUrl(),
-        CI: "true",
-      },
-    },
-    async (err, stdout, stderr) => {
-      const p = running.get(runId);
-      if (!p) return;
-
-      p.log += stdout || "";
-      if (stderr) p.log += "\n" + stderr;
-
-      // Сохраняем stderr для extractError
-      const _stderr = stderr || "";
-
-      // Парсим JSON-суммари с последней строки
-      const lines = stdout.trim().split("\n").filter(Boolean);
-      const lastLine = lines[lines.length - 1];
-      let syncStats = { added: 0, updated: 0, archived: 0, skipped: 0, errors: 0 };
-
-      if (lastLine?.startsWith("{")) {
-        try {
-          const s = JSON.parse(lastLine);
-          syncStats = {
-            added: s.created || 0,
-            updated: s.updated || 0,
-            archived: s.archived || 0,
-            skipped: s.skipped || 0,
-            errors: s.errors || 0,
-          };
-        } catch { /* ignore */ }
-      }
-
-      const success = !err && !stdout.includes("ERROR:") && !stdout.includes("FATAL:");
-      const errorMsg = extractError(p.log, _stderr, err);
-
-      // Сохраняем в историю
-      const record: SyncRunRecord = {
-        platform,
-        timestamp: new Date().toISOString(),
-        duration: Date.now() - p.startedAt,
-        success,
-        error: errorMsg,
-        stats: {
-          added: syncStats.added,
-          updated: syncStats.updated,
-          archived: syncStats.archived,
-          skipped: syncStats.skipped || 0,
-          errors: syncStats.errors,
-          total: syncStats.added + syncStats.updated + syncStats.archived + (syncStats.skipped || 0),
-        },
-        log: p.log,
-      };
-      await addSyncRun(record);
-
-      // Сброс кэша данных + ISR
-      invalidateCache();
-      try {
-        revalidatePath("/catalog");
-        revalidatePath("/");
-      } catch {
-        // revalidatePath может упасть вне request-контекста
-      }
-
-      // Финальный статус
-      p.status = success ? "completed" : "failed";
-      p.error = errorMsg;
-      p.phase = "done";
-      p.phaseLabel = success ? "Завершено" : "Ошибка";
-      p.current = p.total;
-
-      // Очищаем activePlatformRun
-      activePlatformRun.delete(platform);
-    },
-  );
-
-  // Обработка ошибки запуска (синхронная)
-  child.on("error", (execErr) => {
+  // Запускаем синхронизацию асинхронно (не блокируем ответ API)
+  runSync(runId, platform).catch((err) => {
     const p = running.get(runId);
     if (!p) return;
-    p.log += `\nОшибка запуска: ${execErr.message}`;
-    p.status = "failed";
-    p.error = execErr.message.slice(0, 300);
-    p.phase = "done";
-    p.phaseLabel = "Ошибка";
-    activePlatformRun.delete(platform);
+    if (p.status !== "failed") {
+      p.status = "failed";
+      p.error = err instanceof Error ? err.message.slice(0, 500) : String(err).slice(0, 500);
+      p.phase = "done";
+      p.phaseLabel = "Ошибка";
+      activePlatformRun.delete(platform);
+    }
   });
 
-  // Построчный разбор stdout
-  child.stdout?.on("data", (chunk: string) => {
-    const p = running.get(runId);
-    if (!p) return;
+  return runId;
+}
 
-    p.log += chunk;
-    const lines = chunk.split("\n");
+/* ─── Внутренний запуск ─── */
 
-    for (const line of lines) {
+async function runSync(runId: string, platform: "wb" | "ozon") {
+  const p = running.get(runId);
+  if (!p) return;
+
+  // Сохраняем оригинальные функции для восстановления
+  const originalConsoleLog = console.log;
+  const originalProcessExit = process.exit;
+
+  try {
+    // Перехватываем console.log, чтобы парсить [PROGRESS] и [DETAIL] в реальном времени
+    console.log = (...args) => {
+      const line = args.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ");
+      p.log += line + "\n";
+
       const prog = parseProgressLine(line);
-      if (prog) {
-        Object.assign(p, prog);
-        continue;
-      }
+      if (prog) Object.assign(p, prog);
 
       const detail = parseDetailLine(line);
       if (detail) {
         if (detail.updated) p.details.updated.push(detail.updated);
         if (detail.added) p.details.added.push(detail.added);
-        continue;
       }
+
+      // Также пишем в реальный stdout (на случай отладки)
+      originalConsoleLog(...args);
+    };
+
+    // Блокируем process.exit — он убьёт весь сервер
+    (process as NodeJS.EventEmitter).exit = ((code?: number) => {
+      const msg = `process.exit(${code}) was called — sync прерван`;
+      p.log += msg + "\n";
+      throw new Error(msg);
+    }) as (code?: number) => never;
+
+    // Динамический импорт sync-all.mjs
+    // Используем абсолютный путь — на Vercel файл лежит в /var/task/scripts/sync-all.mjs
+    const syncModule = await import(SYNC_SCRIPT);
+
+    if (platform === "wb") {
+      await syncModule.runWbSync();
+    } else {
+      await syncModule.runOzonSync();
     }
-  });
 
-  child.stderr?.on("data", (chunk: string) => {
-    const p = running.get(runId);
-    if (p) p.log += chunk;
-  });
+    // Успех — парсим статистику
+    const stats = parseStats(p.log);
+    const success = !p.log.includes("FATAL:") && !p.log.includes("ERROR:");
+    const errorMsg = success ? undefined : extractError(p.log);
 
-  return runId;
+    await addSyncRun({
+      platform,
+      timestamp: new Date().toISOString(),
+      duration: Date.now() - p.startedAt,
+      success,
+      error: errorMsg,
+      stats: {
+        added: stats.added,
+        updated: stats.updated,
+        archived: stats.archived,
+        skipped: stats.skipped || 0,
+        errors: stats.errors,
+        total: stats.added + stats.updated + stats.archived + (stats.skipped || 0),
+      },
+      log: p.log,
+    });
+
+    p.status = success ? "completed" : "failed";
+    p.error = errorMsg;
+    p.phase = "done";
+    p.phaseLabel = success ? "Завершено" : "Ошибка";
+    p.current = p.total;
+
+  } catch (err) {
+    if (p.status !== "failed") {
+      const msg = err instanceof Error ? err.message : String(err);
+      p.log += `\nFATAL: ${msg}\n`;
+      p.status = "failed";
+      p.error = msg.slice(0, 500);
+      p.phase = "done";
+      p.phaseLabel = "Ошибка";
+
+      await addSyncRun({
+        platform,
+        timestamp: new Date().toISOString(),
+        duration: Date.now() - p.startedAt,
+        success: false,
+        error: msg.slice(0, 500),
+        stats: { added: 0, updated: 0, archived: 0, skipped: 0, errors: 1, total: 0 },
+        log: p.log,
+      });
+    }
+  } finally {
+    // Восстанавливаем оригинальные функции
+    console.log = originalConsoleLog;
+    process.exit = originalProcessExit;
+    activePlatformRun.delete(platform);
+
+    // Сброс кэша данных + ISR
+    invalidateCache();
+    try {
+      revalidatePath("/catalog");
+      revalidatePath("/");
+    } catch {
+      // revalidatePath может упасть вне request-контекста
+    }
+  }
+}
+
+/* ─── Очистка зависшего запуска ─── */
+
+function clearStaleRun(platform: "wb" | "ozon") {
+  const active = activePlatformRun.get(platform);
+  if (active && running.has(active)) {
+    running.delete(active);
+    activePlatformRun.delete(platform);
+  }
 }
 
 /* ─── Получение прогресса ─── */
