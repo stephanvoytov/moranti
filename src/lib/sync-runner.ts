@@ -242,7 +242,8 @@ async function runSync(runId: string, platform: "wb" | "ozon") {
     };
 
     // Блокируем process.exit — он убьёт весь сервер
-    (process as NodeJS.EventEmitter).exit = ((code?: number) => {
+    const origExit = process.exit;
+    ((process as unknown) as Record<string, unknown>).exit = ((code?: number) => {
       const msg = `process.exit(${code}) was called — sync прерван`;
       p.log += msg + "\n";
       throw new Error(msg);
