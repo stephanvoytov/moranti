@@ -10,7 +10,6 @@
  *   getActiveRunId(platform) → string | null
  */
 
-import path from "path";
 import { revalidatePath } from "next/cache";
 import { invalidateCache } from "@/lib/data-cache";
 import { addSyncRun, getLastSyncRun } from "./sync-history";
@@ -20,10 +19,12 @@ import { WildberriesSDK } from "daytona-wildberries-typescript-sdk";
 import { ApiError } from "ozon-seller-sdk";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+// Статический импорт бандла синхронизации — Turbopack трассирует его,
+// включает все зависимости (6.1мб) в бандл серверлесс-функции.
+// outputFileTracingIncludes (next.config.ts) гарантирует, что файл в деплое.
+import { runWbSync, runOzonSync } from "../../scripts/sync-all.bundle.mjs";
 
 [WildberriesSDK, ApiError, PrismaPg, PrismaClient];
-
-const SYNC_SCRIPT = path.join(process.cwd(), "scripts", "sync-all.bundle.mjs");
 
 /* ─── Типы прогресса ─── */
 
@@ -249,14 +250,13 @@ async function runSync(runId: string, platform: "wb" | "ozon") {
       throw new Error(msg);
     }) as (code?: number) => never;
 
-    // Динамический импорт sync-all.mjs
-    // Используем абсолютный путь — на Vercel файл лежит в /var/task/scripts/sync-all.mjs
-    const syncModule = await import(SYNC_SCRIPT);
-
+    // Статический импорт уже загружен наверху (runWbSync, runOzonSync).
+    // console.log и process.exit перехватываются через глобальные объекты
+    // — все функции используют их, т.к. это не замыкания, а рантайм-глобалы.
     if (platform === "wb") {
-      await syncModule.runWbSync();
+      await runWbSync();
     } else {
-      await syncModule.runOzonSync();
+      await runOzonSync();
     }
 
     // Успех — парсим статистику
