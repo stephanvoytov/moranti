@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./sync.module.css";
 import { formatDistanceToNow } from "@/lib/format-date";
+import { useLiveAgo, useElapsed, usePulse } from "@/lib/use-live-ago";
 
 /* ─── Types ─── */
 
@@ -264,15 +265,6 @@ const PLATFORM = {
 
 /* ─── Helpers ─── */
 
-function ago(ts: string) {
-  try {
-    return formatDistanceToNow(new Date(ts), { addSuffix: true, locale: "ru" });
-  } catch {
-    const d = new Date(ts);
-    return d.toLocaleString("ru-RU");
-  }
-}
-
 function fmtDur(ms: number) {
   if (ms < 1000) return `${ms}мс`;
   if (ms < 60_000) return `${(ms / 1000).toFixed(1)}с`;
@@ -492,6 +484,12 @@ function PlatformCard({
   history: SyncRunRecord[];
 }) {
   const isRunning = progress?.status === "running";
+  const isFailed = progress?.status === "failed";
+
+  // Hooks — всегда на верхнем уровне
+  const lastRunAgo = useLiveAgo(lastRun?.timestamp ?? null);
+  const elapsed = useElapsed(isRunning ? (progress?.startedAt ?? null) : null);
+  const pulsing = usePulse(isRunning);
 
   // Expand state per card
   const [expandedHistory, setExpandedHistory] = useState(false);
@@ -520,17 +518,29 @@ function PlatformCard({
         <span className={`${styles.badge} ${config.badgeClass}`}>{config.badge}</span>
       </div>
 
-      {/* Status */}
-      {lastRun && !isRunning && (
+      {/* Status: last run */}
+      {lastRun && !isRunning && !isFailed && (
         <div className={styles.statusRow}>
           <span className={lastRun.success ? styles.statusOk : styles.statusFail}>
             {lastRun.success ? "✓" : "✗"}
           </span>
           <span className={styles.statusText}>
             {lastRun.success
-              ? `Успешно · ${ago(lastRun.timestamp)} · за ${fmtDur(lastRun.duration)}`
-              : `Ошибка · ${ago(lastRun.timestamp)}`
+              ? `Успешно · ${lastRunAgo} · за ${fmtDur(lastRun.duration)}`
+              : `Ошибка · ${lastRunAgo}`
             }
+          </span>
+        </div>
+      )}
+
+      {/* Status: running now */}
+      {isRunning && (
+        <div className={styles.statusRow}>
+          <span className={pulsing ? styles.statusPulseOn : styles.statusPulseOff}>
+            ●
+          </span>
+          <span className={styles.statusText}>
+            Синхронизация · {elapsed}
           </span>
         </div>
       )}
@@ -584,7 +594,7 @@ function PlatformCard({
           )}
 
           {/* Error banner (only when failed) */}
-          {progress.status === "failed" && progress.error && (
+          {isFailed && progress.error && (
             <div className={styles.errorMsg}>{progress.error}</div>
           )}
 
@@ -601,8 +611,8 @@ function PlatformCard({
           disabled={disabled}
         >
           {isRunning ? (
-            <><span className={styles.btnSpinner} /> Синхронизация...</>
-          ) : progress?.status === "failed" ? (
+            <><span className={styles.btnSpinner} /> Синхронизация... {elapsed}</>
+          ) : isFailed ? (
             "↻ Повторить"
           ) : (
             "Запустить синхронизацию"
@@ -678,7 +688,7 @@ function PlatformCard({
                 <div key={run.timestamp + i} className={styles.historyItem}>
                   <div className={styles.historyLeft}>
                     <span className={run.success ? styles.historyDotOk : styles.historyDotFail} />
-                    <span className={styles.historyDate}>{fmtDate(run.timestamp)}</span>
+                    <span className={styles.historyDate}><HistoryDate timestamp={run.timestamp} /></span>
                   </div>
                   <div className={styles.historyRight}>
                     <span className={styles.historyStat}>
@@ -694,6 +704,13 @@ function PlatformCard({
       )}
     </section>
   );
+}
+
+/* ─── HistoryDate — живое относительное время для истории ─── */
+
+function HistoryDate({ timestamp }: { timestamp: string }) {
+  const ago = useLiveAgo(timestamp);
+  return <>{ago || timestamp}</>;
 }
 
 /* ─── Stat Card ─── */

@@ -156,6 +156,25 @@
   font-weight: 700;
 }
 
+/* Пульсирующий индикатор синхронизации */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.statusPulseOn {
+  color: #059669;
+  font-size: 16px;
+  font-weight: 700;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.statusPulseOff {
+  color: #d1d5db;
+  font-size: 16px;
+  font-weight: 700;
+}
+
 .statusText {
   line-height: 1.3;
 }
