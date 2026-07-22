@@ -1,2 +1,13 @@
 {
+  "functions": {
+    "src/app/api/admin/sync/route.ts": {
+      "includeFiles": "node_modules/**"
+    },
+    "src/app/api/admin/sync/ozon/route.ts": {
+      "includeFiles": "node_modules/**"
+    },
+    "src/app/api/admin/sync/progress/route.ts": {
+      "includeFiles": "node_modules/**"
+    }
+  }
 }
