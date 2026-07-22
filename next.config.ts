@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  /* ─── Prisma имеет динамические require(), Turbopack не умеет их бандлить ─── */
+  serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg"],
+
   /* ─── Include sync bundle in API routes (Vercel file tracing) ─── */
   outputFileTracingIncludes: {
     "/api/admin/sync": ["./scripts/sync-all.bundle.mjs"],

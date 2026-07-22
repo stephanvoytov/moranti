@@ -16,7 +16,7 @@ const OUT = "scripts/sync-all.bundle.mjs";
 console.log(`[bundle] Сборка ${OUT}...`);
 
 execSync(
-  `npx esbuild scripts/sync-all.mjs --bundle --platform=node --format=esm --outfile=${OUT}`,
+  `npx esbuild scripts/sync-all.mjs --bundle --platform=node --format=esm --external:@prisma/client --external:@prisma/adapter-pg --outfile=${OUT}`,
   { stdio: "inherit", cwd: process.cwd() }
 );
 
