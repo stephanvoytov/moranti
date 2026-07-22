@@ -4,7 +4,7 @@
  * Все функции зависят от Prisma — используем mock.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 
 const MODELS_PATH = "../../scripts/sync-modules/models.mjs";
 

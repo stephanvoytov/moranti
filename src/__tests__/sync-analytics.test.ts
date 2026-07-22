@@ -28,7 +28,7 @@ beforeEach(() => {
   vi.restoreAllMocks();
 });
 
-function mockFetch(status, body) {
+function mockFetch(status: number, body: any) {
   globalThis.fetch = vi.fn().mockResolvedValue({
     status,
     ok: status >= 200 && status < 300,
@@ -45,12 +45,12 @@ describe("wbFetchAnalytics", () => {
   });
 
   it("нет apiKey (null) — возвращает пустой Map", async () => {
-    const result = await wbFetchAnalytics([123], null);
+    const result = await wbFetchAnalytics([123], null as any);
     expect(result.size).toBe(0);
   });
 
   it("нет apiKey (undefined) — возвращает пустой Map", async () => {
-    const result = await wbFetchAnalytics([123], undefined);
+    const result = await wbFetchAnalytics([123], undefined as any);
     expect(result.size).toBe(0);
   });
 
@@ -80,7 +80,7 @@ describe("wbFetchAnalytics", () => {
 
     const result = await wbFetchAnalytics([123456789], "test-key");
     expect(result.size).toBe(1);
-    const entry = result.get(123456789);
+    const entry = result.get(123456789)!;
     expect(entry.productRating).toBe(4.5);
     expect(entry.feedbackRating).toEqual({ current: 4.5, dynamics: 0.3, percentile: 2.1 });
     expect(entry.feedbackCount).toBe(12);
@@ -100,10 +100,10 @@ describe("wbFetchAnalytics", () => {
 
     const result = await wbFetchAnalytics([111, 222, 333], "key");
     expect(result.size).toBe(3);
-    expect(result.get(111).productRating).toBe(4.0);
-    expect(result.get(222).productRating).toBe(3.5);
-    expect(result.get(333).productRating).toBe(5.0);
-    expect(result.get(222).pinnedFeedback).toBe(true);
+    expect(result.get(111)!.productRating).toBe(4.0);
+    expect(result.get(222)!.productRating).toBe(3.5);
+    expect(result.get(333)!.productRating).toBe(5.0);
+    expect(result.get(222)!.pinnedFeedback).toBe(true);
   });
 
   // ─── URL и тело запроса ───
@@ -112,7 +112,7 @@ describe("wbFetchAnalytics", () => {
     await wbFetchAnalytics([111, 222], "my-token");
 
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
-    const [url, init] = globalThis.fetch.mock.calls[0];
+    const [url, init] = (globalThis.fetch as any).mock.calls[0];
     expect(url).toBe("https://seller-analytics-api.wildberries.ru/api/analytics/v1/item-rating");
     expect(init.method).toBe("POST");
     expect(init.headers.Authorization).toBe("my-token");
@@ -135,21 +135,21 @@ describe("wbFetchAnalytics", () => {
     mockFetch(200, {
       data: { cards: [{ nmId: 1, feedbackRating: null, feedbackCount: { current: 0 } }] },
     });
-    expect((await wbFetchAnalytics([1], "key")).get(1).productRating).toBeNull();
+    expect((await wbFetchAnalytics([1], "key")).get(1)!.productRating).toBeNull();
   });
 
   it("feedbackCount отсутствует — feedbackCount = null", async () => {
     mockFetch(200, {
       data: { cards: [{ nmId: 1, feedbackRating: { current: 4.0 }, feedbackCount: null }] },
     });
-    expect((await wbFetchAnalytics([1], "key")).get(1).feedbackCount).toBeNull();
+    expect((await wbFetchAnalytics([1], "key")).get(1)!.feedbackCount).toBeNull();
   });
 
   it("pinnedFeedback отсутствует — по умолчанию false", async () => {
     mockFetch(200, {
       data: { cards: [{ nmId: 1, feedbackRating: { current: 4.0 }, feedbackCount: { current: 5 } }] },
     });
-    expect((await wbFetchAnalytics([1], "key")).get(1).pinnedFeedback).toBe(false);
+    expect((await wbFetchAnalytics([1], "key")).get(1)!.pinnedFeedback).toBe(false);
   });
 
   it("карточка без nmId — пропускается", async () => {
@@ -164,7 +164,7 @@ describe("wbFetchAnalytics", () => {
     const result = await wbFetchAnalytics([42], "key");
     expect(result.size).toBe(1);
     expect(result.get(42)).toBeDefined();
-    expect(result.get(42).productRating).toBe(3.0);
+    expect(result.get(42)!.productRating).toBe(3.0);
     expect(Array.from(result.keys())).toEqual([42]);
   });
 
@@ -209,7 +209,7 @@ describe("wbFetchAnalytics", () => {
     vi.useRealTimers();
 
     expect(result.size).toBe(1);
-    expect(result.get(1).productRating).toBe(4.2);
+    expect(result.get(1)!.productRating).toBe(4.2);
     expect(globalThis.fetch).toHaveBeenCalledTimes(2);
   });
 
@@ -250,7 +250,7 @@ describe("wbFetchAnalytics", () => {
 
   it("батчинг: 51 → 2 батча (50 + 1)", async () => {
     vi.useFakeTimers();
-    const capturedBodies = [];
+    const capturedBodies: any[] = [];
     globalThis.fetch = vi.fn().mockImplementation((url, init) => {
       capturedBodies.push(JSON.parse(init.body));
       return Promise.resolve({
@@ -275,7 +275,7 @@ describe("wbFetchAnalytics", () => {
 
   it("батчинг: 120 → 3 батча с правильным распределением ID", async () => {
     vi.useFakeTimers();
-    const capturedBodies = [];
+    const capturedBodies: any[] = [];
     globalThis.fetch = vi.fn().mockImplementation((url, init) => {
       capturedBodies.push(JSON.parse(init.body));
       return Promise.resolve({

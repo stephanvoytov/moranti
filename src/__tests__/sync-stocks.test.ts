@@ -18,7 +18,8 @@ const mockSDKConstructor = vi.fn();
 
 vi.mock("daytona-wildberries-typescript-sdk", () => {
   class MockWildberriesSDK {
-    constructor(config) {
+    analytics: { createProductsProduct: typeof mockCreateProductsProduct };
+    constructor(config: any) {
       mockSDKConstructor(config);
       this.analytics = {
         createProductsProduct: mockCreateProductsProduct,
@@ -29,7 +30,8 @@ vi.mock("daytona-wildberries-typescript-sdk", () => {
   return {
     WildberriesSDK: MockWildberriesSDK,
     RateLimitError: class RateLimitError extends Error {
-      constructor(msg, retryAfter) {
+      retryAfter: any;
+      constructor(msg: any, retryAfter: any) {
         super(msg);
         this.retryAfter = retryAfter;
       }
@@ -53,7 +55,7 @@ beforeEach(() => {
   mockCreateProductsProduct.mockReset();
 });
 
-function stockItem(nmID, stockCount, vendorCode = `vendor-${nmID}`) {
+function stockItem(nmID: number, stockCount: number, vendorCode = `vendor-${nmID}`) {
   return {
     nmID,
     vendorCode,
@@ -96,12 +98,12 @@ describe("wbFetchStocks", () => {
   });
 
   it("нет apiKey (null) — возвращает пустой Map", async () => {
-    const result = await wbFetchStocks([123], null);
+    const result = await wbFetchStocks([123], null as any);
     expect(result.size).toBe(0);
   });
 
   it("нет apiKey (undefined) — возвращает пустой Map", async () => {
-    const result = await wbFetchStocks([123], undefined);
+    const result = await wbFetchStocks([123], undefined as any);
     expect(result.size).toBe(0);
   });
 
@@ -223,13 +225,13 @@ describe("wbFetchStocks", () => {
 
   // ─── Батчинг ───
   it("батчинг: 2500 nmID → 3 запроса, offset: 0→1000→2000", async () => {
-    const capturedParams = [];
+    const capturedParams: any[] = [];
     mockCreateProductsProduct.mockImplementation((params) => {
       capturedParams.push({ ...params });
       const chunk = params.nmIDs || [];
       const items = chunk
-        .filter((id) => id != null)
-        .map((id) => stockItem(id, 10));
+        .filter((id: any) => id != null)
+        .map((id: any) => stockItem(id, 10));
       return Promise.resolve({ data: { items } });
     });
 
@@ -254,8 +256,8 @@ describe("wbFetchStocks", () => {
   });
 
   it("батчинг: ровно 1000 → 1 запрос", async () => {
-    mockCreateProductsProduct.mockImplementation((params) => {
-      const items = (params.nmIDs || []).map((id) => stockItem(id, 1));
+    mockCreateProductsProduct.mockImplementation((params: any) => {
+      const items = (params.nmIDs || []).map((id: number) => stockItem(id, 1));
       return Promise.resolve({ data: { items } });
     });
 

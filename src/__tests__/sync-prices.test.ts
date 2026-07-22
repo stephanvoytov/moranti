@@ -18,7 +18,8 @@ const mockSDKConstructor = vi.fn();
 
 vi.mock("daytona-wildberries-typescript-sdk", () => {
   class MockWildberriesSDK {
-    constructor(config) {
+    products: { getGoodsFilter: typeof mockGetGoodsFilter };
+    constructor(config: any) {
       mockSDKConstructor(config);
       this.products = {
         getGoodsFilter: mockGetGoodsFilter,
@@ -29,7 +30,8 @@ vi.mock("daytona-wildberries-typescript-sdk", () => {
   return {
     WildberriesSDK: MockWildberriesSDK,
     RateLimitError: class RateLimitError extends Error {
-      constructor(msg, retryAfter) {
+      retryAfter: any;
+      constructor(msg: any, retryAfter: any) {
         super(msg);
         this.retryAfter = retryAfter;
       }
@@ -53,7 +55,7 @@ beforeEach(() => {
   mockGetGoodsFilter.mockReset();
 });
 
-function priceGood(nmID, priceKop, discountedKop, techSize = "ONE") {
+function priceGood(nmID: number, priceKop: number, discountedKop: number, techSize = "ONE") {
   return {
     nmID,
     vendorCode: `vendor-${nmID}`,
@@ -75,11 +77,11 @@ function priceGood(nmID, priceKop, discountedKop, techSize = "ONE") {
 describe("wbFetchOfficialPrices", () => {
   // ─── Нет ключа ───
   it("нет apiKey (null) — возвращает пустой Map", async () => {
-    expect((await wbFetchOfficialPrices(null)).size).toBe(0);
+    expect((await wbFetchOfficialPrices(null as any)).size).toBe(0);
   });
 
   it("нет apiKey (undefined) — возвращает пустой Map", async () => {
-    expect((await wbFetchOfficialPrices(undefined)).size).toBe(0);
+    expect((await wbFetchOfficialPrices(undefined as any)).size).toBe(0);
   });
 
   // ─── Успешный парсинг ───
@@ -90,9 +92,10 @@ describe("wbFetchOfficialPrices", () => {
 
     const result = await wbFetchOfficialPrices("test-key");
     expect(result.size).toBe(1);
-    expect(result.get(98486).price).toBe(500);
-    expect(result.get(98486).discountedPrice).toBe(350);
-    expect(result.get(98486)).not.toHaveProperty("stock");
+    expect(result.get(98486)!).toBeDefined();
+    expect(result.get(98486)!.price).toBe(500);
+    expect(result.get(98486)!.discountedPrice).toBe(350);
+    expect(result.get(98486)!).not.toHaveProperty("stock");
   });
 
   it("несколько товаров — маппится по nmID", async () => {
@@ -108,9 +111,9 @@ describe("wbFetchOfficialPrices", () => {
 
     const result = await wbFetchOfficialPrices("key");
     expect(result.size).toBe(3);
-    expect(result.get(111).price).toBe(1000);
-    expect(result.get(222).price).toBe(500);
-    expect(result.get(333).price).toBe(2000);
+    expect(result.get(111)!.price).toBe(1000);
+    expect(result.get(222)!.price).toBe(500);
+    expect(result.get(333)!.price).toBe(2000);
   });
 
   // ─── Копейки ───
@@ -119,8 +122,8 @@ describe("wbFetchOfficialPrices", () => {
       data: { listGoods: [priceGood(1, 100, 99)] },
     });
     const result = await wbFetchOfficialPrices("key");
-    expect(result.get(1).price).toBe(1);
-    expect(result.get(1).discountedPrice).toBe(0.99);
+    expect(result.get(1)!.price).toBe(1);
+    expect(result.get(1)!.discountedPrice).toBe(0.99);
   });
 
   it("большое число копеек: 999999 → 9999.99", async () => {
@@ -128,8 +131,8 @@ describe("wbFetchOfficialPrices", () => {
       data: { listGoods: [priceGood(1, 999999, 888888)] },
     });
     const result = await wbFetchOfficialPrices("key");
-    expect(result.get(1).price).toBe(9999.99);
-    expect(result.get(1).discountedPrice).toBe(8888.88);
+    expect(result.get(1)!.price).toBe(9999.99);
+    expect(result.get(1)!.discountedPrice).toBe(8888.88);
   });
 
   // ─── SDK вызывается с правильными параметрами ───
@@ -203,7 +206,7 @@ describe("wbFetchOfficialPrices", () => {
 
   // ─── Пагинация ───
   it("пагинация: 2500 товаров → 3 запроса к SDK, offset: 0→1000→2000", async () => {
-    const capturedParams = [];
+    const capturedParams: any[] = [];
     mockGetGoodsFilter.mockImplementation((params) => {
       capturedParams.push({ ...params });
       const offset = params.offset || 0;
