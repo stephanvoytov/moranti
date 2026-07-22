@@ -16,12 +16,14 @@ import { revalidatePath } from "next/cache";
 import { invalidateCache } from "@/lib/data-cache";
 import { addSyncRun, getLastSyncRun } from "./sync-history";
 import type { SyncRunRecord, SyncRunDetail } from "./sync-history";
-// Явные импорты для Vercel File Tracer — включает SDK в Lambda
-// (нужны для scripts/sync-modules/*.mjs в child_process)
+// Явные импорты для Vercel File Tracer — включает SDK и Prisma адаптер в Lambda
+// (нужны для scripts/sync-all.mjs и scripts/sync-modules/*.mjs в child_process)
 import { WildberriesSDK } from "daytona-wildberries-typescript-sdk";
 import { ApiError } from "ozon-seller-sdk";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "@prisma/client";
 
-[WildberriesSDK, ApiError];
+[WildberriesSDK, ApiError, PrismaPg, PrismaClient];
 
 const SCRIPTS_DIR = path.join(process.cwd(), "scripts");
 const SYNC_SCRIPT = path.join(SCRIPTS_DIR, "sync-all.mjs");
