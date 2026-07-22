@@ -20891,7 +20891,7 @@ async function wbFetchAllCards(apiKey, trash = false) {
     const data = await wbFetch(WB_CONTENT_API, endpoint, { method: "POST", apiKey, body });
     const cards = data.cards || [];
     allCards.push(...cards);
-    total = data.total || allCards.length;
+    total = data.cursor?.total ?? allCards.length;
     log.write(` ${allCards.length}/${total}`);
     if (data.cursor && cards.length === ITEMS_PER_WB_CARDS) {
       cursor = data.cursor;
