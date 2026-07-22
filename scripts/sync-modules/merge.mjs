@@ -21,9 +21,7 @@ import {
   ozonExtractCharacteristics,
 } from "./transform.mjs";
 
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const { generateName } = require("../name-generator.js");
+import { generateName } from "../name-generator.js";
 
 /**
  * Собирает финальные данные товара из WB и Ozon источников.

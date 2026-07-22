@@ -23,7 +23,7 @@ import { PrismaClient } from "@prisma/client";
 
 [WildberriesSDK, ApiError, PrismaPg, PrismaClient];
 
-const SYNC_SCRIPT = path.join(process.cwd(), "scripts", "sync-all.mjs");
+const SYNC_SCRIPT = path.join(process.cwd(), "scripts", "sync-all.bundle.mjs");
 
 /* ─── Типы прогресса ─── */
 

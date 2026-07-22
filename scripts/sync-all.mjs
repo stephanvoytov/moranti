@@ -46,15 +46,11 @@ import {
 import { mergeProductSources } from "./sync-modules/merge.mjs";
 import { syncModels, syncOzonModels, archiveGoneProducts } from "./sync-modules/models.mjs";
 
-// --- CommonJS зависимости (используем require вместо ESM import,
-//     потому что Vercel не резолвит ESM-пакеты в child_process правильно,
-//     а require учитывает NODE_PATH) ---
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const { PrismaClient } = require("@prisma/client");
-const { PrismaPg } = require("@prisma/adapter-pg");
-const { wbToCategory, CATEGORY_RU } = require("./wb-categories.js");
-const { generateName } = require("./name-generator.js");
+// --- Зависимости (прямой import — esbuild трассирует его для бандла) ---
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { wbToCategory, CATEGORY_RU } from "./wb-categories.js";
+import { generateName } from "./name-generator.js";
 
 // ============================================================
 // Config

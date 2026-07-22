@@ -12,9 +12,7 @@
  * @module sync-modules/stocks
  */
 
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const { WildberriesSDK } = require("daytona-wildberries-typescript-sdk");
+import { WildberriesSDK } from "daytona-wildberries-typescript-sdk";
 
 const FETCH_TIMEOUT = 30000;
 const BATCH_SIZE = 1000;

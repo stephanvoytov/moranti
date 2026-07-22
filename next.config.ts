@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  /* ─── Include sync bundle in API routes (Vercel file tracing) ─── */
+  outputFileTracingIncludes: {
+    "/api/admin/sync": ["./scripts/sync-all.bundle.mjs"],
+    "/api/admin/sync/*": ["./scripts/sync-all.bundle.mjs"],
+  },
+
   /* ─── Remove X-Powered-By: Next.js header ─── */
   poweredByHeader: false,
 

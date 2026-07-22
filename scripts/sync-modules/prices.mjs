@@ -17,9 +17,7 @@
  * @module sync-modules/prices
  */
 
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const { WildberriesSDK } = require("daytona-wildberries-typescript-sdk");
+import { WildberriesSDK } from "daytona-wildberries-typescript-sdk";
 
 const FETCH_TIMEOUT = 30000;
 

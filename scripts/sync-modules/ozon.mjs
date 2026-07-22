@@ -7,9 +7,7 @@
  *   import { ozonFetchAllProducts, ozonFetchProductInfo, ozonFetchProductAttributes } from "./sync-modules/ozon.mjs";
  */
 
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const { OzonSellerApiClient } = require("ozon-seller-sdk");
+import { OzonSellerApiClient } from "ozon-seller-sdk";
 
 const BATCH_SIZE = 100;
 const REQUEST_DELAY = 100;
