@@ -85,7 +85,7 @@ describe("wbFetchOfficialPrices", () => {
   });
 
   // ─── Успешный парсинг ───
-  it("парсит ответ с одним товаром — цена /100", async () => {
+  it("парсит ответ с одним товаром — цена в рублях", async () => {
     mockGetGoodsFilter.mockResolvedValue({
       data: { listGoods: [priceGood(98486, 50000, 35000)] },
     });
@@ -93,8 +93,8 @@ describe("wbFetchOfficialPrices", () => {
     const result = await wbFetchOfficialPrices("test-key");
     expect(result.size).toBe(1);
     expect(result.get(98486)!).toBeDefined();
-    expect(result.get(98486)!.price).toBe(500);
-    expect(result.get(98486)!.discountedPrice).toBe(350);
+    expect(result.get(98486)!.price).toBe(50000);
+    expect(result.get(98486)!.discountedPrice).toBe(35000);
     expect(result.get(98486)!).not.toHaveProperty("stock");
   });
 
@@ -111,28 +111,28 @@ describe("wbFetchOfficialPrices", () => {
 
     const result = await wbFetchOfficialPrices("key");
     expect(result.size).toBe(3);
-    expect(result.get(111)!.price).toBe(1000);
-    expect(result.get(222)!.price).toBe(500);
-    expect(result.get(333)!.price).toBe(2000);
+    expect(result.get(111)!.price).toBe(100000);
+    expect(result.get(222)!.price).toBe(50000);
+    expect(result.get(333)!.price).toBe(200000);
   });
 
   // ─── Копейки ───
-  it("деление на 100: 100 копеек → 1 рубль", async () => {
+  it("деление на 100: 100 рублей → 100 рублей (без деления)", async () => {
     mockGetGoodsFilter.mockResolvedValue({
       data: { listGoods: [priceGood(1, 100, 99)] },
     });
     const result = await wbFetchOfficialPrices("key");
-    expect(result.get(1)!.price).toBe(1);
-    expect(result.get(1)!.discountedPrice).toBe(0.99);
+    expect(result.get(1)!.price).toBe(100);
+    expect(result.get(1)!.discountedPrice).toBe(99);
   });
 
-  it("большое число копеек: 999999 → 9999.99", async () => {
+  it("большое число: 999999 → 999999", async () => {
     mockGetGoodsFilter.mockResolvedValue({
       data: { listGoods: [priceGood(1, 999999, 888888)] },
     });
     const result = await wbFetchOfficialPrices("key");
-    expect(result.get(1)!.price).toBe(9999.99);
-    expect(result.get(1)!.discountedPrice).toBe(8888.88);
+    expect(result.get(1)!.price).toBe(999999);
+    expect(result.get(1)!.discountedPrice).toBe(888888);
   });
 
   // ─── SDK вызывается с правильными параметрами ───

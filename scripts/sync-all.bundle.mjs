@@ -17719,8 +17719,8 @@ async function wbFetchOfficialPrices(apiKey, log2 = noopLog2) {
         const size = g.sizes?.[0];
         if (size?.price != null) {
           priceMap.set(g.nmID, {
-            price: size.price / 100,
-            discountedPrice: size.discountedPrice / 100
+            price: size.price,
+            discountedPrice: size.discountedPrice
           });
         }
       }

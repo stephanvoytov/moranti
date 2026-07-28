@@ -9,7 +9,7 @@
  *   - Retry с exponential backoff на 429/5xx
  *   - Typed errors (RateLimitError, AuthenticationError, NetworkError, etc.)
  *
- * Цены приходят в копейках → функция делит на 100.
+ * Цены приходят в рублях (не в копейках).
  * Стоков этот API не возвращает (stock всегда null).
  *
  * Требует токен категории «Цены и скидки» (WB_PRICES_API_KEY).
@@ -66,8 +66,8 @@ export async function wbFetchOfficialPrices(apiKey, log = noopLog) {
         const size = g.sizes?.[0];
         if (size?.price != null) {
           priceMap.set(g.nmID, {
-            price: size.price / 100,
-            discountedPrice: size.discountedPrice / 100,
+            price: size.price,
+            discountedPrice: size.discountedPrice,
           });
         }
       }

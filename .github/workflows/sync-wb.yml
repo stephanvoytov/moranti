@@ -1,4 +1,4 @@
-name: Sync Wildberries
+name: Sync Wildberries & Ozon
 
 on:
   schedule:
@@ -14,7 +14,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: 'npm'
 
       - run: npm ci
@@ -23,10 +23,14 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      # sync-all.mjs использует официальные WB API (Content + Pricing + Stocks)
-      # Требует WB_API_KEY (токен категории «Контент»)
-      - name: Sync catalog with Wildberries
-        run: node scripts/sync-all.mjs --wb-only
+      # sync-all.mjs использует официальные WB API (Content + Pricing + Stocks + Analytics)
+      # и Ozon Seller API
+      - name: Sync catalog with WB & Ozon
+        run: node scripts/sync-all.mjs
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           WB_API_KEY: ${{ secrets.WB_API_KEY }}
+          WB_ANALYTICS_API_KEY: ${{ secrets.WB_ANALYTICS_API_KEY }}
+          WB_PRICES_API_KEY: ${{ secrets.WB_PRICES_API_KEY }}
+          OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
+          OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
