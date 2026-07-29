@@ -511,6 +511,13 @@ async function main() {
           log.line(`  Стоки наложены на ${mergedCount} товаров`);
         }
         log.progress("wb-stocks", 1, 1);
+
+        // Товары WB, которых нет в ответе API — явно ставим stock = 0
+        for (const nmId of wbArticles) {
+          if (!wbPriceMap.has(nmId)) {
+            wbPriceMap.set(nmId, { price: null, discountedPrice: null, stock: 0 });
+          }
+        }
       } else if (shouldRun("wb-stocks") && !wbAnalyticsKey) {
         log.line("[SKIP] WB_ANALYTICS_API_KEY не задан — стоки не обновляются");
       }

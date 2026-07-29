@@ -18621,6 +18621,11 @@ async function wbFetchStocks(nmIDs, apiKey, log2 = noopLog3) {
       offset += BATCH_SIZE;
     }
     log2.line(` \u2014 ${stockMap.size} products`);
+    for (const nmId of nmIDs) {
+      if (!stockMap.has(nmId)) {
+        stockMap.set(nmId, 0);
+      }
+    }
   } catch (err) {
     log2.line(`
   SDK stocks API error: ${err.message}`);
@@ -21948,6 +21953,11 @@ async function main() {
           log.line(`  \u0421\u0442\u043E\u043A\u0438 \u043D\u0430\u043B\u043E\u0436\u0435\u043D\u044B \u043D\u0430 ${mergedCount} \u0442\u043E\u0432\u0430\u0440\u043E\u0432`);
         }
         log.progress("wb-stocks", 1, 1);
+        for (const nmId of wbArticles) {
+          if (!wbPriceMap.has(nmId)) {
+            wbPriceMap.set(nmId, { price: null, discountedPrice: null, stock: 0 });
+          }
+        }
       } else if (shouldRun("wb-stocks") && !wbAnalyticsKey) {
         log.line("[SKIP] WB_ANALYTICS_API_KEY \u043D\u0435 \u0437\u0430\u0434\u0430\u043D \u2014 \u0441\u0442\u043E\u043A\u0438 \u043D\u0435 \u043E\u0431\u043D\u043E\u0432\u043B\u044F\u044E\u0442\u0441\u044F");
       }

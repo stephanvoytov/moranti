@@ -80,6 +80,13 @@ export async function wbFetchStocks(nmIDs, apiKey, log = noopLog) {
     }
 
     log.line(` — ${stockMap.size} products`);
+
+    // Товары, которых нет в ответе API (остаток = 0), явно ставим 0
+    for (const nmId of nmIDs) {
+      if (!stockMap.has(nmId)) {
+        stockMap.set(nmId, 0);
+      }
+    }
   } catch (err) {
     log.line(`\n  SDK stocks API error: ${err.message}`);
   }
