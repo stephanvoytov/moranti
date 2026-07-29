@@ -215,6 +215,16 @@ export default function AdminModelsKanban() {
     finally { setCreating(false); }
   }
 
+  // ─── Marketplace stats ───
+  const allVariants = columns.flatMap((c) => c.items);
+  const totalVariants = allVariants.length;
+  const onWb = allVariants.filter((v) => v.wbArticle);
+  const wbInStock = onWb.filter((v) => (v.wbStock ?? 0) > 0);
+  const wbNoStock = onWb.filter((v) => (v.wbStock ?? 0) <= 0);
+  const onOzon = allVariants.filter((v) => v.ozonArticle);
+  const ozInStock = onOzon.filter((v) => (v.ozonStock ?? 0) > 0);
+  const ozNoStock = onOzon.filter((v) => (v.ozonStock ?? 0) <= 0);
+
   // ─── Helpers ───
 
   function formatPrice(n?: number) {
@@ -263,6 +273,57 @@ export default function AdminModelsKanban() {
           </AdminButton>
         </div>
       </header>
+
+      {/* ─── Marketplace summary ─── */}
+      <section className={styles.summarySection}>
+        <p className={styles.summaryCount}>Вариантов всего: {totalVariants}</p>
+        <div className={styles.summaryRow}>
+          <div className={styles.mpCard}>
+            <div className={styles.mpHeader}>
+              <div className={styles.mpIcon}>WB</div>
+              <span className={styles.mpTitle}>Wildberries</span>
+            </div>
+            <div className={styles.mpStats}>
+              <div className={styles.mpStat}>
+                <span className={styles.mpStatValue}>{wbInStock.length}</span>
+                <span className={styles.mpStatLabel}>в наличии</span>
+              </div>
+              <div className={styles.mpDivider} />
+              <div className={styles.mpStat}>
+                <span className={styles.mpStatValue}>{wbNoStock.length}</span>
+                <span className={styles.mpStatLabel}>без остатка</span>
+              </div>
+              <div className={styles.mpDivider} />
+              <div className={styles.mpStat}>
+                <span className={styles.mpStatValue}>{onWb.length}</span>
+                <span className={styles.mpStatLabel}>всего на WB</span>
+              </div>
+            </div>
+          </div>
+          <div className={styles.mpCard}>
+            <div className={styles.mpHeader}>
+              <div className={`${styles.mpIcon} ${styles.mpIconOzon}`}>OZ</div>
+              <span className={styles.mpTitle}>Ozon</span>
+            </div>
+            <div className={styles.mpStats}>
+              <div className={styles.mpStat}>
+                <span className={styles.mpStatValue}>{ozInStock.length}</span>
+                <span className={styles.mpStatLabel}>в наличии</span>
+              </div>
+              <div className={styles.mpDivider} />
+              <div className={styles.mpStat}>
+                <span className={styles.mpStatValue}>{ozNoStock.length}</span>
+                <span className={styles.mpStatLabel}>без остатка</span>
+              </div>
+              <div className={styles.mpDivider} />
+              <div className={styles.mpStat}>
+                <span className={styles.mpStatValue}>{onOzon.length}</span>
+                <span className={styles.mpStatLabel}>всего на Ozon</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ─── Kanban board ─── */}
       <div className={styles.board}>

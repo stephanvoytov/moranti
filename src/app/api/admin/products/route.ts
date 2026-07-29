@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const parsed = productsQuerySchema.safeParse(Object.fromEntries(searchParams));
-  const { search = "", category = "", archived = "", marketplace = "", page = 1, limit = 20 } = parsed.data ?? {};
+  const { search = "", category = "", archived = "", marketplace = "", sortBy, sortOrder, page = 1, limit = 20 } = parsed.data ?? {};
 
   const where: Record<string, unknown> = {};
   if (search) {
@@ -50,10 +50,22 @@ export async function GET(request: NextRequest) {
     where.ozonArticle = { not: null };
   }
 
+  const nullableFields = ["wbStock", "ozonStock"] as const;
+  const itemsOrderBy: Record<string, unknown>[] = [];
+  if (sortBy && sortOrder) {
+    if (nullableFields.includes(sortBy as typeof nullableFields[number])) {
+      itemsOrderBy.push({ [sortBy]: { sort: sortOrder, nulls: "last" } });
+    } else {
+      itemsOrderBy.push({ [sortBy]: sortOrder });
+    }
+  } else {
+    itemsOrderBy.push({ createdAt: "desc" });
+  }
+
   const [items, total] = await prismaQuery(() => Promise.all([
     prisma.product.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: itemsOrderBy,
       skip: (page - 1) * limit,
       take: limit,
       include: { model: { select: { id: true, name: true } } },

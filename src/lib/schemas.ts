@@ -125,6 +125,8 @@ export const productsQuerySchema = z.object({
   category: z.enum(VALID_CATEGORIES).optional(),
   archived: z.enum(["true", "false"]).optional(),
   marketplace: z.enum(["wb", "ozon", "both"]).optional(),
+  sortBy: z.enum(["wbStock", "ozonStock", "price", "name", "createdAt"]).optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(200).optional().default(20),
 });

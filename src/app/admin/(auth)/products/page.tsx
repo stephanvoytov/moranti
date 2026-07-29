@@ -70,6 +70,10 @@ export default function AdminProductsPage() {
   const [assignModelId, setAssignModelId] = useState("");
   const [models, setModels] = useState<ModelBrief[]>([]);
 
+  // Sorting — по умолчанию сортируем по наличию на WB
+  const [sortBy, setSortBy] = useState("wbStock");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
   // Reorder mode
   const [reorderMode, setReorderMode] = useState(false);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -93,6 +97,8 @@ export default function AdminProductsPage() {
       if (category) params.set("category", category);
       if (archivedParam) params.set("archived", archivedParam);
       if (marketplaceParam) params.set("marketplace", marketplaceParam);
+      if (sortBy) params.set("sortBy", sortBy);
+      if (sortOrder) params.set("sortOrder", sortOrder);
 
       const res = await fetch(`/api/admin/products?${params}`);
       if (res.status === 401) { router.push("/admin/login"); return; }
@@ -102,7 +108,7 @@ export default function AdminProductsPage() {
       setSelectedIds(new Set());
       setLoading(false);
     },
-    [search, category, archivedParam, marketplaceParam, router],
+    [search, category, archivedParam, marketplaceParam, sortBy, sortOrder, router],
   );
 
   useEffect(() => { fetchProducts(1); }, [fetchProducts]);
@@ -285,6 +291,15 @@ export default function AdminProductsPage() {
 
   const catName = (slug: string) => CATEGORIES.find((c) => c.slug === slug)?.name || slug;
 
+  function toggleSort(field: string) {
+    if (sortBy === field) {
+      setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(field);
+      setSortOrder("desc");
+    }
+  }
+
   // ─── Render ───
 
   if (reorderMode) {
@@ -434,12 +449,24 @@ export default function AdminProductsPage() {
                 />
               </th>
               <th></th>
-              <th>Название</th>
+              <th className={styles.sortable} onClick={() => toggleSort("name")}>
+                Название{sortBy === "name" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
+              </th>
               <th>Модель</th>
-              <th>Цена</th>
+              <th className={styles.sortable} onClick={() => toggleSort("price")}>
+                Цена{sortBy === "price" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
+              </th>
               <th>Категория</th>
               <th>SKU</th>
-              <th>Маркетплейсы</th>
+              <th>
+                <span className={styles.sortable} onClick={() => toggleSort("wbStock")}>
+                  WB{sortBy === "wbStock" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
+                </span>
+                {" / "}
+                <span className={styles.sortable} onClick={() => toggleSort("ozonStock")}>
+                  Ozon{sortBy === "ozonStock" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
+                </span>
+              </th>
               <th>Рейтинг</th>
               <th></th>
             </tr>
