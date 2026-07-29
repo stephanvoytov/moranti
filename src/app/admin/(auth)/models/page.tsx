@@ -215,13 +215,13 @@ export default function AdminModelsKanban() {
     finally { setCreating(false); }
   }
 
-  // ─── Marketplace stats ───
-  const allVariants = columns.flatMap((c) => c.items);
-  const totalVariants = allVariants.length;
-  const onWb = allVariants.filter((v) => v.wbArticle);
+  // ─── Marketplace stats (только активные) ───
+  const activeVariants = columns.flatMap((c) => c.items).filter((v) => !v.archivedAt);
+  const totalVariants = activeVariants.length;
+  const onWb = activeVariants.filter((v) => v.wbArticle);
   const wbInStock = onWb.filter((v) => (v.wbStock ?? 0) > 0);
   const wbNoStock = onWb.filter((v) => (v.wbStock ?? 0) <= 0);
-  const onOzon = allVariants.filter((v) => v.ozonArticle);
+  const onOzon = activeVariants.filter((v) => v.ozonArticle);
   const ozInStock = onOzon.filter((v) => (v.ozonStock ?? 0) > 0);
   const ozNoStock = onOzon.filter((v) => (v.ozonStock ?? 0) <= 0);
 
