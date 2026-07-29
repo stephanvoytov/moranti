@@ -23,6 +23,8 @@ interface ProductForm {
   colorName: string;
   composition: string;
   modelId: string;
+  inStock: boolean;
+  archivedAt: string | null;
 }
 
 interface ModelOption {
@@ -55,6 +57,8 @@ const emptyForm: ProductForm = {
   colorName: "",
   composition: "",
   modelId: "",
+  inStock: true,
+  archivedAt: null,
 };
 
 export default function ProductEditorPage() {
@@ -99,7 +103,7 @@ export default function ProductEditorPage() {
     colorName: form.colorName || undefined,
       composition: form.composition || undefined,
     modelId: form.modelId || undefined,
-    inStock: true,
+    inStock: form.inStock,
     photoCount: form.images?.length || 1,
   }), [form, params.slug]);
 
@@ -140,6 +144,8 @@ export default function ProductEditorPage() {
           colorName: data.colorName || "",
           composition: data.composition || "",
           modelId: data.modelId || "",
+          inStock: data.inStock !== false,
+          archivedAt: data.archivedAt || null,
         });
         setLoading(false);
       } catch {
@@ -339,6 +345,8 @@ export default function ProductEditorPage() {
     colorName: form.colorName || undefined,
       composition: form.composition || undefined,
     photoCount: form.images?.length || 1,
+    inStock: form.inStock,
+    archivedAt: form.archivedAt || null,
     };
 
     const method = isNew ? "POST" : "PUT";
@@ -526,6 +534,51 @@ export default function ProductEditorPage() {
                 </select>
               </label>
             )}
+
+            <h3 className={styles.sectionTitle}>Наличие</h3>
+
+            <div className={styles.row}>
+              <label className={styles.checkLabel}>
+                <input
+                  type="checkbox"
+                  className={styles.checkbox}
+                  checked={form.inStock}
+                  onChange={(e) => {
+                    setForm((prev) => ({ ...prev, inStock: e.target.checked }));
+                    setDirty(true);
+                  }}
+                />
+                <span>В наличии</span>
+              </label>
+              {!form.archivedAt ? (
+                <button
+                  type="button"
+                  className={styles.archiveBtn}
+                  onClick={() => {
+                    setForm((prev) => ({ ...prev, archivedAt: new Date().toISOString() }));
+                    setDirty(true);
+                  }}
+                >
+                  Архивировать
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.unarchiveBtn}
+                  onClick={() => {
+                    setForm((prev) => ({ ...prev, archivedAt: null }));
+                    setDirty(true);
+                  }}
+                >
+                  Восстановить из архива
+                </button>
+              )}
+              {form.archivedAt && (
+                <span className={styles.archivedHint}>
+                  Архив: {new Date(form.archivedAt).toLocaleDateString("ru-RU")}
+                </span>
+              )}
+            </div>
 
             <h3 className={styles.sectionTitle}>Описание и внешний вид</h3>
 

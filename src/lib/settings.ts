@@ -6,7 +6,7 @@
 import { readFileSync, existsSync } from "fs";
 import path from "path";
 import prisma, { prismaQuery } from "@/lib/prisma";
-import { cacheGet } from "@/lib/data-cache";
+import { cacheGet, invalidateCache } from "@/lib/data-cache";
 import { logger } from "@/lib/logger";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 
@@ -98,5 +98,6 @@ export async function writeSettings(
     }),
   );
 
+  invalidateCache("site-settings");
   return merged;
 }

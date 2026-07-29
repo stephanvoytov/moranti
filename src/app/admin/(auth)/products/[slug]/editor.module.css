@@ -572,6 +572,65 @@
   cursor: not-allowed;
 }
 
+/* ─── Stock / Archive controls ─── */
+
+.checkLabel {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-primary);
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--dark);
+  cursor: pointer;
+}
+
+.archiveBtn,
+.unarchiveBtn {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.archiveBtn {
+  background: none;
+  border: 1px solid var(--error);
+  color: var(--error);
+}
+
+.archiveBtn:hover {
+  background: var(--error);
+  color: var(--white);
+}
+
+.unarchiveBtn {
+  background: none;
+  border: 1px solid #2e7d32;
+  color: #2e7d32;
+}
+
+.unarchiveBtn:hover {
+  background: #2e7d32;
+  color: var(--white);
+}
+
+.archivedHint {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
 /* ─── Skeleton ─── */
 
 .skeleton {

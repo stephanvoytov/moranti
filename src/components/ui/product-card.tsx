@@ -31,7 +31,7 @@ function HeartIcon({ filled }: { filled: boolean }) {
 
 export default function ProductCard({ product, priority = false }: ProductCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { livePrice, loading } = useLivePrice(product.wbArticle);
+  const { livePrice, liveOriginal, loading } = useLivePrice(product.wbArticle);
   const slug = product.slug;
   const link = `/catalog/${slug}`;
   const fav = isFavorite(product.wbArticle);
@@ -41,7 +41,8 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
   // Use live price when available, fall back to static data
   const displayPrice = livePrice ?? product.price;
-  const showOriginal = !loading && !livePrice && product.originalPrice > product.price;
+  const displayOriginal = liveOriginal ?? product.originalPrice;
+  const showOriginal = !loading && displayOriginal > displayPrice;
 
   const handleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -123,7 +124,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           </span>
           {showOriginal && (
             <span className={styles.oldPrice}>
-              {product.originalPrice.toLocaleString("ru-RU")} ₽
+              {displayOriginal.toLocaleString("ru-RU")} ₽
             </span>
           )}
         </div>

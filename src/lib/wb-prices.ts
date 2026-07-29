@@ -259,6 +259,11 @@ export async function getWbPrices(articles: number[]): Promise<WbPriceResult[]> 
     await buildStaticSnapshot();
   }
 
+  // ── Если снэпшот устарел — сбрасываем для принудительного обновления ──
+  if (snapshot && !isSnapshotFresh()) {
+    snapshot = null;
+  }
+
   // ── Определяем, какие артикулы нужно обновить ──
   const staleOrMissing = articles.filter((a) => {
     if (!snapshot) return true;

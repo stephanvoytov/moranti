@@ -65,6 +65,13 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
     if (!hasInitialData && products.length > 0) setLoaded(true);
   }, [products, hasInitialData]);
 
+  // Refresh RSC data on focus — подхватывает изменения после админки
+  useEffect(() => {
+    const onFocus = () => router.refresh();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [router]);
+
   // catalogOrder: from props (server) or fetch from API (client nav)
   const [catalogOrder, setCatalogOrder] = useState<string[]>(initialCatalogOrder ?? []);
   useEffect(() => {

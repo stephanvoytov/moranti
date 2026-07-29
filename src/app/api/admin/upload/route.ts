@@ -1,12 +1,5 @@
-/* =============================================
-   POST /api/admin/upload
-   Загрузка изображения на сервер
-   Protected: requires valid admin session
-   ============================================= */
-
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -33,7 +26,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Validate type
     if (!ALLOWED_UPLOAD_TYPES.includes(file.type as typeof ALLOWED_UPLOAD_TYPES[number])) {
       return NextResponse.json(
         { error: `Invalid file type: ${file.type}. Allowed: JPEG, PNG, WebP, AVIF` },
@@ -41,7 +33,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate size
     if (file.size > MAX_UPLOAD_SIZE) {
       return NextResponse.json(
         { error: `File too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Max: 10 MB` },
@@ -49,21 +40,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // Generate unique filename
     const ext = file.name.split(".").pop() || "jpg";
     const timestamp = Date.now();
     const random = Math.random().toString(36).slice(2, 6);
-    const filename = `${timestamp}-${random}.${ext}`;
+    const filename = `images/products/${timestamp}-${random}.${ext}`;
 
-    // Save file
-    const dir = path.join(process.cwd(), "public", "images", "products");
-    await mkdir(dir, { recursive: true });
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(path.join(dir, filename), buffer);
+    const blob = await put(filename, file, { access: "public" });
 
-    const url = `/images/products/${filename}`;
-
-    return NextResponse.json({ url, filename });
+    return NextResponse.json({ url: blob.url, filename });
   } catch (err) {
     logger.error("Upload failed", { error: err instanceof Error ? err.message : String(err) });
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });

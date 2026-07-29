@@ -8,32 +8,37 @@ interface ProductsData {
   categories: ProductCategory[];
 }
 
-let globalData: ProductsData | null = null;
 let globalPromise: Promise<ProductsData> | null = null;
 
 function fetchProducts(): Promise<ProductsData> {
-  if (globalData) return Promise.resolve(globalData);
   if (globalPromise) return globalPromise;
 
   globalPromise = fetch("/api/data/products")
     .then((res) => res.json())
     .then((data) => {
-      globalData = data;
+      globalPromise = null;
       return data;
+    })
+    .catch((err) => {
+      globalPromise = null;
+      throw err;
     });
 
   return globalPromise;
 }
 
 export function useProducts(): ProductsData {
-  const [data, setData] = useState<ProductsData>(
-    globalData ?? { products: [], categories: [] },
-  );
+  const [data, setData] = useState<ProductsData>({
+    products: [],
+    categories: [],
+  });
 
   useEffect(() => {
-    if (!globalData) {
-      fetchProducts().then(setData);
-    }
+    let cancelled = false;
+    fetchProducts().then((result) => {
+      if (!cancelled) setData(result);
+    });
+    return () => { cancelled = true; };
   }, []);
 
   return data;

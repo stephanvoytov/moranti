@@ -71,7 +71,7 @@ export async function PUT(
     );
   }
 
-  const { name, price, originalPrice, category, description, rating, reviewsCount, images, wbArticle, ozonArticle, composition, colorName, modelId, sku } = parsed.data;
+  const { name, price, originalPrice, category, description, rating, reviewsCount, images, wbArticle, ozonArticle, composition, colorName, modelId, sku, inStock, archivedAt } = parsed.data;
 
   const data: Record<string, unknown> = {};
   if (name !== undefined) {
@@ -91,6 +91,10 @@ export async function PUT(
   if (colorName !== undefined) data.colorName = colorName;
   if (modelId !== undefined) data.modelId = modelId ?? null;
   if (sku !== undefined) data.sku = sku ?? null;
+  if (inStock !== undefined) data.inStock = inStock;
+  if (archivedAt !== undefined) {
+    data.archivedAt = archivedAt === null ? null : new Date(archivedAt);
+  }
 
   if (images !== undefined) {
     const filtered = images.filter(Boolean);

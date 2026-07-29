@@ -4,6 +4,7 @@
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -42,6 +43,8 @@ export async function PUT(request: NextRequest) {
       );
     }
     const updated = await writeSettings(parsed.data);
+    revalidatePath("/");
+    revalidatePath("/catalog");
     return NextResponse.json(updated);
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });

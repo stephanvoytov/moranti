@@ -73,6 +73,8 @@ export const updateProductSchema = z.object({
   composition: z.string().optional(),
   colorName: z.string().optional(),
   modelId: z.string().optional().nullable(),
+  inStock: z.boolean().optional(),
+  archivedAt: z.string().datetime().optional().nullable(),
 });
 
 /* ─── Settings ─── */
