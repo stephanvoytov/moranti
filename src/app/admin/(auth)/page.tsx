@@ -53,33 +53,31 @@ export default async function AdminDashboard() {
   const totalCategories = categories.length;
 
   const inStock = allProducts.filter((p) => p.inStock && !p.archivedAt);
-  const outOfStock = allProducts.filter((p) => !p.inStock && !p.archivedAt);
   const archived = allProducts.filter((p) => p.archivedAt);
   const totalSum = inStock.reduce((s, p) => s + p.price, 0);
   const avgPrice = inStock.length ? Math.round(totalSum / inStock.length) : 0;
 
   const onWb = allProducts.filter((p) => p.wbArticle);
   const wbInStock = onWb.filter((p) => (p.wbStock ?? 0) > 0);
-  const wbOutOfStock = onWb.filter((p) => !(p.wbStock ?? 0) > 0);
+  const wbNoStock = onWb.filter((p) => (p.wbStock ?? 0) <= 0);
 
   const onOzon = allProducts.filter((p) => p.ozonArticle);
   const ozonInStock = onOzon.filter((p) => (p.ozonStock ?? 0) > 0);
-  const ozonOutOfStock = onOzon.filter((p) => !(p.ozonStock ?? 0) > 0);
+  const ozonNoStock = onOzon.filter((p) => (p.ozonStock ?? 0) <= 0);
 
-  const withImages = allProducts.filter((p) => p.images?.length).length;
-  const withColorName = allProducts.filter((p) => p.colorName).length;
-  const linkedToModel = allProducts.filter((p) => p.modelId).length;
+  const withImages = inStock.filter((p) => p.images?.length).length;
+  const withColorName = inStock.filter((p) => p.colorName).length;
+  const linkedToModel = inStock.filter((p) => p.modelId).length;
 
   const issues: Issue[] = [];
   for (const p of allProducts) {
     if (p.archivedAt) continue;
     const tags: Issue["tags"] = [];
     if (!p.colorName) tags.push({ text: "Нет цвета" });
-    if (!p.composition) tags.push({ text: "Нет материала" });
     if (!p.images?.length) tags.push({ text: "Нет фото", warn: true });
     if (!p.wbArticle && !p.ozonArticle) tags.push({ text: "Нет в продаже", warn: true });
-    if (p.wbArticle && !(p.wbStock ?? 0) > 0) tags.push({ text: "Нет на WB", warn: true });
-    if (p.ozonArticle && !(p.ozonStock ?? 0) > 0) tags.push({ text: "Нет на Ozon", warn: true });
+    if (p.wbArticle && (p.wbStock ?? 0) <= 0) tags.push({ text: "Нет остатка WB", warn: true });
+    if (p.ozonArticle && (p.ozonStock ?? 0) <= 0) tags.push({ text: "Нет остатка Ozon", warn: true });
     if (tags.length) issues.push({ productId: p.id, productName: p.name, tags });
   }
   issues.sort((a, b) => b.tags.length - a.tags.length);
@@ -92,49 +90,59 @@ export default async function AdminDashboard() {
       <header className={styles.header}>
         <h1 className={styles.title}>Дашборд</h1>
         <p className={styles.subtitle}>
-          Всего вариантов {totalProducts} · В наличии {inStock.length} · Архив {archived.length} · Средняя цена {avgPrice.toLocaleString("ru-RU")} ₽
+          {totalProducts} варианта(ов) · {inStock.length} в наличии · {archived.length} в архиве · средняя {avgPrice.toLocaleString("ru-RU")} ₽
         </p>
       </header>
 
-      {/* ——— Marketplace stock ——— */}
-      <div className={styles.grid}>
-        <div className={styles.card}>
-          <span className={styles.cardValue}>{onWb.length}</span>
-          <span className={styles.cardLabel}>На WB</span>
+      {/* ——— Marketplace comparison ——— */}
+      <section className={styles.marketplaceSection}>
+        <div className={styles.mpRow}>
+          <div className={styles.mpCard}>
+            <div className={styles.mpHeader}>
+              <span className={styles.mpIcon}>WB</span>
+              <span className={styles.mpTitle}>Wildberries</span>
+            </div>
+            <div className={styles.mpStats}>
+              <div className={styles.mpStat}>
+                <span className={styles.mpStatValue}>{wbInStock.length}</span>
+                <span className={styles.mpStatLabel}>в наличии</span>
+              </div>
+              <div className={styles.mpDivider} />
+              <div className={styles.mpStat}>
+                <span className={styles.mpStatValue}>{wbNoStock.length}</span>
+                <span className={styles.mpStatLabel}>без остатка</span>
+              </div>
+              <div className={styles.mpDivider} />
+              <div className={styles.mpStat}>
+                <span className={styles.mpStatValue}>{onWb.length}</span>
+                <span className={styles.mpStatLabel}>всего на площадке</span>
+              </div>
+            </div>
+          </div>
+          <div className={styles.mpCard}>
+            <div className={styles.mpHeader}>
+              <span className={`${styles.mpIcon} ${styles.mpIconOzon}`}>O</span>
+              <span className={styles.mpTitle}>Ozon</span>
+            </div>
+            <div className={styles.mpStats}>
+              <div className={styles.mpStat}>
+                <span className={styles.mpStatValue}>{ozonInStock.length}</span>
+                <span className={styles.mpStatLabel}>в наличии</span>
+              </div>
+              <div className={styles.mpDivider} />
+              <div className={styles.mpStat}>
+                <span className={styles.mpStatValue}>{ozonNoStock.length}</span>
+                <span className={styles.mpStatLabel}>без остатка</span>
+              </div>
+              <div className={styles.mpDivider} />
+              <div className={styles.mpStat}>
+                <span className={styles.mpStatValue}>{onOzon.length}</span>
+                <span className={styles.mpStatLabel}>всего на площадке</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className={styles.card}>
-          <span className={styles.cardValue}>{wbInStock.length}</span>
-          <span className={styles.cardLabel}>В наличии на WB</span>
-        </div>
-        <div className={styles.card}>
-          <span className={`${styles.cardValue} ${!wbOutOfStock.length ? styles.cardValueMuted : ""}`}>
-            {wbOutOfStock.length || "—"}
-          </span>
-          <span className={styles.cardLabel}>Нет в остатке WB</span>
-        </div>
-        <div className={styles.card}>
-          <span className={styles.cardValue}>{onOzon.length}</span>
-          <span className={styles.cardLabel}>На Ozon</span>
-        </div>
-        <div className={styles.card}>
-          <span className={styles.cardValue}>{ozonInStock.length}</span>
-          <span className={styles.cardLabel}>В наличии на Ozon</span>
-        </div>
-        <div className={styles.card}>
-          <span className={`${styles.cardValue} ${!ozonOutOfStock.length ? styles.cardValueMuted : ""}`}>
-            {ozonOutOfStock.length || "—"}
-          </span>
-          <span className={styles.cardLabel}>Нет в остатке Ozon</span>
-        </div>
-        <div className={styles.card}>
-          <span className={styles.cardValue}>{inStock.length}</span>
-          <span className={styles.cardLabel}>В наличии всего</span>
-        </div>
-        <div className={styles.card}>
-          <span className={styles.cardValue}>{outOfStock.length}</span>
-          <span className={styles.cardLabel}>Нет в наличии</span>
-        </div>
-      </div>
+      </section>
 
       {/* ——— Sync status ——— */}
       <div className={styles.syncRow}>
@@ -142,7 +150,7 @@ export default async function AdminDashboard() {
         <SyncSection label="Ozon" sync={ozonSync} href="/admin/sync" />
       </div>
 
-      {/* ——— Summary ——— */}
+      {/* ——— Summary bar ——— */}
       <div className={styles.summaryBar}>
         <span className={styles.summaryItem}>
           <span className={`${styles.summaryDot} ${styles.summaryDotGood}`} />
@@ -162,11 +170,11 @@ export default async function AdminDashboard() {
         </span>
         <span className={styles.summaryItem}>
           <span className={`${styles.summaryDot} ${styles.summaryDotWarn}`} />
-          {totalProducts - withColorName} без цвета
+          {inStock.length - withColorName} без цвета
         </span>
         <span className={styles.summaryItem}>
           <span className={`${styles.summaryDot} ${styles.summaryDotBad}`} />
-          {totalProducts - withImages} без фото
+          {inStock.length - withImages} без фото
         </span>
       </div>
 
@@ -226,42 +234,6 @@ export default async function AdminDashboard() {
                 </td>
               </tr>
             ))}
-          </tbody>
-        </table>
-      </section>
-
-      {/* ——— Categories breakdown ——— */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>По категориям</h2>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Категория</th>
-              <th>Вариантов</th>
-              <th>В наличии</th>
-              <th>На WB</th>
-              <th>На Ozon</th>
-              <th>Средняя цена</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categories.map((cat) => {
-              const catProducts = allProducts.filter((p) => p.category === cat.slug);
-              const catInStock = catProducts.filter((p) => p.inStock && !p.archivedAt);
-              const catAvg = catInStock.length
-                ? Math.round(catInStock.reduce((s, p) => s + p.price, 0) / catInStock.length)
-                : 0;
-              return (
-                <tr key={cat.slug}>
-                  <td>{cat.name}</td>
-                  <td>{catProducts.length}</td>
-                  <td>{catInStock.length}</td>
-                  <td>{catProducts.filter((p) => p.wbArticle).length}</td>
-                  <td>{catProducts.filter((p) => p.ozonArticle).length}</td>
-                  <td>{catAvg.toLocaleString("ru-RU")} ₽</td>
-                </tr>
-              );
-            })}
           </tbody>
         </table>
       </section>
