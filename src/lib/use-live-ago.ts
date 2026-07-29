@@ -18,8 +18,8 @@ import { formatDistanceToNow } from "./format-date";
  * - до 24ч: каждые 5 мин
  * - далее: не обновляется (там уже дни)
  */
-export function useLiveAgo(timestamp: string | Date | null | undefined): string {
-  const ts = timestamp ? (typeof timestamp === "string" ? new Date(timestamp) : timestamp) : null;
+export function useLiveAgo(timestamp: string | Date | number | null | undefined): string {
+  const ts = timestamp ? (typeof timestamp === "string" || typeof timestamp === "number" ? new Date(timestamp) : timestamp) : null;
 
   const calc = () => {
     if (!ts) return "";
@@ -60,8 +60,8 @@ export function useLiveAgo(timestamp: string | Date | null | undefined): string 
  * Секундомер: возвращает "MM:SS" от startTime до сейчас.
  * Обновляется каждую секунду.
  */
-export function useElapsed(startTime: string | Date | null | undefined): string {
-  const st = startTime ? (typeof startTime === "string" ? new Date(startTime) : startTime) : null;
+export function useElapsed(startTime: string | Date | number | null | undefined): string {
+  const st = startTime ? (typeof startTime === "string" || typeof startTime === "number" ? new Date(startTime) : startTime) : null;
 
   const calc = () => {
     if (!st) return "--:--";
