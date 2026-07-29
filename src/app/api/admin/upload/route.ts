@@ -49,7 +49,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: blob.url, filename });
   } catch (err) {
-    logger.error("Upload failed", { error: err instanceof Error ? err.message : String(err) });
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error("Upload failed", { error: message, stack: err instanceof Error ? err.stack : undefined });
+    return NextResponse.json({ error: "Upload failed", detail: message }, { status: 500 });
   }
 }

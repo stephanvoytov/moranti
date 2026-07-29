@@ -6,6 +6,7 @@
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -37,8 +38,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const runId = runOzonSync();
-    // Сбрасываем кеш сразу (следующий запрос возьмёт свежие данные из БД)
     invalidateCache();
+    revalidatePath("/");
+    revalidatePath("/catalog");
     return NextResponse.json({ runId, status: "started" });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Ozon sync failed";

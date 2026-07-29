@@ -15,7 +15,7 @@ interface CacheEntry<T> {
 const store = new Map<string, CacheEntry<unknown>>();
 const pending = new Map<string, Promise<unknown>>();
 
-const DEFAULT_TTL = 300_000; // 5 min
+const DEFAULT_TTL = 30_000; // 30 s
 
 export function cacheGet<T>(
   key: string,

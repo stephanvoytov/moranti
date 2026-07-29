@@ -5,6 +5,7 @@
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -86,9 +87,10 @@ export async function POST(request: NextRequest) {
     }
   });
 
-  // Сбросить кеш данных — изменился список товаров
   invalidateCache("all-products");
   invalidateCache("all-categories");
+  revalidatePath("/");
+  revalidatePath("/catalog");
 
   return NextResponse.json({
     success: true,

@@ -6,7 +6,7 @@ var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-  get: (a, b2) => (typeof require !== "undefined" ? require : a)[b2]
+  get: (a2, b2) => (typeof require !== "undefined" ? require : a2)[b2]
 }) : x)(function(x) {
   if (typeof require !== "undefined") return require.apply(this, arguments);
   throw Error('Dynamic require of "' + x + '" is not supported');
@@ -453,9 +453,9 @@ import { fileURLToPath } from "url";
 // scripts/sync-modules/transform.mjs
 var import_wb_categories = __toESM(require_wb_categories(), 1);
 var GEO_CDN_HOST = "kgd-basket-cdn-01bl.geobasket.ru";
-function toBigInt(v2) {
-  if (v2 == null) return null;
-  return BigInt(v2);
+function toBigInt(v) {
+  if (v == null) return null;
+  return BigInt(v);
 }
 function getVolPart(article) {
   return {
@@ -526,11 +526,11 @@ function extractImageUrls(card, size = "big") {
   const media = card.media;
   if (!media) return null;
   if (Array.isArray(media.photo)) {
-    const urls = media.photo.map((p) => p && p[size] ? p[size] : null).filter(Boolean);
+    const urls = media.photo.map((p2) => p2 && p2[size] ? p2[size] : null).filter(Boolean);
     if (urls.length > 0) return urls;
   }
   if (Array.isArray(card.photos)) {
-    const urls = card.photos.map((p) => p?.url || null).filter(Boolean);
+    const urls = card.photos.map((p2) => p2?.url || null).filter(Boolean);
     if (urls.length > 0) return urls;
   }
   return null;
@@ -572,9 +572,9 @@ function resolveCategory(card) {
 }
 function ozonExtractColor(info, attrs) {
   if (attrs?.attributes) {
-    for (const a of attrs.attributes) {
-      if (a.attribute_name === "\u0426\u0432\u0435\u0442" || a.attribute_name === "\u0426\u0432\u0435\u0442 \u0442\u043E\u0432\u0430\u0440\u0430") {
-        const vals = Array.isArray(a.value) ? a.value : [a.value];
+    for (const a2 of attrs.attributes) {
+      if (a2.attribute_name === "\u0426\u0432\u0435\u0442" || a2.attribute_name === "\u0426\u0432\u0435\u0442 \u0442\u043E\u0432\u0430\u0440\u0430") {
+        const vals = Array.isArray(a2.value) ? a2.value : [a2.value];
         return vals.filter(Boolean).join(", ");
       }
     }
@@ -589,9 +589,9 @@ function ozonExtractColor(info, attrs) {
 }
 function ozonExtractComposition(attrs) {
   if (!attrs?.attributes) return null;
-  for (const a of attrs.attributes) {
-    if (a.attribute_name === "\u0421\u043E\u0441\u0442\u0430\u0432" || a.attribute_name === "\u041C\u0430\u0442\u0435\u0440\u0438\u0430\u043B") {
-      const vals = Array.isArray(a.value) ? a.value : [a.value];
+  for (const a2 of attrs.attributes) {
+    if (a2.attribute_name === "\u0421\u043E\u0441\u0442\u0430\u0432" || a2.attribute_name === "\u041C\u0430\u0442\u0435\u0440\u0438\u0430\u043B") {
+      const vals = Array.isArray(a2.value) ? a2.value : [a2.value];
       return vals.filter(Boolean).join(", ");
     }
   }
@@ -603,9 +603,9 @@ function ozonExtractDescription(attrs) {
 }
 function ozonExtractCharacteristics(attrs) {
   if (!attrs?.attributes) return [];
-  return attrs.attributes.map((a) => ({
-    name: a.attribute_name,
-    value: Array.isArray(a.value) ? a.value.join(", ") : String(a.value || "")
+  return attrs.attributes.map((a2) => ({
+    name: a2.attribute_name,
+    value: Array.isArray(a2.value) ? a2.value.join(", ") : String(a2.value || "")
   }));
 }
 function ozonExtractCategory(info, attrs) {
@@ -623,21 +623,21 @@ function ozonExtractCategory(info, attrs) {
     if (text.includes("\u0442\u043E\u0443\u0442") || text.includes("toute") || text.includes("tout ")) return "tote";
   }
   if (attrs?.attributes) {
-    const typeAttr = attrs.attributes.find((a) => a.id === 20259);
+    const typeAttr = attrs.attributes.find((a2) => a2.id === 20259);
     if (typeAttr?.values?.length) {
-      const vals = typeAttr.values.map((v2) => String(v2.value).toLowerCase());
-      if (vals.some((v2) => v2 === "\u0448\u043E\u043F\u043F\u0435\u0440" || v2 === "\u0448\u043E\u043F\u0435\u0440")) return "tote";
-      if (vals.some((v2) => v2.includes("\u0440\u044E\u043A\u0437\u0430\u043A"))) return "backpack";
-      if (vals.some((v2) => v2.includes("\u0441\u0435\u0434\u043B"))) return "saddle";
-      if (vals.some((v2) => v2.includes("\u0431\u0430\u0433\u0435\u0442"))) return "baguette";
-      if (vals.some((v2) => v2.includes("\u043D\u0430 \u043F\u043B\u0435\u0447\u043E") || v2.includes("\u0442\u043E\u0443\u0442"))) return "na-plecho";
-      if (vals.some((v2) => v2.includes("\u043A\u0440\u043E\u0441\u0441-\u0431\u043E\u0434\u0438") || v2.includes("\u043A\u0440\u043E\u0441\u0441\u0431\u043E\u0434\u0438"))) return "crossbody";
-      if (vals.some((v2) => v2.includes("\u043A\u043B\u0430\u0442\u0447"))) return "crossbody";
+      const vals = typeAttr.values.map((v) => String(v.value).toLowerCase());
+      if (vals.some((v) => v === "\u0448\u043E\u043F\u043F\u0435\u0440" || v === "\u0448\u043E\u043F\u0435\u0440")) return "tote";
+      if (vals.some((v) => v.includes("\u0440\u044E\u043A\u0437\u0430\u043A"))) return "backpack";
+      if (vals.some((v) => v.includes("\u0441\u0435\u0434\u043B"))) return "saddle";
+      if (vals.some((v) => v.includes("\u0431\u0430\u0433\u0435\u0442"))) return "baguette";
+      if (vals.some((v) => v.includes("\u043D\u0430 \u043F\u043B\u0435\u0447\u043E") || v.includes("\u0442\u043E\u0443\u0442"))) return "na-plecho";
+      if (vals.some((v) => v.includes("\u043A\u0440\u043E\u0441\u0441-\u0431\u043E\u0434\u0438") || v.includes("\u043A\u0440\u043E\u0441\u0441\u0431\u043E\u0434\u0438"))) return "crossbody";
+      if (vals.some((v) => v.includes("\u043A\u043B\u0430\u0442\u0447"))) return "crossbody";
     }
-    const modelAttr = attrs.attributes.find((a) => a.id === 9048);
+    const modelAttr = attrs.attributes.find((a2) => a2.id === 9048);
     if (modelAttr?.values?.length) {
-      const modelVals = modelAttr.values.map((v2) => String(v2.value).toLowerCase());
-      if (modelVals.some((v2) => v2.includes("sedlo") || v2.includes("\u0441\u0435\u0434\u043B") || v2.includes("saddle"))) return "saddle";
+      const modelVals = modelAttr.values.map((v) => String(v.value).toLowerCase());
+      if (modelVals.some((v) => v.includes("sedlo") || v.includes("\u0441\u0435\u0434\u043B") || v.includes("saddle"))) return "saddle";
     }
   }
   if (text) {
@@ -646,9 +646,9 @@ function ozonExtractCategory(info, attrs) {
   }
   return null;
 }
-function makeSlug(s) {
-  if (!s) return null;
-  return s.replace(/([a-z])([A-Z])/g, "$1-$2").replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2").toLowerCase().replace(/[/]+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-|-$/g, "");
+function makeSlug(s3) {
+  if (!s3) return null;
+  return s3.replace(/([a-z])([A-Z])/g, "$1-$2").replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2").toLowerCase().replace(/[/]+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-|-$/g, "");
 }
 
 // scripts/sync-modules/merge.mjs
@@ -663,8 +663,8 @@ function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAttrs, oz
   if (wbOrigPrice !== (db?.wbOriginalPrice ?? null)) data.wbOriginalPrice = wbOrigPrice;
   if (ozonPriceVal !== (db?.ozonPrice ?? null)) data.ozonPrice = ozonPriceVal;
   if (ozonOrigPriceVal !== (db?.ozonOriginalPrice ?? null)) data.ozonOriginalPrice = ozonOrigPriceVal;
-  const prices = [wbPrice, ozonPriceVal].filter((p) => p != null);
-  const origPrices = [wbOrigPrice, ozonOrigPriceVal].filter((p) => p != null);
+  const prices = [wbPrice, ozonPriceVal].filter((p2) => p2 != null);
+  const origPrices = [wbOrigPrice, ozonOrigPriceVal].filter((p2) => p2 != null);
   if (prices.length > 0) {
     const np = Math.min(...prices);
     if (np !== db?.price) data.price = np;
@@ -678,7 +678,7 @@ function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAttrs, oz
   }
   if (ozonInfo?.stocks?.stocks) {
     const qty = ozonInfo.stocks.stocks.reduce(
-      (s, st2) => s + Math.max(0, (st2.present || 0) - (st2.reserved || 0)),
+      (s3, st) => s3 + Math.max(0, (st.present || 0) - (st.reserved || 0)),
       0
     );
     if (qty !== (db?.ozonStock ?? null)) data.ozonStock = qty;
@@ -765,7 +765,7 @@ function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAttrs, oz
   const wbChars = wbCard?.characteristics || [];
   const ozonChars = ozonExtractCharacteristics(ozonAttrs);
   if (wbChars.length > 0 || ozonChars.length > 0) {
-    const sortOpts = (a, b2) => (a.name || "").localeCompare(b2.name || "");
+    const sortOpts = (a2, b2) => (a2.name || "").localeCompare(b2.name || "");
     const merged = [];
     if (wbChars.length > 0) {
       merged.push({
@@ -783,16 +783,16 @@ function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAttrs, oz
       });
     }
     const dbChars = db?.characteristics || [];
-    const mergedGroupNames = new Set(merged.map((g) => g.group_name));
-    const otherDbGroups = dbChars.filter((g) => !mergedGroupNames.has(g.group_name)).map((g) => ({
-      group_name: g.group_name,
-      options: [...g.options || []].sort(sortOpts)
+    const mergedGroupNames = new Set(merged.map((g2) => g2.group_name));
+    const otherDbGroups = dbChars.filter((g2) => !mergedGroupNames.has(g2.group_name)).map((g2) => ({
+      group_name: g2.group_name,
+      options: [...g2.options || []].sort(sortOpts)
     }));
     const combined = [...merged, ...otherDbGroups];
-    const dbEquivalent = combined.map((g) => {
-      const dbGroup = dbChars.find((dbg) => dbg.group_name === g.group_name);
+    const dbEquivalent = combined.map((g2) => {
+      const dbGroup = dbChars.find((dbg) => dbg.group_name === g2.group_name);
       return {
-        group_name: g.group_name,
+        group_name: g2.group_name,
         options: [...dbGroup?.options || []].sort(sortOpts)
       };
     });
@@ -854,7 +854,7 @@ function skuBase(sku) {
 }
 function findBestPrefix(skus) {
   if (!skus.length) return "";
-  const bases = skus.filter(Boolean).map((s) => skuBase(s));
+  const bases = skus.filter(Boolean).map((s3) => skuBase(s3));
   const n = bases.length;
   if (n === 0) return "";
   if (n === 1) return bases[0];
@@ -862,8 +862,8 @@ function findBestPrefix(skus) {
   for (const b2 of bases) {
     const lower = b2.toLowerCase();
     for (let len = lower.length; len >= 3; len--) {
-      const p = lower.slice(0, len);
-      freq.set(p, (freq.get(p) || 0) + 1);
+      const p2 = lower.slice(0, len);
+      freq.set(p2, (freq.get(p2) || 0) + 1);
     }
   }
   const byCount = /* @__PURE__ */ new Map();
@@ -874,9 +874,9 @@ function findBestPrefix(skus) {
       byCount.set(count, prefix);
     }
   }
-  const sorted = [...byCount.entries()].sort((a, b2) => {
-    if (b2[0] !== a[0]) return b2[0] - a[0];
-    return b2[1].length - a[1].length;
+  const sorted = [...byCount.entries()].sort((a2, b2) => {
+    if (b2[0] !== a2[0]) return b2[0] - a2[0];
+    return b2[1].length - a2[1].length;
   });
   if (sorted.length > 0) {
     const bestLower = sorted[0][1];
@@ -888,14 +888,14 @@ function findBestPrefix(skus) {
   }
   return "";
 }
-function stripSuffix(s) {
-  let r = s;
+function stripSuffix(s3) {
+  let r2 = s3;
   for (let i = 0; i < 5; i++) {
     let changed = false;
     for (const color of COLOR_WORDS) {
       const re2 = new RegExp(`[-_/]?${color}$`, "i");
-      if (re2.test(r)) {
-        r = r.replace(re2, "");
+      if (re2.test(r2)) {
+        r2 = r2.replace(re2, "");
         changed = true;
         break;
       }
@@ -903,53 +903,53 @@ function stripSuffix(s) {
     if (changed) continue;
     for (const code of COLOR_CODES) {
       let re2 = new RegExp(`[-_/]${code}$`);
-      if (re2.test(r)) {
-        r = r.replace(re2, "");
+      if (re2.test(r2)) {
+        r2 = r2.replace(re2, "");
         changed = true;
         break;
       }
       re2 = new RegExp(`${code}$`);
-      if (re2.test(r) && r.length > 4) {
-        r = r.replace(re2, "");
+      if (re2.test(r2) && r2.length > 4) {
+        r2 = r2.replace(re2, "");
         changed = true;
         break;
       }
     }
     if (changed) continue;
     const matRe = /[-_/](zamsh|leather|кожа|замш|prjag|big|small)$/i;
-    if (matRe.test(r)) {
-      r = r.replace(matRe, "");
+    if (matRe.test(r2)) {
+      r2 = r2.replace(matRe, "");
       changed = true;
       continue;
     }
     break;
   }
-  return r;
+  return r2;
 }
-function stripSize(s) {
-  return s.replace(/[-_/]\d+[-_/]\d+$/, "").replace(/[-_/]\d+$/, "").replace(/\d+$/, "").replace(/[-_/]$/, "");
+function stripSize(s3) {
+  return s3.replace(/[-_/]\d+[-_/]\d+$/, "").replace(/[-_/]\d+$/, "").replace(/\d+$/, "").replace(/[-_/]$/, "");
 }
 function cleanPrefix(raw) {
   if (!raw || raw.length < 3) return "";
-  let s = raw;
+  let s3 = raw;
   for (let i = 0; i < 3; i++) {
-    const prev = s;
-    s = stripSuffix(s);
-    s = stripSize(s);
-    if (s === prev) break;
+    const prev = s3;
+    s3 = stripSuffix(s3);
+    s3 = stripSize(s3);
+    if (s3 === prev) break;
   }
-  s = s.replace(/([a-zа-яё])([A-ZА-ЯЁ])/g, "$1 $2");
-  s = s.charAt(0).toUpperCase() + s.slice(1);
-  s = s.replace(/[^a-zA-Zа-яА-ЯЁё0-9\s-]/g, "").replace(/\s+/g, " ").trim();
-  return s;
+  s3 = s3.replace(/([a-zа-яё])([A-ZА-ЯЁ])/g, "$1 $2");
+  s3 = s3.charAt(0).toUpperCase() + s3.slice(1);
+  s3 = s3.replace(/[^a-zA-Zа-яА-ЯЁё0-9\s-]/g, "").replace(/\s+/g, " ").trim();
+  return s3;
 }
 function deriveFromProducts(productNames, category) {
   const mats = /* @__PURE__ */ new Set();
   for (const n of productNames) {
     if (!n) continue;
-    const l = n.toLowerCase();
-    if (l.includes("\u0437\u0430\u043C\u0448")) mats.add("\u0437\u0430\u043C\u0448\u0438");
-    if (l.includes("\u043A\u043E\u0436")) mats.add("\u043D\u0430\u0442\u0443\u0440\u0430\u043B\u044C\u043D\u043E\u0439 \u043A\u043E\u0436\u0438");
+    const l2 = n.toLowerCase();
+    if (l2.includes("\u0437\u0430\u043C\u0448")) mats.add("\u0437\u0430\u043C\u0448\u0438");
+    if (l2.includes("\u043A\u043E\u0436")) mats.add("\u043D\u0430\u0442\u0443\u0440\u0430\u043B\u044C\u043D\u043E\u0439 \u043A\u043E\u0436\u0438");
   }
   const cat = CATEGORY_RU[category] || category;
   if (mats.size === 0) return cat;
@@ -976,22 +976,22 @@ async function syncModels(prisma, wbCards, resolveCategory2, log2, flags2) {
     if (!imtGroups.has(imtId)) {
       imtGroups.set(imtId, { nmIDs: /* @__PURE__ */ new Set(), category: resolveCategory2(card) });
     }
-    const g = imtGroups.get(imtId);
-    g.nmIDs.add(card.nmID);
+    const g2 = imtGroups.get(imtId);
+    g2.nmIDs.add(card.nmID);
   }
   if (imtGroups.size === 0) {
     log2.line("  No imtId groups found in WB cards");
     return { created: 0, assigned: 0 };
   }
-  const allNmIds = [...new Set([...imtGroups.values()].flatMap((g) => [...g.nmIDs]))];
+  const allNmIds = [...new Set([...imtGroups.values()].flatMap((g2) => [...g2.nmIDs]))];
   const dbProducts = await prisma.product.findMany({
     where: { wbArticle: { in: allNmIds }, archivedAt: null },
     select: { id: true, wbArticle: true, sku: true, name: true, modelId: true }
   });
   const productByArticle = /* @__PURE__ */ new Map();
-  for (const p of dbProducts) {
-    const art = Number(p.wbArticle);
-    if (art) productByArticle.set(art, p);
+  for (const p2 of dbProducts) {
+    const art = Number(p2.wbArticle);
+    if (art) productByArticle.set(art, p2);
   }
   let created = 0;
   let assigned = 0;
@@ -1001,8 +1001,8 @@ async function syncModels(prisma, wbCards, resolveCategory2, log2, flags2) {
     const variantProducts = [...group.nmIDs].map((n) => productByArticle.get(n)).filter(Boolean);
     let model = await prisma.model.findFirst({ where: { imtId: bigIntId } });
     const catCounts = /* @__PURE__ */ new Map();
-    for (const p of variantProducts) {
-      catCounts.set(p.category, (catCounts.get(p.category) || 0) + 1);
+    for (const p2 of variantProducts) {
+      catCounts.set(p2.category, (catCounts.get(p2.category) || 0) + 1);
     }
     let majorityCat = group.category || "crossbody";
     let maxCount = 0;
@@ -1013,8 +1013,8 @@ async function syncModels(prisma, wbCards, resolveCategory2, log2, flags2) {
       }
     }
     if (model) {
-      const skus = variantProducts.map((p) => p.sku).filter(Boolean);
-      const names = [...new Set(variantProducts.map((p) => p.name).filter(Boolean))];
+      const skus = variantProducts.map((p2) => p2.sku).filter(Boolean);
+      const names = [...new Set(variantProducts.map((p2) => p2.name).filter(Boolean))];
       const newName = deriveModelName(skus, names, majorityCat);
       const updates = {};
       if (newName !== model.name) updates.name = newName;
@@ -1031,8 +1031,8 @@ async function syncModels(prisma, wbCards, resolveCategory2, log2, flags2) {
         skipped++;
         continue;
       }
-      const skus = variantProducts.map((p) => p.sku).filter(Boolean);
-      const names = [...new Set(variantProducts.map((p) => p.name).filter(Boolean))];
+      const skus = variantProducts.map((p2) => p2.sku).filter(Boolean);
+      const names = [...new Set(variantProducts.map((p2) => p2.name).filter(Boolean))];
       const modelName = deriveModelName(skus, names, majorityCat);
       const slug = `model-wb-${imtId}`;
       if (!flags2.dry) {
@@ -1054,16 +1054,16 @@ async function syncModels(prisma, wbCards, resolveCategory2, log2, flags2) {
       }
     }
     if (model) {
-      for (const p of variantProducts) {
-        if (p.modelId !== model.id) {
+      for (const p2 of variantProducts) {
+        if (p2.modelId !== model.id) {
           if (!flags2.dry) {
             await prisma.product.update({
-              where: { id: p.id },
+              where: { id: p2.id },
               data: { modelId: model.id }
             });
           }
           assigned++;
-          log2.line(`  Assigned ${p.id} \u2192 ${model.id}`);
+          log2.line(`  Assigned ${p2.id} \u2192 ${model.id}`);
         }
       }
     }
@@ -1077,9 +1077,9 @@ async function syncOzonModels(prisma, attrMap, log2) {
   const groups = /* @__PURE__ */ new Map();
   for (const [offerId, attrs] of attrMap) {
     if (!attrs?.attributes) continue;
-    const modelAttr = attrs.attributes.find((a) => a.id === 9048);
+    const modelAttr = attrs.attributes.find((a2) => a2.id === 9048);
     if (!modelAttr?.values?.length) continue;
-    const vals = modelAttr.values.map((v2) => v2.value).filter(Boolean);
+    const vals = modelAttr.values.map((v) => v.value).filter(Boolean);
     if (vals.length === 0) continue;
     const key = vals.join(" ");
     if (!groups.has(key)) groups.set(key, []);
@@ -1094,13 +1094,13 @@ async function syncOzonModels(prisma, attrMap, log2) {
       select: { id: true, sku: true, name: true, modelId: true, category: true }
     });
     if (products.length === 0) continue;
-    const existingModelId = products.find((p) => p.modelId)?.modelId;
+    const existingModelId = products.find((p2) => p2.modelId)?.modelId;
     if (existingModelId) {
-      for (const p of products) {
-        if (p.modelId !== existingModelId) {
-          await prisma.product.update({ where: { id: p.id }, data: { modelId: existingModelId } });
+      for (const p2 of products) {
+        if (p2.modelId !== existingModelId) {
+          await prisma.product.update({ where: { id: p2.id }, data: { modelId: existingModelId } });
           assigned++;
-          log2.line(`  Assigned ${p.id} \u2192 ${existingModelId} (Ozon)`);
+          log2.line(`  Assigned ${p2.id} \u2192 ${existingModelId} (Ozon)`);
         }
       }
     } else {
@@ -1109,7 +1109,7 @@ async function syncOzonModels(prisma, attrMap, log2) {
         continue;
       }
       const catCounts = /* @__PURE__ */ new Map();
-      for (const p of products) catCounts.set(p.category, (catCounts.get(p.category) || 0) + 1);
+      for (const p2 of products) catCounts.set(p2.category, (catCounts.get(p2.category) || 0) + 1);
       let majorityCat = products[0].category || "crossbody";
       let maxCount = 0;
       for (const [cat, c2] of catCounts) {
@@ -1118,8 +1118,8 @@ async function syncOzonModels(prisma, attrMap, log2) {
           majorityCat = cat;
         }
       }
-      const skus = products.map((p) => p.sku).filter(Boolean);
-      const names = [...new Set(products.map((p) => p.name).filter(Boolean))];
+      const skus = products.map((p2) => p2.sku).filter(Boolean);
+      const names = [...new Set(products.map((p2) => p2.name).filter(Boolean))];
       const modelName = deriveModelName(skus, names, majorityCat);
       const slug = "model-ozon-" + modelName.toLowerCase().replace(/[/\s]+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-|-$/g, "");
       let model = await prisma.model.findFirst({ where: { slug } });
@@ -1130,11 +1130,11 @@ async function syncOzonModels(prisma, attrMap, log2) {
         created++;
         log2.line(`  Created Ozon model: ${model.id} ("${modelName}")`);
       }
-      for (const p of products) {
-        if (p.modelId !== model.id) {
-          await prisma.product.update({ where: { id: p.id }, data: { modelId: model.id } });
+      for (const p2 of products) {
+        if (p2.modelId !== model.id) {
+          await prisma.product.update({ where: { id: p2.id }, data: { modelId: model.id } });
           assigned++;
-          log2.line(`  Assigned ${p.id} \u2192 ${model.id} (Ozon)`);
+          log2.line(`  Assigned ${p2.id} \u2192 ${model.id} (Ozon)`);
         }
       }
     }
@@ -1235,7 +1235,7 @@ async function wbFetchAnalytics(nmIDs, apiKey, log2 = noopLog) {
       });
       if (resp.status === 429) {
         log2.write(" 429 (rate limit, waiting 30s)");
-        await new Promise((r) => setTimeout(r, 3e4));
+        await new Promise((r2) => setTimeout(r2, 3e4));
         i -= BATCH;
         continue;
       }
@@ -1264,182 +1264,2623 @@ async function wbFetchAnalytics(nmIDs, apiKey, log2 = noopLog) {
   Analytics API error: ${err.message}`);
     }
     if (i + BATCH < nmIDs.length) {
-      await new Promise((r) => setTimeout(r, 25e3));
+      await new Promise((r2) => setTimeout(r2, 25e3));
     }
   }
   log2.line(` \u2014 ${analyticsMap.size} products`);
   return analyticsMap;
 }
 
+// node_modules/daytona-wildberries-typescript-sdk/dist/index-BT3QDNa0.js
+var d = class extends Error {
+  /**
+   * Creates a new WBAPIError
+   *
+   * @param message - Error message describing what went wrong
+   * @param statusCode - HTTP status code if applicable
+   * @param response - API response body if available
+   * @param requestId - Correlation ID for debugging
+   * @param origin - Origin service identifier from RFC 7807 responses
+   * @param timestamp - ISO 8601 timestamp from RFC 7807 responses
+   */
+  constructor(e, i, t, s3, r2, c2) {
+    super(e), this.name = this.constructor.name;
+    const u = Error.captureStackTrace;
+    u && u(this, this.constructor), this.statusCode = i, this.response = t, this.requestId = s3, this.origin = r2, this.timestamp = c2;
+  }
+  /**
+   * Returns a human-readable error message with recovery guidance.
+   *
+   * Override this method in subclasses to provide specific recovery steps.
+   *
+   * @returns User-friendly error message with actionable guidance
+   *
+   * @example
+   * ```typescript
+   * try {
+   *   await sdk.products.createProduct(data);
+   * } catch (error) {
+   *   if (error instanceof WBAPIError) {
+   *     // Show user-friendly message
+   *     alert(error.getUserMessage());
+   *
+   *     // Log technical details for debugging
+   *     console.error('Technical details:', {
+   *       statusCode: error.statusCode,
+   *       requestId: error.requestId
+   *     });
+   *   }
+   * }
+   * ```
+   */
+  getUserMessage() {
+    let e = this.message;
+    return this.statusCode !== void 0 && (e += ` (Status: ${this.statusCode.toString()})`), this.requestId && (e += ` [Request ID: ${this.requestId}]`), this.origin && (e += ` [Origin: ${this.origin}]`), e;
+  }
+  /**
+   * Custom JSON serialization to preserve all error properties.
+   *
+   * By default, Error objects don't serialize the `message` property
+   * when using JSON.stringify(). This method ensures all important
+   * properties are included in the JSON output.
+   *
+   * @returns Object representation of the error for JSON serialization
+   *
+   * @example
+   * ```typescript
+   * const error = new WBAPIError('Test error', 400, { detail: 'info' }, 'req-123');
+   * const json = JSON.stringify(error);
+   * // { "name": "WBAPIError", "message": "Test error", "statusCode": 400, ... }
+   * ```
+   */
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      statusCode: this.statusCode,
+      response: this.response,
+      requestId: this.requestId,
+      origin: this.origin,
+      timestamp: this.timestamp
+    };
+  }
+};
+var a = class extends d {
+  /**
+   * Creates a validation error
+   *
+   * @param message - Error message (defaults to standard validation failure message)
+   * @param fieldErrors - Optional map of field names to error messages
+   * @param statusCode - HTTP status code (400 or 422)
+   * @param response - API response body if available
+   * @param requestId - Correlation ID for debugging
+   */
+  constructor(e = "Validation failed. Please check the request data and try again.", i, t = 400, s3, r2) {
+    super(e, t, s3, r2), this.name = "ValidationError", this.fieldErrors = i;
+  }
+  /**
+   * Returns user-friendly error message with field-level validation details
+   *
+   * @returns Error message with specific field errors and resolution guidance
+   */
+  getUserMessage() {
+    const e = super.getUserMessage();
+    if (this.fieldErrors && Object.keys(this.fieldErrors).length > 0) {
+      const s3 = [
+        `
+
+Field validation errors:`,
+        Object.entries(this.fieldErrors).map(([r2, c2]) => `  - ${r2}: ${c2}`).join(`
+`),
+        `
+Please correct the above fields and try again.`
+      ].join(`
+`);
+      return e + s3;
+    }
+    const i = [
+      `
+
+To resolve this issue:`,
+      "1. Ensure all required fields are provided",
+      "2. Verify that field values meet the API specifications",
+      "3. Check that data types and formats are correct",
+      "4. Review the API documentation for field requirements"
+    ].join(`
+`);
+    return e + i;
+  }
+  /**
+   * Custom JSON serialization to preserve fieldErrors property
+   *
+   * @returns Object representation including field-level error details
+   */
+  toJSON() {
+    return {
+      ...super.toJSON(),
+      statusCode: this.statusCode ?? 400,
+      fieldErrors: this.fieldErrors
+    };
+  }
+};
+var o = /* @__PURE__ */ new Set();
+function m(n, e) {
+  o.has(n) || (o.add(n), console.warn(e));
+}
+var h = /^\d+:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}:[0-9a-f]+$/i;
+var f = {
+  MAX_MESSAGE_LENGTH: 1e3,
+  MAX_TOTAL_FILE_SIZE: 30 * 1024 * 1024,
+  MAX_PER_FILE_SIZE: 5 * 1024 * 1024,
+  MAX_REPLYSIGN_LENGTH: 255
+};
+var { MAX_MESSAGE_LENGTH: l, MAX_TOTAL_FILE_SIZE: g, MAX_PER_FILE_SIZE: b, MAX_REPLYSIGN_LENGTH: p } = f;
+var y = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".pdf": "application/pdf"
+};
+function w(n) {
+  const e = n.toLowerCase();
+  for (const [i, t] of Object.entries(y))
+    if (e.endsWith(i)) return t;
+  return "application/octet-stream";
+}
+var S = class {
+  constructor(e) {
+    this.client = e;
+  }
+  /**
+   * Непросмотренные отзывы и вопросы
+   *
+   * Метод проверяет наличие непросмотренных [вопросов](/openapi/user-communication#tag/Voprosy/paths/~1api~1v1~1questions/get) и [отзывов](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get) от покупателей. Если у продавца есть непросмотренные вопросы или отзывы, возвращает `true`. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.newFeedbacksQuestions();
+  console.log(result);
+   */
+  async newFeedbacksQuestions() {
+    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/new-feedbacks-questions", {
+      rateLimitKey: "communications.newFeedbacksQuestions"
+    });
+  }
+  /**
+   * Неотвеченные вопросы
+   *
+   * Метод возвращает общее количество неотвеченных [вопросов](/openapi/user-communication#tag/Voprosy/paths/~1api~1v1~1questions/get) и количество неотвеченных вопросов за сегодня. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.getQuestionsCountUnanswered();
+  console.log(result);
+   */
+  async getQuestionsCountUnanswered() {
+    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/questions/count-unanswered", {
+      rateLimitKey: "communications.questionsCountUnanswered"
+    });
+  }
+  /**
+   * Количество вопросов
+   *
+   * Метод возвращает количество отвеченных или неотвеченных [вопросов](/openapi/user-communication#tag/Voprosy/paths/~1api~1v1~1questions/get) за заданный период. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.getQuestionsCount({});
+  console.log(result);
+   */
+  async getQuestionsCount(e) {
+    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/questions/count", {
+      params: e,
+      rateLimitKey: "communications.questionsCount"
+    });
+  }
+  /**
+   * Список вопросов
+   *
+   * Метод возвращает список вопросов по заданным фильтрам. Вы можете: - получить данные отвеченных и неотвеченных вопросов - сортировать вопросы по дате - настроить пагинацию и количество вопросов в ответе <div class="description_important"> Можно получить максимум 10 000 вопросов в одном ответе </div> <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.questions({});
+  console.log(result);
+   */
+  async questions(e) {
+    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/questions", {
+      params: e,
+      rateLimitKey: "communications.questions"
+    });
+  }
+  /**
+   * Работа с вопросами
+   *
+   * В зависимости от тела запроса, метод позволяет: - отметить [вопрос](/openapi/user-communication#tag/Voprosy/paths/~1api~1v1~1questions/get) как просмотренный - отклонить вопрос - ответить на вопрос или отредактировать ответ <div class="description_important"> Отредактировать ответ на вопрос можно 1 раз в течение 60 дней после отправки ответа </div> <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @param [data] - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.updateQuestion({});
+  console.log(result);
+   */
+  async updateQuestion(e) {
+    return this.client.patch("https://feedbacks-api.wildberries.ru/api/v1/questions", e, {
+      rateLimitKey: "communications.patchQuestions"
+    });
+  }
+  /**
+   * Получить вопрос по ID
+   *
+   * Метод возвращает данные [вопроса](/openapi/user-communication#tag/Voprosy/paths/~1api~1v1~1questions/get) по его ID. Далее вы можете [работать с этим вопросом](/openapi/user-communication#tag/Voprosy/paths/~1api~1v1~1questions/patch). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.question({});
+  console.log(result);
+   */
+  async question(e) {
+    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/question", {
+      params: e,
+      rateLimitKey: "communications.question"
+    });
+  }
+  /**
+   * Необработанные отзывы
+   *
+   * Метод возвращает: - количество необработанных [отзывов](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get) за сегодня и за всё время - среднюю оценку всех отзывов <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.getFeedbacksCountUnanswered();
+  console.log(result);
+   */
+  async getFeedbacksCountUnanswered() {
+    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/feedbacks/count-unanswered", {
+      rateLimitKey: "communications.feedbacksCountUnanswered"
+    });
+  }
+  /**
+   * Количество отзывов
+   *
+   * Метод возвращает количество обработанных или необработанных [отзывов](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get) за заданный период. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.getFeedbacksCount({});
+  console.log(result);
+   */
+  async getFeedbacksCount(e) {
+    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/feedbacks/count", {
+      params: e,
+      rateLimitKey: "communications.feedbacksCount"
+    });
+  }
+  /**
+   * Список отзывов
+   *
+   * Метод возвращает список отзывов по заданным фильтрам. Вы можете: - получить данные обработанных и необработанных отзывов - сортировать отзывы по дате - настроить пагинацию и количество отзывов в ответе <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.feedbacks({});
+  console.log(result);
+   */
+  async feedbacks(e) {
+    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/feedbacks", {
+      params: e,
+      rateLimitKey: "communications.feedbacks"
+    });
+  }
+  /**
+   * Ответить на отзыв
+   *
+   * Метод позволяет ответить на [отзыв](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get) покупателя. <div class="description_important"> ID отзыва не валидируется. Если в запросе вы передали некорректный ID, вы не получите ошибку. </div> <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @param [data] - Request body data
+   * @returns Response data
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.createFeedbacksAnswer({});
+   */
+  async createFeedbacksAnswer(e) {
+    return this.client.post("https://feedbacks-api.wildberries.ru/api/v1/feedbacks/answer", e, {
+      rateLimitKey: "communications.postFeedbacksAnswer"
+    });
+  }
+  /**
+   * Отредактировать ответ на отзыв
+   *
+   * Метод позволяет отредактировать уже отправленный [ответ на отзыв](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks~1answer/post) покупателя. <br><br> Отредактировать ответ можно только один раз в течение 60 дней c момента отправки. <div class="description_important"> ID отзыва не валидируется. Если в запросе вы передали некорректный ID, вы не получите ошибку. </div> <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @param [data] - Request body data
+   * @returns Response data
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.updateFeedbacksAnswer({});
+   */
+  async updateFeedbacksAnswer(e) {
+    return this.client.patch("https://feedbacks-api.wildberries.ru/api/v1/feedbacks/answer", e, {
+      rateLimitKey: "communications.patchFeedbacksAnswer"
+    });
+  }
+  /**
+   * Возврат товара по ID отзыва
+   *
+   * Метод запрашивает возврат товара, по которому оставлен [отзыв](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get). <br><br> Возврат доступен для отзывов с полем `"isAbleReturnProductOrders": true`. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @param data - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.createOrderReturn({});
+  console.log(result);
+   */
+  async createOrderReturn(e) {
+    return this.client.post("https://feedbacks-api.wildberries.ru/api/v1/feedbacks/order/return", e, {
+      rateLimitKey: "communications.postFeedbacksOrderReturn"
+    });
+  }
+  /**
+   * Получить отзыв по ID
+   *
+   * Метод возвращает данные [отзыва](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get) по его ID. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.feedback({});
+  console.log(result);
+   */
+  async feedback(e) {
+    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/feedback", {
+      params: e,
+      rateLimitKey: "communications.feedback"
+    });
+  }
+  /**
+   * Список архивных отзывов
+   *
+   * Метод возвращает список архивных [отзывов](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get). <br><br> Отзыв становится архивным, если: - на отзыв получен ответ - на отзыв не получен ответ в течение 30 дней - в отзыве нет текста и фото <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.getFeedbacksArchive({});
+  console.log(result);
+   */
+  async getFeedbacksArchive(e) {
+    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/feedbacks/archive", {
+      params: e,
+      rateLimitKey: "communications.feedbacksArchive"
+    });
+  }
+  /**
+   * Список чатов
+   *
+   * Метод возвращает список всех чатов продавца. По этим данным можно получить [события чатов](/openapi/user-communication#tag/Chat-s-pokupatelyami/paths/~1api~1v1~1seller~1events/get) или [отправить сообщение покупателю](/openapi/user-communication#tag/Chat-s-pokupatelyami/paths/~1api~1v1~1seller~1message/post). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 10 запросов | 1 секунда | 10 запросов | </div>
+   *
+   * **v3.13.0 — replySign format change (deadline 2026-06-04)**: WB updated the `replySign` field
+   * returned by this endpoint. If you cache `replySign` values, you must refresh them via this
+   * method before calling `createSellerMessage()` after 2026-06-04 — old-format values will be
+   * rejected by WB with HTTP 400. New format: `<version>:<UUID>:<crypto-signature>` (~135 chars).
+   * See docs/guides/chat-replysign-format-migration.md.
+   *
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const chats = await sdk.communications.getSellerChats();
+  console.log(chats.result);
+   */
+  async getSellerChats() {
+    return this.client.get(
+      "https://buyer-chat-api.wildberries.ru/api/v1/seller/chats",
+      { rateLimitKey: "communications.sellerChats" }
+    );
+  }
+  /**
+   * События чатов
+   *
+   * Метод возвращает список событий всех [чатов с покупателями](/openapi/user-communication#tag/Chat-s-pokupatelyami/paths/~1api~1v1~1seller~1chats/get). Чтобы получить все события: 1. Сделайте первый запрос без параметра `next`. 2. Повторяйте запрос со значением параметра `next` из ответа на предыдущий запрос, пока `totalEvents` не станет равным `0`. Это будет означать, что вы получили все события. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 10 запросов | 1 секунда | 10 запросов | </div>
+   *
+   * **v3.13.0 — replySign format change (deadline 2026-06-04)**: when `Event.isNewChat` is `true`,
+   * the event includes a `replySign` field in the new format (`<version>:<UUID>:<crypto-signature>`).
+   * Old-format `replySign` values (e.g. cached from before 2026-06-04) will be rejected by WB after
+   * the deadline. Prefer refreshing via `getSellerChats()` which always returns the latest values.
+   * See docs/guides/chat-replysign-format-migration.md.
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.getSellerEvents({});
+  console.log(result);
+   */
+  async getSellerEvents(e) {
+    return this.client.get(
+      "https://buyer-chat-api.wildberries.ru/api/v1/seller/events",
+      {
+        params: e,
+        rateLimitKey: "communications.sellerEvents"
+      }
+    );
+  }
+  /**
+     * Отправить сообщение покупателю (multipart/form-data)
+     *
+     * Метод отправляет сообщение в [чат с покупателем](/openapi/user-communication#tag/Chat-s-pokupatelyami/paths/~1api~1v1~1seller~1chats/get). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 10 запросов | 1 секунда | 10 запросов | </div>
+     *
+     * **v3.13.0 fix**: this method previously took zero parameters and always sent an empty body
+     * (broken since introduction). It now requires a `data` parameter with `replySign`.
+     *
+     * **replySign deadline 2026-06-04**: WB rejects old-format `replySign` values with HTTP 400.
+     * Always fetch a fresh `replySign` from `getSellerChats()` before sending. New-format pattern:
+     * `<version>:<UUID>:<crypto-signature>` (~135 chars, e.g. `1:1e265a58-a120-b178-008c-60af2460207c:66f136...`).
+     * If you pass a value that does not match this pattern the SDK emits a one-time `console.warn`
+     * (see `warnOnce` — key `communications.createSellerMessage:legacy-replysign-format`).
+     * See docs/guides/chat-replysign-format-migration.md.
+     *
+     * @param data - Request body: `replySign` (required), optional `message` and `file` attachments
+     * @returns Успешно
+     * @throws {ValidationError} When `replySign` is missing/empty/exceeds 255 chars, `message` > 1000 chars, or total file size > 30 MB
+     * @throws {AuthenticationError} When API key is invalid (401/403)
+     * @throws {RateLimitError} When rate limit exceeded (429)
+     * @throws {NetworkError} When network request fails or times out
+     * @example
+    // 1. Fetch chats to get a fresh replySign
+    const chats = await sdk.communications.getSellerChats();
+    const chat = chats.result?.[0];
+    if (!chat?.replySign) throw new Error('No chat found');
+  
+    // 2. Send message (optionally with attachments)
+    const result = await sdk.communications.createSellerMessage({
+      replySign: chat.replySign,
+      message: 'Thank you for your order!',
+    });
+    console.log(result);
+     */
+  async createSellerMessage(e) {
+    if (e == null)
+      throw new a("data is required: pass { replySign, message?, file? }");
+    if (e.replySign == null || typeof e.replySign != "string" || e.replySign.trim().length === 0)
+      throw new a("replySign is required (string, non-empty after trim)");
+    if (e.replySign.length > p)
+      throw new a(`replySign exceeds maxLength ${String(p)}`);
+    if (e.message && e.message.length > l)
+      throw new a(`message exceeds maxLength ${String(l)}`);
+    if (e.file) {
+      let t = 0;
+      for (const s3 of e.file) {
+        const r2 = s3 instanceof Blob ? s3.size : s3.content.length;
+        if (r2 > b)
+          throw new a(
+            `file size exceeds 5 MB (got ${String(r2)} bytes). WB limit: 5 MB per file.`
+          );
+        t += r2;
+      }
+      if (t > g)
+        throw new a(`total file size exceeds 30 MB (got ${String(t)} bytes)`);
+    }
+    h.test(e.replySign) || m(
+      "communications.createSellerMessage:legacy-replysign-format",
+      "communications.createSellerMessage: `replySign` does not match the expected new-format pattern (version:UUID:signature). WB API rejects old-format `replySign` after 2026-06-04. Refresh via `getSellerChats()` to get current-format values. See docs/guides/chat-replysign-format-migration.md."
+    );
+    const i = new FormData();
+    if (i.append("replySign", e.replySign), e.message && i.append("message", e.message), e.file)
+      for (const t of e.file)
+        if (t instanceof Blob)
+          i.append("file", t);
+        else {
+          const s3 = w(t.filename);
+          i.append(
+            "file",
+            new Blob([Uint8Array.from(t.content)], { type: s3 }),
+            t.filename
+          );
+        }
+    return this.client.post(
+      "https://buyer-chat-api.wildberries.ru/api/v1/seller/message",
+      i,
+      {
+        rateLimitKey: "communications.postSellerMessage",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- axios + FormData auto-sets
+        // multipart/form-data boundary; overriding to undefined removes the default application/json
+        headers: { "Content-Type": void 0 }
+      }
+    );
+  }
+  /**
+   * Получить файл из сообщения
+   *
+   * Метод возвращает файл или изображение из сообщения по его ID. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 10 запросов | 1 секунда | 10 запросов | </div>
+   *
+   * @param id - ID файла, см. значение поля `downloadID` в методе [События чатов](https://dev.wildberries.ru/openapi/user-communication#tag/Chat-s-pokupatelyami/paths/~1api~1v1~1seller~1events/get)
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.getSellerDownload('id-value');
+  console.log(result);
+   */
+  async getSellerDownload(e) {
+    return this.client.get(
+      `https://buyer-chat-api.wildberries.ru/api/v1/seller/download/${e}`,
+      {
+        rateLimitKey: "communications.sellerDownload"
+      }
+    );
+  }
+  /**
+   * Заявки покупателей на возврат
+   *
+   * Метод возвращает заявки покупателей на возврат товаров за последние 14 дней. Вы можете [отвечать на эти заявки](/openapi/user-communication#tag/Vozvraty-pokupatelyami/paths/~1api~1v1~1claim/patch). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 20 запросов | 3 секунды | 10 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Response data
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.claims({});
+  console.log(result);
+   */
+  async claims(e) {
+    return this.client.get("https://returns-api.wildberries.ru/api/v1/claims", {
+      params: e,
+      rateLimitKey: "communications.claims"
+    });
+  }
+  /**
+   * Ответ на заявку покупателя
+   *
+   * Метод отправляет ответ на [заявку](/openapi/user-communication#tag/Vozvraty-pokupatelyami/paths/~1api~1v1~1claims/get) покупателя на возврат товаров. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 20 запросов | 3 секунды | 10 запросов | </div>
+   *
+   * @param data - Request body. `action` must be one of the values from the `actions` array returned by `claims()`. When `action` is `"rejectcustom"` the `comment` is required (10–1000 chars); it is optional for `"approvecc1"`.
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+  const result = await sdk.communications.updateClaim({
+    id: 'fe3e9337-e9f9-423c-8930-946a8ebef80',
+    action: 'rejectcustom',
+    comment: 'The photo is not related to the item in the application',
+  });
+  console.log(result);
+   */
+  async updateClaim(e) {
+    return this.client.patch("https://returns-api.wildberries.ru/api/v1/claim", e, {
+      rateLimitKey: "communications.patchClaim"
+    });
+  }
+  // ============================================================================
+  // Pinned Reviews Methods (Закреплённые отзывы)
+  // ============================================================================
+  /**
+   * Get count of pinned/unpinned reviews
+   *
+   * Returns the count of pinned and unpinned reviews for the given filters.
+   * Unpinned reviews are only those that were automatically unpinned due to reasons
+   * specified in the `unpinnedCause` field.
+   *
+   * Rate limit: 3 requests per second with 333ms interval, burst of 6 requests.
+   *
+   * @param params - Optional filter parameters
+   * @returns Count of reviews matching the filter
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/user-communication#tag/Zakreplyonnye-otzyvy}
+   * @example
+   * ```typescript
+   * // Get count of all pinned reviews
+   * const count = await sdk.communications.getPinnedFeedbacksCount({ state: 'pinned' });
+   * console.log(`Pinned reviews: ${count.data}`);
+   *
+   * // Get count of pinned reviews on product cards
+   * const cardCount = await sdk.communications.getPinnedFeedbacksCount({
+   *   state: 'pinned',
+   *   pinOn: 'nm'
+   * });
+   * ```
+   */
+  async getPinnedFeedbacksCount(e) {
+    return this.client.get(
+      "https://feedbacks-api.wildberries.ru/api/feedbacks/v1/pins/count",
+      { params: e, rateLimitKey: "communications.getPinnedFeedbacksCount" }
+    );
+  }
+  /**
+   * Get limits for pinning reviews
+   *
+   * Returns the limits for pinning reviews by subscription and tariff option.
+   * Shows total limits, used count, remaining slots, and per-unit limits.
+   *
+   * Rate limit: 3 requests per second with 333ms interval, burst of 6 requests.
+   *
+   * @returns Limits data for subscription and tariff
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/user-communication#tag/Zakreplyonnye-otzyvy}
+   * @example
+   * ```typescript
+   * const limits = await sdk.communications.getPinnedFeedbacksLimits();
+   * if (limits.data.subscription) {
+   *   console.log(`Subscription remaining: ${limits.data.subscription.remaining}`);
+   * }
+   * if (limits.data.tariff) {
+   *   console.log(`Tariff remaining: ${limits.data.tariff.remaining}`);
+   * }
+   * ```
+   */
+  async getPinnedFeedbacksLimits() {
+    return this.client.get(
+      "https://feedbacks-api.wildberries.ru/api/feedbacks/v1/pins/limits",
+      { rateLimitKey: "communications.getPinnedFeedbacksLimits" }
+    );
+  }
+  /**
+   * Get list of pinned/unpinned reviews
+   *
+   * Returns a list of pinned and unpinned reviews with pagination support.
+   * Unpinned reviews are only those that were automatically unpinned due to reasons
+   * specified in the `unpinnedCause` field.
+   *
+   * Rate limit: 3 requests per second with 333ms interval, burst of 6 requests.
+   *
+   * @param params - Optional filter and pagination parameters
+   * @returns List of pinned/unpinned review items with pagination cursor
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/user-communication#tag/Zakreplyonnye-otzyvy}
+   * @example
+   * ```typescript
+   * // Get first page of pinned reviews
+   * const response = await sdk.communications.getPinnedFeedbacks({
+   *   state: 'pinned',
+   *   limit: 100
+   * });
+   * console.log(`Found ${response.data.length} pinned reviews`);
+   *
+   * // Get next page if available
+   * if (response.next) {
+   *   const nextPage = await sdk.communications.getPinnedFeedbacks({
+   *     state: 'pinned',
+   *     next: response.next
+   *   });
+   * }
+   * ```
+   */
+  async getPinnedFeedbacks(e) {
+    return this.client.get(
+      "https://feedbacks-api.wildberries.ru/api/feedbacks/v1/pins",
+      { params: e, rateLimitKey: "communications.getPinnedFeedbacks" }
+    );
+  }
+  /**
+   * Pin reviews to product cards or merged groups
+   *
+   * Pins reviews to a product card or group of merged product cards.
+   * Requires an active Jam subscription or tariff option for pinning reviews.
+   * Maximum 500 reviews can be pinned in a single request.
+   *
+   * Rate limit: 3 requests per second with 333ms interval, burst of 6 requests.
+   *
+   * @param data - Array of reviews to pin (max 500 items)
+   * @returns Result of pin operations with success/error details per item
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400)
+   * @throws {ForbiddenError} When no active subscription or tariff (403)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/user-communication#tag/Zakreplyonnye-otzyvy}
+   * @example
+   * ```typescript
+   * const result = await sdk.communications.pinFeedback([
+   *   {
+   *     pinMethod: 'subscription',
+   *     pinOn: 'imt',
+   *     feedbackId: 'VlbkVVl7mtw37wyWkJZz'
+   *   },
+   *   {
+   *     pinMethod: 'tariff',
+   *     pinOn: 'nm',
+   *     feedbackId: 'DibuRAImknLyiqgzvGcU'
+   *   }
+   * ]);
+   *
+   * result.data.forEach(item => {
+   *   if (item.isErrors) {
+   *     console.log(`Failed to pin ${item.feedbackId}:`, item.errors);
+   *   } else {
+   *     console.log(`Pinned ${item.feedbackId} with pinId: ${item.pinId}`);
+   *   }
+   * });
+   * ```
+   */
+  async pinFeedback(e) {
+    return this.client.post(
+      "https://feedbacks-api.wildberries.ru/api/feedbacks/v1/pins",
+      e,
+      { rateLimitKey: "communications.pinFeedback" }
+    );
+  }
+  /**
+   * Unpin reviews from product cards or merged groups
+   *
+   * Unpins reviews using their pin operation IDs (pinId).
+   * Get pinId values from the getPinnedFeedbacks method.
+   * Maximum 500 pin IDs can be unpinned in a single request.
+   *
+   * Rate limit: 3 requests per second with 333ms interval, burst of 6 requests.
+   *
+   * @param data - Array of pin IDs to unpin (max 500 items)
+   * @returns Array of successfully unpinned pin IDs
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/user-communication#tag/Zakreplyonnye-otzyvy}
+   * @example
+   * ```typescript
+   * // Get pinned reviews first to obtain pinIds
+   * const pinned = await sdk.communications.getPinnedFeedbacks({ state: 'pinned' });
+   * const pinIdsToUnpin = pinned.data.slice(0, 3).map(item => item.pinId);
+   *
+   * // Unpin the reviews
+   * const result = await sdk.communications.unpinFeedback(pinIdsToUnpin);
+   * console.log(`Successfully unpinned: ${result.data.join(', ')}`);
+   * ```
+   */
+  async unpinFeedback(e) {
+    return this.client.delete(
+      "https://feedbacks-api.wildberries.ru/api/feedbacks/v1/pins",
+      e,
+      { rateLimitKey: "communications.unpinFeedback" }
+    );
+  }
+};
+
+// node_modules/daytona-wildberries-typescript-sdk/dist/esm/modules/finances/index.js
+var s = class {
+  constructor(e) {
+    this.client = e;
+  }
+  /**
+   * Получить баланс продавца
+   *
+   * Метод возвращает данные виджета баланса на [главной странице](https://seller.wildberries.ru) портала продавцов. <br><br> <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 1 запрос | </div>
+   *
+   * @returns Account balance data including currency, current balance, and available withdrawal amount
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/financial-reports-and-accounting#tag/Balans}
+   * @example
+   * ```typescript
+   * const result = await sdk.finances.getAccountBalance();
+   * console.log(result);
+   * ```
+   */
+  async getAccountBalance() {
+    return this.client.get(
+      "https://finance-api.wildberries.ru/api/v1/account/balance",
+      { rateLimitKey: "finances.accountBalance" }
+    );
+  }
+  /**
+   * Категории документов
+   *
+   * Метод возвращает категории документов для получения [списка документов продавца](/openapi/financial-reports-and-accounting#tag/Dokumenty/paths/~1api~1v1~1documents~1list/get). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 1 запрос | 10 секунд | 5 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns List of document categories available for the seller
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/financial-reports-and-accounting#tag/Dokumenty}
+   * @example
+   * ```typescript
+   * const result = await sdk.finances.getDocumentsCategories({ locale: 'ru' });
+   * console.log(result);
+   * ```
+   */
+  async getDocumentsCategories(e) {
+    return this.client.get(
+      "https://documents-api.wildberries.ru/api/v1/documents/categories",
+      { params: e, rateLimitKey: "finances.documentsCategories" }
+    );
+  }
+  /**
+   * Список документов
+   *
+   * Метод возвращает список документов продавца. Вы можете получить [один](/openapi/financial-reports-and-accounting#tag/Dokumenty/paths/~1api~1v1~1documents~1download/get) или [несколько](/openapi/financial-reports-and-accounting#tag/Dokumenty/paths/~1api~1v1~1documents~1download~1all/post) документов из полученного списка. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 1 запрос | 10 секунд | 5 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Paginated list of seller documents with metadata
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @remarks The `sort` and `order` parameters work together — specifying `order` without `sort` has no effect. The `beginTime` and `endTime` parameters define a date range and should be used as a pair.
+   * @see {@link https://dev.wildberries.ru/openapi/financial-reports-and-accounting#tag/Dokumenty}
+   * @example
+   * ```typescript
+   * const result = await sdk.finances.getDocumentsList({
+   *   locale: 'ru',
+   *   sort: 'date',
+   *   order: 'desc',
+   * });
+   * console.log(result);
+   * ```
+   */
+  async getDocumentsList(e) {
+    return this.client.get("https://documents-api.wildberries.ru/api/v1/documents/list", {
+      params: e,
+      rateLimitKey: "finances.documentsList"
+    });
+  }
+  /**
+   * Получить документ
+   *
+   * Метод загружает один документ из [списка документов продавца](/openapi/financial-reports-and-accounting#tag/Dokumenty/paths/~1api~1v1~1documents~1list/get). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 1 запрос | 10 секунд | 5 запросов | </div>
+   *
+   * @param options - Query parameters including required serviceName and extension
+   * @returns Document file data for the requested document
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/financial-reports-and-accounting#tag/Dokumenty}
+   * @example
+   * ```typescript
+   * const result = await sdk.finances.getDocumentsDownload({
+   *   serviceName: 'act',
+   *   extension: 'pdf',
+   * });
+   * console.log(result);
+   * ```
+   */
+  async getDocumentsDownload(e) {
+    return this.client.get(
+      "https://documents-api.wildberries.ru/api/v1/documents/download",
+      { params: e, rateLimitKey: "finances.documentsDownload" }
+    );
+  }
+  /**
+   * Получить документы
+   *
+   * Метод загружает несколько документов из [списка документов продавца](/openapi/financial-reports-and-accounting#tag/Dokumenty/paths/~1api~1v1~1documents~1list/get). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 5 минут | 1 запрос | 5 минут | 5 запросов | </div>
+   *
+   * @param [data] - Request body data
+   * @returns Download details for the requested batch of documents
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/financial-reports-and-accounting#tag/Dokumenty}
+   * @example
+   * ```typescript
+   * const result = await sdk.finances.createDownloadAll({
+   *   serviceNames: ['act', 'invoice'],
+   * });
+   * console.log(result);
+   * ```
+   */
+  async createDownloadAll(e) {
+    return this.client.post(
+      "https://documents-api.wildberries.ru/api/v1/documents/download/all",
+      e,
+      { rateLimitKey: "finances.createDownloadAll" }
+    );
+  }
+  // ==========================================================================
+  // v1 Sales Reports (since v3.7.0)
+  // Replaces deprecated GET /api/v5/supplier/reportDetailByPeriod (disabled 2026-07-15)
+  // All money amounts are string (not number) — use parseMoneyAmount() helper for math.
+  // ==========================================================================
+  /**
+   * Список отчётов реализации (v1)
+   *
+   * Returns list of sales reports by report format. Data available from 2025-01-01.
+   *
+   * **Available token types**: Personal, Service (NOT Basic or Test)
+   *
+   * Rate limit: 1 req/min, 1 minute interval, burst 1
+   *
+   * @param data - Request body with dateFrom, dateTo, limit, offset, period
+   * @returns Array of SalesReportListItem (money sums as string — use parseMoneyAmount helper)
+   * @throws {AuthenticationError} When token type is Basic or Test — this endpoint requires Personal or Service token (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/docs/openapi/financial-reports-and-accounting#tag/Finansovye-otchyoty/operation/postV1SalesReportsList}
+   * @since v3.7.0
+   * @example
+   * ```typescript
+   * import { parseMoneyAmount } from 'daytona-wildberries-typescript-sdk';
+   *
+   * const reports = await sdk.finances.getSalesReportsList({
+   *   dateFrom: '2026-03-17',
+   *   dateTo: '2026-03-20',
+   *   period: 'weekly',
+   * });
+   * console.log(parseMoneyAmount(reports[0].forPaySum));
+   * ```
+   */
+  async getSalesReportsList(e) {
+    return this.client.post(
+      "https://finance-api.wildberries.ru/api/finance/v1/sales-reports/list",
+      e,
+      { rateLimitKey: "finances.salesReportsList" }
+    );
+  }
+  /**
+   * Детализации к отчётам реализации за период (v1)
+   *
+   * Returns detailed rows for sales reports within a date range. Replaces the deprecated v5 method.
+   * Data available from 2024-01-29. Supports selective field loading via `fields` parameter.
+   *
+   * **Available token types**: Personal, Service (NOT Basic or Test)
+   *
+   * Rate limit: 1 req/min, 1 minute interval, burst 1
+   *
+   * @param data - Request body with dateFrom, dateTo, limit, rrdId, period, fields
+   * @returns Array of SalesReportDetailedItem (~70 fields, money amounts as string — use parseMoneyAmount)
+   * @throws {AuthenticationError} When token type is Basic or Test — this endpoint requires Personal or Service token (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/docs/openapi/financial-reports-and-accounting#tag/Finansovye-otchyoty/operation/postV1SalesReportsDetailed}
+   * @since v3.7.0
+   * @example
+   * ```typescript
+   * import { parseMoneyAmount } from 'daytona-wildberries-typescript-sdk';
+   *
+   * const rows = await sdk.finances.getSalesReportsDetailed({
+   *   dateFrom: '2026-03-17',
+   *   dateTo: '2026-03-20',
+   *   limit: 100000,
+   *   rrdId: 0,
+   *   fields: ['rrdId', 'nmId', 'forPay'],  // Optional: load only specific fields
+   * });
+   * const totalPayout = rows.reduce((sum, r) => sum + parseMoneyAmount(r.forPay), 0);
+   * ```
+   */
+  async getSalesReportsDetailed(e) {
+    return this.client.post(
+      "https://finance-api.wildberries.ru/api/finance/v1/sales-reports/detailed",
+      e,
+      { rateLimitKey: "finances.salesReportsDetailed" }
+    );
+  }
+  /**
+   * Детализации к отчётам реализации по ID отчёта (v1)
+   *
+   * Returns detailed rows for a specific report by its ID. Data available from 2025-01-01.
+   *
+   * **BigInt precision note**: For daily reports, `reportId` may exceed `Number.MAX_SAFE_INTEGER` (2^53).
+   * If you obtained the ID from `getSalesReportsList()` response (which returns `number`),
+   * standard JSON parsing may already have truncated precision. For precision-safe handling,
+   * fetch the ID via a custom BigInt-aware parser and pass it as `bigint` or `string`.
+   *
+   * **Available token types**: Personal, Service (NOT Basic or Test)
+   *
+   * Rate limit: 1 req/min, 1 minute interval, burst 1
+   *
+   * @param reportId - Report ID (number for typical use, bigint/string for BigInt precision on daily reports)
+   * @param data - Request body with optional limit, rrdId, fields
+   * @returns Array of SalesReportDetailedItem
+   * @throws {AuthenticationError} When token type is Basic or Test — this endpoint requires Personal or Service token (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/docs/openapi/financial-reports-and-accounting#tag/Finansovye-otchyoty/operation/postV1SalesReportsDetailedReportId}
+   * @since v3.7.0
+   * @example
+   * ```typescript
+   * // Typical weekly report usage:
+   * const rows = await sdk.finances.getSalesReportsDetailedByReportId(307401554);
+   *
+   * // Daily report with BigInt precision:
+   * const rows = await sdk.finances.getSalesReportsDetailedByReportId('9007199254740993', {
+   *   fields: ['rrdId', 'nmId', 'retailAmount'],
+   * });
+   * ```
+   */
+  async getSalesReportsDetailedByReportId(e, t = {}) {
+    return this.client.post(
+      `https://finance-api.wildberries.ru/api/finance/v1/sales-reports/detailed/${String(e)}`,
+      t,
+      { rateLimitKey: "finances.salesReportsDetailedByReportId" }
+    );
+  }
+  // ==========================================================================
+  // v1 Acquiring Reports (since v3.7.0) — payment acquisition costs (эквайринг)
+  // Available ONLY for Russian sellers. Personal/Service tokens only.
+  // ==========================================================================
+  /**
+   * Список отчётов об издержках на приём платежей (v1)
+   *
+   * Returns list of acquiring reports. **Available only to Russian sellers.**
+   *
+   * **Available token types**: Personal, Service (NOT Basic or Test)
+   *
+   * Rate limit: 1 req/min, 1 minute interval, burst 1
+   *
+   * @param data - Request body with dateFrom, dateTo, limit, offset
+   * @returns Array of AcquiringReportListItem (money sums as string — use parseMoneyAmount helper)
+   * @throws {AuthenticationError} When token type is Basic or Test — this endpoint requires Personal or Service token
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/docs/openapi/financial-reports-and-accounting#tag/Finansovye-otchyoty/operation/postV1AcquiringList}
+   * @since v3.7.0
+   * @example
+   * ```typescript
+   * import { parseMoneyAmount } from 'daytona-wildberries-typescript-sdk';
+   *
+   * const reports = await sdk.finances.getAcquiringReportsList({
+   *   dateFrom: '2026-03-17',
+   *   dateTo: '2026-03-20',
+   * });
+   * const totalFees = reports.reduce(
+   *   (sum, r) => sum + parseMoneyAmount(r.acquiringFeeSum), 0
+   * );
+   * ```
+   */
+  async getAcquiringReportsList(e) {
+    return this.client.post(
+      "https://finance-api.wildberries.ru/api/finance/v1/acquiring/list",
+      e,
+      { rateLimitKey: "finances.acquiringReportsList" }
+    );
+  }
+  /**
+   * Детализации к отчётам об издержках на приём платежей за период (v1)
+   *
+   * Returns detailed rows for acquiring reports within a date range.
+   * **Available only to Russian sellers.** Supports selective field loading via `fields` parameter.
+   *
+   * **Available token types**: Personal, Service (NOT Basic or Test)
+   *
+   * Rate limit: 1 req/min, 1 minute interval, burst 1
+   *
+   * @param data - Request body with dateFrom, dateTo, limit, rrdId, fields
+   * @returns Array of AcquiringReportDetailedItem (money amounts as string — use parseMoneyAmount)
+   * @throws {AuthenticationError} When token type is Basic or Test — this endpoint requires Personal or Service token
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/docs/openapi/financial-reports-and-accounting#tag/Finansovye-otchyoty/operation/postV1AcquiringDetailed}
+   * @since v3.7.0
+   * @example
+   * ```typescript
+   * import { parseMoneyAmount } from 'daytona-wildberries-typescript-sdk';
+   *
+   * const rows = await sdk.finances.getAcquiringReportsDetailed({
+   *   dateFrom: '2026-03-17',
+   *   dateTo: '2026-03-20',
+   *   limit: 100000,
+   *   rrdId: 0,
+   *   fields: ['rrdId', 'acquiringBank', 'acquiringFee'],
+   * });
+   * const totalFees = rows.reduce(
+   *   (sum, r) => sum + parseMoneyAmount(r.acquiringFee), 0
+   * );
+   * ```
+   */
+  async getAcquiringReportsDetailed(e) {
+    return this.client.post(
+      "https://finance-api.wildberries.ru/api/finance/v1/acquiring/detailed",
+      e,
+      { rateLimitKey: "finances.acquiringReportsDetailed" }
+    );
+  }
+  /**
+   * Детализации к отчётам об издержках на приём платежей по ID отчёта (v1)
+   *
+   * Returns detailed rows for a specific acquiring report by ID.
+   * **Available only to Russian sellers.**
+   *
+   * **BigInt precision note**: For daily reports, `reportId` may exceed `Number.MAX_SAFE_INTEGER`.
+   * Pass as `bigint` or `string` for precision-safe handling.
+   *
+   * **Available token types**: Personal, Service (NOT Basic or Test)
+   *
+   * Rate limit: 1 req/min, 1 minute interval, burst 1
+   *
+   * @param reportId - Report ID (number/bigint/string)
+   * @param data - Request body with optional limit, rrdId, fields
+   * @returns Array of AcquiringReportDetailedItem
+   * @throws {AuthenticationError} When token type is Basic or Test — this endpoint requires Personal or Service token
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/docs/openapi/financial-reports-and-accounting#tag/Finansovye-otchyoty/operation/postV1AcquiringDetailedReportId}
+   * @since v3.7.0
+   * @example
+   * ```typescript
+   * import { parseMoneyAmount } from 'daytona-wildberries-typescript-sdk';
+   *
+   * // Typical number reportId
+   * const rows = await sdk.finances.getAcquiringReportsDetailedByReportId(307401554);
+   *
+   * // BigInt precision for daily reports — pass as string or bigint
+   * const rows = await sdk.finances.getAcquiringReportsDetailedByReportId(
+   *   '9007199254740993',
+   *   { fields: ['rrdId', 'acquiringFee'] }
+   * );
+   * ```
+   */
+  async getAcquiringReportsDetailedByReportId(e, t = {}) {
+    return this.client.post(
+      `https://finance-api.wildberries.ru/api/finance/v1/acquiring/detailed/${String(e)}`,
+      t,
+      { rateLimitKey: "finances.acquiringReportsDetailedByReportId" }
+    );
+  }
+};
+
+// node_modules/daytona-wildberries-typescript-sdk/dist/esm/modules/analytics/index.js
+var r = class {
+  constructor(t) {
+    this.client = t;
+  }
+  /**
+   * Получить список отчётов
+   *
+   * Метод возвращает список отчётов с расширенной аналитикой продавца. Ответ содержит ID созданных отчётов и статусы генерации.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, burst 3
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Analitika-prodavca-CSV}
+   * @example
+   * const result = await sdk.analytics.getNmReportDownloads({});
+   * console.log(result);
+   */
+  async getNmReportDownloads(t) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/v2/nm-report/downloads",
+      { params: t, rateLimitKey: "analytics.nmReportDownloads" }
+    );
+  }
+  /**
+   * Создать отчёт
+   *
+   * Метод создаёт задание на генерацию отчёта с расширенной аналитикой продавца.
+   * Вы можете создать CSV-версии отчётов по воронке продаж или параметрам поиска с группировкой по артикулам WB, предметам, брендам и ярлыкам.
+   * В отчётах по воронке продаж можно группировать данные по дням, неделям или месяцам.
+   * Параметры `includeSubstitutedSKUs` и `includeSearchTexts` не могут одновременно иметь значение `false`.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, burst 3
+   *
+   * @remarks Daily limit: 20 reports per day per seller account.
+   * @param [data] - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Analitika-prodavca-CSV}
+   * @example
+   * const result = await sdk.analytics.createNmReportDownload({});
+   * console.log(result);
+   */
+  async createNmReportDownload(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/v2/nm-report/downloads",
+      t,
+      { rateLimitKey: "analytics.postNmReportDownloads" }
+    );
+  }
+  /**
+   * Сгенерировать отчёт повторно
+   *
+   * Метод создает повторное задание на генерацию отчёта с расширенной аналитикой продавца.
+   * Необходимо, если при генерации отчёта вы получили статус `FAILED`.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, burst 3
+   *
+   * @param data - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Analitika-prodavca-CSV}
+   * @example
+   * const result = await sdk.analytics.createDownloadsRetry({});
+   * console.log(result);
+   */
+  async createDownloadsRetry(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/v2/nm-report/downloads/retry",
+      t,
+      { rateLimitKey: "analytics.postNmReportDownloadsRetry" }
+    );
+  }
+  /**
+   * Получить отчёт
+   *
+   * Метод возвращает отчёт с расширенной аналитикой продавца по ID задания на генерацию.
+   * Можно получить отчёт, который сгенерирован за последние 48 часов.
+   * Отчёт будет загружен внутри архива ZIP в формате CSV.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, burst 3
+   *
+   * @param downloadId - ID отчёта (UUID format)
+   * @returns Успешно - ZIP архив с CSV файлом
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Analitika-prodavca-CSV}
+   * @example
+   * const result = await sdk.analytics.getDownloadsFile('downloadId-value');
+   * console.log(result);
+   */
+  async getDownloadsFile(t) {
+    return this.client.get(
+      `https://seller-analytics-api.wildberries.ru/api/v2/nm-report/downloads/file/${t}`,
+      { rateLimitKey: "analytics.nmReportDownloadsFile" }
+    );
+  }
+  /**
+   * Основная страница
+   *
+   * Метод формирует набор данных для основной страницы отчёта по поисковым запросам с общей информацией, позициями товаров, данными по видимости и переходам в карточку, данными для таблицы по группам.
+   * Параметры `includeSubstitutedSKUs` и `includeSearchTexts` не могут одновременно иметь значение `false`.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, burst 3
+   *
+   * @param data - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Poiskovye-zaprosy}
+   * @example
+   * const result = await sdk.analytics.createSearchReportReport({});
+   * console.log(result);
+   */
+  async createSearchReportReport(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/v2/search-report/report",
+      t,
+      { rateLimitKey: "analytics.postSearchReportReport" }
+    );
+  }
+  /**
+   * Пагинация по группам
+   *
+   * Метод формирует дополнительные данные к основному отчёту с пагинацией по группам.
+   * Пагинация возможна только при наличии фильтра по бренду, предмету или ярлыку.
+   * Параметры `includeSubstitutedSKUs` и `includeSearchTexts` не могут одновременно иметь значение `false`.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, burst 3
+   *
+   * @param data - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Poiskovye-zaprosy}
+   * @example
+   * const result = await sdk.analytics.createTableGroup({});
+   * console.log(result);
+   */
+  async createTableGroup(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/v2/search-report/table/groups",
+      t,
+      { rateLimitKey: "analytics.postSearchReportTableGroups" }
+    );
+  }
+  /**
+   * Пагинация по товарам в группе
+   *
+   * Метод формирует дополнительные данные к основному отчёту с пагинацией по товарам в группе.
+   * Пагинация возможна вне зависимости от наличия фильтров.
+   * Параметры `includeSubstitutedSKUs` и `includeSearchTexts` не могут одновременно иметь значение `false`.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, burst 3
+   *
+   * @param data - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Poiskovye-zaprosy}
+   * @example
+   * const result = await sdk.analytics.createTableDetail({});
+   * console.log(result);
+   */
+  async createTableDetail(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/v2/search-report/table/details",
+      t,
+      { rateLimitKey: "analytics.postSearchReportTableDetails" }
+    );
+  }
+  /**
+   * Поисковые запросы по товару
+   *
+   * Метод формирует топ поисковых запросов по товару.
+   * Параметры `includeSubstitutedSKUs` и `includeSearchTexts` не могут одновременно иметь значение `false`.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, burst 3
+   *
+   * @param data - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Poiskovye-zaprosy}
+   * @example
+   * const result = await sdk.analytics.createProductSearchText({});
+   * console.log(result);
+   */
+  async createProductSearchText(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/v2/search-report/product/search-texts",
+      t,
+      { rateLimitKey: "analytics.postSearchReportProductSearchTexts" }
+    );
+  }
+  /**
+   * Заказы и позиции по поисковым запросам товара
+   *
+   * Метод формирует данные для таблицы по количеству заказов и позиций в поиске по запросам покупателя.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, burst 3
+   *
+   * @param data - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Poiskovye-zaprosy}
+   * @example
+   * const result = await sdk.analytics.createProductOrder({});
+   * console.log(result);
+   */
+  async createProductOrder(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/v2/search-report/product/orders",
+      t,
+      { rateLimitKey: "analytics.postSearchReportProductOrders" }
+    );
+  }
+  /**
+   * Данные по группам
+   *
+   * Метод формирует набор данных об остатках по группам товаров.
+   * Группа товаров описывается кортежем `subjectID, brandName, tagID`.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, burst 3
+   *
+   * @param data - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Istoriya-ostatkov}
+   * @example
+   * const result = await sdk.analytics.createProductsGroup({});
+   * console.log(result);
+   */
+  async createProductsGroup(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/v2/stocks-report/products/groups",
+      t,
+      { rateLimitKey: "analytics.postStocksReportProductsGroups" }
+    );
+  }
+  /**
+   * Данные по товарам
+   *
+   * Метод формирует набор данных об остатках по товарам.
+   * Можно получить данные как по отдельным товарам, так и в рамках всего отчёта — если в запросе отсутствуют фильтры: `nmIDs`, `subjectID`, `brandName`, `tagID`.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, burst 3
+   *
+   * @param data - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Istoriya-ostatkov}
+   * @example
+   * const result = await sdk.analytics.createProductsProduct({});
+   * console.log(result);
+   */
+  async createProductsProduct(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/v2/stocks-report/products/products",
+      t,
+      { rateLimitKey: "analytics.postStocksReportProductsProducts" }
+    );
+  }
+  /**
+   * Данные по размерам
+   *
+   * Метод формирует набор данных об остатках по размерам товара.
+   * Товар не имеет размера, если у него единственный размер с `"techSize":"0"`.
+   * Данные по складам Маркетплейс (FBS) приходят в агрегированном виде.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, burst 3
+   *
+   * @param data - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Istoriya-ostatkov}
+   * @example
+   * const result = await sdk.analytics.createProductsSize({});
+   * console.log(result);
+   */
+  async createProductsSize(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/v2/stocks-report/products/sizes",
+      t,
+      { rateLimitKey: "analytics.postStocksReportProductsSizes" }
+    );
+  }
+  /**
+   * Данные по складам
+   *
+   * Метод формирует набор данных об остатках по складам.
+   * Данные по складам Маркетплейс (FBS) приходят в агрегированном виде — по всем сразу, без детализации по конкретным складам.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, burst 3
+   *
+   * @param data - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Istoriya-ostatkov}
+   * @example
+   * const result = await sdk.analytics.createStocksReportOffice({});
+   * console.log(result);
+   */
+  async createStocksReportOffice(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/v2/stocks-report/offices",
+      t,
+      { rateLimitKey: "analytics.postStocksReportOffices" }
+    );
+  }
+  // ============ v3 Sales Funnel Methods ============
+  /**
+   * Статистика карточек товаров за период (v3)
+   *
+   * Возвращает отчёт о товарах с ключевыми показателями — переходы в карточку,
+   * добавления в корзину, заказы — за текущий и прошлый периоды.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, 3-request burst
+   *
+   * @param data - Request parameters
+   * @returns Sales funnel products statistics
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Voronka-prodazh}
+   * @example
+   * const result = await sdk.analytics.getSalesFunnelProducts({
+   *   selectedPeriod: { start: '2026-01-01', end: '2026-01-31' },
+   *   orderBy: { field: 'orderCount', mode: 'desc' },
+   *   limit: 10,
+   *   offset: 0,
+   * });
+   * console.log(result.products);
+   */
+  async getSalesFunnelProducts(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/analytics/v3/sales-funnel/products",
+      t,
+      { rateLimitKey: "analytics.postSalesFunnelProducts" }
+    );
+  }
+  /**
+   * Статистика карточек товаров по дням (v3)
+   *
+   * Возвращает статистику карточек товаров по дням или неделям.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, 3-request burst
+   *
+   * @param data - Request parameters
+   * @returns Products history statistics
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Voronka-prodazh}
+   * @example
+   * const result = await sdk.analytics.getSalesFunnelProductsHistory({
+   *   selectedPeriod: { start: '2026-01-01', end: '2026-01-07' },
+   *   nmIds: [268913787],
+   *   aggregationLevel: 'day',
+   * });
+   * console.log(result);
+   */
+  async getSalesFunnelProductsHistory(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/analytics/v3/sales-funnel/products/history",
+      t,
+      { rateLimitKey: "analytics.postSalesFunnelProductsHistory" }
+    );
+  }
+  /**
+   * Статистика групп карточек товаров по дням (v3)
+   *
+   * Возвращает статистику карточек товаров по дням, сгруппированных по предметам, брендам и ярлыкам.
+   *
+   * Rate limit: 3 requests/minute, 20-second interval, 3-request burst
+   *
+   * @param data - Request parameters
+   * @returns Grouped history statistics
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Voronka-prodazh}
+   * @example
+   * const result = await sdk.analytics.getSalesFunnelGroupedHistory({
+   *   selectedPeriod: { start: '2026-01-01', end: '2026-01-07' },
+   *   aggregationLevel: 'day',
+   * });
+   * console.log(result);
+   */
+  async getSalesFunnelGroupedHistory(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/analytics/v3/sales-funnel/grouped/history",
+      t,
+      { rateLimitKey: "analytics.postSalesFunnelGroupedHistory" }
+    );
+  }
+  /**
+   * Текущие остатки на складах WB
+   *
+   * Возвращает актуальные остатки товаров на складах Wildberries.
+   * Данные обновляются раз в 30 минут. Одна строка = один размер на одном складе.
+   * Результаты отсортированы по возрастанию nmId.
+   *
+   * Доступен только для токенов типа Personal и Service.
+   *
+   * **WB expanded access:** now also available to registered/authorized services
+   * via a basic token + secret (not just personal/service tokens).
+   *
+   * **Заменяет устаревший метод** `GET /api/v1/supplier/stocks`,
+   * который будет отключён 23 июня 2026.
+   *
+   * Rate limit: 3 requests per minute, 20-second interval, burst 1
+   *
+   * @param data - Filter and pagination parameters (all optional)
+   * @param data.nmIds - WB articles to filter (0-1000, empty = all)
+   * @param data.chrtIds - Size IDs (only for articles in nmIds)
+   * @param data.limit - Rows in response (max 250000, default 250000)
+   * @param data.offset - Skip N results for pagination (default 0)
+   * @returns Current inventory with warehouse IDs, region names, quantities
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @since 3.4.0
+   * @see {@link https://dev.wildberries.ru/docs/openapi/analytics#tag/Istoriya-ostatkov/operation/postV1StocksReportWbWarehouses}
+   * @see [Stocks History guide](https://dev.wildberries.ru/knowledge-base/articles/019ef14c-c72d-717a-9fc2-b0b2f361dc80)
+   * @example
+   * ```typescript
+   * // Get all inventory
+   * const stock = await sdk.analytics.getWbWarehousesStock();
+   * for (const item of stock.data.items) {
+   *   console.log(`${item.warehouseName} (${item.regionName}): ${item.quantity} шт.`);
+   * }
+   *
+   * // With filters and pagination
+   * const page = await sdk.analytics.getWbWarehousesStock({
+   *   nmIds: [395996251],
+   *   limit: 100,
+   *   offset: 0,
+   * });
+   * ```
+   */
+  async getWbWarehousesStock(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/analytics/v1/stocks-report/wb-warehouses",
+      t ?? {},
+      { rateLimitKey: "analytics.postStocksReportWbWarehouses" }
+    );
+  }
+  /**
+   * Get the v2 item-rating report, including catalog visibility.
+   *
+   * Use `onlyShadowedNms: true` to replace the deprecated
+   * `reports.getBannedProductsShadowed()` report. Each returned item includes
+   * `isShadowed`, and the per-product array is named `items` (not the v1 `cards`).
+   *
+   * Rate limit: 3 requests per minute, 20s interval, burst 3.
+   *
+   * @param data - V2 report filters, sorting, and pagination.
+   * @returns Seller rating, feedback summary, and per-product rows with `isShadowed`.
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @since 4.1.0
+   * @see {@link https://dev.wildberries.ru/docs/openapi/analytics#tag/Ocenka-tovara/operation/postV2ItemRating}
+   * @example
+   * ```typescript
+   * const hiddenProducts = await sdk.analytics.getItemRatingV2({
+   *   currentPeriod: { start: '2026-07-01', end: '2026-07-18' },
+   *   onlyShadowedNms: true,
+   *   orderBy: { field: 'feedbackCount', mode: 'desc' },
+   *   offset: 0,
+   * });
+   * console.log(hiddenProducts.data.items[0]?.isShadowed);
+   * ```
+   */
+  async getItemRatingV2(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/analytics/v2/item-rating",
+      t,
+      { rateLimitKey: "analytics.itemRatingV2" }
+    );
+  }
+  /**
+   * Get item rating with feedback distribution.
+   *
+   * Returns the seller rating, a feedback-increase summary (total + per-star 1-5
+   * with optional dynamics vs. the previous period), and a per-item breakdown
+   * of feedback counts and star distribution.
+   *
+   * Rate limit: 3 requests per minute, 20s interval, burst 3.
+   *
+   * @param data - Request parameters. `currentPeriod`, `orderBy`, and `offset` are required.
+   * Pass `pastPeriod` to enable compare mode (yields `dynamics` fields in the response).
+   * @param data.currentPeriod - Current period (`start`/`end` as `YYYY-MM-DD`).
+   * @param data.pastPeriod - Previous period for comparison (optional — compare mode).
+   * @param data.nmIds - WB item numbers filter (max 50).
+   * @param data.subjectIds - Subcategory IDs filter (max 50).
+   * @param data.brandNames - Brand names filter (max 50).
+   * @param data.tagIds - Label IDs filter (max 50).
+   * @param data.isNotIncludeNMsWithoutSales - Exclude items without sales (default `false`).
+   * @param data.orderBy - Sorting parameters (`field` + `mode`).
+   * @param data.limit - Items per response (default 100, max 1000).
+   * @param data.offset - Skip N results for pagination (required).
+   * @returns Seller rating, feedback-increase summary, and per-item array.
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @deprecated Scheduled for removal by Wildberries on 2026-07-30. Use
+   * {@link AnalyticsModule.getItemRatingV2}; note the v2 response uses `items`
+   * instead of `cards` and the no-sales filter is `isNotIncludeNmsWithoutSales`.
+   * @since 3.16.0
+   * @see {@link https://dev.wildberries.ru/docs/openapi/analytics#tag/Ocenka-tovara/operation/postV1ItemRating}
+   * @example
+   * ```typescript
+   * // Period mode (single period, no dynamics)
+   * const rating = await sdk.analytics.getItemRating({
+   *   currentPeriod: { start: '2026-02-10', end: '2026-02-10' },
+   *   orderBy: { field: 'feedbackCount', mode: 'desc' },
+   *   offset: 0,
+   *   limit: 100,
+   * });
+   * console.log(rating.data.sellerRating.current); // e.g. 3.56
+   *
+   * // Compare mode (current + past period — yields `dynamics` fields)
+   * const compared = await sdk.analytics.getItemRating({
+   *   currentPeriod: { start: '2026-02-10', end: '2026-02-10' },
+   *   pastPeriod: { start: '2026-02-08', end: '2026-02-08' },
+   *   nmIds: [162579635, 166699779],
+   *   orderBy: { field: 'fiveStar', mode: 'desc' },
+   *   offset: 0,
+   * });
+   * console.log(compared.data.feedbackIncrease.fiveStar.dynamics); // % change vs past period
+   * ```
+   */
+  async getItemRating(t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/analytics/v1/item-rating",
+      t,
+      { rateLimitKey: "analytics.itemRating" }
+    );
+  }
+};
+
+// node_modules/daytona-wildberries-typescript-sdk/dist/esm/modules/reports/index.js
+var s2 = class {
+  constructor(e) {
+    this.client = e;
+  }
+  /**
+   * Склады
+   *
+   * Метод возвращает количество остатков товаров на складах WB.<br>Данные обновляются раз в 30 минут. <br><br> Для одного ответа в системе установлено условное ограничение 60000 строк. Поэтому, чтобы получить все остатки, может потребоваться более, чем один запрос. Во втором и далее запросе в параметре `dateFrom` используйте полное значение поля `lastChangeDate` из последней строки ответа на предыдущий запрос.<br> Если в ответе отдаётся пустой массив `[]`, все остатки уже выгружены. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 1 запрос | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getSupplierStocks({});
+   * console.log(result);
+   */
+  async getSupplierStocks(e) {
+    return this.client.get(
+      "https://statistics-api.wildberries.ru/api/v1/supplier/stocks",
+      { params: e, rateLimitKey: "reports.supplierStocks" }
+    );
+  }
+  /**
+   * Заказы
+   *
+   * Метод возвращает информацию обо всех заказах.<br>Данные обновляются раз в 30 минут.<br><br> 1 строка = 1 заказ = 1 cборочное задание = 1 единица товара.<br>Для определения заказа рекомендуем использовать поле `srid`.<br><br> Информация о заказе хранится 90 дней с момента оформления.<br><br> Для одного ответа на запрос с `flag=0` или без `flag` в системе установлено условное ограничение 80000 строк. Поэтому, чтобы получить все заказы, может потребоваться более, чем один запрос. Во втором и далее запросе в параметре `dateFrom` используйте полное значение поля `lastChangeDate` из последней строки ответа на предыдущий запрос.<br> Если в ответе отдаётся пустой массив `[]`, все заказы уже выгружены. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 1 запрос | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getSupplierOrders({});
+   * console.log(result);
+   */
+  async getSupplierOrders(e) {
+    return this.client.get(
+      "https://statistics-api.wildberries.ru/api/v1/supplier/orders",
+      { params: e, rateLimitKey: "reports.supplierOrders" }
+    );
+  }
+  /**
+   * Продажи
+   *
+   * Метод возвращает информацию о продажах и возвратах.<br>Данные обновляются раз в 30 минут.<br><br> 1 строка = 1 заказ = 1 cборочное задание = 1 единица товара.<br>Для определения заказа рекомендуем использовать поле `srid`.<br><br> Информация о заказе хранится 90 дней с момента оформления.<br><br> Для одного ответа на запрос с `flag=0` или без `flag` в системе установлено условное ограничение 80000 строк. Поэтому, чтобы получить все продажи и возвраты, может потребоваться более, чем один запрос. Во втором и далее запросе в параметре `dateFrom `используйте полное значение поля `lastChangeDate` из последней строки ответа на предыдущий запрос.<br> Если в ответе отдаётся пустой массив `[]`, все продажи и возвраты уже выгружены. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 1 запрос | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getSupplierSales({});
+   * console.log(result);
+   */
+  async getSupplierSales(e) {
+    return this.client.get(
+      "https://statistics-api.wildberries.ru/api/v1/supplier/sales",
+      { params: e, rateLimitKey: "reports.supplierSales" }
+    );
+  }
+  /**
+   * Получить отчёт
+   *
+   * Метод возвращает отчёт с [операциями по товарам с обязательной маркировкой](https://seller.wildberries.ru/analytics-reports/excise-report).<br><br> Данный отчёт можно сохранить в [формате таблиц](https://dev.wildberries.ru/cases/1). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 5 часов | 10 запросов | 30 минут | 10 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @param [data] - Request body data
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.createAnalyticsExciseReport({}, {});
+   * console.log(result);
+   */
+  async createAnalyticsExciseReport(e, t) {
+    return this.client.post(
+      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/excise-report",
+      t,
+      { params: e, rateLimitKey: "reports.postAnalyticsExciseReport" }
+    );
+  }
+  /**
+   * Создать отчёт
+   *
+   * Метод создаёт [задание на генерацию](/openapi/reports#tag/Otchyot-ob-ostatkah-na-skladah/paths/~1api~1v1~1warehouse_remains~1tasks~1%7Btask_id%7D~1status/get) отчёта об [остатках на складах WB](/openapi/reports#tag/Otchyot-ob-ostatkah-na-skladah/paths/~1api~1v1~1warehouse_remains~1tasks~1%7Btask_id%7D~1download/get).<br><br> Параметры `groupBy` и `filter` (группировки и фильтры) можно задать в любой комбинации — аналогично [версии](https://seller.wildberries.ru/analytics-reports/warehouse-remains) в личном кабинете. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 5 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.warehouseRemains({});
+   * console.log(result);
+   */
+  async warehouseRemains(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains",
+      { params: e, rateLimitKey: "reports.warehouse_remains" }
+    );
+  }
+  /**
+   * Проверить статус задания на генерацию отчёта об остатках на складах WB
+   *
+   * @param task_id - ID задания на генерацию
+   * @returns Статус задания
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getWarehouseRemainsTaskStatus('task-uuid');
+   * console.log(result.data?.status);
+   */
+  async getWarehouseRemainsTaskStatus(e) {
+    return this.client.get(
+      `https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains/tasks/${e}/status`,
+      { rateLimitKey: "reports.warehouse_remainsTasksStatus" }
+    );
+  }
+  /**
+   * Получить отчёт об остатках на складах WB
+   *
+   * @param task_id - ID задания на генерацию
+   * @returns Данные отчёта
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.downloadWarehouseRemainsReport('task-uuid');
+   * console.log(result);
+   */
+  async downloadWarehouseRemainsReport(e) {
+    return this.client.get(
+      `https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains/tasks/${e}/download`,
+      { rateLimitKey: "reports.warehouse_remainsTasksDownload" }
+    );
+  }
+  /**
+   * Самовыкупы
+   *
+   * Метод возвращает отчёт об удержаниях за самовыкупы. Отчёт формируется каждую неделю по средам, до 7:00 по московскому времени, и содержит данные за одну неделю.<br><br> Удержание за самовыкуп — 30% от стоимости товаров.<br>Минимальная сумма всех удержаний — 100 000 ₽, если за неделю в ПВЗ привезли ваших товаров больше, чем на сумму 100 000 ₽.<br><br> Данные доступны с августа 2023. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 100 минут | 10 запросов | 10 минут | 10 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Response data
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getAnalyticsAntifraudDetails({});
+   * console.log(result);
+   */
+  async getAnalyticsAntifraudDetails(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/antifraud-details",
+      { params: e, rateLimitKey: "reports.analyticsAntifraudDetails" }
+    );
+  }
+  /**
+   * Маркировка товара
+   *
+   * Метод возвращает отчёт о штрафах за отсутствие обязательной маркировки товаров.<br> В отчёте представлены фотографии товаров, на которых маркировка отсутствует либо не считывается.<br><br> Можно получить данные максимум за 31 день. Данные доступны с марта 2024. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 минут | 10 запросов | 1 минута | 10 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Response data
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getAnalyticsGoodsLabeling({});
+   * console.log(result);
+   */
+  async getAnalyticsGoodsLabeling(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/goods-labeling",
+      { params: e, rateLimitKey: "reports.analyticsGoodsLabeling" }
+    );
+  }
+  /**
+   * Создать отчёт
+   *
+   * Метод создаёт [задание на генерацию](/openapi/reports#tag/Platnaya-priyomka/paths/~1api~1v1~1acceptance_report~1tasks~1%7Btask_id%7D~1status/get) отчёта о [платной приёмке](/openapi/reports#tag/Platnaya-priyomka/paths/~1api~1v1~1acceptance_report~1tasks~1%7Btask_id%7D~1download/get).<br><br> Можно получить отчёт максимум за 31 день. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 1 запрос | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.acceptanceReport({});
+   * console.log(result);
+   */
+  async acceptanceReport(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/v1/acceptance_report",
+      { params: e, rateLimitKey: "reports.acceptance_report" }
+    );
+  }
+  /**
+   * Проверить статус задания на генерацию отчёта о платной приёмке
+   *
+   * @param task_id - ID задания на генерацию
+   * @returns Статус задания
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getAcceptanceReportTaskStatus('task-uuid');
+   * console.log(result.data?.status);
+   */
+  async getAcceptanceReportTaskStatus(e) {
+    return this.client.get(
+      `https://seller-analytics-api.wildberries.ru/api/v1/acceptance_report/tasks/${e}/status`,
+      { rateLimitKey: "reports.acceptance_reportTasksStatus" }
+    );
+  }
+  /**
+   * Получить отчёт о платной приёмке
+   *
+   * @param task_id - ID задания на генерацию
+   * @returns Данные отчёта
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.downloadAcceptanceReport('task-uuid');
+   * console.log(result);
+   */
+  async downloadAcceptanceReport(e) {
+    return this.client.get(
+      `https://seller-analytics-api.wildberries.ru/api/v1/acceptance_report/tasks/${e}/download`,
+      { rateLimitKey: "reports.acceptance_reportTasksDownload" }
+    );
+  }
+  /**
+   * Создать отчёт
+   *
+   * Метод создаёт [задание на генерацию](/openapi/reports#tag/Platnoe-hranenie/paths/~1api~1v1~1paid_storage~1tasks~1%7Btask_id%7D~1status/get) отчёта о [платном хранении](/openapi/reports#tag/Platnoe-hranenie/paths/~1api~1v1~1paid_storage~1tasks~1%7Btask_id%7D~1download/get).<br><br> Можно получить отчёт максимум за 8 дней. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 5 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.paidStorage({});
+   * console.log(result);
+   */
+  async paidStorage(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/v1/paid_storage",
+      { params: e, rateLimitKey: "reports.paid_storage" }
+    );
+  }
+  /**
+   * Проверить статус задания на генерацию отчёта о платном хранении
+   *
+   * @param task_id - ID задания на генерацию
+   * @returns Статус задания
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getPaidStorageTaskStatus('task-uuid');
+   * console.log(result.data?.status);
+   */
+  async getPaidStorageTaskStatus(e) {
+    return this.client.get(
+      `https://seller-analytics-api.wildberries.ru/api/v1/paid_storage/tasks/${e}/status`,
+      { rateLimitKey: "reports.paid_storageTasksStatus" }
+    );
+  }
+  /**
+   * Получить отчёт о платном хранении
+   *
+   * @param task_id - ID задания на генерацию
+   * @returns Данные отчёта
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.downloadPaidStorageReport('task-uuid');
+   * console.log(result);
+   */
+  async downloadPaidStorageReport(e) {
+    return this.client.get(
+      `https://seller-analytics-api.wildberries.ru/api/v1/paid_storage/tasks/${e}/download`,
+      { rateLimitKey: "reports.paid_storageTasksDownload" }
+    );
+  }
+  /**
+   * Получить отчёт
+   *
+   * Метод возвращает отчёт с [данными продаж, сгруппированных по регионам стран](https://seller.wildberries.ru/analytics-reports/region-sale).<br><br> Можно получить отчёт максимум за 31 день. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 1 запрос | 10 секунд | 5 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Response data
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getAnalyticsRegionSale({});
+   * console.log(result);
+   */
+  async getAnalyticsRegionSale(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/region-sale",
+      { params: e, rateLimitKey: "reports.analyticsRegionSale" }
+    );
+  }
+  /**
+   * Бренды продавца
+   *
+   * Метод возвращает список брендов продавца для отчёта о [доле бренда в продажах](https://seller.wildberries.ru/analytics-reports/brand-share). <br><br> Можно получить только бренды, которые: - Продавались за последние 90 дней. - Есть на складе WB. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 10 запросов | </div>
+   *
+   * @returns Response data
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getBrandShareBrands();
+   * console.log(result);
+   */
+  async getBrandShareBrands() {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/brand-share/brands",
+      { rateLimitKey: "reports.analyticsBrandShareBrands" }
+    );
+  }
+  /**
+   * Родительские категории бренда
+   *
+   * Метод возвращает родительские категории бренда продавца для отчёта о [доле бренда в продажах](https://seller.wildberries.ru/analytics-reports/brand-share).<br><br> Можно получить отчёт максимум за 365 дней. Данные доступны с 1 ноября 2022. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 5 секунд | 1 запрос | 5 секунд | 20 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Response data
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getBrandShareParentSubjects({});
+   * console.log(result);
+   */
+  async getBrandShareParentSubjects(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/brand-share/parent-subjects",
+      { params: e, rateLimitKey: "reports.analyticsBrandShareParentSubjects" }
+    );
+  }
+  /**
+   * Получить отчёт
+   *
+   * Метод возвращает отчёт о [доле бренда продавца в продажах](https://seller.wildberries.ru/analytics-reports/brand-share). <br><br> Можно получить отчёт максимум за 365 дней. Данные доступны с 1 ноября 2022. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 5 секунд | 1 запрос | 5 секунд | 20 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Response data
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getAnalyticsBrandShare({});
+   * console.log(result);
+   */
+  async getAnalyticsBrandShare(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/brand-share",
+      { params: e, rateLimitKey: "reports.analyticsBrandShare" }
+    );
+  }
+  /**
+   * Заблокированные карточки
+   *
+   * Метод возвращает список [заблокированных карточек товаров продавца](https://seller.wildberries.ru/analytics-reports/banned-products) с причинами блокировки. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 1 запрос | 10 секунд | 6 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getBannedProductsBlocked({});
+   * console.log(result);
+   */
+  async getBannedProductsBlocked(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/banned-products/blocked",
+      { params: e, rateLimitKey: "reports.analyticsBannedProductsBlocked" }
+    );
+  }
+  /**
+   * Скрытые из каталога
+   *
+   * Метод возвращает список [товаров продавца, скрытых из каталога](https://seller.wildberries.ru/analytics-reports/banned-products/shadowed). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 1 запрос | 10 секунд | 6 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @deprecated Scheduled for removal by Wildberries on 2026-07-30. Use
+   * `sdk.analytics.getItemRatingV2({ onlyShadowedNms: true, ... })` instead;
+   * v2 returns catalog visibility in `data.items[].isShadowed`.
+   * @example
+   * const result = await sdk.reports.getBannedProductsShadowed({});
+   * console.log(result);
+   */
+  async getBannedProductsShadowed(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/banned-products/shadowed",
+      { params: e, rateLimitKey: "reports.analyticsBannedProductsShadowed" }
+    );
+  }
+  /**
+   * Получить отчёт
+   *
+   * Метод возвращает отчёт о [возвратах товаров продавцу](https://seller.wildberries.ru/analytics-reports/goods-return). <br><br> Можно получить отчёт максимум за 31 день. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 10 запросов | </div>
+   *
+   * @param [options] - Query parameters
+   * @returns Успешно
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @example
+   * const result = await sdk.reports.getAnalyticsGoodsReturn({});
+   * console.log(result);
+   */
+  async getAnalyticsGoodsReturn(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/goods-return",
+      { params: e, rateLimitKey: "reports.analyticsGoodsReturn" }
+    );
+  }
+  // ==========================================================================
+  // New Deduction Endpoints - EPIC 44
+  // ==========================================================================
+  /**
+   * Занижение габаритов упаковки (штрафы)
+   *
+   * Метод возвращает отчёт об удержаниях за занижение габаритов упаковки.
+   *
+   * Rate limit: 1 req/min, 1 min interval, burst 1
+   *
+   * @param options - Query parameters
+   * @param options.dateFrom - Start of reporting period (ISO 8601)
+   * @param options.dateTo - End of reporting period (ISO 8601, required)
+   * @param options.limit - Number of items in response (max 1000, required)
+   * @param options.offset - Number of items to skip (default 0)
+   * @returns Penalty reports with total count
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see EPIC 44 - New endpoint replacing tab=penalty on old warehouse-measurements
+   * @example
+   * const result = await sdk.reports.getMeasurementPenalties({
+   *   dateTo: '2026-02-06',
+   *   limit: 100
+   * });
+   * console.log(result.data?.reports);
+   */
+  async getMeasurementPenalties(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/analytics/v1/measurement-penalties",
+      { params: e, rateLimitKey: "reports.measurementPenalties" }
+    );
+  }
+  /**
+   * Замеры склада
+   *
+   * Метод возвращает отчёт о замерах склада.
+   *
+   * Rate limit: 1 req/min, 1 min interval, burst 1
+   *
+   * @param options - Query parameters
+   * @param options.dateFrom - Start of reporting period (ISO 8601)
+   * @param options.dateTo - End of reporting period (ISO 8601, required)
+   * @param options.limit - Number of items in response (max 1000, required)
+   * @param options.offset - Number of items to skip (default 0)
+   * @returns Measurement reports with total count
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see EPIC 44 - New endpoint replacing tab=measurement on old warehouse-measurements
+   * @example
+   * const result = await sdk.reports.getWarehouseMeasurementsV2({
+   *   dateTo: '2026-02-06',
+   *   limit: 100
+   * });
+   * console.log(result.data?.reports);
+   */
+  async getWarehouseMeasurementsV2(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/analytics/v1/warehouse-measurements",
+      { params: e, rateLimitKey: "reports.warehouseMeasurementsV2" }
+    );
+  }
+  /**
+   * Удержания за подмену и некорректные вложения
+   *
+   * Метод возвращает отчёт об удержаниях за подмену товара и некорректные вложения.
+   * Заменяет удалённый endpoint /api/v1/analytics/incorrect-attachments.
+   *
+   * Rate limit: 1 req/min, 1 min interval, burst 1
+   *
+   * @param options - Query parameters
+   * @param options.dateFrom - Start of reporting period (ISO 8601)
+   * @param options.dateTo - End of reporting period (ISO 8601, required)
+   * @param options.sort - Sort field: nmId, dtBonus, bonusSumm (default: dtBonus)
+   * @param options.order - Sort order: desc, asc (default: desc)
+   * @param options.limit - Number of items in response (max 1000, required)
+   * @param options.offset - Number of items to skip (default 0)
+   * @returns Deduction reports with total count
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see EPIC 44 - New endpoint replacing removed incorrect-attachments
+   * @example
+   * const result = await sdk.reports.getDeductions({
+   *   dateTo: '2026-02-06',
+   *   limit: 100,
+   *   sort: 'dtBonus',
+   *   order: 'desc'
+   * });
+   * console.log(result.data?.reports);
+   */
+  async getDeductions(e) {
+    return this.client.get(
+      "https://seller-analytics-api.wildberries.ru/api/analytics/v1/deductions",
+      { params: e, rateLimitKey: "reports.deductions" }
+    );
+  }
+};
+
 // node_modules/daytona-wildberries-typescript-sdk/dist/esm/index.js
-function ot(r, e) {
+var pr = "4.1.0";
+var mr = {
+  version: pr
+};
+function Rt(r2, e) {
   return function() {
-    return r.apply(e, arguments);
+    return r2.apply(e, arguments);
   };
 }
-var { toString: It } = Object.prototype;
-var { getPrototypeOf: qe } = Object;
-var { iterator: de, toStringTag: ct } = Symbol;
-var pe = /* @__PURE__ */ ((r) => (e) => {
-  const t = It.call(e);
-  return r[t] || (r[t] = t.slice(8, -1).toLowerCase());
-})(/* @__PURE__ */ Object.create(null));
-var O = (r) => (r = r.toLowerCase(), (e) => pe(e) === r);
-var me = (r) => (e) => typeof e === r;
-var { isArray: J } = Array;
-var z = me("undefined");
-function Z(r) {
-  return r !== null && !z(r) && r.constructor !== null && !z(r.constructor) && K(r.constructor.isBuffer) && r.constructor.isBuffer(r);
-}
-var ut = O("ArrayBuffer");
-function Ft(r) {
-  let e;
-  return typeof ArrayBuffer < "u" && ArrayBuffer.isView ? e = ArrayBuffer.isView(r) : e = r && r.buffer && ut(r.buffer), e;
-}
-var xt = me("string");
-var K = me("function");
-var lt = me("number");
-var ee = (r) => r !== null && typeof r == "object";
-var Nt = (r) => r === true || r === false;
-var oe = (r) => {
-  if (pe(r) !== "object")
-    return false;
-  const e = qe(r);
-  return (e === null || e === Object.prototype || Object.getPrototypeOf(e) === null) && !(ct in r) && !(de in r);
+var { toString: yr } = Object.prototype;
+var { getPrototypeOf: ae } = Object;
+var { iterator: fe, toStringTag: At } = Symbol;
+var Ce = (({ hasOwnProperty: r2 }) => (e, t) => r2.call(e, t))(Object.prototype);
+var ye = (r2, e) => {
+  let t = r2;
+  const s3 = [];
+  for (; t != null && t !== Object.prototype; ) {
+    if (s3.indexOf(t) !== -1)
+      return false;
+    if (s3.push(t), Ce(t, e))
+      return true;
+    t = ae(t);
+  }
+  return false;
 };
-var Ut = (r) => {
-  if (!ee(r) || Z(r))
+var fr = (r2, e) => r2 != null && ye(r2, e) ? r2[e] : void 0;
+var Ve = /* @__PURE__ */ ((r2) => (e) => {
+  const t = yr.call(e);
+  return r2[t] || (r2[t] = t.slice(8, -1).toLowerCase());
+})(/* @__PURE__ */ Object.create(null));
+var F = (r2) => (r2 = r2.toLowerCase(), (e) => Ve(e) === r2);
+var Ae = (r2) => (e) => typeof e === r2;
+var { isArray: ee } = Array;
+var oe = Ae("undefined");
+function ce(r2) {
+  return r2 !== null && !oe(r2) && r2.constructor !== null && !oe(r2.constructor) && E(r2.constructor.isBuffer) && r2.constructor.isBuffer(r2);
+}
+var Bt = F("ArrayBuffer");
+function hr(r2) {
+  let e;
+  return typeof ArrayBuffer < "u" && ArrayBuffer.isView ? e = ArrayBuffer.isView(r2) : e = r2 && r2.buffer && Bt(r2.buffer), e;
+}
+var gr = Ae("string");
+var E = Ae("function");
+var Kt = Ae("number");
+var ue = (r2) => r2 !== null && typeof r2 == "object";
+var br = (r2) => r2 === true || r2 === false;
+var ke = (r2) => {
+  if (!ue(r2))
+    return false;
+  const e = ae(r2);
+  return (e === null || e === Object.prototype || ae(e) === null) && // Treat any genuine (non-Object.prototype-polluted) Symbol.toStringTag or
+  // Symbol.iterator as evidence the value is a tagged/iterable type rather
+  // than a plain object, while ignoring keys injected onto Object.prototype.
+  !ye(r2, At) && !ye(r2, fe);
+};
+var vr = (r2) => {
+  if (!ue(r2) || ce(r2))
     return false;
   try {
-    return Object.keys(r).length === 0 && Object.getPrototypeOf(r) === Object.prototype;
+    return Object.keys(r2).length === 0 && Object.getPrototypeOf(r2) === Object.prototype;
   } catch {
     return false;
   }
 };
-var _t = O("Date");
-var $t = O("File");
-var jt = O("Blob");
-var Gt = O("FileList");
-var Wt = (r) => ee(r) && K(r.pipe);
-var Ht = (r) => {
-  let e;
-  return r && (typeof FormData == "function" && r instanceof FormData || K(r.append) && ((e = pe(r)) === "formdata" || // detect form-data instance
-  e === "object" && K(r.toString) && r.toString() === "[object FormData]"));
+var Sr = F("Date");
+var Lr = F("File");
+var wr = (r2) => !!(r2 && typeof r2.uri < "u");
+var kr = (r2) => r2 && typeof r2.getParts < "u";
+var Mr = F("Blob");
+var Pr = F("FileList");
+var Cr = (r2) => ue(r2) && E(r2.pipe);
+function qr() {
+  return typeof globalThis < "u" ? globalThis : typeof self < "u" ? self : typeof window < "u" ? window : typeof global < "u" ? global : {};
+}
+var ut = qr();
+var lt = typeof ut.FormData < "u" ? ut.FormData : void 0;
+var Rr = (r2) => {
+  if (!r2) return false;
+  if (lt && r2 instanceof lt) return true;
+  const e = ae(r2);
+  if (!e || e === Object.prototype || !E(r2.append)) return false;
+  const t = Ve(r2);
+  return t === "formdata" || // detect form-data instance
+  t === "object" && E(r2.toString) && r2.toString() === "[object FormData]";
 };
-var Vt = O("URLSearchParams");
-var [zt, Jt, Xt, Qt] = ["ReadableStream", "Request", "Response", "Headers"].map(O);
-var Yt = (r) => r.trim ? r.trim() : r.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
-function te(r, e, { allOwnKeys: t = false } = {}) {
-  if (r === null || typeof r > "u")
+var Ar = F("URLSearchParams");
+var [Br, Kr, Tr, Or] = [
+  "ReadableStream",
+  "Request",
+  "Response",
+  "Headers"
+].map(F);
+var Er = (r2) => r2.trim ? r2.trim() : r2.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
+function he(r2, e, { allOwnKeys: t = false } = {}) {
+  if (r2 === null || typeof r2 > "u")
     return;
-  let s, i;
-  if (typeof r != "object" && (r = [r]), J(r))
-    for (s = 0, i = r.length; s < i; s++)
-      e.call(null, r[s], s, r);
+  let s3, i;
+  if (typeof r2 != "object" && (r2 = [r2]), ee(r2))
+    for (s3 = 0, i = r2.length; s3 < i; s3++)
+      e.call(null, r2[s3], s3, r2);
   else {
-    if (Z(r))
+    if (ce(r2))
       return;
-    const a = t ? Object.getOwnPropertyNames(r) : Object.keys(r), n = a.length;
-    let o;
-    for (s = 0; s < n; s++)
-      o = a[s], e.call(null, r[o], o, r);
+    const n = t ? Object.getOwnPropertyNames(r2) : Object.keys(r2), a2 = n.length;
+    let o2;
+    for (s3 = 0; s3 < a2; s3++)
+      o2 = n[s3], e.call(null, r2[o2], o2, r2);
   }
 }
-function dt(r, e) {
-  if (Z(r))
+function Tt(r2, e) {
+  if (ce(r2))
     return null;
   e = e.toLowerCase();
-  const t = Object.keys(r);
-  let s = t.length, i;
-  for (; s-- > 0; )
-    if (i = t[s], e === i.toLowerCase())
+  const t = Object.keys(r2);
+  let s3 = t.length, i;
+  for (; s3-- > 0; )
+    if (i = t[s3], e === i.toLowerCase())
       return i;
   return null;
 }
-var $ = typeof globalThis < "u" ? globalThis : typeof self < "u" ? self : typeof window < "u" ? window : global;
-var pt = (r) => !z(r) && r !== $;
-function we() {
-  const { caseless: r, skipUndefined: e } = pt(this) && this || {}, t = {}, s = (i, a) => {
-    const n = r && dt(t, a) || a;
-    oe(t[n]) && oe(i) ? t[n] = we(t[n], i) : oe(i) ? t[n] = we({}, i) : J(i) ? t[n] = i.slice() : (!e || !z(i)) && (t[n] = i);
+var Y = typeof globalThis < "u" ? globalThis : typeof self < "u" ? self : typeof window < "u" ? window : global;
+var Ot = (r2) => !oe(r2) && r2 !== Y;
+function Ue(...r2) {
+  const { caseless: e, skipUndefined: t } = Ot(this) && this || {}, s3 = {}, i = (n, a2) => {
+    if (a2 === "__proto__" || a2 === "constructor" || a2 === "prototype")
+      return;
+    const o2 = e && typeof a2 == "string" && Tt(s3, a2) || a2, u = Ce(s3, o2) ? s3[o2] : void 0;
+    ke(u) && ke(n) ? s3[o2] = Ue(u, n) : ke(n) ? s3[o2] = Ue({}, n) : ee(n) ? s3[o2] = n.slice() : (!t || !oe(n)) && (s3[o2] = n);
   };
-  for (let i = 0, a = arguments.length; i < a; i++)
-    arguments[i] && te(arguments[i], s);
-  return t;
+  for (let n = 0, a2 = r2.length; n < a2; n++) {
+    const o2 = r2[n];
+    if (!o2 || ce(o2) || (he(o2, i), typeof o2 != "object" || ee(o2)))
+      continue;
+    const u = Object.getOwnPropertySymbols(o2);
+    for (let l2 = 0; l2 < u.length; l2++) {
+      const d2 = u[l2];
+      Gr.call(o2, d2) && i(o2[d2], d2);
+    }
+  }
+  return s3;
 }
-var Zt = (r, e, t, { allOwnKeys: s } = {}) => (te(e, (i, a) => {
-  t && K(i) ? r[a] = ot(i, t) : r[a] = i;
-}, { allOwnKeys: s }), r);
-var er = (r) => (r.charCodeAt(0) === 65279 && (r = r.slice(1)), r);
-var tr = (r, e, t, s) => {
-  r.prototype = Object.create(e.prototype, s), r.prototype.constructor = r, Object.defineProperty(r, "super", {
+var Dr = (r2, e, t, { allOwnKeys: s3 } = {}) => (he(
+  e,
+  (i, n) => {
+    t && E(i) ? Object.defineProperty(r2, n, {
+      // Null-proto descriptor so a polluted Object.prototype.get cannot
+      // hijack defineProperty's accessor-vs-data resolution.
+      __proto__: null,
+      value: Rt(i, t),
+      writable: true,
+      enumerable: true,
+      configurable: true
+    }) : Object.defineProperty(r2, n, {
+      __proto__: null,
+      value: i,
+      writable: true,
+      enumerable: true,
+      configurable: true
+    });
+  },
+  { allOwnKeys: s3 }
+), r2);
+var Ir = (r2) => (r2.charCodeAt(0) === 65279 && (r2 = r2.slice(1)), r2);
+var xr = (r2, e, t, s3) => {
+  r2.prototype = Object.create(e.prototype, s3), Object.defineProperty(r2.prototype, "constructor", {
+    __proto__: null,
+    value: r2,
+    writable: true,
+    enumerable: false,
+    configurable: true
+  }), Object.defineProperty(r2, "super", {
+    __proto__: null,
     value: e.prototype
-  }), t && Object.assign(r.prototype, t);
+  }), t && Object.assign(r2.prototype, t);
 };
-var rr = (r, e, t, s) => {
-  let i, a, n;
-  const o = {};
-  if (e = e || {}, r == null) return e;
+var Nr = (r2, e, t, s3) => {
+  let i, n, a2;
+  const o2 = {};
+  if (e = e || {}, r2 == null) return e;
   do {
-    for (i = Object.getOwnPropertyNames(r), a = i.length; a-- > 0; )
-      n = i[a], (!s || s(n, r, e)) && !o[n] && (e[n] = r[n], o[n] = true);
-    r = t !== false && qe(r);
-  } while (r && (!t || t(r, e)) && r !== Object.prototype);
+    for (i = Object.getOwnPropertyNames(r2), n = i.length; n-- > 0; )
+      a2 = i[n], (!s3 || s3(a2, r2, e)) && !o2[a2] && (e[a2] = r2[a2], o2[a2] = true);
+    r2 = t !== false && ae(r2);
+  } while (r2 && (!t || t(r2, e)) && r2 !== Object.prototype);
   return e;
 };
-var sr = (r, e, t) => {
-  r = String(r), (t === void 0 || t > r.length) && (t = r.length), t -= e.length;
-  const s = r.indexOf(e, t);
-  return s !== -1 && s === t;
+var Fr = (r2, e, t) => {
+  r2 = String(r2), (t === void 0 || t > r2.length) && (t = r2.length), t -= e.length;
+  const s3 = r2.indexOf(e, t);
+  return s3 !== -1 && s3 === t;
 };
-var ir = (r) => {
-  if (!r) return null;
-  if (J(r)) return r;
-  let e = r.length;
-  if (!lt(e)) return null;
+var _r = (r2) => {
+  if (!r2) return null;
+  if (ee(r2)) return r2;
+  let e = r2.length;
+  if (!Kt(e)) return null;
   const t = new Array(e);
   for (; e-- > 0; )
-    t[e] = r[e];
+    t[e] = r2[e];
   return t;
 };
-var ar = /* @__PURE__ */ ((r) => (e) => r && e instanceof r)(typeof Uint8Array < "u" && qe(Uint8Array));
-var nr = (r, e) => {
-  const s = (r && r[de]).call(r);
+var Ur = /* @__PURE__ */ ((r2) => (e) => r2 && e instanceof r2)(typeof Uint8Array < "u" && ae(Uint8Array));
+var $r = (r2, e) => {
+  const s3 = (r2 && r2[fe]).call(r2);
   let i;
-  for (; (i = s.next()) && !i.done; ) {
-    const a = i.value;
-    e.call(r, a[0], a[1]);
+  for (; (i = s3.next()) && !i.done; ) {
+    const n = i.value;
+    e.call(r2, n[0], n[1]);
   }
 };
-var or = (r, e) => {
+var jr = (r2, e) => {
   let t;
-  const s = [];
-  for (; (t = r.exec(e)) !== null; )
-    s.push(t);
-  return s;
+  const s3 = [];
+  for (; (t = r2.exec(e)) !== null; )
+    s3.push(t);
+  return s3;
 };
-var cr = O("HTMLFormElement");
-var ur = (r) => r.toLowerCase().replace(
-  /[-_\s]([a-z\d])(\w*)/g,
-  function(t, s, i) {
-    return s.toUpperCase() + i;
-  }
-);
-var Ue = (({ hasOwnProperty: r }) => (e, t) => r.call(e, t))(Object.prototype);
-var lr = O("RegExp");
-var mt = (r, e) => {
-  const t = Object.getOwnPropertyDescriptors(r), s = {};
-  te(t, (i, a) => {
-    let n;
-    (n = e(i, a, r)) !== false && (s[a] = n || i);
-  }), Object.defineProperties(r, s);
+var Wr = F("HTMLFormElement");
+var Hr = (r2) => r2.toLowerCase().replace(/[-_\s]([a-z\d])(\w*)/g, function(t, s3, i) {
+  return s3.toUpperCase() + i;
+});
+var { propertyIsEnumerable: Gr } = Object.prototype;
+var Vr = F("RegExp");
+var Et = (r2, e) => {
+  const t = Object.getOwnPropertyDescriptors(r2), s3 = {};
+  he(t, (i, n) => {
+    let a2;
+    (a2 = e(i, n, r2)) !== false && (s3[n] = a2 || i);
+  }), Object.defineProperties(r2, s3);
 };
-var dr = (r) => {
-  mt(r, (e, t) => {
-    if (K(r) && ["arguments", "caller", "callee"].indexOf(t) !== -1)
+var zr = (r2) => {
+  Et(r2, (e, t) => {
+    if (E(r2) && ["arguments", "caller", "callee"].includes(t))
       return false;
-    const s = r[t];
-    if (K(s)) {
+    const s3 = r2[t];
+    if (E(s3)) {
       if (e.enumerable = false, "writable" in e) {
         e.writable = false;
         return;
@@ -1450,117 +3891,432 @@ var dr = (r) => {
     }
   });
 };
-var pr = (r, e) => {
-  const t = {}, s = (i) => {
-    i.forEach((a) => {
-      t[a] = true;
+var Jr = (r2, e) => {
+  const t = {}, s3 = (i) => {
+    i.forEach((n) => {
+      t[n] = true;
     });
   };
-  return J(r) ? s(r) : s(String(r).split(e)), t;
+  return ee(r2) ? s3(r2) : s3(String(r2).split(e)), t;
 };
-var mr = () => {
+var Xr = () => {
 };
-var yr = (r, e) => r != null && Number.isFinite(r = +r) ? r : e;
-function fr(r) {
-  return !!(r && K(r.append) && r[ct] === "FormData" && r[de]);
+var Qr = (r2, e) => r2 != null && Number.isFinite(r2 = +r2) ? r2 : e;
+function Yr(r2) {
+  return !!(r2 && E(r2.append) && r2[At] === "FormData" && r2[fe]);
 }
-var hr = (r) => {
-  const e = new Array(10), t = (s, i) => {
-    if (ee(s)) {
-      if (e.indexOf(s) >= 0)
+var Zr = (r2) => {
+  const e = /* @__PURE__ */ new WeakSet(), t = (s3) => {
+    if (ue(s3)) {
+      if (e.has(s3))
         return;
-      if (Z(s))
-        return s;
-      if (!("toJSON" in s)) {
-        e[i] = s;
-        const a = J(s) ? [] : {};
-        return te(s, (n, o) => {
-          const u = t(n, i + 1);
-          !z(u) && (a[o] = u);
-        }), e[i] = void 0, a;
+      if (ce(s3))
+        return s3;
+      if (!("toJSON" in s3)) {
+        e.add(s3);
+        const i = ee(s3) ? [] : {};
+        return he(s3, (n, a2) => {
+          const o2 = t(n);
+          !oe(o2) && (i[a2] = o2);
+        }), e.delete(s3), i;
       }
     }
-    return s;
+    return s3;
   };
-  return t(r, 0);
+  return t(r2);
 };
-var gr = O("AsyncFunction");
-var br = (r) => r && (ee(r) || K(r)) && K(r.then) && K(r.catch);
-var yt = ((r, e) => r ? setImmediate : e ? ((t, s) => ($.addEventListener("message", ({ source: i, data: a }) => {
-  i === $ && a === t && s.length && s.shift()();
-}, false), (i) => {
-  s.push(i), $.postMessage(t, "*");
-}))(`axios@${Math.random()}`, []) : (t) => setTimeout(t))(
-  typeof setImmediate == "function",
-  K($.postMessage)
-);
-var vr = typeof queueMicrotask < "u" ? queueMicrotask.bind($) : typeof process < "u" && process.nextTick || yt;
-var Sr = (r) => r != null && K(r[de]);
+var es = F("AsyncFunction");
+var ts = (r2) => r2 && (ue(r2) || E(r2)) && E(r2.then) && E(r2.catch);
+var Dt = ((r2, e) => r2 ? setImmediate : e ? ((t, s3) => (Y.addEventListener(
+  "message",
+  ({ source: i, data: n }) => {
+    i === Y && n === t && s3.length && s3.shift()();
+  },
+  false
+), (i) => {
+  s3.push(i), Y.postMessage(t, "*");
+}))(`axios@${Math.random()}`, []) : (t) => setTimeout(t))(typeof setImmediate == "function", E(Y.postMessage));
+var rs = typeof queueMicrotask < "u" ? queueMicrotask.bind(Y) : typeof process < "u" && process.nextTick || Dt;
+var It = (r2) => r2 != null && E(r2[fe]);
+var ss = (r2) => r2 != null && ye(r2, fe) && It(r2);
 var c = {
-  isArray: J,
-  isArrayBuffer: ut,
-  isBuffer: Z,
-  isFormData: Ht,
-  isArrayBufferView: Ft,
-  isString: xt,
-  isNumber: lt,
-  isBoolean: Nt,
-  isObject: ee,
-  isPlainObject: oe,
-  isEmptyObject: Ut,
-  isReadableStream: zt,
-  isRequest: Jt,
-  isResponse: Xt,
-  isHeaders: Qt,
-  isUndefined: z,
-  isDate: _t,
-  isFile: $t,
-  isBlob: jt,
-  isRegExp: lr,
-  isFunction: K,
-  isStream: Wt,
-  isURLSearchParams: Vt,
-  isTypedArray: ar,
-  isFileList: Gt,
-  forEach: te,
-  merge: we,
-  extend: Zt,
-  trim: Yt,
-  stripBOM: er,
-  inherits: tr,
-  toFlatObject: rr,
-  kindOf: pe,
-  kindOfTest: O,
-  endsWith: sr,
-  toArray: ir,
-  forEachEntry: nr,
-  matchAll: or,
-  isHTMLForm: cr,
-  hasOwnProperty: Ue,
-  hasOwnProp: Ue,
+  isArray: ee,
+  isArrayBuffer: Bt,
+  isBuffer: ce,
+  isFormData: Rr,
+  isArrayBufferView: hr,
+  isString: gr,
+  isNumber: Kt,
+  isBoolean: br,
+  isObject: ue,
+  isPlainObject: ke,
+  isEmptyObject: vr,
+  isReadableStream: Br,
+  isRequest: Kr,
+  isResponse: Tr,
+  isHeaders: Or,
+  isUndefined: oe,
+  isDate: Sr,
+  isFile: Lr,
+  isReactNativeBlob: wr,
+  isReactNative: kr,
+  isBlob: Mr,
+  isRegExp: Vr,
+  isFunction: E,
+  isStream: Cr,
+  isURLSearchParams: Ar,
+  isTypedArray: Ur,
+  isFileList: Pr,
+  forEach: he,
+  merge: Ue,
+  extend: Dr,
+  trim: Er,
+  stripBOM: Ir,
+  inherits: xr,
+  toFlatObject: Nr,
+  kindOf: Ve,
+  kindOfTest: F,
+  endsWith: Fr,
+  toArray: _r,
+  forEachEntry: $r,
+  matchAll: jr,
+  isHTMLForm: Wr,
+  hasOwnProperty: Ce,
+  hasOwnProp: Ce,
   // an alias to avoid ESLint no-prototype-builtins detection
-  reduceDescriptors: mt,
-  freezeMethods: dr,
-  toObjectSet: pr,
-  toCamelCase: ur,
-  noop: mr,
-  toFiniteNumber: yr,
-  findKey: dt,
-  global: $,
-  isContextDefined: pt,
-  isSpecCompliantForm: fr,
-  toJSONObject: hr,
-  isAsyncFn: gr,
-  isThenable: br,
-  setImmediate: yt,
-  asap: vr,
-  isIterable: Sr
+  hasOwnInPrototypeChain: ye,
+  getSafeProp: fr,
+  reduceDescriptors: Et,
+  freezeMethods: zr,
+  toObjectSet: Jr,
+  toCamelCase: Hr,
+  noop: Xr,
+  toFiniteNumber: Qr,
+  findKey: Tt,
+  global: Y,
+  isContextDefined: Ot,
+  isSpecCompliantForm: Yr,
+  toJSONObject: Zr,
+  isAsyncFn: es,
+  isThenable: ts,
+  setImmediate: Dt,
+  asap: rs,
+  isIterable: It,
+  isSafeIterable: ss
 };
-function v(r, e, t, s, i) {
-  Error.call(this), Error.captureStackTrace ? Error.captureStackTrace(this, this.constructor) : this.stack = new Error().stack, this.message = r, this.name = "AxiosError", e && (this.code = e), t && (this.config = t), s && (this.request = s), i && (this.response = i, this.status = i.status ? i.status : null);
+var is = c.toObjectSet([
+  "age",
+  "authorization",
+  "content-length",
+  "content-type",
+  "etag",
+  "expires",
+  "from",
+  "host",
+  "if-modified-since",
+  "if-unmodified-since",
+  "last-modified",
+  "location",
+  "max-forwards",
+  "proxy-authorization",
+  "referer",
+  "retry-after",
+  "user-agent"
+]);
+var ns = (r2) => {
+  const e = {};
+  let t, s3, i;
+  return r2 && r2.split(`
+`).forEach(function(a2) {
+    i = a2.indexOf(":"), t = a2.substring(0, i).trim().toLowerCase(), s3 = a2.substring(i + 1).trim(), !(!t || e[t] && is[t]) && (t === "set-cookie" ? e[t] ? e[t].push(s3) : e[t] = [s3] : e[t] = e[t] ? e[t] + ", " + s3 : s3);
+  }), e;
+};
+function as(r2) {
+  let e = 0, t = r2.length;
+  for (; e < t; ) {
+    const s3 = r2.charCodeAt(e);
+    if (s3 !== 9 && s3 !== 32)
+      break;
+    e += 1;
+  }
+  for (; t > e; ) {
+    const s3 = r2.charCodeAt(t - 1);
+    if (s3 !== 9 && s3 !== 32)
+      break;
+    t -= 1;
+  }
+  return e === 0 && t === r2.length ? r2 : r2.slice(e, t);
 }
-c.inherits(v, Error, {
-  toJSON: function() {
+var os = new RegExp("[\\u0000-\\u0008\\u000a-\\u001f\\u007f]+", "g");
+var cs = new RegExp("[^\\u0009\\u0020-\\u007e\\u0080-\\u00ff]+", "g");
+function ze(r2, e) {
+  return c.isArray(r2) ? r2.map((t) => ze(t, e)) : as(String(r2).replace(e, ""));
+}
+var us = (r2) => ze(r2, os);
+var ls = (r2) => ze(r2, cs);
+function xt(r2) {
+  const e = /* @__PURE__ */ Object.create(null);
+  return c.forEach(r2.toJSON(), (t, s3) => {
+    e[s3] = ls(t);
+  }), e;
+}
+var dt = /* @__PURE__ */ Symbol("internals");
+function me(r2) {
+  return r2 && String(r2).trim().toLowerCase();
+}
+function Me(r2) {
+  return r2 === false || r2 == null ? r2 : c.isArray(r2) ? r2.map(Me) : us(String(r2));
+}
+function ds(r2) {
+  const e = /* @__PURE__ */ Object.create(null), t = /([^\s,;=]+)\s*(?:=\s*([^,;]+))?/g;
+  let s3;
+  for (; s3 = t.exec(r2); )
+    e[s3[1]] = s3[2];
+  return e;
+}
+var ps = (r2) => /^[-_a-zA-Z0-9^`|~,!#$%&'*+.]+$/.test(r2.trim());
+function xe(r2, e, t, s3, i) {
+  if (c.isFunction(s3))
+    return s3.call(this, e, t);
+  if (i && (e = t), !!c.isString(e)) {
+    if (c.isString(s3))
+      return e.indexOf(s3) !== -1;
+    if (c.isRegExp(s3))
+      return s3.test(e);
+  }
+}
+function ms(r2) {
+  return r2.trim().toLowerCase().replace(/([a-z\d])(\w*)/g, (e, t, s3) => t.toUpperCase() + s3);
+}
+function ys(r2, e) {
+  const t = c.toCamelCase(" " + e);
+  ["get", "set", "has"].forEach((s3) => {
+    Object.defineProperty(r2, s3 + t, {
+      // Null-proto descriptor so a polluted Object.prototype.get cannot turn
+      // this data descriptor into an accessor descriptor on the way in.
+      __proto__: null,
+      value: function(i, n, a2) {
+        return this[s3].call(this, e, i, n, a2);
+      },
+      configurable: true
+    });
+  });
+}
+var O = class {
+  constructor(e) {
+    e && this.set(e);
+  }
+  set(e, t, s3) {
+    const i = this;
+    function n(o2, u, l2) {
+      const d2 = me(u);
+      if (!d2)
+        return;
+      const m2 = c.findKey(i, d2);
+      (!m2 || i[m2] === void 0 || l2 === true || l2 === void 0 && i[m2] !== false) && (i[m2 || u] = Me(o2));
+    }
+    const a2 = (o2, u) => c.forEach(o2, (l2, d2) => n(l2, d2, u));
+    if (c.isPlainObject(e) || e instanceof this.constructor)
+      a2(e, t);
+    else if (c.isString(e) && (e = e.trim()) && !ps(e))
+      a2(ns(e), t);
+    else if (c.isObject(e) && c.isSafeIterable(e)) {
+      let o2 = /* @__PURE__ */ Object.create(null), u, l2;
+      for (const d2 of e) {
+        if (!c.isArray(d2))
+          throw new TypeError("Object iterator must return a key-value pair");
+        l2 = d2[0], c.hasOwnProp(o2, l2) ? (u = o2[l2], o2[l2] = c.isArray(u) ? [...u, d2[1]] : [u, d2[1]]) : o2[l2] = d2[1];
+      }
+      a2(o2, t);
+    } else
+      e != null && n(t, e, s3);
+    return this;
+  }
+  get(e, t) {
+    if (e = me(e), e) {
+      const s3 = c.findKey(this, e);
+      if (s3) {
+        const i = this[s3];
+        if (!t)
+          return i;
+        if (t === true)
+          return ds(i);
+        if (c.isFunction(t))
+          return t.call(this, i, s3);
+        if (c.isRegExp(t))
+          return t.exec(i);
+        throw new TypeError("parser must be boolean|regexp|function");
+      }
+    }
+  }
+  has(e, t) {
+    if (e = me(e), e) {
+      const s3 = c.findKey(this, e);
+      return !!(s3 && this[s3] !== void 0 && (!t || xe(this, this[s3], s3, t)));
+    }
+    return false;
+  }
+  delete(e, t) {
+    const s3 = this;
+    let i = false;
+    function n(a2) {
+      if (a2 = me(a2), a2) {
+        const o2 = c.findKey(s3, a2);
+        o2 && (!t || xe(s3, s3[o2], o2, t)) && (delete s3[o2], i = true);
+      }
+    }
+    return c.isArray(e) ? e.forEach(n) : n(e), i;
+  }
+  clear(e) {
+    const t = Object.keys(this);
+    let s3 = t.length, i = false;
+    for (; s3--; ) {
+      const n = t[s3];
+      (!e || xe(this, this[n], n, e, true)) && (delete this[n], i = true);
+    }
+    return i;
+  }
+  normalize(e) {
+    const t = this, s3 = {};
+    return c.forEach(this, (i, n) => {
+      const a2 = c.findKey(s3, n);
+      if (a2) {
+        t[a2] = Me(i), delete t[n];
+        return;
+      }
+      const o2 = e ? ms(n) : String(n).trim();
+      o2 !== n && delete t[n], t[o2] = Me(i), s3[o2] = true;
+    }), this;
+  }
+  concat(...e) {
+    return this.constructor.concat(this, ...e);
+  }
+  toJSON(e) {
+    const t = /* @__PURE__ */ Object.create(null);
+    return c.forEach(this, (s3, i) => {
+      s3 != null && s3 !== false && (t[i] = e && c.isArray(s3) ? s3.join(", ") : s3);
+    }), t;
+  }
+  [Symbol.iterator]() {
+    return Object.entries(this.toJSON())[Symbol.iterator]();
+  }
+  toString() {
+    return Object.entries(this.toJSON()).map(([e, t]) => e + ": " + t).join(`
+`);
+  }
+  getSetCookie() {
+    return this.get("set-cookie") || [];
+  }
+  get [Symbol.toStringTag]() {
+    return "AxiosHeaders";
+  }
+  static from(e) {
+    return e instanceof this ? e : new this(e);
+  }
+  static concat(e, ...t) {
+    const s3 = new this(e);
+    return t.forEach((i) => s3.set(i)), s3;
+  }
+  static accessor(e) {
+    const s3 = (this[dt] = this[dt] = {
+      accessors: {}
+    }).accessors, i = this.prototype;
+    function n(a2) {
+      const o2 = me(a2);
+      s3[o2] || (ys(i, a2), s3[o2] = true);
+    }
+    return c.isArray(e) ? e.forEach(n) : n(e), this;
+  }
+};
+O.accessor([
+  "Content-Type",
+  "Content-Length",
+  "Accept",
+  "Accept-Encoding",
+  "User-Agent",
+  "Authorization"
+]);
+c.reduceDescriptors(O.prototype, ({ value: r2 }, e) => {
+  let t = e[0].toUpperCase() + e.slice(1);
+  return {
+    get: () => r2,
+    set(s3) {
+      this[t] = s3;
+    }
+  };
+});
+c.freezeMethods(O);
+var fs = "[REDACTED ****]";
+function hs(r2) {
+  if (c.hasOwnProp(r2, "toJSON"))
+    return true;
+  let e = Object.getPrototypeOf(r2);
+  for (; e && e !== Object.prototype; ) {
+    if (c.hasOwnProp(e, "toJSON"))
+      return true;
+    e = Object.getPrototypeOf(e);
+  }
+  return false;
+}
+function gs(r2, e) {
+  const t = new Set(e.map((n) => String(n).toLowerCase())), s3 = [], i = (n) => {
+    if (n === null || typeof n != "object" || c.isBuffer(n)) return n;
+    if (s3.indexOf(n) !== -1) return;
+    n instanceof O && (n = n.toJSON()), s3.push(n);
+    let a2;
+    if (c.isArray(n))
+      a2 = [], n.forEach((o2, u) => {
+        const l2 = i(o2);
+        c.isUndefined(l2) || (a2[u] = l2);
+      });
+    else {
+      if (!c.isPlainObject(n) && hs(n))
+        return s3.pop(), n;
+      a2 = /* @__PURE__ */ Object.create(null);
+      for (const [o2, u] of Object.entries(n)) {
+        const l2 = t.has(o2.toLowerCase()) ? fs : i(u);
+        c.isUndefined(l2) || (a2[o2] = l2);
+      }
+    }
+    return s3.pop(), a2;
+  };
+  return i(r2);
+}
+var h2 = class Nt extends Error {
+  static from(e, t, s3, i, n, a2) {
+    const o2 = new Nt(e.message, t || e.code, s3, i, n);
+    return Object.defineProperty(o2, "cause", {
+      __proto__: null,
+      value: e,
+      writable: true,
+      enumerable: false,
+      configurable: true
+    }), o2.name = e.name, e.status != null && o2.status == null && (o2.status = e.status), a2 && Object.assign(o2, a2), o2;
+  }
+  /**
+   * Create an Error with the specified message, config, error code, request and response.
+   *
+   * @param {string} message The error message.
+   * @param {string} [code] The error code (for example, 'ECONNABORTED').
+   * @param {Object} [config] The config.
+   * @param {Object} [request] The request.
+   * @param {Object} [response] The response.
+   *
+   * @returns {Error} The created error.
+   */
+  constructor(e, t, s3, i, n) {
+    super(e), Object.defineProperty(this, "message", {
+      // Null-proto descriptor so a polluted Object.prototype.get cannot turn
+      // this data descriptor into an accessor descriptor on the way in.
+      __proto__: null,
+      value: e,
+      enumerable: true,
+      writable: true,
+      configurable: true
+    }), this.name = "AxiosError", this.isAxiosError = true, t && (this.code = t), s3 && (this.config = s3), i && (this.request = i), n && (this.response = n, this.status = n.status);
+  }
+  toJSON() {
+    const e = this.config, t = e && c.hasOwnProp(e, "redact") ? e.redact : void 0, s3 = c.isArray(t) && t.length > 0 ? gs(e, t) : c.toJSONObject(e);
     return {
       // Standard
       message: this.message,
@@ -1574,170 +4330,179 @@ c.inherits(v, Error, {
       columnNumber: this.columnNumber,
       stack: this.stack,
       // Axios
-      config: c.toJSONObject(this.config),
+      config: s3,
       code: this.code,
       status: this.status
     };
   }
-});
-var ft = v.prototype;
-var ht = {};
-[
-  "ERR_BAD_OPTION_VALUE",
-  "ERR_BAD_OPTION",
-  "ECONNABORTED",
-  "ETIMEDOUT",
-  "ERR_NETWORK",
-  "ERR_FR_TOO_MANY_REDIRECTS",
-  "ERR_DEPRECATED",
-  "ERR_BAD_RESPONSE",
-  "ERR_BAD_REQUEST",
-  "ERR_CANCELED",
-  "ERR_NOT_SUPPORT",
-  "ERR_INVALID_URL"
-  // eslint-disable-next-line func-names
-].forEach((r) => {
-  ht[r] = { value: r };
-});
-Object.defineProperties(v, ht);
-Object.defineProperty(ft, "isAxiosError", { value: true });
-v.from = (r, e, t, s, i, a) => {
-  const n = Object.create(ft);
-  c.toFlatObject(r, n, function(p) {
-    return p !== Error.prototype;
-  }, (l) => l !== "isAxiosError");
-  const o = r && r.message ? r.message : "Error", u = e == null && r ? r.code : e;
-  return v.call(n, o, u, t, s, i), r && n.cause == null && Object.defineProperty(n, "cause", { value: r, configurable: true }), n.name = r && r.name || "Error", a && Object.assign(n, a), n;
 };
-var Lr = null;
-function ke(r) {
-  return c.isPlainObject(r) || c.isArray(r);
+h2.ERR_BAD_OPTION_VALUE = "ERR_BAD_OPTION_VALUE";
+h2.ERR_BAD_OPTION = "ERR_BAD_OPTION";
+h2.ECONNABORTED = "ECONNABORTED";
+h2.ETIMEDOUT = "ETIMEDOUT";
+h2.ECONNREFUSED = "ECONNREFUSED";
+h2.ERR_NETWORK = "ERR_NETWORK";
+h2.ERR_FR_TOO_MANY_REDIRECTS = "ERR_FR_TOO_MANY_REDIRECTS";
+h2.ERR_DEPRECATED = "ERR_DEPRECATED";
+h2.ERR_BAD_RESPONSE = "ERR_BAD_RESPONSE";
+h2.ERR_BAD_REQUEST = "ERR_BAD_REQUEST";
+h2.ERR_CANCELED = "ERR_CANCELED";
+h2.ERR_NOT_SUPPORT = "ERR_NOT_SUPPORT";
+h2.ERR_INVALID_URL = "ERR_INVALID_URL";
+h2.ERR_FORM_DATA_DEPTH_EXCEEDED = "ERR_FORM_DATA_DEPTH_EXCEEDED";
+var bs = null;
+var Ft = 100;
+function $e(r2) {
+  return c.isPlainObject(r2) || c.isArray(r2);
 }
-function gt(r) {
-  return c.endsWith(r, "[]") ? r.slice(0, -2) : r;
+function _t(r2) {
+  return c.endsWith(r2, "[]") ? r2.slice(0, -2) : r2;
 }
-function _e(r, e, t) {
-  return r ? r.concat(e).map(function(i, a) {
-    return i = gt(i), !t && a ? "[" + i + "]" : i;
+function Ne(r2, e, t) {
+  return r2 ? r2.concat(e).map(function(i, n) {
+    return i = _t(i), !t && n ? "[" + i + "]" : i;
   }).join(t ? "." : "") : e;
 }
-function wr(r) {
-  return c.isArray(r) && !r.some(ke);
+function vs(r2) {
+  return c.isArray(r2) && !r2.some($e);
 }
-var kr = c.toFlatObject(c, {}, null, function(e) {
+var Ss = c.toFlatObject(c, {}, null, function(e) {
   return /^is[A-Z]/.test(e);
 });
-function ye(r, e, t) {
-  if (!c.isObject(r))
+function Be(r2, e, t) {
+  if (!c.isObject(r2))
     throw new TypeError("target must be an object");
-  e = e || new FormData(), t = c.toFlatObject(t, {
-    metaTokens: true,
-    dots: false,
-    indexes: false
-  }, false, function(h, y) {
-    return !c.isUndefined(y[h]);
-  });
-  const s = t.metaTokens, i = t.visitor || p, a = t.dots, n = t.indexes, u = (t.Blob || typeof Blob < "u" && Blob) && c.isSpecCompliantForm(e);
+  e = e || new FormData(), t = c.toFlatObject(
+    t,
+    {
+      metaTokens: true,
+      dots: false,
+      indexes: false
+    },
+    false,
+    function(v, w2) {
+      return !c.isUndefined(w2[v]);
+    }
+  );
+  const s3 = t.metaTokens, i = t.visitor || b2, n = t.dots, a2 = t.indexes, o2 = t.Blob || typeof Blob < "u" && Blob, u = t.maxDepth === void 0 ? Ft : t.maxDepth, l2 = o2 && c.isSpecCompliantForm(e), d2 = [];
   if (!c.isFunction(i))
     throw new TypeError("visitor must be a function");
-  function l(d) {
-    if (d === null) return "";
-    if (c.isDate(d))
-      return d.toISOString();
-    if (c.isBoolean(d))
-      return d.toString();
-    if (!u && c.isBlob(d))
-      throw new v("Blob is not supported. Use a Buffer instead.");
-    return c.isArrayBuffer(d) || c.isTypedArray(d) ? u && typeof Blob == "function" ? new Blob([d]) : Buffer.from(d) : d;
+  function m2(y2) {
+    if (y2 === null) return "";
+    if (c.isDate(y2))
+      return y2.toISOString();
+    if (c.isBoolean(y2))
+      return y2.toString();
+    if (!l2 && c.isBlob(y2))
+      throw new h2("Blob is not supported. Use a Buffer instead.");
+    if (c.isArrayBuffer(y2) || c.isTypedArray(y2)) {
+      if (l2 && typeof o2 == "function")
+        return new o2([y2]);
+      if (typeof Buffer < "u")
+        return Buffer.from(y2);
+      throw new h2("Blob is not supported. Use a Buffer instead.", h2.ERR_NOT_SUPPORT);
+    }
+    return y2;
   }
-  function p(d, h, y) {
-    let S = d;
-    if (d && !y && typeof d == "object") {
-      if (c.endsWith(h, "{}"))
-        h = s ? h : h.slice(0, -2), d = JSON.stringify(d);
-      else if (c.isArray(d) && wr(d) || (c.isFileList(d) || c.endsWith(h, "[]")) && (S = c.toArray(d)))
-        return h = gt(h), S.forEach(function(w, C) {
-          !(c.isUndefined(w) || w === null) && e.append(
+  function p2(y2) {
+    if (y2 > u)
+      throw new h2(
+        "Object is too deeply nested (" + y2 + " levels). Max depth: " + u,
+        h2.ERR_FORM_DATA_DEPTH_EXCEEDED
+      );
+  }
+  function f2(y2, v) {
+    if (u === 1 / 0)
+      return JSON.stringify(y2);
+    const w2 = [];
+    return JSON.stringify(y2, function(K, C) {
+      if (!c.isObject(C))
+        return C;
+      for (; w2.length && w2[w2.length - 1] !== this; )
+        w2.pop();
+      return w2.push(C), p2(v + w2.length - 1), C;
+    });
+  }
+  function b2(y2, v, w2) {
+    let M = y2;
+    if (c.isReactNative(e) && c.isReactNativeBlob(y2))
+      return e.append(Ne(w2, v, n), m2(y2)), false;
+    if (y2 && !w2 && typeof y2 == "object") {
+      if (c.endsWith(v, "{}"))
+        v = s3 ? v : v.slice(0, -2), y2 = f2(y2, 1);
+      else if (c.isArray(y2) && vs(y2) || (c.isFileList(y2) || c.endsWith(v, "[]")) && (M = c.toArray(y2)))
+        return v = _t(v), M.forEach(function(C, j) {
+          !(c.isUndefined(C) || C === null) && e.append(
             // eslint-disable-next-line no-nested-ternary
-            n === true ? _e([h], C, a) : n === null ? h : h + "[]",
-            l(w)
+            a2 === true ? Ne([v], j, n) : a2 === null ? v : v + "[]",
+            m2(C)
           );
         }), false;
     }
-    return ke(d) ? true : (e.append(_e(y, h, a), l(d)), false);
+    return $e(y2) ? true : (e.append(Ne(w2, v, n), m2(y2)), false);
   }
-  const f = [], m = Object.assign(kr, {
-    defaultVisitor: p,
-    convertValue: l,
-    isVisitable: ke
+  const S2 = Object.assign(Ss, {
+    defaultVisitor: b2,
+    convertValue: m2,
+    isVisitable: $e
   });
-  function g(d, h) {
-    if (!c.isUndefined(d)) {
-      if (f.indexOf(d) !== -1)
-        throw Error("Circular reference detected in " + h.join("."));
-      f.push(d), c.forEach(d, function(S, L) {
-        (!(c.isUndefined(S) || S === null) && i.call(
-          e,
-          S,
-          c.isString(L) ? L.trim() : L,
-          h,
-          m
-        )) === true && g(S, h ? h.concat(L) : [L]);
-      }), f.pop();
+  function g2(y2, v, w2 = 0) {
+    if (!c.isUndefined(y2)) {
+      if (p2(w2), d2.indexOf(y2) !== -1)
+        throw new Error("Circular reference detected in " + v.join("."));
+      d2.push(y2), c.forEach(y2, function(K, C) {
+        (!(c.isUndefined(K) || K === null) && i.call(e, K, c.isString(C) ? C.trim() : C, v, S2)) === true && g2(K, v ? v.concat(C) : [C], w2 + 1);
+      }), d2.pop();
     }
   }
-  if (!c.isObject(r))
+  if (!c.isObject(r2))
     throw new TypeError("data must be an object");
-  return g(r), e;
+  return g2(r2), e;
 }
-function $e(r) {
+function pt(r2) {
   const e = {
     "!": "%21",
     "'": "%27",
     "(": "%28",
     ")": "%29",
     "~": "%7E",
-    "%20": "+",
-    "%00": "\0"
+    "%20": "+"
   };
-  return encodeURIComponent(r).replace(/[!'()~]|%20|%00/g, function(s) {
-    return e[s];
+  return encodeURIComponent(r2).replace(/[!'()~]|%20/g, function(s3) {
+    return e[s3];
   });
 }
-function Re(r, e) {
-  this._pairs = [], r && ye(r, this, e);
+function Je(r2, e) {
+  this._pairs = [], r2 && Be(r2, this, e);
 }
-var bt = Re.prototype;
-bt.append = function(e, t) {
+var Ut = Je.prototype;
+Ut.append = function(e, t) {
   this._pairs.push([e, t]);
 };
-bt.toString = function(e) {
-  const t = e ? function(s) {
-    return e.call(this, s, $e);
-  } : $e;
+Ut.toString = function(e) {
+  const t = e ? (s3) => e.call(this, s3, pt) : pt;
   return this._pairs.map(function(i) {
     return t(i[0]) + "=" + t(i[1]);
   }, "").join("&");
 };
-function Mr(r) {
-  return encodeURIComponent(r).replace(/%3A/gi, ":").replace(/%24/g, "$").replace(/%2C/gi, ",").replace(/%20/g, "+");
+function Ls(r2) {
+  return encodeURIComponent(r2).replace(/%3A/gi, ":").replace(/%24/g, "$").replace(/%2C/gi, ",").replace(/%20/g, "+");
 }
-function vt(r, e, t) {
+function $t(r2, e, t) {
   if (!e)
-    return r;
-  const s = t && t.encode || Mr;
-  c.isFunction(t) && (t = {
+    return r2;
+  r2 = r2 || "";
+  const s3 = c.isFunction(t) ? {
     serialize: t
-  });
-  const i = t && t.serialize;
-  let a;
-  if (i ? a = i(e, t) : a = c.isURLSearchParams(e) ? e.toString() : new Re(e, t).toString(s), a) {
-    const n = r.indexOf("#");
-    n !== -1 && (r = r.slice(0, n)), r += (r.indexOf("?") === -1 ? "?" : "&") + a;
+  } : t, i = c.getSafeProp(s3, "encode") || Ls, n = c.getSafeProp(s3, "serialize");
+  let a2;
+  if (n ? a2 = n(e, s3) : a2 = c.isURLSearchParams(e) ? e.toString() : new Je(e, s3).toString(i), a2) {
+    const o2 = r2.indexOf("#");
+    o2 !== -1 && (r2 = r2.slice(0, o2)), r2 += (r2.indexOf("?") === -1 ? "?" : "&") + a2;
   }
-  return r;
+  return r2;
 }
-var je = class {
+var mt = class {
   constructor() {
     this.handlers = [];
   }
@@ -1746,15 +4511,16 @@ var je = class {
    *
    * @param {Function} fulfilled The function to handle `then` for a `Promise`
    * @param {Function} rejected The function to handle `reject` for a `Promise`
+   * @param {Object} options The options for the interceptor, synchronous and runWhen
    *
    * @return {Number} An ID used to remove interceptor later
    */
-  use(e, t, s) {
+  use(e, t, s3) {
     return this.handlers.push({
       fulfilled: e,
       rejected: t,
-      synchronous: s ? s.synchronous : false,
-      runWhen: s ? s.runWhen : null
+      synchronous: s3 ? s3.synchronous : false,
+      runWhen: s3 ? s3.runWhen : null
     }), this.handlers.length - 1;
   }
   /**
@@ -1762,7 +4528,7 @@ var je = class {
    *
    * @param {Number} id The ID that was returned by `use`
    *
-   * @returns {Boolean} `true` if the interceptor was removed, `false` otherwise
+   * @returns {void}
    */
   eject(e) {
     this.handlers[e] && (this.handlers[e] = null);
@@ -1786,134 +4552,156 @@ var je = class {
    * @returns {void}
    */
   forEach(e) {
-    c.forEach(this.handlers, function(s) {
-      s !== null && e(s);
+    c.forEach(this.handlers, function(s3) {
+      s3 !== null && e(s3);
     });
   }
 };
-var St = {
+var Xe = {
   silentJSONParsing: true,
   forcedJSONParsing: true,
-  clarifyTimeoutError: false
+  clarifyTimeoutError: false,
+  legacyInterceptorReqResOrdering: true,
+  advertiseZstdAcceptEncoding: false,
+  validateStatusUndefinedResolves: true
 };
-var Pr = typeof URLSearchParams < "u" ? URLSearchParams : Re;
-var Cr = typeof FormData < "u" ? FormData : null;
-var Kr = typeof Blob < "u" ? Blob : null;
-var Ar = {
+var ws = typeof URLSearchParams < "u" ? URLSearchParams : Je;
+var ks = typeof FormData < "u" ? FormData : null;
+var Ms = typeof Blob < "u" ? Blob : null;
+var Ps = {
   isBrowser: true,
   classes: {
-    URLSearchParams: Pr,
-    FormData: Cr,
-    Blob: Kr
+    URLSearchParams: ws,
+    FormData: ks,
+    Blob: Ms
   },
   protocols: ["http", "https", "file", "blob", "url", "data"]
 };
-var Be = typeof window < "u" && typeof document < "u";
-var Me = typeof navigator == "object" && navigator || void 0;
-var qr = Be && (!Me || ["ReactNative", "NativeScript", "NS"].indexOf(Me.product) < 0);
-var Rr = typeof WorkerGlobalScope < "u" && // eslint-disable-next-line no-undef
+var Qe = typeof window < "u" && typeof document < "u";
+var je = typeof navigator == "object" && navigator || void 0;
+var Cs = Qe && (!je || ["ReactNative", "NativeScript", "NS"].indexOf(je.product) < 0);
+var qs = typeof WorkerGlobalScope < "u" && // eslint-disable-next-line no-undef
 self instanceof WorkerGlobalScope && typeof self.importScripts == "function";
-var Br = Be && window.location.href || "http://localhost";
-var Tr = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+var Rs = Qe && window.location.href || "http://localhost";
+var As = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  hasBrowserEnv: Be,
-  hasStandardBrowserEnv: qr,
-  hasStandardBrowserWebWorkerEnv: Rr,
-  navigator: Me,
-  origin: Br
+  hasBrowserEnv: Qe,
+  hasStandardBrowserEnv: Cs,
+  hasStandardBrowserWebWorkerEnv: qs,
+  navigator: je,
+  origin: Rs
 }, Symbol.toStringTag, { value: "Module" }));
-var P = {
-  ...Tr,
-  ...Ar
+var B = {
+  ...As,
+  ...Ps
 };
-function Or(r, e) {
-  return ye(r, new P.classes.URLSearchParams(), {
-    visitor: function(t, s, i, a) {
-      return P.isNode && c.isBuffer(t) ? (this.append(s, t.toString("base64")), false) : a.defaultVisitor.apply(this, arguments);
+function Bs(r2, e) {
+  return Be(r2, new B.classes.URLSearchParams(), {
+    visitor: function(t, s3, i, n) {
+      return B.isNode && c.isBuffer(t) ? (this.append(s3, t.toString("base64")), false) : n.defaultVisitor.apply(this, arguments);
     },
     ...e
   });
 }
-function Er(r) {
-  return c.matchAll(/\w+|\[(\w*)]/g, r).map((e) => e[0] === "[]" ? "" : e[1] || e[0]);
+var yt = Ft;
+function jt(r2) {
+  if (r2 > yt)
+    throw new h2(
+      "FormData field is too deeply nested (" + r2 + " levels). Max depth: " + yt,
+      h2.ERR_FORM_DATA_DEPTH_EXCEEDED
+    );
 }
-function Dr(r) {
-  const e = {}, t = Object.keys(r);
-  let s;
-  const i = t.length;
-  let a;
-  for (s = 0; s < i; s++)
-    a = t[s], e[a] = r[a];
+function Ks(r2) {
+  const e = [], t = /\w+|\[(\w*)]/g;
+  let s3;
+  for (; (s3 = t.exec(r2)) !== null; )
+    jt(e.length), e.push(s3[0] === "[]" ? "" : s3[1] || s3[0]);
   return e;
 }
-function Lt(r) {
-  function e(t, s, i, a) {
-    let n = t[a++];
-    if (n === "__proto__") return true;
-    const o = Number.isFinite(+n), u = a >= t.length;
-    return n = !n && c.isArray(i) ? i.length : n, u ? (c.hasOwnProp(i, n) ? i[n] = [i[n], s] : i[n] = s, !o) : ((!i[n] || !c.isObject(i[n])) && (i[n] = []), e(t, s, i[n], a) && c.isArray(i[n]) && (i[n] = Dr(i[n])), !o);
+function Ts(r2) {
+  const e = {}, t = Object.keys(r2);
+  let s3;
+  const i = t.length;
+  let n;
+  for (s3 = 0; s3 < i; s3++)
+    n = t[s3], e[n] = r2[n];
+  return e;
+}
+function Wt(r2) {
+  function e(t, s3, i, n) {
+    jt(n);
+    let a2 = t[n++];
+    if (a2 === "__proto__") return true;
+    const o2 = Number.isFinite(+a2), u = n >= t.length;
+    return a2 = !a2 && c.isArray(i) ? i.length : a2, u ? (c.hasOwnProp(i, a2) ? i[a2] = c.isArray(i[a2]) ? i[a2].concat(s3) : [i[a2], s3] : i[a2] = s3, !o2) : ((!c.hasOwnProp(i, a2) || !c.isObject(i[a2])) && (i[a2] = []), e(t, s3, i[a2], n) && c.isArray(i[a2]) && (i[a2] = Ts(i[a2])), !o2);
   }
-  if (c.isFormData(r) && c.isFunction(r.entries)) {
+  if (c.isFormData(r2) && c.isFunction(r2.entries)) {
     const t = {};
-    return c.forEachEntry(r, (s, i) => {
-      e(Er(s), i, t, 0);
+    return c.forEachEntry(r2, (s3, i) => {
+      e(Ks(s3), i, t, 0);
     }), t;
   }
   return null;
 }
-function Ir(r, e, t) {
-  if (c.isString(r))
+var ie = (r2, e) => r2 != null && c.hasOwnProp(r2, e) ? r2[e] : void 0;
+function Os(r2, e, t) {
+  if (c.isString(r2))
     try {
-      return (e || JSON.parse)(r), c.trim(r);
-    } catch (s) {
-      if (s.name !== "SyntaxError")
-        throw s;
+      return (e || JSON.parse)(r2), c.trim(r2);
+    } catch (s3) {
+      if (s3.name !== "SyntaxError")
+        throw s3;
     }
-  return (t || JSON.stringify)(r);
+  return (t || JSON.stringify)(r2);
 }
-var re = {
-  transitional: St,
+var ge = {
+  transitional: Xe,
   adapter: ["xhr", "http", "fetch"],
-  transformRequest: [function(e, t) {
-    const s = t.getContentType() || "", i = s.indexOf("application/json") > -1, a = c.isObject(e);
-    if (a && c.isHTMLForm(e) && (e = new FormData(e)), c.isFormData(e))
-      return i ? JSON.stringify(Lt(e)) : e;
-    if (c.isArrayBuffer(e) || c.isBuffer(e) || c.isStream(e) || c.isFile(e) || c.isBlob(e) || c.isReadableStream(e))
-      return e;
-    if (c.isArrayBufferView(e))
-      return e.buffer;
-    if (c.isURLSearchParams(e))
-      return t.setContentType("application/x-www-form-urlencoded;charset=utf-8", false), e.toString();
-    let o;
-    if (a) {
-      if (s.indexOf("application/x-www-form-urlencoded") > -1)
-        return Or(e, this.formSerializer).toString();
-      if ((o = c.isFileList(e)) || s.indexOf("multipart/form-data") > -1) {
-        const u = this.env && this.env.FormData;
-        return ye(
-          o ? { "files[]": e } : e,
-          u && new u(),
-          this.formSerializer
-        );
+  transformRequest: [
+    function(e, t) {
+      const s3 = t.getContentType() || "", i = s3.indexOf("application/json") > -1, n = c.isObject(e);
+      if (n && c.isHTMLForm(e) && (e = new FormData(e)), c.isFormData(e))
+        return i ? JSON.stringify(Wt(e)) : e;
+      if (c.isArrayBuffer(e) || c.isBuffer(e) || c.isStream(e) || c.isFile(e) || c.isBlob(e) || c.isReadableStream(e))
+        return e;
+      if (c.isArrayBufferView(e))
+        return e.buffer;
+      if (c.isURLSearchParams(e))
+        return t.setContentType("application/x-www-form-urlencoded;charset=utf-8", false), e.toString();
+      let o2;
+      if (n) {
+        const u = ie(this, "formSerializer");
+        if (s3.indexOf("application/x-www-form-urlencoded") > -1)
+          return Bs(e, u).toString();
+        if ((o2 = c.isFileList(e)) || s3.indexOf("multipart/form-data") > -1) {
+          const l2 = ie(this, "env"), d2 = l2 && l2.FormData;
+          return Be(
+            o2 ? { "files[]": e } : e,
+            d2 && new d2(),
+            u
+          );
+        }
       }
+      return n || i ? (t.setContentType("application/json", false), Os(e)) : e;
     }
-    return a || i ? (t.setContentType("application/json", false), Ir(e)) : e;
-  }],
-  transformResponse: [function(e) {
-    const t = this.transitional || re.transitional, s = t && t.forcedJSONParsing, i = this.responseType === "json";
-    if (c.isResponse(e) || c.isReadableStream(e))
-      return e;
-    if (e && c.isString(e) && (s && !this.responseType || i)) {
-      const n = !(t && t.silentJSONParsing) && i;
-      try {
-        return JSON.parse(e, this.parseReviver);
-      } catch (o) {
-        if (n)
-          throw o.name === "SyntaxError" ? v.from(o, v.ERR_BAD_RESPONSE, this, null, this.response) : o;
+  ],
+  transformResponse: [
+    function(e) {
+      const t = ie(this, "transitional") || ge.transitional, s3 = t && t.forcedJSONParsing, i = ie(this, "responseType"), n = i === "json";
+      if (c.isResponse(e) || c.isReadableStream(e))
+        return e;
+      if (e && c.isString(e) && (s3 && !i || n)) {
+        const o2 = !(t && t.silentJSONParsing) && n;
+        try {
+          return JSON.parse(e, ie(this, "parseReviver"));
+        } catch (u) {
+          if (o2)
+            throw u.name === "SyntaxError" ? h2.from(u, h2.ERR_BAD_RESPONSE, this, null, ie(this, "response")) : u;
+        }
       }
+      return e;
     }
-    return e;
-  }],
+  ],
   /**
    * A timeout in milliseconds to abort a request. If set to 0 (default) a
    * timeout is not created.
@@ -1924,8 +4712,8 @@ var re = {
   maxContentLength: -1,
   maxBodyLength: -1,
   env: {
-    FormData: P.classes.FormData,
-    Blob: P.classes.Blob
+    FormData: B.classes.FormData,
+    Blob: B.classes.Blob
   },
   validateStatus: function(e) {
     return e >= 200 && e < 300;
@@ -1937,316 +4725,137 @@ var re = {
     }
   }
 };
-c.forEach(["delete", "get", "head", "post", "put", "patch"], (r) => {
-  re.headers[r] = {};
+c.forEach(["delete", "get", "head", "post", "put", "patch", "query"], (r2) => {
+  ge.headers[r2] = {};
 });
-var Fr = c.toObjectSet([
-  "age",
-  "authorization",
-  "content-length",
-  "content-type",
-  "etag",
-  "expires",
-  "from",
-  "host",
-  "if-modified-since",
-  "if-unmodified-since",
-  "last-modified",
-  "location",
-  "max-forwards",
-  "proxy-authorization",
-  "referer",
-  "retry-after",
-  "user-agent"
-]);
-var xr = (r) => {
-  const e = {};
-  let t, s, i;
-  return r && r.split(`
-`).forEach(function(n) {
-    i = n.indexOf(":"), t = n.substring(0, i).trim().toLowerCase(), s = n.substring(i + 1).trim(), !(!t || e[t] && Fr[t]) && (t === "set-cookie" ? e[t] ? e[t].push(s) : e[t] = [s] : e[t] = e[t] ? e[t] + ", " + s : s);
-  }), e;
-};
-var Ge = /* @__PURE__ */ Symbol("internals");
-function Y(r) {
-  return r && String(r).trim().toLowerCase();
+function Fe(r2, e) {
+  const t = this || ge, s3 = e || t, i = O.from(s3.headers);
+  let n = s3.data;
+  return c.forEach(r2, function(o2) {
+    n = o2.call(t, n, i.normalize(), e ? e.status : void 0);
+  }), i.normalize(), n;
 }
-function ce(r) {
-  return r === false || r == null ? r : c.isArray(r) ? r.map(ce) : String(r);
+function Ht(r2) {
+  return !!(r2 && r2.__CANCEL__);
 }
-function Nr(r) {
-  const e = /* @__PURE__ */ Object.create(null), t = /([^\s,;=]+)\s*(?:=\s*([^,;]+))?/g;
-  let s;
-  for (; s = t.exec(r); )
-    e[s[1]] = s[2];
-  return e;
-}
-var Ur = (r) => /^[-_a-zA-Z0-9^`|~,!#$%&'*+.]+$/.test(r.trim());
-function ve(r, e, t, s, i) {
-  if (c.isFunction(s))
-    return s.call(this, e, t);
-  if (i && (e = t), !!c.isString(e)) {
-    if (c.isString(s))
-      return e.indexOf(s) !== -1;
-    if (c.isRegExp(s))
-      return s.test(e);
-  }
-}
-function _r(r) {
-  return r.trim().toLowerCase().replace(/([a-z\d])(\w*)/g, (e, t, s) => t.toUpperCase() + s);
-}
-function $r(r, e) {
-  const t = c.toCamelCase(" " + e);
-  ["get", "set", "has"].forEach((s) => {
-    Object.defineProperty(r, s + t, {
-      value: function(i, a, n) {
-        return this[s].call(this, e, i, a, n);
-      },
-      configurable: true
-    });
-  });
-}
-var A = class {
-  constructor(e) {
-    e && this.set(e);
-  }
-  set(e, t, s) {
-    const i = this;
-    function a(o, u, l) {
-      const p = Y(u);
-      if (!p)
-        throw new Error("header name must be a non-empty string");
-      const f = c.findKey(i, p);
-      (!f || i[f] === void 0 || l === true || l === void 0 && i[f] !== false) && (i[f || u] = ce(o));
-    }
-    const n = (o, u) => c.forEach(o, (l, p) => a(l, p, u));
-    if (c.isPlainObject(e) || e instanceof this.constructor)
-      n(e, t);
-    else if (c.isString(e) && (e = e.trim()) && !Ur(e))
-      n(xr(e), t);
-    else if (c.isObject(e) && c.isIterable(e)) {
-      let o = {}, u, l;
-      for (const p of e) {
-        if (!c.isArray(p))
-          throw TypeError("Object iterator must return a key-value pair");
-        o[l = p[0]] = (u = o[l]) ? c.isArray(u) ? [...u, p[1]] : [u, p[1]] : p[1];
-      }
-      n(o, t);
-    } else
-      e != null && a(t, e, s);
-    return this;
-  }
-  get(e, t) {
-    if (e = Y(e), e) {
-      const s = c.findKey(this, e);
-      if (s) {
-        const i = this[s];
-        if (!t)
-          return i;
-        if (t === true)
-          return Nr(i);
-        if (c.isFunction(t))
-          return t.call(this, i, s);
-        if (c.isRegExp(t))
-          return t.exec(i);
-        throw new TypeError("parser must be boolean|regexp|function");
-      }
-    }
-  }
-  has(e, t) {
-    if (e = Y(e), e) {
-      const s = c.findKey(this, e);
-      return !!(s && this[s] !== void 0 && (!t || ve(this, this[s], s, t)));
-    }
-    return false;
-  }
-  delete(e, t) {
-    const s = this;
-    let i = false;
-    function a(n) {
-      if (n = Y(n), n) {
-        const o = c.findKey(s, n);
-        o && (!t || ve(s, s[o], o, t)) && (delete s[o], i = true);
-      }
-    }
-    return c.isArray(e) ? e.forEach(a) : a(e), i;
-  }
-  clear(e) {
-    const t = Object.keys(this);
-    let s = t.length, i = false;
-    for (; s--; ) {
-      const a = t[s];
-      (!e || ve(this, this[a], a, e, true)) && (delete this[a], i = true);
-    }
-    return i;
-  }
-  normalize(e) {
-    const t = this, s = {};
-    return c.forEach(this, (i, a) => {
-      const n = c.findKey(s, a);
-      if (n) {
-        t[n] = ce(i), delete t[a];
-        return;
-      }
-      const o = e ? _r(a) : String(a).trim();
-      o !== a && delete t[a], t[o] = ce(i), s[o] = true;
-    }), this;
-  }
-  concat(...e) {
-    return this.constructor.concat(this, ...e);
-  }
-  toJSON(e) {
-    const t = /* @__PURE__ */ Object.create(null);
-    return c.forEach(this, (s, i) => {
-      s != null && s !== false && (t[i] = e && c.isArray(s) ? s.join(", ") : s);
-    }), t;
-  }
-  [Symbol.iterator]() {
-    return Object.entries(this.toJSON())[Symbol.iterator]();
-  }
-  toString() {
-    return Object.entries(this.toJSON()).map(([e, t]) => e + ": " + t).join(`
-`);
-  }
-  getSetCookie() {
-    return this.get("set-cookie") || [];
-  }
-  get [Symbol.toStringTag]() {
-    return "AxiosHeaders";
-  }
-  static from(e) {
-    return e instanceof this ? e : new this(e);
-  }
-  static concat(e, ...t) {
-    const s = new this(e);
-    return t.forEach((i) => s.set(i)), s;
-  }
-  static accessor(e) {
-    const s = (this[Ge] = this[Ge] = {
-      accessors: {}
-    }).accessors, i = this.prototype;
-    function a(n) {
-      const o = Y(n);
-      s[o] || ($r(i, n), s[o] = true);
-    }
-    return c.isArray(e) ? e.forEach(a) : a(e), this;
+var be = class extends h2 {
+  /**
+   * A `CanceledError` is an object that is thrown when an operation is canceled.
+   *
+   * @param {string=} message The message.
+   * @param {Object=} config The config.
+   * @param {Object=} request The request.
+   *
+   * @returns {CanceledError} The created error.
+   */
+  constructor(e, t, s3) {
+    super(e ?? "canceled", h2.ERR_CANCELED, t, s3), this.name = "CanceledError", this.__CANCEL__ = true;
   }
 };
-A.accessor(["Content-Type", "Content-Length", "Accept", "Accept-Encoding", "User-Agent", "Authorization"]);
-c.reduceDescriptors(A.prototype, ({ value: r }, e) => {
-  let t = e[0].toUpperCase() + e.slice(1);
-  return {
-    get: () => r,
-    set(s) {
-      this[t] = s;
-    }
-  };
-});
-c.freezeMethods(A);
-function Se(r, e) {
-  const t = this || re, s = e || t, i = A.from(s.headers);
-  let a = s.data;
-  return c.forEach(r, function(o) {
-    a = o.call(t, a, i.normalize(), e ? e.status : void 0);
-  }), i.normalize(), a;
-}
-function wt(r) {
-  return !!(r && r.__CANCEL__);
-}
-function X(r, e, t) {
-  v.call(this, r ?? "canceled", v.ERR_CANCELED, e, t), this.name = "CanceledError";
-}
-c.inherits(X, v, {
-  __CANCEL__: true
-});
-function kt(r, e, t) {
-  const s = t.config.validateStatus;
-  !t.status || !s || s(t.status) ? r(t) : e(new v(
+function Gt(r2, e, t) {
+  const s3 = t.config.validateStatus;
+  !t.status || !s3 || s3(t.status) ? r2(t) : e(new h2(
     "Request failed with status code " + t.status,
-    [v.ERR_BAD_REQUEST, v.ERR_BAD_RESPONSE][Math.floor(t.status / 100) - 4],
+    t.status >= 400 && t.status < 500 ? h2.ERR_BAD_REQUEST : h2.ERR_BAD_RESPONSE,
     t.config,
     t.request,
     t
   ));
 }
-function jr(r) {
-  const e = /^([-+\w]{1,25})(:?\/\/|:)/.exec(r);
+function Es(r2) {
+  const e = /^([-+\w]{1,25}):(?:\/\/)?/.exec(r2);
   return e && e[1] || "";
 }
-function Gr(r, e) {
-  r = r || 10;
-  const t = new Array(r), s = new Array(r);
-  let i = 0, a = 0, n;
+function Ds(r2, e) {
+  r2 = r2 || 10;
+  const t = new Array(r2), s3 = new Array(r2);
+  let i = 0, n = 0, a2;
   return e = e !== void 0 ? e : 1e3, function(u) {
-    const l = Date.now(), p = s[a];
-    n || (n = l), t[i] = u, s[i] = l;
-    let f = a, m = 0;
-    for (; f !== i; )
-      m += t[f++], f = f % r;
-    if (i = (i + 1) % r, i === a && (a = (a + 1) % r), l - n < e)
+    const l2 = Date.now(), d2 = s3[n];
+    a2 || (a2 = l2), t[i] = u, s3[i] = l2;
+    let m2 = n, p2 = 0;
+    for (; m2 !== i; )
+      p2 += t[m2++], m2 = m2 % r2;
+    if (i = (i + 1) % r2, i === n && (n = (n + 1) % r2), l2 - a2 < e)
       return;
-    const g = p && l - p;
-    return g ? Math.round(m * 1e3 / g) : void 0;
+    const f2 = d2 && l2 - d2;
+    return f2 ? Math.round(p2 * 1e3 / f2) : void 0;
   };
 }
-function Wr(r, e) {
-  let t = 0, s = 1e3 / e, i, a;
-  const n = (l, p = Date.now()) => {
-    t = p, i = null, a && (clearTimeout(a), a = null), r(...l);
+function Is(r2, e) {
+  let t = 0, s3 = 1e3 / e, i, n;
+  const a2 = (l2, d2 = Date.now()) => {
+    t = d2, i = null, n && (clearTimeout(n), n = null), r2(...l2);
   };
-  return [(...l) => {
-    const p = Date.now(), f = p - t;
-    f >= s ? n(l, p) : (i = l, a || (a = setTimeout(() => {
-      a = null, n(i);
-    }, s - f)));
-  }, () => i && n(i)];
+  return [(...l2) => {
+    const d2 = Date.now(), m2 = d2 - t;
+    m2 >= s3 ? a2(l2, d2) : (i = l2, n || (n = setTimeout(() => {
+      n = null, a2(i);
+    }, s3 - m2)));
+  }, () => i && a2(i)];
 }
-var le = (r, e, t = 3) => {
-  let s = 0;
-  const i = Gr(50, 250);
-  return Wr((a) => {
-    const n = a.loaded, o = a.lengthComputable ? a.total : void 0, u = n - s, l = i(u), p = n <= o;
-    s = n;
-    const f = {
-      loaded: n,
-      total: o,
-      progress: o ? n / o : void 0,
-      bytes: u,
-      rate: l || void 0,
-      estimated: l && o && p ? (o - n) / l : void 0,
-      event: a,
-      lengthComputable: o != null,
+var qe = (r2, e, t = 3) => {
+  let s3 = 0;
+  const i = Ds(50, 250);
+  return Is((n) => {
+    if (!n || typeof n.loaded != "number")
+      return;
+    const a2 = n.loaded, o2 = n.lengthComputable ? n.total : void 0, u = o2 != null ? Math.min(a2, o2) : a2, l2 = Math.max(0, u - s3), d2 = i(l2);
+    s3 = Math.max(s3, u);
+    const m2 = {
+      loaded: u,
+      total: o2,
+      progress: o2 ? u / o2 : void 0,
+      bytes: l2,
+      rate: d2 || void 0,
+      estimated: d2 && o2 ? (o2 - u) / d2 : void 0,
+      event: n,
+      lengthComputable: o2 != null,
       [e ? "download" : "upload"]: true
     };
-    r(f);
+    r2(m2);
   }, t);
 };
-var We = (r, e) => {
-  const t = r != null;
-  return [(s) => e[0]({
-    lengthComputable: t,
-    total: r,
-    loaded: s
-  }), e[1]];
+var ft = (r2, e) => {
+  const t = r2 != null;
+  return [
+    (s3) => e[0]({
+      lengthComputable: t,
+      total: r2,
+      loaded: s3
+    }),
+    e[1]
+  ];
 };
-var He = (r) => (...e) => c.asap(() => r(...e));
-var Hr = P.hasStandardBrowserEnv ? /* @__PURE__ */ ((r, e) => (t) => (t = new URL(t, P.origin), r.protocol === t.protocol && r.host === t.host && (e || r.port === t.port)))(
-  new URL(P.origin),
-  P.navigator && /(msie|trident)/i.test(P.navigator.userAgent)
+var ht = (r2) => (...e) => c.asap(() => r2(...e));
+var xs = B.hasStandardBrowserEnv ? /* @__PURE__ */ ((r2, e) => (t) => (t = new URL(t, B.origin), r2.protocol === t.protocol && r2.host === t.host && (e || r2.port === t.port)))(
+  new URL(B.origin),
+  B.navigator && /(msie|trident)/i.test(B.navigator.userAgent)
 ) : () => true;
-var Vr = P.hasStandardBrowserEnv ? (
+var Ns = B.hasStandardBrowserEnv ? (
   // Standard browser envs support document.cookie
   {
-    write(r, e, t, s, i, a) {
-      const n = [r + "=" + encodeURIComponent(e)];
-      c.isNumber(t) && n.push("expires=" + new Date(t).toGMTString()), c.isString(s) && n.push("path=" + s), c.isString(i) && n.push("domain=" + i), a === true && n.push("secure"), document.cookie = n.join("; ");
+    write(r2, e, t, s3, i, n, a2) {
+      if (typeof document > "u") return;
+      const o2 = [`${r2}=${encodeURIComponent(e)}`];
+      c.isNumber(t) && o2.push(`expires=${new Date(t).toUTCString()}`), c.isString(s3) && o2.push(`path=${s3}`), c.isString(i) && o2.push(`domain=${i}`), n === true && o2.push("secure"), c.isString(a2) && o2.push(`SameSite=${a2}`), document.cookie = o2.join("; ");
     },
-    read(r) {
-      const e = document.cookie.match(new RegExp("(^|;\\s*)(" + r + ")=([^;]*)"));
-      return e ? decodeURIComponent(e[3]) : null;
+    read(r2) {
+      if (typeof document > "u") return null;
+      const e = document.cookie.split(";");
+      for (let t = 0; t < e.length; t++) {
+        const s3 = e[t].replace(/^\s+/, ""), i = s3.indexOf("=");
+        if (i !== -1 && s3.slice(0, i) === r2)
+          try {
+            return decodeURIComponent(s3.slice(i + 1));
+          } catch {
+            return s3.slice(i + 1);
+          }
+      }
+      return null;
     },
-    remove(r) {
-      this.write(r, "", Date.now() - 864e5);
+    remove(r2) {
+      this.write(r2, "", Date.now() - 864e5, "/");
     }
   }
 ) : (
@@ -2261,539 +4870,833 @@ var Vr = P.hasStandardBrowserEnv ? (
     }
   }
 );
-function zr(r) {
-  return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(r);
+function Fs(r2) {
+  return typeof r2 != "string" ? false : /^([a-z][a-z\d+\-.]*:)?\/\//i.test(r2);
 }
-function Jr(r, e) {
-  return e ? r.replace(/\/?\/$/, "") + "/" + e.replace(/^\/+/, "") : r;
+function _s(r2, e) {
+  return e ? r2.replace(/\/?\/$/, "") + "/" + e.replace(/^\/+/, "") : r2;
 }
-function Mt(r, e, t) {
-  let s = !zr(e);
-  return r && (s || t == false) ? Jr(r, e) : e;
+var Us = /^https?:(?!\/\/)/i;
+var $s = /[\t\n\r]/g;
+function js(r2) {
+  let e = 0;
+  for (; e < r2.length && r2.charCodeAt(e) <= 32; )
+    e++;
+  return r2.slice(e);
 }
-var Ve = (r) => r instanceof A ? { ...r } : r;
-function G(r, e) {
-  e = e || {};
-  const t = {};
-  function s(l, p, f, m) {
-    return c.isPlainObject(l) && c.isPlainObject(p) ? c.merge.call({ caseless: m }, l, p) : c.isPlainObject(p) ? c.merge({}, p) : c.isArray(p) ? p.slice() : p;
+function Ws(r2) {
+  return js(r2).replace($s, "");
+}
+function gt(r2, e) {
+  if (typeof r2 == "string" && Us.test(Ws(r2)))
+    throw new h2(
+      'Invalid URL: missing "//" after protocol',
+      h2.ERR_INVALID_URL,
+      e
+    );
+}
+function Vt(r2, e, t, s3) {
+  gt(e, s3);
+  let i = !Fs(e);
+  return r2 && (i || t === false) ? (gt(r2, s3), _s(r2, e)) : e;
+}
+var bt = (r2) => r2 instanceof O ? { ...r2 } : r2;
+function te(r2, e) {
+  r2 = r2 || {}, e = e || {};
+  const t = /* @__PURE__ */ Object.create(null);
+  Object.defineProperty(t, "hasOwnProperty", {
+    // Null-proto descriptor so a polluted Object.prototype.get cannot turn
+    // this data descriptor into an accessor descriptor on the way in.
+    __proto__: null,
+    value: Object.prototype.hasOwnProperty,
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  function s3(d2, m2, p2, f2) {
+    return c.isPlainObject(d2) && c.isPlainObject(m2) ? c.merge.call({ caseless: f2 }, d2, m2) : c.isPlainObject(m2) ? c.merge({}, m2) : c.isArray(m2) ? m2.slice() : m2;
   }
-  function i(l, p, f, m) {
-    if (c.isUndefined(p)) {
-      if (!c.isUndefined(l))
-        return s(void 0, l, f, m);
-    } else return s(l, p, f, m);
+  function i(d2, m2, p2, f2) {
+    if (c.isUndefined(m2)) {
+      if (!c.isUndefined(d2))
+        return s3(void 0, d2, p2, f2);
+    } else return s3(d2, m2, p2, f2);
   }
-  function a(l, p) {
-    if (!c.isUndefined(p))
-      return s(void 0, p);
+  function n(d2, m2) {
+    if (!c.isUndefined(m2))
+      return s3(void 0, m2);
   }
-  function n(l, p) {
-    if (c.isUndefined(p)) {
-      if (!c.isUndefined(l))
-        return s(void 0, l);
-    } else return s(void 0, p);
+  function a2(d2, m2) {
+    if (c.isUndefined(m2)) {
+      if (!c.isUndefined(d2))
+        return s3(void 0, d2);
+    } else return s3(void 0, m2);
   }
-  function o(l, p, f) {
-    if (f in e)
-      return s(l, p);
-    if (f in r)
-      return s(void 0, l);
+  function o2(d2) {
+    const m2 = c.hasOwnProp(e, "transitional") ? e.transitional : void 0;
+    if (!c.isUndefined(m2))
+      if (c.isPlainObject(m2)) {
+        if (c.hasOwnProp(m2, d2))
+          return m2[d2];
+      } else
+        return;
+    const p2 = c.hasOwnProp(r2, "transitional") ? r2.transitional : void 0;
+    if (c.isPlainObject(p2) && c.hasOwnProp(p2, d2))
+      return p2[d2];
   }
-  const u = {
-    url: a,
-    method: a,
-    data: a,
-    baseURL: n,
-    transformRequest: n,
-    transformResponse: n,
-    paramsSerializer: n,
-    timeout: n,
-    timeoutMessage: n,
-    withCredentials: n,
-    withXSRFToken: n,
-    adapter: n,
-    responseType: n,
-    xsrfCookieName: n,
-    xsrfHeaderName: n,
-    onUploadProgress: n,
-    onDownloadProgress: n,
-    decompress: n,
-    maxContentLength: n,
-    maxBodyLength: n,
-    beforeRedirect: n,
-    transport: n,
-    httpAgent: n,
-    httpsAgent: n,
-    cancelToken: n,
-    socketPath: n,
-    responseEncoding: n,
-    validateStatus: o,
-    headers: (l, p, f) => i(Ve(l), Ve(p), f, true)
+  function u(d2, m2, p2) {
+    if (c.hasOwnProp(e, p2))
+      return s3(d2, m2);
+    if (c.hasOwnProp(r2, p2))
+      return s3(void 0, d2);
+  }
+  const l2 = {
+    url: n,
+    method: n,
+    data: n,
+    baseURL: a2,
+    transformRequest: a2,
+    transformResponse: a2,
+    paramsSerializer: a2,
+    timeout: a2,
+    timeoutMessage: a2,
+    withCredentials: a2,
+    withXSRFToken: a2,
+    adapter: a2,
+    responseType: a2,
+    xsrfCookieName: a2,
+    xsrfHeaderName: a2,
+    onUploadProgress: a2,
+    onDownloadProgress: a2,
+    decompress: a2,
+    maxContentLength: a2,
+    maxBodyLength: a2,
+    beforeRedirect: a2,
+    transport: a2,
+    httpAgent: a2,
+    httpsAgent: a2,
+    cancelToken: a2,
+    socketPath: a2,
+    allowedSocketPaths: a2,
+    responseEncoding: a2,
+    validateStatus: u,
+    headers: (d2, m2, p2) => i(bt(d2), bt(m2), p2, true)
   };
-  return c.forEach(Object.keys({ ...r, ...e }), function(p) {
-    const f = u[p] || i, m = f(r[p], e[p], p);
-    c.isUndefined(m) && f !== o || (t[p] = m);
-  }), t;
+  return c.forEach(Object.keys({ ...r2, ...e }), function(m2) {
+    if (m2 === "__proto__" || m2 === "constructor" || m2 === "prototype") return;
+    const p2 = c.hasOwnProp(l2, m2) ? l2[m2] : i, f2 = c.hasOwnProp(r2, m2) ? r2[m2] : void 0, b2 = c.hasOwnProp(e, m2) ? e[m2] : void 0, S2 = p2(f2, b2, m2);
+    c.isUndefined(S2) && p2 !== u || (t[m2] = S2);
+  }), c.hasOwnProp(e, "validateStatus") && c.isUndefined(e.validateStatus) && o2("validateStatusUndefinedResolves") === false && (c.hasOwnProp(r2, "validateStatus") ? t.validateStatus = s3(void 0, r2.validateStatus) : delete t.validateStatus), t;
 }
-var Pt = (r) => {
-  const e = G({}, r);
-  let { data: t, withXSRFToken: s, xsrfHeaderName: i, xsrfCookieName: a, headers: n, auth: o } = e;
-  if (e.headers = n = A.from(n), e.url = vt(Mt(e.baseURL, e.url, e.allowAbsoluteUrls), r.params, r.paramsSerializer), o && n.set(
-    "Authorization",
-    "Basic " + btoa((o.username || "") + ":" + (o.password ? unescape(encodeURIComponent(o.password)) : ""))
-  ), c.isFormData(t)) {
-    if (P.hasStandardBrowserEnv || P.hasStandardBrowserWebWorkerEnv)
-      n.setContentType(void 0);
-    else if (c.isFunction(t.getHeaders)) {
-      const u = t.getHeaders(), l = ["content-type", "content-length"];
-      Object.entries(u).forEach(([p, f]) => {
-        l.includes(p.toLowerCase()) && n.set(p, f);
-      });
+var Hs = ["content-type", "content-length"];
+function Gs(r2, e, t) {
+  if (t !== "content-only") {
+    r2.set(e);
+    return;
+  }
+  Object.entries(e || {}).forEach(([s3, i]) => {
+    Hs.includes(s3.toLowerCase()) && r2.set(s3, i);
+  });
+}
+var Vs = (r2) => encodeURIComponent(r2).replace(
+  /%([0-9A-F]{2})/gi,
+  (e, t) => String.fromCharCode(parseInt(t, 16))
+);
+function zt(r2) {
+  const e = te({}, r2), t = (p2) => c.hasOwnProp(e, p2) ? e[p2] : void 0, s3 = t("data");
+  let i = t("withXSRFToken");
+  const n = t("xsrfHeaderName"), a2 = t("xsrfCookieName");
+  let o2 = t("headers");
+  const u = t("auth"), l2 = t("baseURL"), d2 = t("allowAbsoluteUrls"), m2 = t("url");
+  if (e.headers = o2 = O.from(o2), e.url = $t(
+    Vt(l2, m2, d2, e),
+    t("params"),
+    t("paramsSerializer")
+  ), u) {
+    const p2 = c.getSafeProp(u, "username") || "", f2 = c.getSafeProp(u, "password") || "";
+    try {
+      o2.set(
+        "Authorization",
+        "Basic " + btoa(p2 + ":" + (f2 ? Vs(f2) : ""))
+      );
+    } catch (b2) {
+      throw h2.from(b2, h2.ERR_BAD_OPTION_VALUE, r2);
     }
   }
-  if (P.hasStandardBrowserEnv && (s && c.isFunction(s) && (s = s(e)), s || s !== false && Hr(e.url))) {
-    const u = i && a && Vr.read(a);
-    u && n.set(i, u);
+  if (c.isFormData(s3) && (B.hasStandardBrowserEnv || B.hasStandardBrowserWebWorkerEnv || c.isReactNative(s3) ? o2.setContentType(void 0) : c.isFunction(s3.getHeaders) && Gs(o2, s3.getHeaders(), t("formDataHeaderPolicy"))), B.hasStandardBrowserEnv && (c.isFunction(i) && (i = i(e)), i === true || i == null && xs(e.url))) {
+    const f2 = n && a2 && Ns.read(a2);
+    f2 && o2.set(n, f2);
   }
   return e;
-};
-var Xr = typeof XMLHttpRequest < "u";
-var Qr = Xr && function(r) {
-  return new Promise(function(t, s) {
-    const i = Pt(r);
-    let a = i.data;
-    const n = A.from(i.headers).normalize();
-    let { responseType: o, onUploadProgress: u, onDownloadProgress: l } = i, p, f, m, g, d;
-    function h() {
-      g && g(), d && d(), i.cancelToken && i.cancelToken.unsubscribe(p), i.signal && i.signal.removeEventListener("abort", p);
+}
+var zs = typeof XMLHttpRequest < "u";
+var Js = zs && function(r2) {
+  return new Promise(function(t, s3) {
+    const i = zt(r2);
+    let n = i.data;
+    const a2 = O.from(i.headers).normalize();
+    let { responseType: o2, onUploadProgress: u, onDownloadProgress: l2 } = i, d2, m2, p2, f2, b2;
+    function S2() {
+      f2 && f2(), b2 && b2(), i.cancelToken && i.cancelToken.unsubscribe(d2), i.signal && i.signal.removeEventListener("abort", d2);
     }
-    let y = new XMLHttpRequest();
-    y.open(i.method.toUpperCase(), i.url, true), y.timeout = i.timeout;
-    function S() {
-      if (!y)
+    let g2 = new XMLHttpRequest();
+    g2.open(i.method.toUpperCase(), i.url, true), g2.timeout = i.timeout;
+    function y2() {
+      if (!g2)
         return;
-      const w = A.from(
-        "getAllResponseHeaders" in y && y.getAllResponseHeaders()
-      ), T = {
-        data: !o || o === "text" || o === "json" ? y.responseText : y.response,
-        status: y.status,
-        statusText: y.statusText,
-        headers: w,
-        config: r,
-        request: y
+      const w2 = O.from(
+        "getAllResponseHeaders" in g2 && g2.getAllResponseHeaders()
+      ), K = {
+        data: !o2 || o2 === "text" || o2 === "json" ? g2.responseText : g2.response,
+        status: g2.status,
+        statusText: g2.statusText,
+        headers: w2,
+        config: r2,
+        request: g2
       };
-      kt(function(B) {
-        t(B), h();
-      }, function(B) {
-        s(B), h();
-      }, T), y = null;
+      Gt(
+        function(j) {
+          t(j), S2();
+        },
+        function(j) {
+          s3(j), S2();
+        },
+        K
+      ), g2 = null;
     }
-    "onloadend" in y ? y.onloadend = S : y.onreadystatechange = function() {
-      !y || y.readyState !== 4 || y.status === 0 && !(y.responseURL && y.responseURL.indexOf("file:") === 0) || setTimeout(S);
-    }, y.onabort = function() {
-      y && (s(new v("Request aborted", v.ECONNABORTED, r, y)), y = null);
-    }, y.onerror = function(C) {
-      const T = C && C.message ? C.message : "Network Error", U = new v(T, v.ERR_NETWORK, r, y);
-      U.event = C || null, s(U), y = null;
-    }, y.ontimeout = function() {
-      let C = i.timeout ? "timeout of " + i.timeout + "ms exceeded" : "timeout exceeded";
-      const T = i.transitional || St;
-      i.timeoutErrorMessage && (C = i.timeoutErrorMessage), s(new v(
-        C,
-        T.clarifyTimeoutError ? v.ETIMEDOUT : v.ECONNABORTED,
-        r,
-        y
-      )), y = null;
-    }, a === void 0 && n.setContentType(null), "setRequestHeader" in y && c.forEach(n.toJSON(), function(C, T) {
-      y.setRequestHeader(T, C);
-    }), c.isUndefined(i.withCredentials) || (y.withCredentials = !!i.withCredentials), o && o !== "json" && (y.responseType = i.responseType), l && ([m, d] = le(l, true), y.addEventListener("progress", m)), u && y.upload && ([f, g] = le(u), y.upload.addEventListener("progress", f), y.upload.addEventListener("loadend", g)), (i.cancelToken || i.signal) && (p = (w) => {
-      y && (s(!w || w.type ? new X(null, r, y) : w), y.abort(), y = null);
-    }, i.cancelToken && i.cancelToken.subscribe(p), i.signal && (i.signal.aborted ? p() : i.signal.addEventListener("abort", p)));
-    const L = jr(i.url);
-    if (L && P.protocols.indexOf(L) === -1) {
-      s(new v("Unsupported protocol " + L + ":", v.ERR_BAD_REQUEST, r));
+    "onloadend" in g2 ? g2.onloadend = y2 : g2.onreadystatechange = function() {
+      !g2 || g2.readyState !== 4 || g2.status === 0 && !(g2.responseURL && g2.responseURL.startsWith("file:")) || setTimeout(y2);
+    }, g2.onabort = function() {
+      g2 && (s3(new h2("Request aborted", h2.ECONNABORTED, r2, g2)), S2(), g2 = null);
+    }, g2.onerror = function(M) {
+      const K = M && M.message ? M.message : "Network Error", C = new h2(K, h2.ERR_NETWORK, r2, g2);
+      C.event = M || null, s3(C), S2(), g2 = null;
+    }, g2.ontimeout = function() {
+      let M = i.timeout ? "timeout of " + i.timeout + "ms exceeded" : "timeout exceeded";
+      const K = i.transitional || Xe;
+      i.timeoutErrorMessage && (M = i.timeoutErrorMessage), s3(
+        new h2(
+          M,
+          K.clarifyTimeoutError ? h2.ETIMEDOUT : h2.ECONNABORTED,
+          r2,
+          g2
+        )
+      ), S2(), g2 = null;
+    }, n === void 0 && a2.setContentType(null), "setRequestHeader" in g2 && c.forEach(xt(a2), function(M, K) {
+      g2.setRequestHeader(K, M);
+    }), c.isUndefined(i.withCredentials) || (g2.withCredentials = !!i.withCredentials), o2 && o2 !== "json" && (g2.responseType = i.responseType), l2 && ([p2, b2] = qe(l2, true), g2.addEventListener("progress", p2)), u && g2.upload && ([m2, f2] = qe(u), g2.upload.addEventListener("progress", m2), g2.upload.addEventListener("loadend", f2)), (i.cancelToken || i.signal) && (d2 = (w2) => {
+      g2 && (s3(!w2 || w2.type ? new be(null, r2, g2) : w2), g2.abort(), S2(), g2 = null);
+    }, i.cancelToken && i.cancelToken.subscribe(d2), i.signal && (i.signal.aborted ? d2() : i.signal.addEventListener("abort", d2)));
+    const v = Es(i.url);
+    if (v && !B.protocols.includes(v)) {
+      s3(
+        new h2(
+          "Unsupported protocol " + v + ":",
+          h2.ERR_BAD_REQUEST,
+          r2
+        )
+      ), S2();
       return;
     }
-    y.send(a || null);
+    g2.send(n || null);
   });
 };
-var Yr = (r, e) => {
-  const { length: t } = r = r ? r.filter(Boolean) : [];
-  if (e || t) {
-    let s = new AbortController(), i;
-    const a = function(l) {
-      if (!i) {
-        i = true, o();
-        const p = l instanceof Error ? l : this.reason;
-        s.abort(p instanceof v ? p : new X(p instanceof Error ? p.message : p));
-      }
-    };
-    let n = e && setTimeout(() => {
-      n = null, a(new v(`timeout ${e} of ms exceeded`, v.ETIMEDOUT));
-    }, e);
-    const o = () => {
-      r && (n && clearTimeout(n), n = null, r.forEach((l) => {
-        l.unsubscribe ? l.unsubscribe(a) : l.removeEventListener("abort", a);
-      }), r = null);
-    };
-    r.forEach((l) => l.addEventListener("abort", a));
-    const { signal: u } = s;
-    return u.unsubscribe = () => c.asap(o), u;
-  }
+var Xs = (r2, e) => {
+  if (r2 = r2 ? r2.filter(Boolean) : [], !e && !r2.length)
+    return;
+  const t = new AbortController();
+  let s3 = false;
+  const i = function(u) {
+    if (!s3) {
+      s3 = true, a2();
+      const l2 = u instanceof Error ? u : this.reason;
+      t.abort(
+        l2 instanceof h2 ? l2 : new be(l2 instanceof Error ? l2.message : l2)
+      );
+    }
+  };
+  let n = e && setTimeout(() => {
+    n = null, i(new h2(`timeout of ${e}ms exceeded`, h2.ETIMEDOUT));
+  }, e);
+  const a2 = () => {
+    r2 && (n && clearTimeout(n), n = null, r2.forEach((u) => {
+      u.unsubscribe ? u.unsubscribe(i) : u.removeEventListener("abort", i);
+    }), r2 = null);
+  };
+  r2.forEach((u) => u.addEventListener("abort", i, { once: true }));
+  const { signal: o2 } = t;
+  return o2.unsubscribe = () => c.asap(a2), o2;
 };
-var Zr = function* (r, e) {
-  let t = r.byteLength;
+var Qs = function* (r2, e) {
+  let t = r2.byteLength;
   if (t < e) {
-    yield r;
+    yield r2;
     return;
   }
-  let s = 0, i;
-  for (; s < t; )
-    i = s + e, yield r.slice(s, i), s = i;
+  let s3 = 0, i;
+  for (; s3 < t; )
+    i = s3 + e, yield r2.slice(s3, i), s3 = i;
 };
-var es = async function* (r, e) {
-  for await (const t of ts(r))
-    yield* Zr(t, e);
+var Ys = async function* (r2, e) {
+  for await (const t of Zs(r2))
+    yield* Qs(t, e);
 };
-var ts = async function* (r) {
-  if (r[Symbol.asyncIterator]) {
-    yield* r;
+var Zs = async function* (r2) {
+  if (r2[Symbol.asyncIterator]) {
+    yield* r2;
     return;
   }
-  const e = r.getReader();
+  const e = r2.getReader();
   try {
     for (; ; ) {
-      const { done: t, value: s } = await e.read();
+      const { done: t, value: s3 } = await e.read();
       if (t)
         break;
-      yield s;
+      yield s3;
     }
   } finally {
     await e.cancel();
   }
 };
-var ze = (r, e, t, s) => {
-  const i = es(r, e);
-  let a = 0, n, o = (u) => {
-    n || (n = true, s && s(u));
+var vt = (r2, e, t, s3) => {
+  const i = Ys(r2, e);
+  let n = 0, a2, o2 = (u) => {
+    a2 || (a2 = true, s3 && s3(u));
   };
-  return new ReadableStream({
-    async pull(u) {
-      try {
-        const { done: l, value: p } = await i.next();
-        if (l) {
-          o(), u.close();
-          return;
+  return new ReadableStream(
+    {
+      async pull(u) {
+        try {
+          const { done: l2, value: d2 } = await i.next();
+          if (l2) {
+            o2(), u.close();
+            return;
+          }
+          let m2 = d2.byteLength;
+          if (t) {
+            let p2 = n += m2;
+            t(p2);
+          }
+          u.enqueue(new Uint8Array(d2));
+        } catch (l2) {
+          throw o2(l2), l2;
         }
-        let f = p.byteLength;
-        if (t) {
-          let m = a += f;
-          t(m);
-        }
-        u.enqueue(new Uint8Array(p));
-      } catch (l) {
-        throw o(l), l;
+      },
+      cancel(u) {
+        return o2(u), i.return();
       }
     },
-    cancel(u) {
-      return o(u), i.return();
+    {
+      highWaterMark: 2
     }
-  }, {
-    highWaterMark: 2
-  });
+  );
 };
-var Je = 64 * 1024;
-var { isFunction: ne } = c;
-var rs = (({ Request: r, Response: e }) => ({
-  Request: r,
-  Response: e
-}))(c.global);
-var {
-  ReadableStream: Xe,
-  TextEncoder: Qe
-} = c.global;
-var Ye = (r, ...e) => {
+var Re = (r2) => r2 >= 48 && r2 <= 57 || r2 >= 65 && r2 <= 70 || r2 >= 97 && r2 <= 102;
+var ei = (r2, e, t) => e + 2 < t && Re(r2.charCodeAt(e + 1)) && Re(r2.charCodeAt(e + 2));
+function ti(r2) {
+  if (!r2 || typeof r2 != "string" || !r2.startsWith("data:")) return 0;
+  const e = r2.indexOf(",");
+  if (e < 0) return 0;
+  const t = r2.slice(5, e), s3 = r2.slice(e + 1);
+  if (/;base64/i.test(t)) {
+    let a2 = s3.length;
+    const o2 = s3.length;
+    for (let f2 = 0; f2 < o2; f2++)
+      if (s3.charCodeAt(f2) === 37 && f2 + 2 < o2) {
+        const b2 = s3.charCodeAt(f2 + 1), S2 = s3.charCodeAt(f2 + 2);
+        Re(b2) && Re(S2) && (a2 -= 2, f2 += 2);
+      }
+    let u = 0, l2 = o2 - 1;
+    const d2 = (f2) => f2 >= 2 && s3.charCodeAt(f2 - 2) === 37 && // '%'
+    s3.charCodeAt(f2 - 1) === 51 && // '3'
+    (s3.charCodeAt(f2) === 68 || s3.charCodeAt(f2) === 100);
+    l2 >= 0 && (s3.charCodeAt(l2) === 61 ? (u++, l2--) : d2(l2) && (u++, l2 -= 3)), u === 1 && l2 >= 0 && (s3.charCodeAt(l2) === 61 || d2(l2)) && u++;
+    const p2 = Math.floor(a2 / 4) * 3 - (u || 0);
+    return p2 > 0 ? p2 : 0;
+  }
+  let n = 0;
+  for (let a2 = 0, o2 = s3.length; a2 < o2; a2++) {
+    const u = s3.charCodeAt(a2);
+    if (u === 37 && ei(s3, a2, o2))
+      n += 1, a2 += 2;
+    else if (u < 128)
+      n += 1;
+    else if (u < 2048)
+      n += 2;
+    else if (u >= 55296 && u <= 56319 && a2 + 1 < o2) {
+      const l2 = s3.charCodeAt(a2 + 1);
+      l2 >= 56320 && l2 <= 57343 ? (n += 4, a2++) : n += 3;
+    } else
+      n += 3;
+  }
+  return n;
+}
+var Ye = "1.18.1";
+var St = 64 * 1024;
+var { isFunction: we } = c;
+var ri = (r2) => encodeURIComponent(r2).replace(
+  /%([0-9A-F]{2})/gi,
+  (e, t) => String.fromCharCode(parseInt(t, 16))
+);
+var Lt = (r2) => {
+  if (!c.isString(r2))
+    return r2;
   try {
-    return !!r(...e);
+    return decodeURIComponent(r2);
+  } catch {
+    return r2;
+  }
+};
+var wt = (r2, ...e) => {
+  try {
+    return !!r2(...e);
   } catch {
     return false;
   }
 };
-var ss = (r) => {
-  r = c.merge.call({
-    skipUndefined: true
-  }, rs, r);
-  const { fetch: e, Request: t, Response: s } = r, i = e ? ne(e) : typeof fetch == "function", a = ne(t), n = ne(s);
-  if (!i)
+var si = (r2) => {
+  const e = r2.indexOf("://");
+  let t = r2;
+  return e !== -1 && (t = t.slice(e + 3)), t.includes("@") || t.includes(":");
+};
+var ii = (r2) => {
+  const e = c.global !== void 0 && c.global !== null ? c.global : globalThis, { ReadableStream: t, TextEncoder: s3 } = e;
+  r2 = c.merge.call(
+    {
+      skipUndefined: true
+    },
+    {
+      Request: e.Request,
+      Response: e.Response
+    },
+    r2
+  );
+  const { fetch: i, Request: n, Response: a2 } = r2, o2 = i ? we(i) : typeof fetch == "function", u = we(n), l2 = we(a2);
+  if (!o2)
     return false;
-  const o = i && ne(Xe), u = i && (typeof Qe == "function" ? /* @__PURE__ */ ((d) => (h) => d.encode(h))(new Qe()) : async (d) => new Uint8Array(await new t(d).arrayBuffer())), l = a && o && Ye(() => {
-    let d = false;
-    const h = new t(P.origin, {
-      body: new Xe(),
+  const d2 = o2 && we(t), m2 = o2 && (typeof s3 == "function" ? /* @__PURE__ */ ((y2) => (v) => y2.encode(v))(new s3()) : async (y2) => new Uint8Array(await new n(y2).arrayBuffer())), p2 = u && d2 && wt(() => {
+    let y2 = false;
+    const v = new n(B.origin, {
+      body: new t(),
       method: "POST",
       get duplex() {
-        return d = true, "half";
+        return y2 = true, "half";
       }
-    }).headers.has("Content-Type");
-    return d && !h;
-  }), p = n && o && Ye(() => c.isReadableStream(new s("").body)), f = {
-    stream: p && ((d) => d.body)
+    }), w2 = v.headers.has("Content-Type");
+    return v.body != null && v.body.cancel(), y2 && !w2;
+  }), f2 = l2 && d2 && wt(() => c.isReadableStream(new a2("").body)), b2 = {
+    stream: f2 && ((y2) => y2.body)
   };
-  i && ["text", "arrayBuffer", "blob", "formData", "stream"].forEach((d) => {
-    !f[d] && (f[d] = (h, y) => {
-      let S = h && h[d];
-      if (S)
-        return S.call(h);
-      throw new v(`Response type '${d}' is not supported`, v.ERR_NOT_SUPPORT, y);
+  o2 && ["text", "arrayBuffer", "blob", "formData", "stream"].forEach((y2) => {
+    !b2[y2] && (b2[y2] = (v, w2) => {
+      let M = v && v[y2];
+      if (M)
+        return M.call(v);
+      throw new h2(
+        `Response type '${y2}' is not supported`,
+        h2.ERR_NOT_SUPPORT,
+        w2
+      );
     });
   });
-  const m = async (d) => {
-    if (d == null)
+  const S2 = async (y2) => {
+    if (y2 == null)
       return 0;
-    if (c.isBlob(d))
-      return d.size;
-    if (c.isSpecCompliantForm(d))
-      return (await new t(P.origin, {
+    if (c.isBlob(y2))
+      return y2.size;
+    if (c.isSpecCompliantForm(y2))
+      return (await new n(B.origin, {
         method: "POST",
-        body: d
+        body: y2
       }).arrayBuffer()).byteLength;
-    if (c.isArrayBufferView(d) || c.isArrayBuffer(d))
-      return d.byteLength;
-    if (c.isURLSearchParams(d) && (d = d + ""), c.isString(d))
-      return (await u(d)).byteLength;
-  }, g = async (d, h) => {
-    const y = c.toFiniteNumber(d.getContentLength());
-    return y ?? m(h);
+    if (c.isArrayBufferView(y2) || c.isArrayBuffer(y2))
+      return y2.byteLength;
+    if (c.isURLSearchParams(y2) && (y2 = y2 + ""), c.isString(y2))
+      return (await m2(y2)).byteLength;
+  }, g2 = async (y2, v) => {
+    const w2 = c.toFiniteNumber(y2.getContentLength());
+    return w2 ?? S2(v);
   };
-  return async (d) => {
+  return async (y2) => {
     let {
-      url: h,
-      method: y,
-      data: S,
-      signal: L,
-      cancelToken: w,
-      timeout: C,
-      onDownloadProgress: T,
-      onUploadProgress: U,
-      responseType: B,
-      headers: ge,
-      withCredentials: se = "same-origin",
-      fetchOptions: Ee
-    } = Pt(d), De = e || fetch;
-    B = B ? (B + "").toLowerCase() : "text";
-    let ie = Yr([L, w && w.toAbortSignal()], C), Q = null;
-    const _ = ie && ie.unsubscribe && (() => {
-      ie.unsubscribe();
+      url: v,
+      method: w2,
+      data: M,
+      signal: K,
+      cancelToken: C,
+      timeout: j,
+      onDownloadProgress: Oe,
+      onUploadProgress: Ee,
+      responseType: W,
+      headers: H,
+      withCredentials: ve = "same-origin",
+      fetchOptions: rt,
+      maxContentLength: _,
+      maxBodyLength: Se
+    } = zt(y2);
+    const le = c.isNumber(_) && _ > -1, De = c.isNumber(Se) && Se > -1, nr = (P) => c.hasOwnProp(y2, P) ? y2[P] : void 0;
+    let st = i || fetch;
+    W = W ? (W + "").toLowerCase() : "text";
+    let G = Xs(
+      [K, C && C.toAbortSignal()],
+      j
+    ), A = null;
+    const X = G && G.unsubscribe && (() => {
+      G.unsubscribe();
     });
-    let Ie;
+    let se, de = null;
+    const it = () => new h2(
+      "Request body larger than maxBodyLength limit",
+      h2.ERR_BAD_REQUEST,
+      y2,
+      A
+    );
     try {
-      if (U && l && y !== "get" && y !== "head" && (Ie = await g(ge, S)) !== 0) {
-        let F = new t(h, {
-          method: "POST",
-          body: S,
-          duplex: "half"
-        }), H;
-        if (c.isFormData(S) && (H = F.headers.get("content-type")) && ge.setContentType(H), F.body) {
-          const [be, ae] = We(
-            Ie,
-            le(He(U))
-          );
-          S = ze(F.body, Je, be, ae);
-        }
+      let P;
+      const x = nr("auth");
+      if (x) {
+        const k2 = c.getSafeProp(x, "username") || "", D = c.getSafeProp(x, "password") || "";
+        P = {
+          username: k2,
+          password: D
+        };
       }
-      c.isString(se) || (se = se ? "include" : "omit");
-      const E = a && "credentials" in t.prototype, Fe = {
-        ...Ee,
-        signal: ie,
-        method: y.toUpperCase(),
-        headers: ge.normalize().toJSON(),
-        body: S,
+      if (si(v)) {
+        const k2 = new URL(v, B.origin);
+        if (!P && (k2.username || k2.password)) {
+          const D = Lt(k2.username), V = Lt(k2.password);
+          P = {
+            username: D,
+            password: V
+          };
+        }
+        (k2.username || k2.password) && (k2.username = "", k2.password = "", v = k2.href);
+      }
+      if (P && (H.delete("authorization"), H.set(
+        "Authorization",
+        "Basic " + btoa(ri((P.username || "") + ":" + (P.password || "")))
+      )), le && typeof v == "string" && v.startsWith("data:") && ti(v) > _)
+        throw new h2(
+          "maxContentLength size of " + _ + " exceeded",
+          h2.ERR_BAD_RESPONSE,
+          y2,
+          A
+        );
+      if (De && w2 !== "get" && w2 !== "head") {
+        const k2 = await S2(M);
+        if (typeof k2 == "number" && isFinite(k2) && (se = k2, k2 > Se))
+          throw it();
+      }
+      const Le = De && (c.isReadableStream(M) || c.isStream(M)), nt = (k2, D, V) => vt(
+        k2,
+        St,
+        (Q) => {
+          if (De && Q > Se)
+            throw de = it();
+          D && D(Q);
+        },
+        V
+      );
+      if (p2 && w2 !== "get" && w2 !== "head" && (Ee || Le)) {
+        if (se = se ?? await g2(H, M), se !== 0 || Le) {
+          let k2 = new n(v, {
+            method: "POST",
+            body: M,
+            duplex: "half"
+          }), D;
+          if (c.isFormData(M) && (D = k2.headers.get("content-type")) && H.setContentType(D), k2.body) {
+            const [V, Q] = Ee && ft(
+              se,
+              qe(ht(Ee))
+            ) || [];
+            M = nt(k2.body, V, Q);
+          }
+        }
+      } else if (Le && !u && d2 && w2 !== "get" && w2 !== "head")
+        M = nt(M);
+      else if (Le && u && !p2 && w2 !== "get" && w2 !== "head")
+        throw new h2(
+          "Stream request bodies are not supported by the current fetch implementation",
+          h2.ERR_NOT_SUPPORT,
+          y2,
+          A
+        );
+      c.isString(ve) || (ve = ve ? "include" : "omit");
+      const ar = u && "credentials" in n.prototype;
+      if (c.isFormData(M)) {
+        const k2 = H.getContentType();
+        k2 && /^multipart\/form-data/i.test(k2) && !/boundary=/i.test(k2) && H.delete("content-type");
+      }
+      H.set("User-Agent", "axios/" + Ye, false);
+      const at = {
+        ...rt,
+        signal: G,
+        method: w2.toUpperCase(),
+        headers: xt(H.normalize()),
+        body: M,
         duplex: "half",
-        credentials: E ? se : void 0
+        credentials: ar ? ve : void 0
       };
-      Q = a && new t(h, Fe);
-      let I = await (a ? De(Q, Ee) : De(h, Fe));
-      const xe = p && (B === "stream" || B === "response");
-      if (p && (T || xe && _)) {
-        const F = {};
-        ["status", "statusText", "headers"].forEach((Ne) => {
-          F[Ne] = I[Ne];
+      A = u && new n(v, at);
+      let U = await (u ? st(A, rt) : st(v, at));
+      const ot = O.from(U.headers);
+      if (le) {
+        const k2 = c.toFiniteNumber(ot.getContentLength());
+        if (k2 != null && k2 > _)
+          throw new h2(
+            "maxContentLength size of " + _ + " exceeded",
+            h2.ERR_BAD_RESPONSE,
+            y2,
+            A
+          );
+      }
+      const Ie = f2 && (W === "stream" || W === "response");
+      if (f2 && U.body && (Oe || le || Ie && X)) {
+        const k2 = {};
+        ["status", "statusText", "headers"].forEach((pe) => {
+          k2[pe] = U[pe];
         });
-        const H = c.toFiniteNumber(I.headers.get("content-length")), [be, ae] = T && We(
-          H,
-          le(He(T), true)
+        const D = c.toFiniteNumber(ot.getContentLength()), [V, Q] = Oe && ft(
+          D,
+          qe(ht(Oe), true)
         ) || [];
-        I = new s(
-          ze(I.body, Je, be, () => {
-            ae && ae(), _ && _();
+        let ct = 0;
+        const or = (pe) => {
+          if (le && (ct = pe, ct > _))
+            throw new h2(
+              "maxContentLength size of " + _ + " exceeded",
+              h2.ERR_BAD_RESPONSE,
+              y2,
+              A
+            );
+          V && V(pe);
+        };
+        U = new a2(
+          vt(U.body, St, or, () => {
+            Q && Q(), X && X();
           }),
-          F
+          k2
         );
       }
-      B = B || "text";
-      let Dt = await f[c.findKey(f, B) || "text"](I, d);
-      return !xe && _ && _(), await new Promise((F, H) => {
-        kt(F, H, {
-          data: Dt,
-          headers: A.from(I.headers),
-          status: I.status,
-          statusText: I.statusText,
-          config: d,
-          request: Q
+      W = W || "text";
+      let $ = await b2[c.findKey(b2, W) || "text"](
+        U,
+        y2
+      );
+      if (le && !f2 && !Ie) {
+        let k2;
+        if ($ != null && (typeof $.byteLength == "number" ? k2 = $.byteLength : typeof $.size == "number" ? k2 = $.size : typeof $ == "string" && (k2 = typeof s3 == "function" ? new s3().encode($).byteLength : $.length)), typeof k2 == "number" && k2 > _)
+          throw new h2(
+            "maxContentLength size of " + _ + " exceeded",
+            h2.ERR_BAD_RESPONSE,
+            y2,
+            A
+          );
+      }
+      return !Ie && X && X(), await new Promise((k2, D) => {
+        Gt(k2, D, {
+          data: $,
+          headers: O.from(U.headers),
+          status: U.status,
+          statusText: U.statusText,
+          config: y2,
+          request: A
         });
       });
-    } catch (E) {
-      throw _ && _(), E && E.name === "TypeError" && /Load failed|fetch/i.test(E.message) ? Object.assign(
-        new v("Network Error", v.ERR_NETWORK, d, Q),
-        {
-          cause: E.cause || E
-        }
-      ) : v.from(E, E && E.code, d, Q);
+    } catch (P) {
+      if (X && X(), G && G.aborted && G.reason instanceof h2) {
+        const x = G.reason;
+        throw x.config = y2, A && (x.request = A), P !== x && Object.defineProperty(x, "cause", {
+          __proto__: null,
+          value: P,
+          writable: true,
+          enumerable: false,
+          configurable: true
+        }), x;
+      }
+      if (de)
+        throw A && !de.request && (de.request = A), de;
+      if (P instanceof h2)
+        throw A && !P.request && (P.request = A), P;
+      if (P && P.name === "TypeError" && /Load failed|fetch/i.test(P.message)) {
+        const x = new h2(
+          "Network Error",
+          h2.ERR_NETWORK,
+          y2,
+          A,
+          P && P.response
+        );
+        throw Object.defineProperty(x, "cause", {
+          __proto__: null,
+          value: P.cause || P,
+          writable: true,
+          enumerable: false,
+          configurable: true
+        }), x;
+      }
+      throw h2.from(P, P && P.code, y2, A, P && P.response);
     }
   };
 };
-var is = /* @__PURE__ */ new Map();
-var Ct = (r) => {
-  let e = r ? r.env : {};
-  const { fetch: t, Request: s, Response: i } = e, a = [
-    s,
-    i,
-    t
-  ];
-  let n = a.length, o = n, u, l, p = is;
-  for (; o--; )
-    u = a[o], l = p.get(u), l === void 0 && p.set(u, l = o ? /* @__PURE__ */ new Map() : ss(e)), p = l;
-  return l;
+var ni = /* @__PURE__ */ new Map();
+var Jt = (r2) => {
+  let e = r2 && r2.env || {};
+  const { fetch: t, Request: s3, Response: i } = e, n = [s3, i, t];
+  let a2 = n.length, o2 = a2, u, l2, d2 = ni;
+  for (; o2--; )
+    u = n[o2], l2 = d2.get(u), l2 === void 0 && d2.set(u, l2 = o2 ? /* @__PURE__ */ new Map() : ii(e)), d2 = l2;
+  return l2;
 };
-Ct();
-var Pe = {
-  http: Lr,
-  xhr: Qr,
+Jt();
+var Ze = {
+  http: bs,
+  xhr: Js,
   fetch: {
-    get: Ct
+    get: Jt
   }
 };
-c.forEach(Pe, (r, e) => {
-  if (r) {
+c.forEach(Ze, (r2, e) => {
+  if (r2) {
     try {
-      Object.defineProperty(r, "name", { value: e });
+      Object.defineProperty(r2, "name", { __proto__: null, value: e });
     } catch {
     }
-    Object.defineProperty(r, "adapterName", { value: e });
+    Object.defineProperty(r2, "adapterName", { __proto__: null, value: e });
   }
 });
-var Ze = (r) => `- ${r}`;
-var as = (r) => c.isFunction(r) || r === null || r === false;
-var Kt = {
-  getAdapter: (r, e) => {
-    r = c.isArray(r) ? r : [r];
-    const { length: t } = r;
-    let s, i;
-    const a = {};
-    for (let n = 0; n < t; n++) {
-      s = r[n];
-      let o;
-      if (i = s, !as(s) && (i = Pe[(o = String(s)).toLowerCase()], i === void 0))
-        throw new v(`Unknown adapter '${o}'`);
-      if (i && (c.isFunction(i) || (i = i.get(e))))
-        break;
-      a[o || "#" + n] = i;
-    }
-    if (!i) {
-      const n = Object.entries(a).map(
-        ([u, l]) => `adapter ${u} ` + (l === false ? "is not supported by the environment" : "is not available in the build")
-      );
-      let o = t ? n.length > 1 ? `since :
-` + n.map(Ze).join(`
-`) : " " + Ze(n[0]) : "as no adapter specified";
-      throw new v(
-        "There is no suitable adapter to dispatch the request " + o,
-        "ERR_NOT_SUPPORT"
-      );
-    }
-    return i;
-  },
-  adapters: Pe
+var kt = (r2) => `- ${r2}`;
+var ai = (r2) => c.isFunction(r2) || r2 === null || r2 === false;
+function oi(r2, e) {
+  r2 = c.isArray(r2) ? r2 : [r2];
+  const { length: t } = r2;
+  let s3, i;
+  const n = {};
+  for (let a2 = 0; a2 < t; a2++) {
+    s3 = r2[a2];
+    let o2;
+    if (i = s3, !ai(s3) && (i = Ze[(o2 = String(s3)).toLowerCase()], i === void 0))
+      throw new h2(`Unknown adapter '${o2}'`);
+    if (i && (c.isFunction(i) || (i = i.get(e))))
+      break;
+    n[o2 || "#" + a2] = i;
+  }
+  if (!i) {
+    const a2 = Object.entries(n).map(
+      ([u, l2]) => `adapter ${u} ` + (l2 === false ? "is not supported by the environment" : "is not available in the build")
+    );
+    let o2 = t ? a2.length > 1 ? `since :
+` + a2.map(kt).join(`
+`) : " " + kt(a2[0]) : "as no adapter specified";
+    throw new h2(
+      "There is no suitable adapter to dispatch the request " + o2,
+      h2.ERR_NOT_SUPPORT
+    );
+  }
+  return i;
+}
+var Xt = {
+  /**
+   * Resolve an adapter from a list of adapter names or functions.
+   * @type {Function}
+   */
+  getAdapter: oi,
+  /**
+   * Exposes all known adapters
+   * @type {Object<string, Function|Object>}
+   */
+  adapters: Ze
 };
-function Le(r) {
-  if (r.cancelToken && r.cancelToken.throwIfRequested(), r.signal && r.signal.aborted)
-    throw new X(null, r);
+function _e(r2) {
+  if (r2.cancelToken && r2.cancelToken.throwIfRequested(), r2.signal && r2.signal.aborted)
+    throw new be(null, r2);
 }
-function et(r) {
-  return Le(r), r.headers = A.from(r.headers), r.data = Se.call(
-    r,
-    r.transformRequest
-  ), ["post", "put", "patch"].indexOf(r.method) !== -1 && r.headers.setContentType("application/x-www-form-urlencoded", false), Kt.getAdapter(r.adapter || re.adapter, r)(r).then(function(s) {
-    return Le(r), s.data = Se.call(
-      r,
-      r.transformResponse,
-      s
-    ), s.headers = A.from(s.headers), s;
-  }, function(s) {
-    return wt(s) || (Le(r), s && s.response && (s.response.data = Se.call(
-      r,
-      r.transformResponse,
-      s.response
-    ), s.response.headers = A.from(s.response.headers))), Promise.reject(s);
-  });
+function Mt(r2) {
+  return _e(r2), r2.headers = O.from(r2.headers), r2.data = Fe.call(r2, r2.transformRequest), ["post", "put", "patch"].indexOf(r2.method) !== -1 && r2.headers.setContentType("application/x-www-form-urlencoded", false), Xt.getAdapter(r2.adapter || ge.adapter, r2)(r2).then(
+    function(s3) {
+      _e(r2), r2.response = s3;
+      try {
+        s3.data = Fe.call(r2, r2.transformResponse, s3);
+      } finally {
+        delete r2.response;
+      }
+      return s3.headers = O.from(s3.headers), s3;
+    },
+    function(s3) {
+      if (!Ht(s3) && (_e(r2), s3 && s3.response)) {
+        r2.response = s3.response;
+        try {
+          s3.response.data = Fe.call(
+            r2,
+            r2.transformResponse,
+            s3.response
+          );
+        } finally {
+          delete r2.response;
+        }
+        s3.response.headers = O.from(s3.response.headers);
+      }
+      return Promise.reject(s3);
+    }
+  );
 }
-var At = "1.12.2";
-var fe = {};
-["object", "boolean", "number", "function", "string", "symbol"].forEach((r, e) => {
-  fe[r] = function(s) {
-    return typeof s === r || "a" + (e < 1 ? "n " : " ") + r;
+var Ke = {};
+["object", "boolean", "number", "function", "string", "symbol"].forEach((r2, e) => {
+  Ke[r2] = function(s3) {
+    return typeof s3 === r2 || "a" + (e < 1 ? "n " : " ") + r2;
   };
 });
-var tt = {};
-fe.transitional = function(e, t, s) {
-  function i(a, n) {
-    return "[Axios v" + At + "] Transitional option '" + a + "'" + n + (s ? ". " + s : "");
+var Pt = {};
+Ke.transitional = function(e, t, s3) {
+  function i(n, a2) {
+    return "[Axios v" + Ye + "] Transitional option '" + n + "'" + a2 + (s3 ? ". " + s3 : "");
   }
-  return (a, n, o) => {
+  return (n, a2, o2) => {
     if (e === false)
-      throw new v(
-        i(n, " has been removed" + (t ? " in " + t : "")),
-        v.ERR_DEPRECATED
+      throw new h2(
+        i(a2, " has been removed" + (t ? " in " + t : "")),
+        h2.ERR_DEPRECATED
       );
-    return t && !tt[n] && (tt[n] = true, console.warn(
+    return t && !Pt[a2] && (Pt[a2] = true, console.warn(
       i(
-        n,
+        a2,
         " has been deprecated since v" + t + " and will be removed in the near future"
       )
-    )), e ? e(a, n, o) : true;
+    )), e ? e(n, a2, o2) : true;
   };
 };
-fe.spelling = function(e) {
-  return (t, s) => (console.warn(`${s} is likely a misspelling of ${e}`), true);
+Ke.spelling = function(e) {
+  return (t, s3) => (console.warn(`${s3} is likely a misspelling of ${e}`), true);
 };
-function ns(r, e, t) {
-  if (typeof r != "object")
-    throw new v("options must be an object", v.ERR_BAD_OPTION_VALUE);
-  const s = Object.keys(r);
-  let i = s.length;
+function ci(r2, e, t) {
+  if (typeof r2 != "object" || r2 === null)
+    throw new h2("options must be an object", h2.ERR_BAD_OPTION_VALUE);
+  const s3 = Object.keys(r2);
+  let i = s3.length;
   for (; i-- > 0; ) {
-    const a = s[i], n = e[a];
-    if (n) {
-      const o = r[a], u = o === void 0 || n(o, a, r);
+    const n = s3[i], a2 = Object.prototype.hasOwnProperty.call(e, n) ? e[n] : void 0;
+    if (a2) {
+      const o2 = r2[n], u = o2 === void 0 || a2(o2, n, r2);
       if (u !== true)
-        throw new v("option " + a + " must be " + u, v.ERR_BAD_OPTION_VALUE);
+        throw new h2(
+          "option " + n + " must be " + u,
+          h2.ERR_BAD_OPTION_VALUE
+        );
       continue;
     }
     if (t !== true)
-      throw new v("Unknown option " + a, v.ERR_BAD_OPTION);
+      throw new h2("Unknown option " + n, h2.ERR_BAD_OPTION);
   }
 }
-var ue = {
-  assertOptions: ns,
-  validators: fe
+var Pe = {
+  assertOptions: ci,
+  validators: Ke
 };
-var D = ue.validators;
-var j = class {
+var T = Pe.validators;
+var Z = class {
   constructor(e) {
     this.defaults = e || {}, this.interceptors = {
-      request: new je(),
-      response: new je()
+      request: new mt(),
+      response: new mt()
     };
   }
   /**
@@ -2807,137 +5710,167 @@ var j = class {
   async request(e, t) {
     try {
       return await this._request(e, t);
-    } catch (s) {
-      if (s instanceof Error) {
+    } catch (s3) {
+      if (s3 instanceof Error) {
         let i = {};
         Error.captureStackTrace ? Error.captureStackTrace(i) : i = new Error();
-        const a = i.stack ? i.stack.replace(/^.+\n/, "") : "";
+        const n = (() => {
+          if (!i.stack)
+            return "";
+          const a2 = i.stack.indexOf(`
+`);
+          return a2 === -1 ? "" : i.stack.slice(a2 + 1);
+        })();
         try {
-          s.stack ? a && !String(s.stack).endsWith(a.replace(/^.+\n.+\n/, "")) && (s.stack += `
-` + a) : s.stack = a;
+          if (!s3.stack)
+            s3.stack = n;
+          else if (n) {
+            const a2 = n.indexOf(`
+`), o2 = a2 === -1 ? -1 : n.indexOf(`
+`, a2 + 1), u = o2 === -1 ? "" : n.slice(o2 + 1);
+            String(s3.stack).endsWith(u) || (s3.stack += `
+` + n);
+          }
         } catch {
         }
       }
-      throw s;
+      throw s3;
     }
   }
   _request(e, t) {
-    typeof e == "string" ? (t = t || {}, t.url = e) : t = e || {}, t = G(this.defaults, t);
-    const { transitional: s, paramsSerializer: i, headers: a } = t;
-    s !== void 0 && ue.assertOptions(s, {
-      silentJSONParsing: D.transitional(D.boolean),
-      forcedJSONParsing: D.transitional(D.boolean),
-      clarifyTimeoutError: D.transitional(D.boolean)
-    }, false), i != null && (c.isFunction(i) ? t.paramsSerializer = {
+    typeof e == "string" ? (t = t || {}, t.url = e) : t = e || {}, t = te(this.defaults, t);
+    const { transitional: s3, paramsSerializer: i, headers: n } = t;
+    s3 !== void 0 && Pe.assertOptions(
+      s3,
+      {
+        silentJSONParsing: T.transitional(T.boolean),
+        forcedJSONParsing: T.transitional(T.boolean),
+        clarifyTimeoutError: T.transitional(T.boolean),
+        legacyInterceptorReqResOrdering: T.transitional(T.boolean),
+        advertiseZstdAcceptEncoding: T.transitional(T.boolean),
+        validateStatusUndefinedResolves: T.transitional(T.boolean)
+      },
+      false
+    ), i != null && (c.isFunction(i) ? t.paramsSerializer = {
       serialize: i
-    } : ue.assertOptions(i, {
-      encode: D.function,
-      serialize: D.function
-    }, true)), t.allowAbsoluteUrls !== void 0 || (this.defaults.allowAbsoluteUrls !== void 0 ? t.allowAbsoluteUrls = this.defaults.allowAbsoluteUrls : t.allowAbsoluteUrls = true), ue.assertOptions(t, {
-      baseUrl: D.spelling("baseURL"),
-      withXsrfToken: D.spelling("withXSRFToken")
-    }, true), t.method = (t.method || this.defaults.method || "get").toLowerCase();
-    let n = a && c.merge(
-      a.common,
-      a[t.method]
-    );
-    a && c.forEach(
-      ["delete", "get", "head", "post", "put", "patch", "common"],
-      (d) => {
-        delete a[d];
-      }
-    ), t.headers = A.concat(n, a);
-    const o = [];
+    } : Pe.assertOptions(
+      i,
+      {
+        encode: T.function,
+        serialize: T.function
+      },
+      true
+    )), t.allowAbsoluteUrls !== void 0 || (this.defaults.allowAbsoluteUrls !== void 0 ? t.allowAbsoluteUrls = this.defaults.allowAbsoluteUrls : t.allowAbsoluteUrls = true), Pe.assertOptions(
+      t,
+      {
+        baseUrl: T.spelling("baseURL"),
+        withXsrfToken: T.spelling("withXSRFToken")
+      },
+      true
+    ), t.method = (t.method || this.defaults.method || "get").toLowerCase();
+    let a2 = n && c.merge(n.common, n[t.method]);
+    n && c.forEach(["delete", "get", "head", "post", "put", "patch", "query", "common"], (b2) => {
+      delete n[b2];
+    }), t.headers = O.concat(a2, n);
+    const o2 = [];
     let u = true;
-    this.interceptors.request.forEach(function(h) {
-      typeof h.runWhen == "function" && h.runWhen(t) === false || (u = u && h.synchronous, o.unshift(h.fulfilled, h.rejected));
+    this.interceptors.request.forEach(function(S2) {
+      if (typeof S2.runWhen == "function" && S2.runWhen(t) === false)
+        return;
+      u = u && S2.synchronous;
+      const g2 = t.transitional || Xe;
+      g2 && g2.legacyInterceptorReqResOrdering ? o2.unshift(S2.fulfilled, S2.rejected) : o2.push(S2.fulfilled, S2.rejected);
     });
-    const l = [];
-    this.interceptors.response.forEach(function(h) {
-      l.push(h.fulfilled, h.rejected);
+    const l2 = [];
+    this.interceptors.response.forEach(function(S2) {
+      l2.push(S2.fulfilled, S2.rejected);
     });
-    let p, f = 0, m;
+    let d2, m2 = 0, p2;
     if (!u) {
-      const d = [et.bind(this), void 0];
-      for (d.unshift(...o), d.push(...l), m = d.length, p = Promise.resolve(t); f < m; )
-        p = p.then(d[f++], d[f++]);
-      return p;
+      const b2 = [Mt.bind(this), void 0];
+      for (b2.unshift(...o2), b2.push(...l2), p2 = b2.length, d2 = Promise.resolve(t); m2 < p2; )
+        d2 = d2.then(b2[m2++], b2[m2++]);
+      return d2;
     }
-    m = o.length;
-    let g = t;
-    for (; f < m; ) {
-      const d = o[f++], h = o[f++];
+    p2 = o2.length;
+    let f2 = t;
+    for (; m2 < p2; ) {
+      const b2 = o2[m2++], S2 = o2[m2++];
       try {
-        g = d(g);
-      } catch (y) {
-        h.call(this, y);
+        f2 = b2(f2);
+      } catch (g2) {
+        S2.call(this, g2);
         break;
       }
     }
     try {
-      p = et.call(this, g);
-    } catch (d) {
-      return Promise.reject(d);
+      d2 = Mt.call(this, f2);
+    } catch (b2) {
+      return Promise.reject(b2);
     }
-    for (f = 0, m = l.length; f < m; )
-      p = p.then(l[f++], l[f++]);
-    return p;
+    for (m2 = 0, p2 = l2.length; m2 < p2; )
+      d2 = d2.then(l2[m2++], l2[m2++]);
+    return d2;
   }
   getUri(e) {
-    e = G(this.defaults, e);
-    const t = Mt(e.baseURL, e.url, e.allowAbsoluteUrls);
-    return vt(t, e.params, e.paramsSerializer);
+    e = te(this.defaults, e);
+    const t = Vt(e.baseURL, e.url, e.allowAbsoluteUrls, e);
+    return $t(t, e.params, e.paramsSerializer);
   }
 };
 c.forEach(["delete", "get", "head", "options"], function(e) {
-  j.prototype[e] = function(t, s) {
-    return this.request(G(s || {}, {
-      method: e,
-      url: t,
-      data: (s || {}).data
-    }));
+  Z.prototype[e] = function(t, s3) {
+    return this.request(
+      te(s3 || {}, {
+        method: e,
+        url: t,
+        data: s3 && c.hasOwnProp(s3, "data") ? s3.data : void 0
+      })
+    );
   };
 });
-c.forEach(["post", "put", "patch"], function(e) {
-  function t(s) {
-    return function(a, n, o) {
-      return this.request(G(o || {}, {
-        method: e,
-        headers: s ? {
-          "Content-Type": "multipart/form-data"
-        } : {},
-        url: a,
-        data: n
-      }));
+c.forEach(["post", "put", "patch", "query"], function(e) {
+  function t(s3) {
+    return function(n, a2, o2) {
+      return this.request(
+        te(o2 || {}, {
+          method: e,
+          headers: s3 ? {
+            "Content-Type": "multipart/form-data"
+          } : {},
+          url: n,
+          data: a2
+        })
+      );
     };
   }
-  j.prototype[e] = t(), j.prototype[e + "Form"] = t(true);
+  Z.prototype[e] = t(), e !== "query" && (Z.prototype[e + "Form"] = t(true));
 });
-var os = class qt {
+var ui = class Qt {
   constructor(e) {
     if (typeof e != "function")
       throw new TypeError("executor must be a function.");
     let t;
-    this.promise = new Promise(function(a) {
-      t = a;
+    this.promise = new Promise(function(n) {
+      t = n;
     });
-    const s = this;
+    const s3 = this;
     this.promise.then((i) => {
-      if (!s._listeners) return;
-      let a = s._listeners.length;
-      for (; a-- > 0; )
-        s._listeners[a](i);
-      s._listeners = null;
+      if (!s3._listeners) return;
+      let n = s3._listeners.length;
+      for (; n-- > 0; )
+        s3._listeners[n](i);
+      s3._listeners = null;
     }), this.promise.then = (i) => {
-      let a;
-      const n = new Promise((o) => {
-        s.subscribe(o), a = o;
+      let n;
+      const a2 = new Promise((o2) => {
+        s3.subscribe(o2), n = o2;
       }).then(i);
-      return n.cancel = function() {
-        s.unsubscribe(a);
-      }, n;
-    }, e(function(a, n, o) {
-      s.reason || (s.reason = new X(a, n, o), t(s.reason));
+      return a2.cancel = function() {
+        s3.unsubscribe(n);
+      }, a2;
+    }, e(function(n, a2, o2) {
+      s3.reason || (s3.reason = new be(n, a2, o2), t(s3.reason));
     });
   }
   /**
@@ -2967,8 +5900,8 @@ var os = class qt {
     t !== -1 && this._listeners.splice(t, 1);
   }
   toAbortSignal() {
-    const e = new AbortController(), t = (s) => {
-      e.abort(s);
+    const e = new AbortController(), t = (s3) => {
+      e.abort(s3);
     };
     return this.subscribe(t), e.signal.unsubscribe = () => this.unsubscribe(t), e.signal;
   }
@@ -2979,22 +5912,22 @@ var os = class qt {
   static source() {
     let e;
     return {
-      token: new qt(function(i) {
+      token: new Qt(function(i) {
         e = i;
       }),
       cancel: e
     };
   }
 };
-function cs(r) {
+function li(r2) {
   return function(t) {
-    return r.apply(null, t);
+    return r2.apply(null, t);
   };
 }
-function us(r) {
-  return c.isObject(r) && r.isAxiosError === true;
+function di(r2) {
+  return c.isObject(r2) && r2.isAxiosError === true;
 }
-var Ce = {
+var We = {
   Continue: 100,
   SwitchingProtocols: 101,
   Processing: 102,
@@ -3057,129 +5990,63 @@ var Ce = {
   InsufficientStorage: 507,
   LoopDetected: 508,
   NotExtended: 510,
-  NetworkAuthenticationRequired: 511
+  NetworkAuthenticationRequired: 511,
+  WebServerIsDown: 521,
+  ConnectionTimedOut: 522,
+  OriginIsUnreachable: 523,
+  TimeoutOccurred: 524,
+  SslHandshakeFailed: 525,
+  InvalidSslCertificate: 526
 };
-Object.entries(Ce).forEach(([r, e]) => {
-  Ce[e] = r;
+Object.entries(We).forEach(([r2, e]) => {
+  We[e] = r2;
 });
-function Rt(r) {
-  const e = new j(r), t = ot(j.prototype.request, e);
-  return c.extend(t, j.prototype, e, { allOwnKeys: true }), c.extend(t, e, null, { allOwnKeys: true }), t.create = function(i) {
-    return Rt(G(r, i));
+function Yt(r2) {
+  const e = new Z(r2), t = Rt(Z.prototype.request, e);
+  return c.extend(t, Z.prototype, e, { allOwnKeys: true }), c.extend(t, e, null, { allOwnKeys: true }), t.create = function(i) {
+    return Yt(te(r2, i));
   }, t;
 }
-var k = Rt(re);
-k.Axios = j;
-k.CanceledError = X;
-k.CancelToken = os;
-k.isCancel = wt;
-k.VERSION = At;
-k.toFormData = ye;
-k.AxiosError = v;
-k.Cancel = k.CanceledError;
-k.all = function(e) {
+var q = Yt(ge);
+q.Axios = Z;
+q.CanceledError = be;
+q.CancelToken = ui;
+q.isCancel = Ht;
+q.VERSION = Ye;
+q.toFormData = Be;
+q.AxiosError = h2;
+q.Cancel = q.CanceledError;
+q.all = function(e) {
   return Promise.all(e);
 };
-k.spread = cs;
-k.isAxiosError = us;
-k.mergeConfig = G;
-k.AxiosHeaders = A;
-k.formToJSON = (r) => Lt(c.isHTMLForm(r) ? new FormData(r) : r);
-k.getAdapter = Kt.getAdapter;
-k.HttpStatusCode = Ce;
-k.default = k;
+q.spread = li;
+q.isAxiosError = di;
+q.mergeConfig = te;
+q.AxiosHeaders = O;
+q.formToJSON = (r2) => Wt(c.isHTMLForm(r2) ? new FormData(r2) : r2);
+q.getAdapter = Xt.getAdapter;
+q.HttpStatusCode = We;
+q.default = q;
 var {
-  Axios: vi,
-  AxiosError: Si,
-  CanceledError: Li,
-  isCancel: wi,
-  CancelToken: ki,
-  VERSION: Mi,
-  all: Pi,
-  Cancel: Ci,
-  isAxiosError: Ki,
-  spread: Ai,
-  toFormData: qi,
-  AxiosHeaders: Ri,
-  HttpStatusCode: Bi,
-  formToJSON: Ti,
-  getAdapter: Oi,
-  mergeConfig: Ei
-} = k;
-var R = class extends Error {
-  /**
-   * Creates a new WBAPIError
-   *
-   * @param message - Error message describing what went wrong
-   * @param statusCode - HTTP status code if applicable
-   * @param response - API response body if available
-   * @param requestId - Correlation ID for debugging
-   * @param origin - Origin service identifier from RFC 7807 responses
-   * @param timestamp - ISO 8601 timestamp from RFC 7807 responses
-   */
-  constructor(e, t, s, i, a, n) {
-    super(e), this.name = this.constructor.name;
-    const o = Error.captureStackTrace;
-    o && o(this, this.constructor), this.statusCode = t, this.response = s, this.requestId = i, this.origin = a, this.timestamp = n;
-  }
-  /**
-   * Returns a human-readable error message with recovery guidance.
-   *
-   * Override this method in subclasses to provide specific recovery steps.
-   *
-   * @returns User-friendly error message with actionable guidance
-   *
-   * @example
-   * ```typescript
-   * try {
-   *   await sdk.products.createProduct(data);
-   * } catch (error) {
-   *   if (error instanceof WBAPIError) {
-   *     // Show user-friendly message
-   *     alert(error.getUserMessage());
-   *
-   *     // Log technical details for debugging
-   *     console.error('Technical details:', {
-   *       statusCode: error.statusCode,
-   *       requestId: error.requestId
-   *     });
-   *   }
-   * }
-   * ```
-   */
-  getUserMessage() {
-    let e = this.message;
-    return this.statusCode !== void 0 && (e += ` (Status: ${this.statusCode.toString()})`), this.requestId && (e += ` [Request ID: ${this.requestId}]`), this.origin && (e += ` [Origin: ${this.origin}]`), e;
-  }
-  /**
-   * Custom JSON serialization to preserve all error properties.
-   *
-   * By default, Error objects don't serialize the `message` property
-   * when using JSON.stringify(). This method ensures all important
-   * properties are included in the JSON output.
-   *
-   * @returns Object representation of the error for JSON serialization
-   *
-   * @example
-   * ```typescript
-   * const error = new WBAPIError('Test error', 400, { detail: 'info' }, 'req-123');
-   * const json = JSON.stringify(error);
-   * // { "name": "WBAPIError", "message": "Test error", "statusCode": 400, ... }
-   * ```
-   */
-  toJSON() {
-    return {
-      name: this.name,
-      message: this.message,
-      statusCode: this.statusCode,
-      response: this.response,
-      requestId: this.requestId,
-      origin: this.origin,
-      timestamp: this.timestamp
-    };
-  }
-};
-var Te = class extends R {
+  Axios: vn,
+  AxiosError: Sn,
+  CanceledError: Ln,
+  isCancel: wn,
+  CancelToken: kn,
+  VERSION: Mn,
+  all: Pn,
+  Cancel: Cn,
+  isAxiosError: qn,
+  spread: Rn,
+  toFormData: An,
+  AxiosHeaders: Bn,
+  HttpStatusCode: Kn,
+  formToJSON: Tn,
+  getAdapter: On,
+  mergeConfig: En,
+  create: Dn
+} = q;
+var et = class extends d {
   /**
    * Creates an authentication error
    *
@@ -3190,8 +6057,8 @@ var Te = class extends R {
    * @param origin - Origin service identifier from RFC 7807 responses
    * @param timestamp - ISO 8601 timestamp from RFC 7807 responses
    */
-  constructor(e = "Authentication failed. Please verify your API key is valid and has the required permissions.", t = 401, s, i, a, n) {
-    super(e, t, s, i, a, n), this.name = "AuthenticationError";
+  constructor(e = "Authentication failed. Please verify your API key is valid and has the required permissions.", t = 401, s3, i, n, a2) {
+    super(e, t, s3, i, n, a2), this.name = "AuthenticationError";
   }
   /**
    * Returns user-friendly error message with API key troubleshooting guidance
@@ -3212,7 +6079,7 @@ To resolve this issue:`,
     return e + t;
   }
 };
-var Bt = class extends R {
+var Zt = class extends d {
   /**
    * Creates a rate limit error
    *
@@ -3223,8 +6090,8 @@ var Bt = class extends R {
    * @param origin - Origin service identifier from RFC 7807 responses
    * @param timestamp - ISO 8601 timestamp from RFC 7807 responses
    */
-  constructor(e = "Rate limit exceeded. The SDK will automatically retry this request.", t, s, i, a, n) {
-    super(e, 429, s, i, a, n), this.name = "RateLimitError", this.retryAfter = t;
+  constructor(e = "Rate limit exceeded. The SDK will automatically retry this request.", t, s3, i, n, a2) {
+    super(e, 429, s3, i, n, a2), this.name = "RateLimitError", this.retryAfter = t;
   }
   /**
    * Returns user-friendly error message with retry timing information
@@ -3232,7 +6099,7 @@ var Bt = class extends R {
    * @returns Error message with retry delay and automatic handling notice
    */
   getUserMessage() {
-    const e = super.getUserMessage(), s = [
+    const e = super.getUserMessage(), s3 = [
       `
 
 Retry after: ${(this.retryAfter / 1e3).toFixed(1)} seconds`,
@@ -3245,7 +6112,7 @@ If rate limiting occurs frequently, consider:`,
       "3. Reviewing your application's API usage patterns"
     ].join(`
 `);
-    return e + s;
+    return e + s3;
   }
   /**
    * Custom JSON serialization to preserve retryAfter property
@@ -3260,65 +6127,7 @@ If rate limiting occurs frequently, consider:`,
     };
   }
 };
-var b = class extends R {
-  /**
-   * Creates a validation error
-   *
-   * @param message - Error message (defaults to standard validation failure message)
-   * @param fieldErrors - Optional map of field names to error messages
-   * @param statusCode - HTTP status code (400 or 422)
-   * @param response - API response body if available
-   * @param requestId - Correlation ID for debugging
-   */
-  constructor(e = "Validation failed. Please check the request data and try again.", t, s = 400, i, a) {
-    super(e, s, i, a), this.name = "ValidationError", this.fieldErrors = t;
-  }
-  /**
-   * Returns user-friendly error message with field-level validation details
-   *
-   * @returns Error message with specific field errors and resolution guidance
-   */
-  getUserMessage() {
-    const e = super.getUserMessage();
-    if (this.fieldErrors && Object.keys(this.fieldErrors).length > 0) {
-      const i = [
-        `
-
-Field validation errors:`,
-        Object.entries(this.fieldErrors).map(([a, n]) => `  - ${a}: ${n}`).join(`
-`),
-        `
-Please correct the above fields and try again.`
-      ].join(`
-`);
-      return e + i;
-    }
-    const t = [
-      `
-
-To resolve this issue:`,
-      "1. Ensure all required fields are provided",
-      "2. Verify that field values meet the API specifications",
-      "3. Check that data types and formats are correct",
-      "4. Review the API documentation for field requirements"
-    ].join(`
-`);
-    return e + t;
-  }
-  /**
-   * Custom JSON serialization to preserve fieldErrors property
-   *
-   * @returns Object representation including field-level error details
-   */
-  toJSON() {
-    return {
-      ...super.toJSON(),
-      statusCode: this.statusCode ?? 400,
-      fieldErrors: this.fieldErrors
-    };
-  }
-};
-var V = class extends R {
+var ne = class extends d {
   /**
    * Creates a network error
    *
@@ -3329,8 +6138,8 @@ var V = class extends R {
    * @param response - API response body if available
    * @param requestId - Correlation ID for debugging
    */
-  constructor(e, t = false, s, i, a, n) {
-    super(e, s, a, n), this.name = "NetworkError", this.isTimeout = t, this.cause = i;
+  constructor(e, t = false, s3, i, n, a2) {
+    super(e, s3, n, a2), this.name = "NetworkError", this.isTimeout = t, this.cause = i;
   }
   /**
    * Returns user-friendly error message with retry information and troubleshooting guidance
@@ -3392,7 +6201,69 @@ To resolve connection issues:`,
     };
   }
 };
-var Oe = class extends R {
+var pi = /wrong bid value:\s*(?<received>-?\d+)\s*;\s*min:\s*(?<min>-?\d+)(?:\s*;\s*max:\s*(?<max>-?\d+))?/i;
+function mi(r2) {
+  if (typeof r2 != "string") return null;
+  const e = pi.exec(r2), t = (e == null ? void 0 : e.groups) ?? void 0;
+  if (!t) return null;
+  const s3 = Number(t.received), i = Number(t.min);
+  if (Number.isNaN(s3) || Number.isNaN(i)) return null;
+  const n = { received: s3, min: i };
+  if (t.max !== void 0) {
+    const a2 = Number(t.max);
+    Number.isNaN(a2) || (n.max = a2);
+  }
+  return n;
+}
+var er = class extends a {
+  /**
+   * Creates a BidOutOfRangeError.
+   *
+   * @param message - Error message (typically the raw WB `detail` string)
+   * @param context - Parsed bid-range context (`received`/`min`/`max`) plus optional `field`
+   * @param response - API response body if available
+   * @param requestId - Correlation ID for debugging
+   */
+  constructor(e, t, s3, i) {
+    const n = { [(t == null ? void 0 : t.field) ?? "bid"]: e };
+    super(e, n, 400, s3, i), this.name = "BidOutOfRangeError", this.received = t == null ? void 0 : t.received, this.min = t == null ? void 0 : t.min, this.max = t == null ? void 0 : t.max;
+  }
+  /**
+   * Returns a user-friendly error message with the accepted bid range.
+   *
+   * @returns Error message naming the rejected bid and the accepted floor/ceiling
+   */
+  getUserMessage() {
+    const e = super.getUserMessage(), t = [];
+    if (this.received !== void 0 && t.push(`Your bid: ${this.received.toString()}`), this.min !== void 0 && t.push(`Minimum accepted: ${this.min.toString()}`), this.max !== void 0 && t.push(`Maximum accepted: ${this.max.toString()}`), t.length > 0) {
+      const s3 = [
+        `
+
+Bid out of range:`,
+        ...t.map((i) => `  - ${i}`),
+        `
+Adjust your bid to fall within the accepted range and retry.`
+      ].join(`
+`);
+      return e + s3;
+    }
+    return e;
+  }
+  /**
+   * Custom JSON serialization to preserve bid-range fields.
+   *
+   * @returns Object representation including received/min/max
+   */
+  toJSON() {
+    return {
+      ...super.toJSON(),
+      received: this.received,
+      min: this.min,
+      max: this.max
+    };
+  }
+};
+var tt = class extends d {
   /**
    * Creates a MetaValidationFailError
    *
@@ -3404,8 +6275,8 @@ var Oe = class extends R {
    * @param origin - Origin service identifier from RFC 7807 problem+json responses
    * @param timestamp - ISO 8601 timestamp from RFC 7807 problem+json responses
    */
-  constructor(e, t, s, i, a, n, o) {
-    super(e, 409, i, a, n, o), this.name = "MetaValidationFailError", this.code = t, this.metaDetails = [...s];
+  constructor(e, t, s3, i, n, a2, o2) {
+    super(e, 409, i, n, a2, o2), this.name = "MetaValidationFailError", this.code = t, this.metaDetails = [...s3];
   }
   /**
    * Returns a user-friendly error message listing the failing marking codes.
@@ -3413,17 +6284,17 @@ var Oe = class extends R {
    * @returns Error message with metaDetails summary and recovery guidance
    */
   getUserMessage() {
-    const e = super.getUserMessage(), t = this.metaDetails.filter((a) => a.decision === "invalid"), s = this.metaDetails.filter((a) => a.decision === "required"), i = [e];
+    const e = super.getUserMessage(), t = this.metaDetails.filter((n) => n.decision === "invalid"), s3 = this.metaDetails.filter((n) => n.decision === "required"), i = [e];
     return t.length > 0 && i.push(
       `
 
 Invalid marking codes (${t.length.toString()}):`,
-      ...t.map((a) => `  - ${a.key}: "${a.value}"`)
-    ), s.length > 0 && i.push(
+      ...t.map((n) => `  - ${n.key}: "${n.value}"`)
+    ), s3.length > 0 && i.push(
       `
 
-Missing required marking codes (${s.length.toString()}):`,
-      ...s.map((a) => `  - ${a.key}`)
+Missing required marking codes (${s3.length.toString()}):`,
+      ...s3.map((n) => `  - ${n.key}`)
     ), i.push(
       `
 
@@ -3449,7 +6320,27 @@ Recovery steps:`,
     };
   }
 };
-var ls = class {
+var yi = class extends d {
+  /**
+   * Creates a WarehouseStocksUpdateBlockError (HTTP 406).
+   *
+   * @param message - Error message from WB (defaults to a maintenance/processing message)
+   * @param response - API response body if available
+   * @param requestId - Correlation ID for debugging
+   * @param origin - Origin service identifier from RFC 7807 responses
+   * @param timestamp - ISO 8601 timestamp from RFC 7807 responses
+   */
+  constructor(e, t, s3, i, n) {
+    super(e, 406, t, s3, i, n);
+  }
+  /**
+   * Returns a human-readable error message with recovery guidance.
+   */
+  getUserMessage() {
+    return `${this.message} The warehouse is processing \u2014 retry the inventory update later.`;
+  }
+};
+var fi = class {
   /**
    * Creates a new token bucket with the specified rate limit configuration.
    *
@@ -3470,8 +6361,8 @@ var ls = class {
    * // tokens = Math.min(capacity, currentTokens + 1)
    */
   refill() {
-    const e = Date.now(), s = (e - this.lastRefill) * this.refillRate;
-    this.tokens = Math.min(this.capacity, this.tokens + s), this.lastRefill = e;
+    const e = Date.now(), s3 = (e - this.lastRefill) * this.refillRate;
+    this.tokens = Math.min(this.capacity, this.tokens + s3), this.lastRefill = e;
   }
   /**
    * Attempts to consume a token for a request.
@@ -3538,7 +6429,7 @@ var ls = class {
     return this.refill(), this.tokens;
   }
 };
-var ds = class {
+var hi = class {
   /**
    * Creates a new RateLimiter instance.
    *
@@ -3627,8 +6518,8 @@ var ds = class {
       return this.buckets.get(e) ?? null;
     if (!(e in this.config))
       return null;
-    const t = this.config[e], s = new ls(t);
-    return this.buckets.set(e, s), s;
+    const t = this.config[e], s3 = new fi(t);
+    return this.buckets.set(e, s3), s3;
   }
   /**
    * Dynamically configure or update rate limit for an endpoint.
@@ -3744,7 +6635,7 @@ var ds = class {
     e ? this.buckets.delete(e) : this.buckets.clear();
   }
 };
-var W = {
+var re = {
   // ============================================================================
   // General Module (from 01-general.yaml)
   // ============================================================================
@@ -4705,15 +7596,6 @@ var W = {
     rateLimitKey: "orders-dbs.getMeta"
   },
   /**
-   * Get metadata for multiple orders (bulk)
-   * x-readonly-method: true, x-category: marketplace
-   */
-  "ordersDBS.getMetaBulk": {
-    readonly: true,
-    category: "marketplace",
-    rateLimitKey: "orders-dbs.getMetaBulk"
-  },
-  /**
    * Delete specific metadata from an order (deprecated)
    * x-readonly-method: false, x-category: marketplace
    */
@@ -5037,15 +7919,6 @@ var W = {
     rateLimitKey: "promotion.postAdvPromotionAdverts"
   },
   /**
-   * Get manual bid campaigns (V0)
-   * x-readonly-method: true, x-category: advert
-   */
-  "promotion.getAuctionAdverts": {
-    readonly: true,
-    category: "advert",
-    rateLimitKey: "promotion.advAuctionAdverts"
-  },
-  /**
    * Get campaigns V2 (replacement for deprecated endpoints)
    * x-readonly-method: true, x-category: advert
    */
@@ -5174,15 +8047,6 @@ var W = {
     rateLimitKey: "promotion.patchAdvBids"
   },
   /**
-   * Update bids (V1)
-   * x-readonly-method: false, x-category: advert
-   */
-  "promotion.updateBidsV2": {
-    readonly: false,
-    category: "advert",
-    rateLimitKey: "promotion.bidsV1"
-  },
-  /**
    * Update placement for manual bid campaigns
    * x-readonly-method: false, x-category: advert
    */
@@ -5190,15 +8054,6 @@ var W = {
     readonly: false,
     category: "advert",
     rateLimitKey: "promotion.putAdvAuctionPlacements"
-  },
-  /**
-   * Update auction bids
-   * x-readonly-method: false, x-category: advert
-   */
-  "promotion.updateAuctionBid": {
-    readonly: false,
-    category: "advert",
-    rateLimitKey: "promotion.patchAdvAuctionBids"
   },
   /**
    * Update product list in campaigns
@@ -5284,15 +8139,6 @@ var W = {
     rateLimitKey: "promotion.postAdvSearchSetExcluded"
   },
   /**
-   * Set/remove minus-phrases for auto campaigns
-   * x-readonly-method: false, x-category: advert
-   */
-  "promotion.createAutoSetExcluded": {
-    readonly: false,
-    category: "advert",
-    rateLimitKey: "promotion.postAdvAutoSetExcluded"
-  },
-  /**
    * Get product list for auto campaign
    * x-readonly-method: true, x-category: advert
    */
@@ -5300,15 +8146,6 @@ var W = {
     readonly: true,
     category: "advert",
     rateLimitKey: "promotion.advAutoGetnmtoadd"
-  },
-  /**
-   * Update product list in auto campaign
-   * x-readonly-method: false, x-category: advert
-   */
-  "promotion.createAutoUpdatenm": {
-    readonly: false,
-    category: "advert",
-    rateLimitKey: "promotion.postAdvAutoUpdatenm"
   },
   // --- Media Campaigns (media.yaml) ---
   /**
@@ -5374,15 +8211,6 @@ var W = {
     readonly: true,
     category: "advert",
     rateLimitKey: "promotion.advStatWords"
-  },
-  /**
-   * Get keyword statistics
-   * x-readonly-method: true, x-category: advert
-   */
-  "promotion.getStatsKeywords": {
-    readonly: true,
-    category: "advert",
-    rateLimitKey: "promotion.advStatsKeywords"
   },
   /**
    * Get media campaign statistics
@@ -6293,15 +9121,6 @@ var W = {
     rateLimitKey: "finances.accountBalance"
   },
   /**
-   * Get supplier report detail by period
-   * x-readonly-method: true, x-category: statistics
-   */
-  "finances.getSupplierReportDetailByPeriod": {
-    readonly: true,
-    category: "statistics",
-    rateLimitKey: "finances.supplierReportDetailByPeriod"
-  },
-  /**
    * Get documents categories
    * x-readonly-method: true, x-category: documents
    */
@@ -6351,24 +9170,6 @@ var W = {
     rateLimitKey: "in-store-pickup.ordersNew"
   },
   /**
-   * Confirm orders
-   * x-readonly-method: false, x-category: marketplace
-   */
-  "inStorePickup.updateOrdersConfirm": {
-    readonly: false,
-    category: "marketplace",
-    rateLimitKey: "in-store-pickup.ordersConfirm"
-  },
-  /**
-   * Prepare orders
-   * x-readonly-method: false, x-category: marketplace
-   */
-  "inStorePickup.updateOrdersPrepare": {
-    readonly: false,
-    category: "marketplace",
-    rateLimitKey: "in-store-pickup.ordersPrepare"
-  },
-  /**
    * Create order client notification
    * x-readonly-method: false, x-category: marketplace
    */
@@ -6387,33 +9188,6 @@ var W = {
     rateLimitKey: "in-store-pickup.clientIdentity"
   },
   /**
-   * Receive orders
-   * x-readonly-method: false, x-category: marketplace
-   */
-  "inStorePickup.updateOrdersReceive": {
-    readonly: false,
-    category: "marketplace",
-    rateLimitKey: "in-store-pickup.ordersReceive"
-  },
-  /**
-   * Reject orders
-   * x-readonly-method: false, x-category: marketplace
-   */
-  "inStorePickup.updateOrdersReject": {
-    readonly: false,
-    category: "marketplace",
-    rateLimitKey: "in-store-pickup.ordersReject"
-  },
-  /**
-   * Get order status
-   * x-readonly-method: false, x-category: marketplace
-   */
-  "inStorePickup.createOrdersStatus": {
-    readonly: false,
-    category: "marketplace",
-    rateLimitKey: "in-store-pickup.ordersStatus"
-  },
-  /**
    * Get click & collect orders
    * x-readonly-method: true, x-category: marketplace
    */
@@ -6421,76 +9195,16 @@ var W = {
     readonly: true,
     category: "marketplace",
     rateLimitKey: "in-store-pickup.clickCollectOrders"
-  },
-  /**
-   * Cancel orders
-   * x-readonly-method: false, x-category: marketplace
-   */
-  "inStorePickup.updateOrdersCancel": {
-    readonly: false,
-    category: "marketplace",
-    rateLimitKey: "in-store-pickup.ordersCancel"
-  },
-  /**
-   * Get orders meta
-   * x-readonly-method: true, x-category: marketplace
-   */
-  "inStorePickup.getOrdersMeta": {
-    readonly: true,
-    category: "marketplace",
-    rateLimitKey: "in-store-pickup.ordersMeta"
-  },
-  /**
-   * Delete orders meta
-   * x-readonly-method: false, x-category: marketplace
-   */
-  "inStorePickup.deleteOrdersMeta": {
-    readonly: false,
-    category: "marketplace",
-    rateLimitKey: "in-store-pickup.deleteOrdersMeta"
-  },
-  /**
-   * Update meta SGTIN
-   * x-readonly-method: false, x-category: marketplace
-   */
-  "inStorePickup.updateMetaSgtin": {
-    readonly: false,
-    category: "marketplace",
-    rateLimitKey: "in-store-pickup.metaSgtin"
-  },
-  /**
-   * Update meta UIN
-   * x-readonly-method: false, x-category: marketplace
-   */
-  "inStorePickup.updateMetaUin": {
-    readonly: false,
-    category: "marketplace",
-    rateLimitKey: "in-store-pickup.metaUin"
-  },
-  /**
-   * Update meta IMEI
-   * x-readonly-method: false, x-category: marketplace
-   */
-  "inStorePickup.updateMetaImei": {
-    readonly: false,
-    category: "marketplace",
-    rateLimitKey: "in-store-pickup.metaImei"
-  },
-  /**
-   * Update meta GTIN
-   * x-readonly-method: false, x-category: marketplace
-   */
-  "inStorePickup.updateMetaGtin": {
-    readonly: false,
-    category: "marketplace",
-    rateLimitKey: "in-store-pickup.metaGtin"
   }
+  // In-store-pickup shim methods removed in v4.0.0 — their metadata entries
+  // (updateOrdersConfirm/Prepare/Receive/Reject/Cancel, createOrdersStatus,
+  // getOrdersMeta, deleteOrdersMeta, updateMetaSgtin/Uin/Imei/Gtin) were deleted.
 };
-function ps(r) {
-  const e = W[r];
+function gi(r2) {
+  const e = re[r2];
   return e ? e.readonly : false;
 }
-var ms = class {
+var bi = class {
   /**
    * Creates a new RetryHandler instance
    *
@@ -6564,46 +9278,46 @@ var ms = class {
    * );
    * ```
    */
-  async executeWithRetry(e, t = "operation", s) {
+  async executeWithRetry(e, t = "operation", s3) {
     let i;
-    for (let a = 0; a <= this.config.maxRetries; a++)
+    for (let n = 0; n <= this.config.maxRetries; n++)
       try {
-        const n = await e();
-        return a > 0 && this.log("info", `Operation succeeded after ${String(a)} retries`, {
+        const a2 = await e();
+        return n > 0 && this.log("info", `Operation succeeded after ${String(n)} retries`, {
           operationName: t
-        }), n;
-      } catch (n) {
-        if (i = n, !this.shouldRetry(n, a, s))
-          throw a > 0 && this.log(
+        }), a2;
+      } catch (a2) {
+        if (i = a2, !this.shouldRetry(a2, n, s3))
+          throw n > 0 && this.log(
             "warn",
-            `All retries exhausted for ${t} after ${String(a)} attempts`,
+            `All retries exhausted for ${t} after ${String(n)} attempts`,
             {
               operationName: t,
-              attempts: a,
+              attempts: n,
               maxRetries: this.config.maxRetries,
-              finalError: n instanceof Error ? n.message : String(n)
+              finalError: a2 instanceof Error ? a2.message : String(a2)
             }
-          ), n;
-        const o = this.calculateDelay(a);
+          ), a2;
+        const o2 = this.calculateDelay(n);
         this.log(
           "info",
-          `Retrying ${t} (attempt ${String(a + 1)}/${String(this.config.maxRetries)}, waiting ${String(Math.round(o))}ms)`,
+          `Retrying ${t} (attempt ${String(n + 1)}/${String(this.config.maxRetries)}, waiting ${String(Math.round(o2))}ms)`,
           {
             operationName: t,
-            attempt: a + 1,
+            attempt: n + 1,
             maxRetries: this.config.maxRetries,
-            delay: Math.round(o)
+            delay: Math.round(o2)
           }
         ), this.log("debug", `Retry context for ${t}`, {
           operationName: t,
-          attempt: a + 1,
+          attempt: n + 1,
           maxRetries: this.config.maxRetries,
-          delay: Math.round(o),
-          errorMessage: n instanceof Error ? n.message : String(n),
-          errorType: n instanceof Error ? n.constructor.name : typeof n,
-          statusCode: n instanceof V ? n.statusCode : void 0,
-          isTimeout: n instanceof V ? n.isTimeout : void 0
-        }), await this.sleep(o);
+          delay: Math.round(o2),
+          errorMessage: a2 instanceof Error ? a2.message : String(a2),
+          errorType: a2 instanceof Error ? a2.constructor.name : typeof a2,
+          statusCode: a2 instanceof ne ? a2.statusCode : void 0,
+          isTimeout: a2 instanceof ne ? a2.isTimeout : void 0
+        }), await this.sleep(o2);
       }
     throw this.log("warn", `Max retries exhausted for ${t}`, {
       maxRetries: this.config.maxRetries
@@ -6633,21 +9347,21 @@ var ms = class {
    *
    * @private
    */
-  shouldRetry(e, t, s) {
-    if (t >= this.config.maxRetries || e instanceof Te || e instanceof Oe || e instanceof b)
+  shouldRetry(e, t, s3) {
+    if (t >= this.config.maxRetries || e instanceof et || e instanceof tt || e instanceof a)
       return false;
-    if (s != null && s.operationKey) {
-      const i = ps(s.operationKey);
-      if (!i && !s.forceRetry)
-        return this.log("info", `Skipping retry for write operation: ${s.operationKey}`, {
-          operationKey: s.operationKey,
+    if (s3 != null && s3.operationKey) {
+      const i = gi(s3.operationKey);
+      if (!i && !s3.forceRetry)
+        return this.log("info", `Skipping retry for write operation: ${s3.operationKey}`, {
+          operationKey: s3.operationKey,
           readonly: i,
-          forceRetry: s.forceRetry ?? false
+          forceRetry: s3.forceRetry ?? false
         }), false;
     }
-    if (e instanceof Bt)
+    if (e instanceof Zt)
       return true;
-    if (e instanceof V) {
+    if (e instanceof ne) {
       const i = e.statusCode;
       return !!(!i || i === 0 || i >= 500 && i < 600 || e.isTimeout);
     }
@@ -6692,8 +9406,8 @@ var ms = class {
   calculateDelay(e) {
     let t;
     this.config.exponentialBackoff ? t = this.config.retryDelay * Math.pow(2, e) : t = this.config.retryDelay;
-    const s = 1 + (Math.random() * 0.2 - 0.1);
-    return t = t * s, Math.min(t, 3e4);
+    const s3 = 1 + (Math.random() * 0.2 - 0.1);
+    return t = t * s3, Math.min(t, 3e4);
   }
   /**
    * Sleeps for the specified number of milliseconds
@@ -6718,7 +9432,7 @@ var ms = class {
    *
    * @private
    */
-  log(e, t, s) {
+  log(e, t, s3) {
     const i = { debug: 0, info: 1, warn: 2, error: 3 };
     if (i[e] < i[this.logLevel]) return;
     ({
@@ -6736,12 +9450,12 @@ var ms = class {
         level: e,
         service: "RetryHandler",
         message: t,
-        ...s ?? {}
+        ...s3 ?? {}
       })
     );
   }
 };
-var ys = {
+var vi = {
   "general.ping": {
     requestsPerMinute: 6,
     intervalSeconds: 10,
@@ -6788,9 +9502,15 @@ var ys = {
     requestsPerMinute: 1,
     intervalSeconds: 60,
     burstLimit: 1
+  },
+  // GET /api/common/v1/tariff-constructor/options — Plan Builder (Tariff Constructor) options
+  "general.tariffConstructorOptions": {
+    requestsPerMinute: 1,
+    intervalSeconds: 60,
+    burstLimit: 10
   }
 };
-var fs = {
+var Si = {
   // === Content Standard Tier: 100 req/min, 600ms interval, burst 5 ===
   "products.contentObjectParentAll": {
     requestsPerMinute: 100,
@@ -6961,6 +9681,13 @@ var fs = {
     intervalSeconds: 0.6,
     burstLimit: 5
   },
+  // B2B wholesale discounts (POST /api/discounts-prices/v1/upload/task/b2b/wholesale)
+  // Same Prices & Discounts tier as the other upload/task methods.
+  "products.postUploadTaskB2bWholesale": {
+    requestsPerMinute: 100,
+    intervalSeconds: 0.6,
+    burstLimit: 5
+  },
   "products.historyTasks": {
     requestsPerMinute: 100,
     intervalSeconds: 0.6,
@@ -7066,7 +9793,7 @@ var fs = {
     penaltyMultiplier: 10
   }
 };
-var hs = {
+var Li = {
   // === Tier 1: General FBS — 300 req/min, 200ms interval, burst 20 (409 = 10 requests) ===
   "orders-fbs.ordersNew": {
     requestsPerMinute: 300,
@@ -7224,13 +9951,6 @@ var hs = {
     burstLimit: 20,
     penaltyMultiplier: 10
   },
-  /** @deprecated Endpoint removed from API */
-  "orders-fbs.postFilesOrdersExternalStickers": {
-    requestsPerMinute: 10,
-    intervalSeconds: 6,
-    burstLimit: 5,
-    penaltyMultiplier: 10
-  },
   /** PATCH /api/marketplace/v3/supplies/{supplyId}/orders — Add assembly tasks to supply (bulk) */
   "orders-fbs.patchMarketplaceSuppliesOrders": {
     requestsPerMinute: 300,
@@ -7303,9 +10023,16 @@ var hs = {
     intervalSeconds: 600,
     burstLimit: 1,
     penaltyMultiplier: 10
+  },
+  /** GET /api/marketplace/v3/fbs/orders/archive — Archived FBS assembly orders (paginated) */
+  "orders-fbs.ordersArchive": {
+    requestsPerMinute: 300,
+    intervalSeconds: 0.2,
+    burstLimit: 20,
+    penaltyMultiplier: 10
   }
 };
-var gs = {
+var wi = {
   "orders-fbw.acceptanceCoefficients": {
     requestsPerMinute: 6,
     intervalSeconds: 10,
@@ -7388,7 +10115,7 @@ var gs = {
     penaltyMultiplier: 10
   }
 };
-var bs = {
+var ki = {
   // ============================================================================
   // T1: Assembly Read (300 req/min, 200ms interval, burst 20)
   // Core read operations, status queries, B2B info
@@ -7559,13 +10286,6 @@ var bs = {
   // ============================================================================
   // T6: Bulk Metadata Read/Delete (150 req/min, 400ms interval, burst 20) - Story 26.2
   // ============================================================================
-  /** Get metadata bulk */
-  "orders-dbs.getMetaBulk": {
-    requestsPerMinute: 150,
-    intervalSeconds: 0.4,
-    burstLimit: 20,
-    penaltyMultiplier: 10
-  },
   /** Delete metadata bulk */
   "orders-dbs.deleteMetaBulk": {
     requestsPerMinute: 150,
@@ -7610,9 +10330,23 @@ var bs = {
     intervalSeconds: 0.12,
     burstLimit: 20,
     penaltyMultiplier: 10
+  },
+  /** Check marking-metadata validation (meta/details) — mirrors deliver/status bucket */
+  "orders-dbs.checkMetaValidation": {
+    requestsPerMinute: 300,
+    intervalSeconds: 0.2,
+    burstLimit: 20,
+    penaltyMultiplier: 10
+  },
+  /** POST /api/marketplace/v3/dbs/orders/stickers - DBS assembly-order stickers (mirrors FBS stickers) */
+  "orders-dbs.createOrdersStickers": {
+    requestsPerMinute: 300,
+    intervalSeconds: 0.2,
+    burstLimit: 20,
+    penaltyMultiplier: 10
   }
 };
-var vs = {
+var Mi = {
   "userManagement.createInvite": {
     requestsPerMinute: 60,
     intervalSeconds: 1,
@@ -7634,13 +10368,8 @@ var vs = {
     burstLimit: 10
   }
 };
-var Ss = {
+var Pi = {
   "finances.accountBalance": {
-    requestsPerMinute: 1,
-    intervalSeconds: 60,
-    burstLimit: 1
-  },
-  "finances.supplierReportDetailByPeriod": {
     requestsPerMinute: 1,
     intervalSeconds: 60,
     burstLimit: 1
@@ -7698,18 +10427,8 @@ var Ss = {
     burstLimit: 1
   }
 };
-var Ls = {
+var Ci = {
   "promotion.advPromotionCount": {
-    requestsPerMinute: 300,
-    intervalSeconds: 0.2,
-    burstLimit: 5
-  },
-  "promotion.postAdvPromotionAdverts": {
-    requestsPerMinute: 300,
-    intervalSeconds: 0.2,
-    burstLimit: 5
-  },
-  "promotion.advAuctionAdverts": {
     requestsPerMinute: 300,
     intervalSeconds: 0.2,
     burstLimit: 5
@@ -7779,11 +10498,6 @@ var Ls = {
     intervalSeconds: 1,
     burstLimit: 1
   },
-  "promotion.patchAdvAuctionBids": {
-    requestsPerMinute: 300,
-    intervalSeconds: 0.2,
-    burstLimit: 5
-  },
   // GET /api/advert/v0/bids/recommendations — recommended bids for product cards and search clusters (cpm only)
   "promotion.getBidsRecommendations": {
     requestsPerMinute: 5,
@@ -7830,17 +10544,7 @@ var Ls = {
     intervalSeconds: 0.5,
     burstLimit: 2
   },
-  "promotion.postAdvAutoSetExcluded": {
-    requestsPerMinute: 10,
-    intervalSeconds: 6,
-    burstLimit: 5
-  },
   "promotion.advAutoGetnmtoadd": {
-    requestsPerMinute: 60,
-    intervalSeconds: 1,
-    burstLimit: 5
-  },
-  "promotion.postAdvAutoUpdatenm": {
     requestsPerMinute: 60,
     intervalSeconds: 1,
     burstLimit: 5
@@ -7885,11 +10589,6 @@ var Ls = {
     intervalSeconds: 0.25,
     burstLimit: 4
   },
-  "promotion.advStatsKeywords": {
-    requestsPerMinute: 240,
-    intervalSeconds: 0.25,
-    burstLimit: 4
-  },
   "promotion.postAdvStats": {
     requestsPerMinute: 600,
     intervalSeconds: 0.1,
@@ -7920,6 +10619,18 @@ var Ls = {
   // ============================================================================
   /** POST /adv/v0/normquery/stats - Get search cluster statistics */
   "promotion.normqueryStats": {
+    requestsPerMinute: 10,
+    intervalSeconds: 6,
+    burstLimit: 20
+  },
+  /** POST /adv/v0/normquery/list - Active and inactive search cluster lists */
+  "promotion.getNormqueryList": {
+    requestsPerMinute: 300,
+    intervalSeconds: 0.2,
+    burstLimit: 10
+  },
+  /** POST /adv/v1/normquery/stats - Daily search clusters statistics (v1) */
+  "promotion.getNormqueryStatsV1": {
     requestsPerMinute: 10,
     intervalSeconds: 6,
     burstLimit: 20
@@ -7955,6 +10666,21 @@ var Ls = {
     burstLimit: 10
   },
   // ============================================================================
+  // V1 Config + V1 NormQuery Bids Rate Limits - NEW in task-170
+  // ============================================================================
+  /** GET /api/advert/v1/config - Account currency + allowed bid steps */
+  "promotion.v1Config": {
+    requestsPerMinute: 1,
+    intervalSeconds: 60,
+    burstLimit: 10
+  },
+  /** POST /api/advert/v1/normquery/bids - Set search-cluster bids in account currency (v1) */
+  "promotion.v1NormqueryBids": {
+    requestsPerMinute: 120,
+    intervalSeconds: 0.5,
+    burstLimit: 4
+  },
+  // ============================================================================
   // V2 Replacement Endpoints Rate Limits - NEW in Feb 2026
   // ============================================================================
   /** GET /api/advert/v2/adverts - Get adverts (replaces deprecated v1) */
@@ -7968,12 +10694,6 @@ var Ls = {
     requestsPerMinute: 20,
     intervalSeconds: 3,
     burstLimit: 5
-  },
-  /** PATCH /api/advert/v1/bids - Update bids (new API path) */
-  "promotion.bidsV1": {
-    requestsPerMinute: 300,
-    intervalSeconds: 0.2,
-    burstLimit: 10
   },
   // ============================================================================
   // Campaign Management Rate Limits - NEW
@@ -8049,9 +10769,21 @@ var Ls = {
     requestsPerMinute: 10,
     intervalSeconds: 6,
     burstLimit: 20
+  },
+  /** POST /api/content/v1/recommendations/list - Get seller recommendations (Content-category) */
+  "promotion.getRecommendationsList": {
+    requestsPerMinute: 100,
+    intervalSeconds: 0.6,
+    burstLimit: 10
+  },
+  /** POST /api/content/v1/recommendations/set - Set seller recommendations (Content-category) */
+  "promotion.setRecommendations": {
+    requestsPerMinute: 100,
+    intervalSeconds: 0.6,
+    burstLimit: 10
   }
 };
-var ws = {
+var qi = {
   "tariffs.tariffsCommission": {
     requestsPerMinute: 1,
     intervalSeconds: 60,
@@ -8078,22 +10810,10 @@ var ws = {
     burstLimit: 6
   }
 };
-var ks = {
+var Ri = {
   "in-store-pickup.clickCollectOrdersNew": {
     requestsPerMinute: 300,
     intervalSeconds: 0.2,
-    burstLimit: 20,
-    penaltyMultiplier: 10
-  },
-  "in-store-pickup.patchClickCollectOrdersConfirm": {
-    requestsPerMinute: 100,
-    intervalSeconds: 0.6,
-    burstLimit: 20,
-    penaltyMultiplier: 10
-  },
-  "in-store-pickup.patchClickCollectOrdersPrepare": {
-    requestsPerMinute: 100,
-    intervalSeconds: 0.6,
     burstLimit: 20,
     penaltyMultiplier: 10
   },
@@ -8109,98 +10829,107 @@ var ks = {
     burstLimit: 20,
     penaltyMultiplier: 10
   },
-  "in-store-pickup.patchClickCollectOrdersReceive": {
-    requestsPerMinute: 100,
-    intervalSeconds: 0.6,
-    burstLimit: 20,
-    penaltyMultiplier: 10
-  },
-  "in-store-pickup.patchClickCollectOrdersReject": {
-    requestsPerMinute: 100,
-    intervalSeconds: 0.6,
-    burstLimit: 20,
-    penaltyMultiplier: 10
-  },
-  "in-store-pickup.postClickCollectOrdersStatus": {
-    requestsPerMinute: 300,
-    intervalSeconds: 0.2,
-    burstLimit: 20,
-    penaltyMultiplier: 10
-  },
   "in-store-pickup.clickCollectOrders": {
     requestsPerMinute: 300,
     intervalSeconds: 0.2,
     burstLimit: 20,
     penaltyMultiplier: 10
   },
-  "in-store-pickup.patchClickCollectOrdersCancel": {
+  "in-store-pickup.checkMetaValidation": {
+    requestsPerMinute: 150,
+    intervalSeconds: 0.4,
+    burstLimit: 20,
+    penaltyMultiplier: 10
+  },
+  "in-store-pickup.setCustomsDeclarationBulk": {
+    requestsPerMinute: 20,
+    intervalSeconds: 3,
+    burstLimit: 500,
+    penaltyMultiplier: 10
+  },
+  // ============================================================================
+  // Batch click-collect API (task-147, since 3.17.0)
+  // POST /api/marketplace/v3/click-collect/* — WB shut down single-order paths.
+  // Tiers mirror the marketplace-api rate-limit convention (4XX×10 penalty):
+  //   - Status write (confirm/prepare/receive/reject/cancel): 100/min, 0.6s, burst 20
+  //   - Status info + meta read/details: 150/min, 0.4s, burst 20
+  //   - Meta delete: 150/min, 0.4s, burst 20
+  //   - Meta set (sgtin/uin/imei/gtin): 20/min, 3s, burst 500
+  // ============================================================================
+  "in-store-pickup.confirmBulk": {
     requestsPerMinute: 100,
     intervalSeconds: 0.6,
     burstLimit: 20,
     penaltyMultiplier: 10
   },
-  "in-store-pickup.clickCollectOrdersMeta": {
-    requestsPerMinute: 300,
-    intervalSeconds: 0.2,
+  "in-store-pickup.prepareBulk": {
+    requestsPerMinute: 100,
+    intervalSeconds: 0.6,
     burstLimit: 20,
     penaltyMultiplier: 10
   },
-  "in-store-pickup.deleteClickCollectOrdersMeta": {
-    requestsPerMinute: 300,
-    intervalSeconds: 0.2,
+  "in-store-pickup.receiveBulk": {
+    requestsPerMinute: 100,
+    intervalSeconds: 0.6,
     burstLimit: 20,
     penaltyMultiplier: 10
   },
-  "in-store-pickup.putClickCollectOrdersMetaSgtin": {
-    requestsPerMinute: 1e3,
-    intervalSeconds: 0.06,
+  "in-store-pickup.rejectBulk": {
+    requestsPerMinute: 100,
+    intervalSeconds: 0.6,
     burstLimit: 20,
     penaltyMultiplier: 10
   },
-  "in-store-pickup.putClickCollectOrdersMetaUin": {
-    requestsPerMinute: 1e3,
-    intervalSeconds: 0.06,
+  "in-store-pickup.cancelBulk": {
+    requestsPerMinute: 100,
+    intervalSeconds: 0.6,
     burstLimit: 20,
     penaltyMultiplier: 10
   },
-  "in-store-pickup.putClickCollectOrdersMetaImei": {
-    requestsPerMinute: 1e3,
-    intervalSeconds: 0.06,
+  "in-store-pickup.getStatusesBulk": {
+    requestsPerMinute: 150,
+    intervalSeconds: 0.4,
     burstLimit: 20,
     penaltyMultiplier: 10
   },
-  "in-store-pickup.putClickCollectOrdersMetaGtin": {
-    requestsPerMinute: 1e3,
-    intervalSeconds: 0.06,
+  "in-store-pickup.getMetaBulk": {
+    requestsPerMinute: 150,
+    intervalSeconds: 0.4,
     burstLimit: 20,
+    penaltyMultiplier: 10
+  },
+  "in-store-pickup.deleteMetaBulk": {
+    requestsPerMinute: 150,
+    intervalSeconds: 0.4,
+    burstLimit: 20,
+    penaltyMultiplier: 10
+  },
+  "in-store-pickup.setSgtinBulk": {
+    requestsPerMinute: 20,
+    intervalSeconds: 3,
+    burstLimit: 500,
+    penaltyMultiplier: 10
+  },
+  "in-store-pickup.setUinBulk": {
+    requestsPerMinute: 20,
+    intervalSeconds: 3,
+    burstLimit: 500,
+    penaltyMultiplier: 10
+  },
+  "in-store-pickup.setImeiBulk": {
+    requestsPerMinute: 20,
+    intervalSeconds: 3,
+    burstLimit: 500,
+    penaltyMultiplier: 10
+  },
+  "in-store-pickup.setGtinBulk": {
+    requestsPerMinute: 20,
+    intervalSeconds: 3,
+    burstLimit: 500,
     penaltyMultiplier: 10
   }
 };
-var Ms = {
-  /**
-   * @deprecated v2 endpoint is dead (404). Wrapper delegates to postSalesFunnelProducts.
-   */
-  "analytics.postNmReportDetail": {
-    requestsPerMinute: 3,
-    intervalSeconds: 20,
-    burstLimit: 3
-  },
-  /**
-   * @deprecated v2 endpoint is dead (404). Wrapper delegates to postSalesFunnelProductsHistory.
-   */
-  "analytics.postNmReportDetailHistory": {
-    requestsPerMinute: 3,
-    intervalSeconds: 20,
-    burstLimit: 3
-  },
-  /**
-   * @deprecated v2 endpoint is dead (404). Wrapper delegates to postSalesFunnelGroupedHistory.
-   */
-  "analytics.postNmReportGroupedHistory": {
-    requestsPerMinute: 3,
-    intervalSeconds: 20,
-    burstLimit: 3
-  },
+var Ai = {
   "analytics.nmReportDownloads": {
     requestsPerMinute: 3,
     intervalSeconds: 20,
@@ -8287,9 +11016,20 @@ var Ms = {
     requestsPerMinute: 3,
     intervalSeconds: 20,
     burstLimit: 3
+  },
+  // Item Rating reports (v1 is scheduled for removal by WB on 2026-07-30)
+  "analytics.itemRating": {
+    requestsPerMinute: 3,
+    intervalSeconds: 20,
+    burstLimit: 3
+  },
+  "analytics.itemRatingV2": {
+    requestsPerMinute: 3,
+    intervalSeconds: 20,
+    burstLimit: 3
   }
 };
-var Ps = {
+var Bi = {
   "reports.supplierIncomes": {
     requestsPerMinute: 1,
     intervalSeconds: 60,
@@ -8346,12 +11086,6 @@ var Ps = {
     burstLimit: 10
   },
   "reports.analyticsGoodsLabeling": {
-    requestsPerMinute: 1,
-    intervalSeconds: 60,
-    burstLimit: 10
-  },
-  // @deprecated - endpoint removed from swagger, kept for backward compatibility
-  "reports.analyticsCharacteristicsChange": {
     requestsPerMinute: 1,
     intervalSeconds: 60,
     burstLimit: 10
@@ -8438,7 +11172,7 @@ var Ps = {
     burstLimit: 1
   }
 };
-var Cs = {
+var Ki = {
   "communications.newFeedbacksQuestions": {
     requestsPerMinute: 180,
     intervalSeconds: 0.333,
@@ -8595,22 +11329,22 @@ var Cs = {
     burstLimit: 6
   }
 };
-var rt = {
-  ...ys,
-  ...fs,
-  ...hs,
-  ...gs,
-  ...bs,
-  ...vs,
-  ...Ss,
-  ...Ls,
-  ...ws,
-  ...ks,
-  ...Ms,
-  ...Ps,
-  ...Cs
+var Ct = {
+  ...vi,
+  ...Si,
+  ...Li,
+  ...wi,
+  ...ki,
+  ...Mi,
+  ...Pi,
+  ...Ci,
+  ...qi,
+  ...Ri,
+  ...Ai,
+  ...Bi,
+  ...Ki
 };
-var Ks = {
+var Ti = {
   general: 1e-3,
   // ~1/24h vs 1/min
   products: 0.01,
@@ -8633,20 +11367,20 @@ var Ks = {
   finances: 0.01,
   "user-management": 0.01
 };
-var As = 0.01;
-function qs(r) {
+var Oi = 0.01;
+function Ei(r2) {
   const e = {};
-  for (const [t, s] of Object.entries(r)) {
-    const i = t.split(".")[0], a = Ks[i] ?? As;
+  for (const [t, s3] of Object.entries(r2)) {
+    const i = t.split(".")[0], n = Ti[i] ?? Oi;
     e[t] = {
-      ...s,
-      requestsPerMinute: Math.max(1, Math.ceil(s.requestsPerMinute * a)),
+      ...s3,
+      requestsPerMinute: Math.max(1, Math.ceil(s3.requestsPerMinute * n)),
       burstLimit: 1
     };
   }
   return e;
 }
-var Rs = class {
+var Di = class {
   /**
    * Creates a new BaseClient instance
    *
@@ -8664,15 +11398,15 @@ var Rs = class {
    * ```
    */
   constructor(e) {
-    this.apiKey = e.apiKey, this.logLevel = e.logLevel ?? "warn", this.axios = k.create({
+    this.apiKey = e.apiKey, this.logLevel = e.logLevel ?? "warn", this.axios = q.create({
       timeout: e.timeout ?? 3e4,
       headers: {
         "Content-Type": "application/json",
         "User-Agent": "WildberriesSDK/0.1.0"
       }
     }), this.setupRequestInterceptor();
-    const t = e.tokenType ?? "personal", s = t === "basic" || t === "test" ? qs(rt) : rt;
-    this.rateLimiter = new ds(s), this.retryHandler = new ms(e.retryConfig, this.logLevel);
+    const t = e.tokenType ?? "personal", s3 = t === "basic" || t === "test" ? Ei(Ct) : Ct;
+    this.rateLimiter = new hi(s3), this.retryHandler = new bi(e.retryConfig, this.logLevel);
   }
   /**
    * Make a GET request with automatic retry on transient failures
@@ -8708,7 +11442,7 @@ var Rs = class {
       t != null && t.rateLimitKey && await this.rateLimiter.waitForSlot(t.rateLimitKey);
       try {
         this.log("debug", "GET request", { url: e });
-        const s = await this.axios.get(e, {
+        const s3 = await this.axios.get(e, {
           headers: t == null ? void 0 : t.headers,
           params: t == null ? void 0 : t.params,
           responseType: t == null ? void 0 : t.responseType,
@@ -8716,10 +11450,10 @@ var Rs = class {
         });
         return this.log("debug", "GET response", {
           url: e,
-          status: s.status
-        }), s.data;
-      } catch (s) {
-        this.transformError(s);
+          status: s3.status
+        }), s3.data;
+      } catch (s3) {
+        this.transformError(s3);
       }
     }, `GET ${e}`);
   }
@@ -8757,15 +11491,15 @@ var Rs = class {
    * );
    * ```
    */
-  async post(e, t, s) {
+  async post(e, t, s3) {
     return this.retryHandler.executeWithRetry(async () => {
-      s != null && s.rateLimitKey && await this.rateLimiter.waitForSlot(s.rateLimitKey);
+      s3 != null && s3.rateLimitKey && await this.rateLimiter.waitForSlot(s3.rateLimitKey);
       try {
         this.log("debug", "POST request", { url: e });
         const i = await this.axios.post(e, t, {
-          headers: s == null ? void 0 : s.headers,
-          params: s == null ? void 0 : s.params,
-          ...(s == null ? void 0 : s.timeout) !== void 0 && { timeout: s.timeout }
+          headers: s3 == null ? void 0 : s3.headers,
+          params: s3 == null ? void 0 : s3.params,
+          ...(s3 == null ? void 0 : s3.timeout) !== void 0 && { timeout: s3.timeout }
         });
         return this.log("debug", "POST response", {
           url: e,
@@ -8801,15 +11535,15 @@ var Rs = class {
    * );
    * ```
    */
-  async put(e, t, s) {
+  async put(e, t, s3) {
     return this.retryHandler.executeWithRetry(async () => {
-      s != null && s.rateLimitKey && await this.rateLimiter.waitForSlot(s.rateLimitKey);
+      s3 != null && s3.rateLimitKey && await this.rateLimiter.waitForSlot(s3.rateLimitKey);
       try {
         this.log("debug", "PUT request", { url: e });
         const i = await this.axios.put(e, t, {
-          headers: s == null ? void 0 : s.headers,
-          params: s == null ? void 0 : s.params,
-          ...(s == null ? void 0 : s.timeout) !== void 0 && { timeout: s.timeout }
+          headers: s3 == null ? void 0 : s3.headers,
+          params: s3 == null ? void 0 : s3.params,
+          ...(s3 == null ? void 0 : s3.timeout) !== void 0 && { timeout: s3.timeout }
         });
         return this.log("debug", "PUT response", {
           url: e,
@@ -8845,15 +11579,15 @@ var Rs = class {
    * );
    * ```
    */
-  async patch(e, t, s) {
+  async patch(e, t, s3) {
     return this.retryHandler.executeWithRetry(async () => {
-      s != null && s.rateLimitKey && await this.rateLimiter.waitForSlot(s.rateLimitKey);
+      s3 != null && s3.rateLimitKey && await this.rateLimiter.waitForSlot(s3.rateLimitKey);
       try {
         this.log("debug", "PATCH request", { url: e });
         const i = await this.axios.patch(e, t, {
-          headers: s == null ? void 0 : s.headers,
-          params: s == null ? void 0 : s.params,
-          ...(s == null ? void 0 : s.timeout) !== void 0 && { timeout: s.timeout }
+          headers: s3 == null ? void 0 : s3.headers,
+          params: s3 == null ? void 0 : s3.params,
+          ...(s3 == null ? void 0 : s3.timeout) !== void 0 && { timeout: s3.timeout }
         });
         return this.log("debug", "PATCH response", {
           url: e,
@@ -8895,16 +11629,16 @@ var Rs = class {
    * );
    * ```
    */
-  async delete(e, t, s) {
+  async delete(e, t, s3) {
     return this.retryHandler.executeWithRetry(async () => {
-      s != null && s.rateLimitKey && await this.rateLimiter.waitForSlot(s.rateLimitKey);
+      s3 != null && s3.rateLimitKey && await this.rateLimiter.waitForSlot(s3.rateLimitKey);
       try {
         this.log("debug", "DELETE request", { url: e, hasBody: !!t });
         const i = await this.axios.delete(e, {
-          headers: s == null ? void 0 : s.headers,
-          params: s == null ? void 0 : s.params,
+          headers: s3 == null ? void 0 : s3.headers,
+          params: s3 == null ? void 0 : s3.params,
           data: t,
-          ...(s == null ? void 0 : s.timeout) !== void 0 && { timeout: s.timeout }
+          ...(s3 == null ? void 0 : s3.timeout) !== void 0 && { timeout: s3.timeout }
         });
         return this.log("debug", "DELETE response", {
           url: e,
@@ -8969,17 +11703,17 @@ var Rs = class {
    * @private
    */
   transformError(e) {
-    var l, p, f;
-    if (!k.isAxiosError(e))
-      throw this.log("error", "Unknown error occurred", { error: e }), new V("Unknown error occurred", false, 0, e);
+    var l2, d2, m2;
+    if (!q.isAxiosError(e))
+      throw this.log("error", "Unknown error occurred", { error: e }), new ne("Unknown error occurred", false, 0, e);
     const t = e;
     if (!t.response) {
-      const m = t.code === "ECONNABORTED" || t.code === "ETIMEDOUT";
-      if (m) {
-        const g = ((l = t.config) == null ? void 0 : l.url) ?? "unknown", d = ((p = t.config) == null ? void 0 : p.timeout) ?? "unknown";
-        this.log("warn", `Request timed out: ${g} after ${String(d)}ms`, {
-          url: g,
-          timeout: d,
+      const p2 = t.code === "ECONNABORTED" || t.code === "ETIMEDOUT";
+      if (p2) {
+        const f2 = ((l2 = t.config) == null ? void 0 : l2.url) ?? "unknown", b2 = ((d2 = t.config) == null ? void 0 : d2.timeout) ?? "unknown";
+        this.log("warn", `Request timed out: ${f2} after ${String(b2)}ms`, {
+          url: f2,
+          timeout: b2,
           code: t.code
         });
       } else
@@ -8987,62 +11721,76 @@ var Rs = class {
           code: t.code,
           message: t.message
         });
-      throw new V(
-        m ? "Request timed out" : "Network error occurred",
-        m,
+      throw new ne(
+        p2 ? "Request timed out" : "Network error occurred",
+        p2,
         0,
         t
       );
     }
-    const s = t.response.status, i = t.response.data;
+    const s3 = t.response.status, i = t.response.data;
     this.log("warn", "HTTP error response", {
-      status: s,
-      url: (f = t.config) == null ? void 0 : f.url
+      status: s3,
+      url: (m2 = t.config) == null ? void 0 : m2.url
     });
-    const a = t.response.headers["content-type"], o = (typeof a == "string" ? a : "").includes("application/problem+json"), u = this.extractProblemJsonFields(i, o);
-    if (s === 401 || s === 403) {
-      const m = u.detail ?? u.title ?? "Authentication failed. Please verify your API key.";
-      throw new Te(
-        m,
-        s,
+    const n = t.response.headers["content-type"], o2 = (typeof n == "string" ? n : "").includes("application/problem+json"), u = this.extractProblemJsonFields(i, o2);
+    if (s3 === 401 || s3 === 403) {
+      const p2 = u.detail ?? u.title ?? "Authentication failed. Please verify your API key.";
+      throw new et(
+        p2,
+        s3,
         i,
         u.requestId,
         u.origin,
         u.timestamp
       );
     }
-    if (s === 429) {
-      const m = this.parseRetryAfter(
+    if (s3 === 429) {
+      const p2 = this.parseRetryAfter(
         t.response.headers["retry-after"]
-      ), g = u.detail ?? u.title ?? `Rate limit exceeded. Retry after ${m.toString()}ms`;
-      throw new Bt(
-        g,
-        m,
+      ), f2 = u.detail ?? u.title ?? `Rate limit exceeded. Retry after ${p2.toString()}ms`;
+      throw new Zt(
+        f2,
+        p2,
         i,
         u.requestId,
         u.origin,
         u.timestamp
       );
     }
-    if (s === 409 && i != null && typeof i == "object" && Array.isArray(i.metaDetails)) {
-      const m = i, g = typeof m.message == "string" ? m.message : u.detail ?? u.title ?? "Meta validation failed", d = typeof m.code == "string" ? m.code : "Unknown", h = m.metaDetails;
-      throw new Oe(
-        g,
-        d,
-        h,
+    if (s3 === 409 && i != null && typeof i == "object" && Array.isArray(i.metaDetails)) {
+      const p2 = i, f2 = typeof p2.message == "string" ? p2.message : u.detail ?? u.title ?? "Meta validation failed", b2 = typeof p2.code == "string" ? p2.code : "Unknown", S2 = p2.metaDetails;
+      throw new tt(
+        f2,
+        b2,
+        S2,
         i,
         u.requestId,
         u.origin,
         u.timestamp
       );
     }
-    if (s === 400 || s === 422) {
-      const m = this.extractFieldErrors(i), g = u.detail ?? u.title ?? "Validation failed";
-      throw new b(g, m, s, i, u.requestId);
+    if (s3 === 400 || s3 === 422) {
+      const p2 = u.detail, f2 = mi(p2);
+      if (p2 !== void 0 && f2)
+        throw new er(
+          p2,
+          { received: f2.received, min: f2.min, max: f2.max, field: "bid" },
+          i,
+          u.requestId
+        );
+      const b2 = this.extractFieldErrors(i), S2 = u.detail ?? u.title ?? "Validation failed";
+      throw new a(S2, b2, s3, i, u.requestId);
     }
-    throw s >= 500 ? new V(`Server error: ${s.toString()}`, false, s, t) : new R(
-      `HTTP error ${s.toString()}`,
-      s,
+    throw s3 === 406 ? new yi(
+      u.detail ?? "Warehouse is processing \u2014 inventory update temporarily unavailable",
+      i,
+      u.requestId,
+      u.origin,
+      u.timestamp
+    ) : s3 >= 500 ? new ne(`Server error: ${s3.toString()}`, false, s3, t) : new d(
+      `HTTP error ${s3.toString()}`,
+      s3,
       i,
       u.requestId,
       u.origin,
@@ -9075,11 +11823,11 @@ var Rs = class {
    * @private
    */
   extractProblemJsonFields(e, t) {
-    const s = {};
+    const s3 = {};
     if (!e || typeof e != "object")
-      return s;
-    const i = e, a = typeof i.title == "string" || typeof i.detail == "string";
-    return !t && !a ? s : {
+      return s3;
+    const i = e, n = typeof i.title == "string" || typeof i.detail == "string";
+    return !t && !n ? s3 : {
       title: typeof i.title == "string" ? i.title : void 0,
       detail: typeof i.detail == "string" ? i.detail : void 0,
       code: typeof i.code == "string" ? i.code : void 0,
@@ -9114,15 +11862,15 @@ var Rs = class {
    *
    * @private
    */
-  log(e, t, s) {
-    const i = { debug: 0, info: 1, warn: 2, error: 3 }, a = i[this.logLevel];
-    if (i[e] < a) return;
-    const o = {
+  log(e, t, s3) {
+    const i = { debug: 0, info: 1, warn: 2, error: 3 }, n = i[this.logLevel];
+    if (i[e] < n) return;
+    const o2 = {
       timestamp: (/* @__PURE__ */ new Date()).toISOString(),
       level: e,
       service: "WildberriesSDK",
       message: t,
-      meta: this.sanitizeMeta(s)
+      meta: this.sanitizeMeta(s3)
     };
     ({
       // eslint-disable-next-line no-console
@@ -9133,7 +11881,7 @@ var Rs = class {
       warn: console.warn,
       // eslint-disable-next-line no-console
       error: console.error
-    })[e](JSON.stringify(o));
+    })[e](JSON.stringify(o2));
   }
   /**
    * Sanitize metadata to remove sensitive information
@@ -9148,8 +11896,8 @@ var Rs = class {
       try {
         const t = JSON.parse(JSON.stringify(e));
         if (t && typeof t == "object" && "headers" in t && t.headers && typeof t.headers == "object") {
-          const s = t.headers;
-          "Authorization" in s && (s.Authorization = "Bearer ***");
+          const s3 = t.headers;
+          "Authorization" in s3 && (s3.Authorization = "Bearer ***");
         }
         return t;
       } catch {
@@ -9169,7 +11917,7 @@ var Rs = class {
     return t.Authorization && (t.Authorization = "Bearer ***"), t;
   }
 };
-var Bs = class {
+var Ii = class {
   constructor(e) {
     this.client = e;
   }
@@ -9455,89 +12203,6 @@ var Bs = class {
     );
   }
   /**
-   * Определение тарифа подписки Джем (Jam) через пробные запросы
-   *
-   * @deprecated Используйте {@link getJamSubscription} вместо этого метода.
-   * Прямой API `GET /api/common/v1/subscriptions` не требует nmIds и не тратит квоту аналитики.
-   * Этот probe-метод сохранён как fallback для случаев, когда нет Сервисного токена.
-   *
-   * Определяет тариф через пробные запросы к аналитическому эндпоинту
-   * поисковых запросов товара (`/api/v2/search-report/product/search-texts`),
-   * используя разные значения `limit`:
-   *
-   * 1. Запрос с `limit: 31` (выше лимита стандартного тарифа = 30)
-   *    - **200** → тариф «Продвинутый» (advanced)
-   *    - **400** → не продвинутый → продолжаем
-   * 2. Запрос с `limit: 1`
-   *    - **200** → тариф «Стандартный» (standard)
-   *    - **400** → подписка Джем отсутствует (none)
-   *
-   * Ошибки аутентификации, превышения лимитов и сетевые ошибки не перехватываются
-   * и пробрасываются вызывающему коду.
-   *
-   * Rate limit: Uses the same quota as `analytics.createProductSearchText`
-   * (3 requests/minute, 20-second interval, burst 3).
-   * Each call makes 1–2 probe requests.
-   *
-   * @param params - Parameters containing nmIds for the probe
-   * @param params.nmIds - One or more WB article IDs to use in the probe
-   * @returns Jam subscription status with detected tier and metadata
-   * @throws {ValidationError} When nmIds array is empty
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {NetworkError} When network request fails or times out
-   *
-   * @example
-   * ```typescript
-   * const status = await sdk.general.getJamSubscriptionStatus({ nmIds: [12345678] });
-   *
-   * switch (status.tier) {
-   *   case 'advanced':
-   *     console.log('Advanced Jam — limit up to 50');
-   *     break;
-   *   case 'standard':
-   *     console.log('Standard Jam — limit up to 30');
-   *     break;
-   *   case 'none':
-   *     console.log('No Jam subscription');
-   *     break;
-   * }
-   * ```
-   */
-  async getJamSubscriptionStatus(e) {
-    if (e.nmIds.length === 0)
-      throw new b("nmIds must be a non-empty array");
-    const t = "https://seller-analytics-api.wildberries.ru/api/v2/search-report/product/search-texts", s = "analytics.postSearchReportProductSearchTexts", a = new Date(Date.now() - 864e5).toISOString().slice(0, 10), n = (u) => ({
-      currentPeriod: { start: a, end: a },
-      nmIds: e.nmIds,
-      topOrderBy: "openCard",
-      orderBy: { field: "avgPosition", mode: "asc" },
-      limit: u
-    });
-    let o = 0;
-    try {
-      return o++, await this.client.post(t, n(31), { rateLimitKey: s }), this.buildResult("advanced", o);
-    } catch (u) {
-      if (!(u instanceof b))
-        throw u;
-    }
-    try {
-      return o++, await this.client.post(t, n(1), { rateLimitKey: s }), this.buildResult("standard", o);
-    } catch (u) {
-      if (!(u instanceof b))
-        throw u;
-      return this.buildResult("none", o);
-    }
-  }
-  /** Build a JamSubscriptionStatus result */
-  buildResult(e, t) {
-    return {
-      tier: e,
-      checkedAt: (/* @__PURE__ */ new Date()).toISOString(),
-      probeCallsMade: t
-    };
-  }
-  /**
    * Получение информации о подписке Джем (Jam)
    *
    * Возвращает подробную информацию о подписке Джем продавца:
@@ -9597,61 +12262,57 @@ var Bs = class {
    */
   async getSellerRating() {
     return this.client.get(
-      "https://common-api.wildberries.ru/api/common/v1/rating",
+      "https://feedbacks-api.wildberries.ru/api/common/v1/rating",
       { rateLimitKey: "general.getSellerRating" }
     );
   }
-};
-var Ke = /* @__PURE__ */ new Set();
-function q(r, e) {
-  Ke.has(r) || (Ke.add(r), console.warn(e));
-}
-function st(r, e) {
-  const t = Array.isArray(r.skus) && r.skus.length > 0, s = Array.isArray(r.chrtIds) && r.chrtIds.length > 0, i = Array.isArray(r.chrtIds) && r.chrtIds.length === 0;
-  if (t && !s) {
-    if (q(
-      `products.${e}:legacy-skus-call`,
-      `products.${e}: the \`skus\` parameter is deprecated. WB API will reject requests with \`skus\` after 2026-05-20 13:00 MSK with HTTP 400. Migrate to \`chrtIds\` (size IDs from POST /content/v2/get/cards/list). See docs/guides/stocks-sku-to-chrtid-migration.md.`
-    ), i) {
-      const { chrtIds: a, ...n } = r;
-      return n;
-    }
-    return r;
-  }
-  if (t && s) {
-    q(
-      `products.${e}:mixed-skus-and-chrtIds`,
-      `products.${e}: both \`skus\` and \`chrtIds\` provided. The SDK is sending ONLY \`chrtIds\` to WB (\`skus\` will be stripped); WB API will reject \`skus\` after 2026-05-20 13:00 MSK with HTTP 400. Remove \`skus\` from your request to avoid this warning. See docs/guides/stocks-sku-to-chrtid-migration.md.`
-    );
-    const { skus: a, ...n } = r;
-    return n;
-  }
-  return r;
-}
-function Ts(r) {
-  if (!r || !Array.isArray(r.stocks) || r.stocks.length === 0) return r;
-  let e = false, t = false;
-  for (const s of r.stocks) {
-    const i = s.sku != null, a = s.chrtId != null;
-    if (i && !a ? e = true : i && a && (t = true), e && t) break;
-  }
-  return e && q(
-    "products.updateStock:legacy-sku-call",
-    "products.updateStock: stock items with `sku` (no `chrtId`) are deprecated. WB API will reject items with `sku` after 2026-05-20 13:00 MSK with HTTP 400. Migrate each item to `chrtId` (size ID from POST /content/v2/get/cards/list). See docs/guides/stocks-sku-to-chrtid-migration.md."
-  ), t ? (q(
-    "products.updateStock:mixed-sku-and-chrtId",
-    "products.updateStock: some items have BOTH `sku` and `chrtId`. The SDK is sending ONLY `chrtId` per item to WB (`sku` will be stripped from those items); WB API will reject `sku` after 2026-05-20 13:00 MSK with HTTP 400. Remove `sku` from items that already have `chrtId` to avoid this warning. See docs/guides/stocks-sku-to-chrtid-migration.md."
-  ), {
-    stocks: r.stocks.map((s) => {
-      if (s.chrtId != null && s.sku != null) {
-        const { sku: i, ...a } = s;
-        return a;
+  /**
+   * Получение информации об опциях и пакетах опций Конструктора тарифов (Plan Builder)
+   *
+   * Возвращает информацию обо всех опциях и пакетах опций, которые продавец активировал
+   * в [Конструкторе тарифов](https://seller.wildberries.ru/tariff-constructor).
+   *
+   * Опции, включённые в активированные пакеты, возвращаются в массиве `packages`.
+   * Опции, активированные вне пакетов, возвращаются в массиве `options`.
+   *
+   * **Авторизация:** Сервисный токен любой категории.
+   *
+   * Rate limit:
+   * | Период | Лимит | Интервал | Всплеск |
+   * | --- | --- | --- | --- |
+   * | 1 мин | 1 запрос | 1 мин | 10 запросов |
+   *
+   * @readonly
+   * @param [params] - Параметры запроса
+   * @param [params.locale] - Язык полей ответа: `ru` (по умолчанию) или `en`
+   * @returns Активированные опции и пакеты опций Конструктора тарифов
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (e.g., wrong locale value) (400)
+   * @throws {NetworkError} When network request fails or times out
+   * @since 3.16.0
+   * @see {@link https://dev.wildberries.ru/docs/openapi/api-information#tag/Informaciya-o-prodavce/operation/getCommonV1TariffConstructorOptions}
+   * @example
+   * ```typescript
+   * const info = await sdk.general.getTariffConstructorOptions({ locale: 'ru' });
+   * console.log(`Total fee: ${info.totalCommissionRate}%`);
+   * console.log(`Packages: ${info.activePackageCount}, standalone options: ${info.activeOptionCount}`);
+   * for (const pkg of info.packages) {
+   *   console.log(`Package ${pkg.name} (${pkg.commissionRate}%) — ${pkg.options?.length ?? 0} options`);
+   * }
+   * ```
+   */
+  async getTariffConstructorOptions(e) {
+    return this.client.get(
+      "https://common-api.wildberries.ru/api/common/v1/tariff-constructor/options",
+      {
+        params: e ? { ...e } : void 0,
+        rateLimitKey: "general.tariffConstructorOptions"
       }
-      return s;
-    })
-  }) : r;
-}
-var Os = class {
+    );
+  }
+};
+var xi = class {
   constructor(e) {
     this.client = e;
   }
@@ -10135,23 +12796,26 @@ var Os = class {
    * console.log(result.cards); // Product cards array
    * console.log(result.cursor?.total); // Total count
    * ```
+   *
+   * ⚠️ **Token requirement (from 2026-08-03):** WB rejects Promotion-category tokens for this
+   * method — use a Content-category API token.
    */
   async getCardsList(e, t) {
-    var i, a, n, o;
-    ((a = (i = e.settings) == null ? void 0 : i.filter) == null ? void 0 : a.withPhoto) === 0 && q(
+    var i, n, a2, o2;
+    ((n = (i = e.settings) == null ? void 0 : i.filter) == null ? void 0 : n.withPhoto) === 0 && m(
       "products.getCardsList:legacy-withphoto-zero",
-      'products.getCardsList: `withPhoto: 0` will change semantics on 2026-06-16. Today it means "only cards without photo"; after the deadline it will mean "ALL cards" (any photo state). If you want "no photo only", migrate to `WITH_PHOTO_FILTER.NO_PHOTO` (= 2). If you want "all cards", use `WITH_PHOTO_FILTER.ALL` (= -1) for clarity. See docs/guides/withphoto-semantic-migration.md.'
+      'products.getCardsList: `withPhoto: 0` now returns ALL cards \u2014 the 2026-06-16 WB semantic change is live (0 previously meant "only cards without photo"). If you wanted "no photo only", use `WITH_PHOTO_FILTER.NO_PHOTO` (= 2). For explicit "all cards", `WITH_PHOTO_FILTER.ALL` (= -1) is clearer. See docs/guides/withphoto-semantic-migration.md.'
     );
-    const s = 100;
-    if ((o = (n = e.settings) == null ? void 0 : n.cursor) != null && o.limit) {
+    const s3 = 100;
+    if ((o2 = (a2 = e.settings) == null ? void 0 : a2.cursor) != null && o2.limit) {
       const u = e.settings.cursor.limit;
-      if (u > s)
+      if (u > s3)
         throw new Error(
-          `Invalid cursor limit: ${u}. Maximum allowed is ${s} cards per request. Use pagination to fetch all cards. See: https://salacoste.github.io/daytona-wildberries-typescript-sdk/guides/working-with-product-cards#pagination-limit-restrictions`
+          `Invalid cursor limit: ${u}. Maximum allowed is ${s3} cards per request. Use pagination to fetch all cards. See: https://salacoste.github.io/daytona-wildberries-typescript-sdk/guides/working-with-product-cards#pagination-limit-restrictions`
         );
       if (u <= 0)
         throw new Error(
-          `Invalid cursor limit: ${u}. Limit must be a positive integer (recommended: ${s}).`
+          `Invalid cursor limit: ${u}. Limit must be a positive integer (recommended: ${s3}).`
         );
     }
     return this.client.post("https://content-api.wildberries.ru/content/v2/get/cards/list", e, {
@@ -10400,6 +13064,9 @@ var Os = class {
    * }, { locale: 'ru' });
    * console.log(result.cards); // Trashed cards array
    * ```
+   *
+   * ⚠️ **Token requirement (from 2026-08-03):** WB rejects Promotion-category tokens for this
+   * method — use a Content-category API token.
    */
   async getTrashedCards(e, t) {
     return this.client.post("https://content-api.wildberries.ru/content/v2/get/cards/trash", e, {
@@ -10533,11 +13200,27 @@ var Os = class {
   /**
    * Загрузить медиафайл
    *
-   * Uploads a single media file to a product card. Images: max 30 per card, min 700x900px, max 32MB,
-   * formats JPG/PNG/BMP/GIF/WebP. Video: max 1 per card, max 50MB, formats MOV/MP4.
+   * Uploads a single media file to a product card via `multipart/form-data`.
+   * Images: max 30 per card, min 700x900px, max 32MB, formats JPG/PNG/BMP/GIF/WebP.
+   * Video: max 1 per card, max 50MB, formats MOV/MP4.
+   *
+   * The WB spec (POST /content/v3/media/file) requires three inputs:
+   *  - `X-Nm-Id` header (string): the WB article ID to attach the file to.
+   *  - `X-Photo-Number` header (integer): the 1-based media slot. For video,
+   *    always `1`. To append an image, the number must exceed the count of
+   *    already-uploaded media files.
+   *  - `multipart/form-data` body with an `uploadfile` field carrying the
+   *    binary content.
    *
    * Rate limit: 100 req/min, 600ms interval, burst 5
    *
+   * @param nmId - WB article ID (sent as the `X-Nm-Id` header)
+   * @param photoNumber - 1-based media slot number (sent as the
+   * `X-Photo-Number` header)
+   * @param formData - `multipart/form-data` payload. Must contain an
+   * `uploadfile` field with the file content. Build with the global
+   * `FormData` (Node 18+/browsers) and append a `Blob`, `File`, `Buffer`,
+   * or `ReadableStream` as the value.
    * @returns Upload result
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
@@ -10546,13 +13229,19 @@ var Os = class {
    * @see {@link https://dev.wildberries.ru/openapi/work-with-products}
    * @example
    * ```typescript
-   * const result = await sdk.products.createMediaFile();
+   * const formData = new FormData();
+   * formData.append('uploadfile', fileBlob, 'photo.jpg');
+   * const result = await sdk.products.createMediaFile(12345678, 2, formData);
    * console.log(result);
    * ```
    */
-  async createMediaFile() {
-    return this.client.post("https://content-api.wildberries.ru/content/v3/media/file", void 0, {
-      rateLimitKey: "products.postContentMediaFile"
+  async createMediaFile(e, t, s3) {
+    return this.client.post("https://content-api.wildberries.ru/content/v3/media/file", s3, {
+      rateLimitKey: "products.postContentMediaFile",
+      headers: {
+        "X-Nm-Id": String(e),
+        "X-Photo-Number": String(t)
+      }
     });
   }
   /**
@@ -10594,7 +13283,9 @@ var Os = class {
    *
    * Rate limit: 10 req/6s, 600ms interval, burst 5
    *
-   * @param data - Goods pricing data
+   * @param data - Goods pricing data (array of pricing entries). Wrapped in a
+   * `{ data: [...] }` envelope before sending, per the WB spec
+   * (`SupplierTaskRequest`).
    * @returns Upload task response
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
@@ -10603,16 +13294,16 @@ var Os = class {
    * @see {@link https://dev.wildberries.ru/openapi/work-with-products#tag/Ceny-i-skidki}
    * @example
    * ```typescript
-   * const result = await sdk.products.createUploadTask({
-   *   data: [{ nmID: 12345678, price: 1500, discount: 10 }],
-   * });
+   * const result = await sdk.products.createUploadTask([
+   *   { nmID: 12345678, price: 1500, discount: 10 },
+   * ]);
    * console.log(result);
    * ```
    */
   async createUploadTask(e) {
     return this.client.post(
       "https://discounts-prices-api.wildberries.ru/api/v2/upload/task",
-      e,
+      { data: e },
       { rateLimitKey: "products.postUploadTask" }
     );
   }
@@ -10624,7 +13315,9 @@ var Os = class {
    *
    * Rate limit: 10 req/6s, 600ms interval, burst 5
    *
-   * @param data - Size pricing data
+   * @param data - Size pricing data (array of per-size entries). Wrapped in a
+   * `{ data: [...] }` envelope before sending, per the WB spec
+   * (`SupplierTaskRequestSize`).
    * @returns Upload task response
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
@@ -10633,16 +13326,16 @@ var Os = class {
    * @see {@link https://dev.wildberries.ru/openapi/work-with-products#tag/Ceny-i-skidki}
    * @example
    * ```typescript
-   * const result = await sdk.products.createTaskSize({
-   *   data: [{ nmID: 12345678, sizeID: 100, price: 2000 }],
-   * });
+   * const result = await sdk.products.createTaskSize([
+   *   { nmID: 12345678, sizeID: 100, price: 2000 },
+   * ]);
    * console.log(result);
    * ```
    */
   async createTaskSize(e) {
     return this.client.post(
       "https://discounts-prices-api.wildberries.ru/api/v2/upload/task/size",
-      e,
+      { data: e },
       { rateLimitKey: "products.postUploadTaskSize" }
     );
   }
@@ -10653,7 +13346,9 @@ var Os = class {
    *
    * Rate limit: 10 req/6s, 600ms interval, burst 5
    *
-   * @param data - Club discount data
+   * @param data - Club discount data (array of club-discount entries). Wrapped
+   * in a `{ data: [...] }` envelope before sending, per the WB spec
+   * (`SupplierTaskRequestClubDisc`).
    * @returns Upload task response
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
@@ -10662,17 +13357,60 @@ var Os = class {
    * @see {@link https://dev.wildberries.ru/openapi/work-with-products#tag/Ceny-i-skidki}
    * @example
    * ```typescript
-   * const result = await sdk.products.createTaskClubDiscount({
-   *   data: [{ nmID: 12345678, clubDiscount: 15 }],
-   * });
+   * const result = await sdk.products.createTaskClubDiscount([
+   *   { nmID: 12345678, clubDiscount: 15 },
+   * ]);
    * console.log(result);
    * ```
    */
   async createTaskClubDiscount(e) {
     return this.client.post(
       "https://discounts-prices-api.wildberries.ru/api/v2/upload/task/club-discount",
-      e,
+      { data: e },
       { rateLimitKey: "products.postUploadTaskClubDiscount" }
+    );
+  }
+  /**
+   * Установить оптовые скидки для B2B-продаж
+   *
+   * Sets wholesale discount thresholds for B2B sales. Each item carries per-item
+   * wholesale discount thresholds (price breakpoint + discount %).
+   *
+   * Reads back via getGoodsFilter() / createGoodsFilter() — responses include a
+   * `wholesaleDiscountThreshold` array per item when such discounts exist.
+   *
+   * Note: this endpoint lives on the `/api/discounts-prices/v1/` path (v1) — a
+   * different prefix from the existing `/api/v2/upload/task*` methods. Auth accepts
+   * a Personal OR Service token for the Prices & Discounts category.
+   *
+   * Rate limit: 10 req/6s, 600ms interval, burst 5 (same Prices & Discounts tier)
+   *
+   * @param data - B2B wholesale discount thresholds (max 1000 items)
+   * @returns Per-item processing results (`success` + `error` when failed)
+   * @throws {AuthenticationError} When API key/token is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/work-with-products#tag/Ceny-i-skidki} - Prices and Discounts
+   * @example
+   * ```typescript
+   * const result = await sdk.products.createUploadTaskB2bWholesale([
+   *   {
+   *     nmID: 12345678,
+   *     wholesaleDiscountThreshold: [
+   *       { minPrice: 1000, discount: 5 },
+   *       { minPrice: 5000, discount: 10 },
+   *     ],
+   *   },
+   * ]);
+   * console.log(result.data?.[0].success);
+   * ```
+   */
+  async createUploadTaskB2bWholesale(e) {
+    return this.client.post(
+      "https://discounts-prices-api.wildberries.ru/api/discounts-prices/v1/upload/task/b2b/wholesale",
+      e,
+      { rateLimitKey: "products.postUploadTaskB2bWholesale" }
     );
   }
   /**
@@ -10825,8 +13563,9 @@ var Os = class {
    * Rate limit: 10 req/6s, 600ms interval, burst 5
    *
    * @param data - Request body with article IDs
-   * @param data.nmIDs - Array of article IDs to fetch pricing for
-   * @returns Goods with pricing information filtered by nmIDs
+   * @param data.nmList - Array of article IDs to fetch pricing for (WB spec
+   * field name; min 1, max 1000)
+   * @returns Goods with pricing information filtered by nmList
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
@@ -10834,7 +13573,7 @@ var Os = class {
    * @see {@link https://dev.wildberries.ru/openapi/work-with-products#tag/Ceny-i-skidki}
    * @example
    * ```typescript
-   * const result = await sdk.products.createGoodsFilter({ nmIDs: [12345678, 87654321] });
+   * const result = await sdk.products.createGoodsFilter({ nmList: [12345678, 87654321] });
    * console.log(result);
    * ```
    */
@@ -10908,38 +13647,26 @@ var Os = class {
    *
    * Returns stock amounts for products at a seller's warehouse. A 409 response counts as 10 requests.
    *
-   * **Migration deadline 2026-05-20 13:00 MSK**: Wildberries is phasing out the `skus`
-   * parameter on this endpoint in favor of `chrtIds`. Pass `chrtIds` for all new code.
-   * After the deadline, WB returns HTTP 400 if `skus` is sent.
-   *
    * Rate limit: 300 req/min, 200ms interval, burst 20
    *
    * @param warehouseId - ID склада продавца
-   * @param data - Request body — see {@link StocksRequest}. Pass `chrtIds` (preferred since
-   *   v3.12.0) or `skus` (deprecated; rejected by WB API after 2026-05-20).
+   * @param data - Request body — see {@link StocksRequest}. Pass `chrtIds` (size IDs).
    * @returns Stock amounts. See {@link GetStocksResponse}.
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
    * @see {@link https://dev.wildberries.ru/openapi/work-with-products#tag/Ostatki-na-skladah-prodavca}
-   * @example New v3.12.0+ pattern (preferred — required after 2026-05-20):
+   * @example
    * ```typescript
    * const result = await sdk.products.getStocks(12345, { chrtIds: [12345678, 12345679] });
    * console.log(result.stocks); // [{ chrtId: 12345678, amount: 50 }, ...]
    * ```
-   *
-   * @example Legacy pattern (deprecated since v3.12.0, breaks after 2026-05-20):
-   * ```typescript
-   * // Will emit a console.warn (since v3.12.0) and return HTTP 400 from WB after 2026-05-20
-   * const result = await sdk.products.getStocks(12345, { skus: ['1234567890123'] });
-   * ```
    */
   async getStocks(e, t) {
-    const s = st(t, "getStocks");
     return this.client.post(
       `https://marketplace-api.wildberries.ru/api/v3/stocks/${e}`,
-      s,
+      t,
       { rateLimitKey: "products.postStocks" }
     );
   }
@@ -10949,44 +13676,28 @@ var Os = class {
    * Updates stock amounts for products at a seller's warehouse. Parameter names are not validated;
    * incorrect names return 204 but do not update stocks. A 409 response counts as 10 requests.
    *
-   * **Migration deadline 2026-05-20 13:00 MSK**: Wildberries is phasing out the `sku` field
-   * in stock items in favor of `chrtId`. Use `chrtId` per item for all new code.
-   * After the deadline, WB returns HTTP 400 if `sku` is sent.
-   *
    * Rate limit: 300 req/min, 200ms interval, burst 20
    *
    * @param warehouseId - ID склада продавца
-   * @param data - Request body — see {@link UpdateStockRequest}. Use `chrtId` per stock item
-   *   (preferred since v3.12.0) or `sku` (deprecated; rejected by WB API after 2026-05-20).
+   * @param data - Request body — see {@link UpdateStockRequest}. Set `chrtId` per stock item.
    * @returns void on success (204)
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {WarehouseStocksUpdateBlockError} 406 — Warehouse is processing (maintenance); retry later
    * @throws {NetworkError} When network request fails or times out
    * @see {@link https://dev.wildberries.ru/openapi/work-with-products#tag/Ostatki-na-skladah-prodavca}
-   * @example New v3.12.0+ pattern (preferred — required after 2026-05-20):
+   * @example
    * ```typescript
    * await sdk.products.updateStock(12345, {
    *   stocks: [{ chrtId: 12345678, amount: 100 }],
    * });
    * ```
-   *
-   * @example Legacy pattern (deprecated since v3.12.0, breaks after 2026-05-20):
-   * ```typescript
-   * // Will emit a console.warn (since v3.12.0) and return HTTP 400 from WB after 2026-05-20
-   * await sdk.products.updateStock(12345, {
-   *   stocks: [{ sku: '1234567890123', amount: 100 }],
-   * });
-   * ```
    */
-  // TODO(v4.0.0): tighten to `data: UpdateStockRequest` (required). Current optional
-  // signature preserves pre-v3.12.0 public API. task-16.2 explicitly chose warn-only
-  // semantics (AC-5 "no throw") instead of fail-fast empty-body validation.
   async updateStock(e, t) {
-    const s = Ts(t);
     return this.client.put(
       `https://marketplace-api.wildberries.ru/api/v3/stocks/${e}`,
-      s,
+      t,
       { rateLimitKey: "products.putStocks" }
     );
   }
@@ -10996,37 +13707,25 @@ var Os = class {
    * Irreversibly deletes stock records. Must re-upload stocks to resume sales.
    * A 409 response counts as 10 requests.
    *
-   * **Migration deadline 2026-05-20 13:00 MSK**: Wildberries is phasing out the `skus`
-   * parameter on this endpoint in favor of `chrtIds`. Pass `chrtIds` for all new code.
-   * After the deadline, WB returns HTTP 400 if `skus` is sent.
-   *
    * Rate limit: 300 req/min, 200ms interval, burst 20
    *
    * @param warehouseId - ID склада продавца
-   * @param data - Request body — see {@link StocksRequest}. Pass `chrtIds` (preferred since
-   *   v3.12.0) or `skus` (deprecated; rejected by WB API after 2026-05-20).
+   * @param data - Request body — see {@link StocksRequest}. Pass `chrtIds` (size IDs).
    * @returns void on success
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
    * @see {@link https://dev.wildberries.ru/openapi/work-with-products#tag/Ostatki-na-skladah-prodavca}
-   * @example New v3.12.0+ pattern (preferred — required after 2026-05-20):
+   * @example
    * ```typescript
    * await sdk.products.deleteStock(12345, { chrtIds: [12345678, 12345679] });
    * ```
-   *
-   * @example Legacy pattern (deprecated since v3.12.0, breaks after 2026-05-20):
-   * ```typescript
-   * // Will emit a console.warn (since v3.12.0) and return HTTP 400 from WB after 2026-05-20
-   * await sdk.products.deleteStock(12345, { skus: ['1234567890123'] });
-   * ```
    */
   async deleteStock(e, t) {
-    const s = st(t, "deleteStock");
     return this.client.delete(
       `https://marketplace-api.wildberries.ru/api/v3/stocks/${e}`,
-      s,
+      t,
       { rateLimitKey: "products.deleteStocks" }
     );
   }
@@ -11222,7 +13921,7 @@ var Os = class {
     );
   }
 };
-var Es = class {
+var Ni = class {
   constructor(e) {
     this.client = e;
   }
@@ -11389,6 +14088,9 @@ var Es = class {
    * Returns assembly task information without their current status.
    * Data can be retrieved for a given period, up to 30 calendar days per request.
    *
+   * **3-month window:** From 2026-07-21, returns only assembly orders created LESS than
+   * 3 months ago. For older orders, use `getOrdersArchive()` (`GET /api/marketplace/v3/fbs/orders/archive`).
+   *
    * @param options - Query parameters for pagination and date filtering
    * @returns Promise resolving to orders with pagination cursor
    * @throws {AuthenticationError} When API key is invalid (401/403)
@@ -11503,7 +14205,7 @@ var Es = class {
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://openapi.wildberries.ru/#tag/Metadannye-FBS/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta/delete}
+   * @see {@link https://openapi.wildberries.ru/#tag/fbsLabelIdentifiers/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta/delete}
    *
    * @example
    * ```typescript
@@ -11529,7 +14231,7 @@ var Es = class {
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://openapi.wildberries.ru/#tag/Metadannye-FBS/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta~1sgtin/put}
+   * @see {@link https://openapi.wildberries.ru/#tag/fbsLabelIdentifiers/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta~1sgtin/put}
    *
    * @example
    * ```typescript
@@ -11556,7 +14258,7 @@ var Es = class {
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://openapi.wildberries.ru/#tag/Metadannye-FBS/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta~1uin/put}
+   * @see {@link https://openapi.wildberries.ru/#tag/fbsLabelIdentifiers/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta~1uin/put}
    *
    * @example
    * ```typescript
@@ -11583,7 +14285,7 @@ var Es = class {
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://openapi.wildberries.ru/#tag/Metadannye-FBS/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta~1imei/put}
+   * @see {@link https://openapi.wildberries.ru/#tag/fbsLabelIdentifiers/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta~1imei/put}
    *
    * @example
    * ```typescript
@@ -11610,7 +14312,7 @@ var Es = class {
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://openapi.wildberries.ru/#tag/Metadannye-FBS/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta~1gtin/put}
+   * @see {@link https://openapi.wildberries.ru/#tag/fbsLabelIdentifiers/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta~1gtin/put}
    *
    * @example
    * ```typescript
@@ -11637,7 +14339,7 @@ var Es = class {
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://openapi.wildberries.ru/#tag/Metadannye-FBS/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta~1expiration/put}
+   * @see {@link https://openapi.wildberries.ru/#tag/fbsLabelIdentifiers/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta~1expiration/put}
    *
    * @example
    * ```typescript
@@ -11665,7 +14367,7 @@ var Es = class {
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://openapi.wildberries.ru/#tag/Metadannye-FBS/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta~1customs-declaration/put}
+   * @see {@link https://openapi.wildberries.ru/#tag/fbsLabelIdentifiers/paths/~1api~1v3~1orders~1%7BorderId%7D~1meta~1customs-declaration/put}
    *
    * @example
    * ```typescript
@@ -11896,6 +14598,7 @@ var Es = class {
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
    * @see {@link https://dev.wildberries.ru/docs/openapi/orders-fbs#tag/Postavki-FBS}
+   * @see [FBS marking guide](https://dev.wildberries.ru/knowledge-base/articles/019e9273-118b-7b69-a25a-ea1d756f05d9/rabota-s-markirovkoi-po-modeli-fbs)
    * @see [Migration guide](../../../docs/guides/fbs-marking-code-validation.md)
    *
    * @example
@@ -12065,10 +14768,10 @@ var Es = class {
    * console.log(result.stickers);
    * ```
    */
-  async createTrbxSticker(e, t, s) {
+  async createTrbxSticker(e, t, s3) {
     return this.client.post(
       `https://marketplace-api.wildberries.ru/api/v3/supplies/${e}/trbx/stickers`,
-      s,
+      s3,
       { params: t, rateLimitKey: "orders-fbs.postSuppliesTrbxStickers" }
     );
   }
@@ -12113,7 +14816,7 @@ var Es = class {
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://openapi.wildberries.ru/#tag/Metadannye-FBS/paths/~1api~1marketplace~1v3~1orders~1meta/post}
+   * @see {@link https://openapi.wildberries.ru/#tag/fbsLabelIdentifiers/paths/~1api~1marketplace~1v3~1orders~1meta/post}
    *
    * @example
    * ```typescript
@@ -12179,8 +14882,46 @@ var Es = class {
       { rateLimitKey: "orders-fbs.getMarketplaceSuppliesOrderIds" }
     );
   }
+  /**
+   * Get archived FBS assembly orders
+   *
+   * Returns a paginated list of archived FBS assembly orders for a given year/month period.
+   * Use the `next` cursor from the response to fetch subsequent pages; pagination is exhausted
+   * when `next` is `null`.
+   *
+   * @param params - Query parameters (year, month, next cursor, limit)
+   * @returns Promise resolving to archived orders with the next pagination cursor
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://openapi.wildberries.ru/#tag/Zakazy-FBS/paths/~1api~1marketplace~1v3~1fbs~1orders~1archive/get}
+   *
+   * @example
+   * ```typescript
+   * const result = await sdk.ordersFBS.getOrdersArchive({
+   *   year: 2025,
+   *   month: 6,
+   *   next: 0,
+   *   limit: 100,
+   * });
+   * console.log(result.orders);
+   * // Fetch the next page using the returned cursor:
+   * if (result.next !== null) {
+   *   const next = await sdk.ordersFBS.getOrdersArchive({
+   *     year: 2025, month: 6, next: result.next, limit: 100,
+   *   });
+   * }
+   * ```
+   */
+  async getOrdersArchive(e) {
+    return this.client.get(
+      "https://marketplace-api.wildberries.ru/api/marketplace/v3/fbs/orders/archive",
+      { params: e, rateLimitKey: "orders-fbs.ordersArchive" }
+    );
+  }
 };
-var Ds = class {
+var Fi = class {
   constructor(e) {
     this.client = e;
   }
@@ -12364,7 +15105,7 @@ var Ds = class {
    */
   async getClientInfo(e) {
     if (e.length === 0)
-      throw new b("orderIds array cannot be empty");
+      throw new a("orderIds array cannot be empty");
     return this.client.post(
       "https://marketplace-api.wildberries.ru/api/marketplace/v3/dbw/orders/client",
       { orders: e },
@@ -12372,7 +15113,7 @@ var Ds = class {
     );
   }
   /**
-   * Удалить маркировочные метаданные у нескольких заказов DBW (массовая операция).
+   * Удалить идентификаторы маркировки у нескольких заказов DBW (массовая операция).
    *
    * Bulk-delete marking metadata (IMEI/UIN/GTIN/SGTIN/customsDeclaration) from up to
    * N DBW orders in a single request. Mirrors the DBS `deleteMetaBulk` method.
@@ -12400,7 +15141,7 @@ var Ds = class {
    */
   async deleteMetaBulk(e) {
     if (e.orders.length === 0)
-      throw new b("orders array cannot be empty");
+      throw new a("orders array cannot be empty");
     return this.client.post(
       "https://marketplace-api.wildberries.ru/api/marketplace/v3/dbw/orders/meta/delete",
       e,
@@ -12438,7 +15179,7 @@ var Ds = class {
    */
   async setSgtinBulk(e) {
     if (e.orders.length === 0)
-      throw new b("orders array cannot be empty");
+      throw new a("orders array cannot be empty");
     return this.client.post(
       "https://marketplace-api.wildberries.ru/api/marketplace/v3/dbw/orders/meta/sgtin",
       e,
@@ -12454,6 +15195,10 @@ var Ds = class {
    *
    * **Important:** Orders requiring IMEI/SGTIN must have metadata attached before calling
    * this method. If metadata is missing, WB returns 409 `MetaValidationFail`.
+   *
+   * **B2C marking (Честный Знак):** WB validates B2C marking for DBW from 2026-06-15.
+   * Invalid marking → HTTP 409 `MetaValidationFail` with diagnostic `metaDetails[]`.
+   * Pre-flight via `checkMetaValidation()` to avoid the guess-and-retry loop.
    *
    * Rate limit: 300 requests/min, 200ms interval, burst 20.
    * (Default mirrors DBS sibling — WB has not yet published explicit DBW limits.
@@ -12487,9 +15232,9 @@ var Ds = class {
    */
   async deliverBulk(e) {
     if (e.length === 0)
-      throw new b("orderIds array cannot be empty");
+      throw new a("orderIds array cannot be empty");
     if (e.length > 1e3)
-      throw new b("orderIds array cannot exceed 1000 items");
+      throw new a("orderIds array cannot exceed 1000 items");
     return this.client.post(
       "https://marketplace-api.wildberries.ru/api/marketplace/v3/dbw/orders/status/deliver",
       { orders: e },
@@ -12497,7 +15242,7 @@ var Ds = class {
     );
   }
   /**
-   * Проверить метаданные маркировки DBW-заказов перед передачей в доставку (предварительная валидация).
+   * Проверить идентификаторы маркировки DBW-заказов перед передачей в доставку (предварительная валидация).
    *
    * Pre-flight metadata validator for DBW orders. Returns the same `metaDetails[]` shape
    * that WB returns inside the 409 `MetaValidationFail` body of `deliverBulk()`, but as a
@@ -12547,9 +15292,9 @@ var Ds = class {
    */
   async checkMetaValidation(e) {
     if (e.orders.length === 0)
-      throw new b("orders array cannot be empty");
+      throw new a("orders array cannot be empty");
     if (e.orders.length > 1e3)
-      throw new b("orders array cannot exceed 1000 items");
+      throw new a("orders array cannot exceed 1000 items");
     return this.client.post(
       "https://marketplace-api.wildberries.ru/api/marketplace/v3/dbw/orders/meta/details",
       { orders: e.orders },
@@ -12557,2174 +15302,7 @@ var Ds = class {
     );
   }
 };
-var Is = class {
-  constructor(e) {
-    this.client = e;
-  }
-  /**
-   * Получить баланс продавца
-   *
-   * Метод возвращает данные виджета баланса на [главной странице](https://seller.wildberries.ru) портала продавцов. <br><br> <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 1 запрос | </div>
-   *
-   * @returns Account balance data including currency, current balance, and available withdrawal amount
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/financial-reports-and-accounting#tag/Balans}
-   * @example
-   * ```typescript
-   * const result = await sdk.finances.getAccountBalance();
-   * console.log(result);
-   * ```
-   */
-  async getAccountBalance() {
-    return this.client.get(
-      "https://finance-api.wildberries.ru/api/v1/account/balance",
-      { rateLimitKey: "finances.accountBalance" }
-    );
-  }
-  /**
-   * Отчёт о продажах по реализации (v5, **deprecated**)
-   *
-   * @deprecated **This method will be disabled by Wildberries on 2026-07-15.**
-   * Migrate to {@link getSalesReportsDetailed} (v1) before that date.
-   *
-   * **Key migration differences (v5 → v1)**:
-   * - HTTP method: GET → POST
-   * - Field names: `snake_case` → `camelCase` (e.g., `ppvz_for_pay` → `forPay`)
-   * - Money amounts: `number` → `string` (use `parseMoneyAmount()` helper)
-   * - Domain: `statistics-api.wildberries.ru` → `finance-api.wildberries.ru`
-   * - New `fields[]` parameter for selective field loading
-   *
-   * See the [migration guide](https://salacoste.github.io/daytona-wildberries-typescript-sdk/guides/migration-finance-reports-v5-to-v1)
-   * for complete field mapping and code examples.
-   *
-   * Метод возвращает детализации к [отчётам реализации](https://seller.wildberries.ru/suppliers-mutual-settlements). <br><br> Данные доступны с 29 января 2024 года. <div class="description_important"> Вы можете выгрузить данные в <a href="https://dev.wildberries.ru/ru/cases/1">Google Таблицы</a> </div> <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 1 запрос | </div>
-   *
-   * @param options - Query parameters including required dateFrom and dateTo
-   * @returns Array of detailed report items for the specified period
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/financial-reports-and-accounting#tag/Finansovye-otchyoty}
-   * @example
-   * ```typescript
-   * // DEPRECATED — migrate to getSalesReportsDetailed() before 2026-07-15
-   * const result = await sdk.finances.getSupplierReportDetailByPeriod({
-   *   dateFrom: '2024-01-01',
-   *   dateTo: '2024-01-31',
-   *   period: 'weekly',
-   * });
-   * console.log(result);
-   * ```
-   */
-  async getSupplierReportDetailByPeriod(e) {
-    return q(
-      "FinancesModule.getSupplierReportDetailByPeriod",
-      "[DEPRECATED] getSupplierReportDetailByPeriod() is deprecated and will be removed after 2026-07-15. Migrate to getSalesReportsDetailed(). See migration guide: https://salacoste.github.io/daytona-wildberries-typescript-sdk/guides/migration-finance-reports-v5-to-v1"
-    ), this.client.get(
-      "https://statistics-api.wildberries.ru/api/v5/supplier/reportDetailByPeriod",
-      { params: e, rateLimitKey: "finances.supplierReportDetailByPeriod" }
-    );
-  }
-  /**
-   * Категории документов
-   *
-   * Метод возвращает категории документов для получения [списка документов продавца](/openapi/financial-reports-and-accounting#tag/Dokumenty/paths/~1api~1v1~1documents~1list/get). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 1 запрос | 10 секунд | 5 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns List of document categories available for the seller
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/financial-reports-and-accounting#tag/Dokumenty}
-   * @example
-   * ```typescript
-   * const result = await sdk.finances.getDocumentsCategories({ locale: 'ru' });
-   * console.log(result);
-   * ```
-   */
-  async getDocumentsCategories(e) {
-    return this.client.get(
-      "https://documents-api.wildberries.ru/api/v1/documents/categories",
-      { params: e, rateLimitKey: "finances.documentsCategories" }
-    );
-  }
-  /**
-   * Список документов
-   *
-   * Метод возвращает список документов продавца. Вы можете получить [один](/openapi/financial-reports-and-accounting#tag/Dokumenty/paths/~1api~1v1~1documents~1download/get) или [несколько](/openapi/financial-reports-and-accounting#tag/Dokumenty/paths/~1api~1v1~1documents~1download~1all/post) документов из полученного списка. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 1 запрос | 10 секунд | 5 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Paginated list of seller documents with metadata
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @remarks The `sort` and `order` parameters work together — specifying `order` without `sort` has no effect. The `beginTime` and `endTime` parameters define a date range and should be used as a pair.
-   * @see {@link https://dev.wildberries.ru/openapi/financial-reports-and-accounting#tag/Dokumenty}
-   * @example
-   * ```typescript
-   * const result = await sdk.finances.getDocumentsList({
-   *   locale: 'ru',
-   *   sort: 'date',
-   *   order: 'desc',
-   * });
-   * console.log(result);
-   * ```
-   */
-  async getDocumentsList(e) {
-    return this.client.get("https://documents-api.wildberries.ru/api/v1/documents/list", {
-      params: e,
-      rateLimitKey: "finances.documentsList"
-    });
-  }
-  /**
-   * Получить документ
-   *
-   * Метод загружает один документ из [списка документов продавца](/openapi/financial-reports-and-accounting#tag/Dokumenty/paths/~1api~1v1~1documents~1list/get). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 1 запрос | 10 секунд | 5 запросов | </div>
-   *
-   * @param options - Query parameters including required serviceName and extension
-   * @returns Document file data for the requested document
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/financial-reports-and-accounting#tag/Dokumenty}
-   * @example
-   * ```typescript
-   * const result = await sdk.finances.getDocumentsDownload({
-   *   serviceName: 'act',
-   *   extension: 'pdf',
-   * });
-   * console.log(result);
-   * ```
-   */
-  async getDocumentsDownload(e) {
-    return this.client.get(
-      "https://documents-api.wildberries.ru/api/v1/documents/download",
-      { params: e, rateLimitKey: "finances.documentsDownload" }
-    );
-  }
-  /**
-   * Получить документы
-   *
-   * Метод загружает несколько документов из [списка документов продавца](/openapi/financial-reports-and-accounting#tag/Dokumenty/paths/~1api~1v1~1documents~1list/get). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 5 минут | 1 запрос | 5 минут | 5 запросов | </div>
-   *
-   * @param [data] - Request body data
-   * @returns Download details for the requested batch of documents
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/financial-reports-and-accounting#tag/Dokumenty}
-   * @example
-   * ```typescript
-   * const result = await sdk.finances.createDownloadAll({
-   *   serviceNames: ['act', 'invoice'],
-   * });
-   * console.log(result);
-   * ```
-   */
-  async createDownloadAll(e) {
-    return this.client.post(
-      "https://documents-api.wildberries.ru/api/v1/documents/download/all",
-      e,
-      { rateLimitKey: "finances.createDownloadAll" }
-    );
-  }
-  // ==========================================================================
-  // v1 Sales Reports (since v3.7.0)
-  // Replaces deprecated GET /api/v5/supplier/reportDetailByPeriod (disabled 2026-07-15)
-  // All money amounts are string (not number) — use parseMoneyAmount() helper for math.
-  // ==========================================================================
-  /**
-   * Список отчётов реализации (v1)
-   *
-   * Returns list of sales reports by report format. Data available from 2025-01-01.
-   *
-   * **Available token types**: Personal, Service (NOT Basic or Test)
-   *
-   * Rate limit: 1 req/min, 1 minute interval, burst 1
-   *
-   * @param data - Request body with dateFrom, dateTo, limit, offset, period
-   * @returns Array of SalesReportListItem (money sums as string — use parseMoneyAmount helper)
-   * @throws {AuthenticationError} When token type is Basic or Test — this endpoint requires Personal or Service token (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/docs/openapi/financial-reports-and-accounting#tag/Finansovye-otchyoty/operation/postV1SalesReportsList}
-   * @since v3.7.0
-   * @example
-   * ```typescript
-   * import { parseMoneyAmount } from 'daytona-wildberries-typescript-sdk';
-   *
-   * const reports = await sdk.finances.getSalesReportsList({
-   *   dateFrom: '2026-03-17',
-   *   dateTo: '2026-03-20',
-   *   period: 'weekly',
-   * });
-   * console.log(parseMoneyAmount(reports[0].forPaySum));
-   * ```
-   */
-  async getSalesReportsList(e) {
-    return this.client.post(
-      "https://finance-api.wildberries.ru/api/finance/v1/sales-reports/list",
-      e,
-      { rateLimitKey: "finances.salesReportsList" }
-    );
-  }
-  /**
-   * Детализации к отчётам реализации за период (v1)
-   *
-   * Returns detailed rows for sales reports within a date range. Replaces the deprecated v5 method.
-   * Data available from 2024-01-29. Supports selective field loading via `fields` parameter.
-   *
-   * **Available token types**: Personal, Service (NOT Basic or Test)
-   *
-   * Rate limit: 1 req/min, 1 minute interval, burst 1
-   *
-   * @param data - Request body with dateFrom, dateTo, limit, rrdId, period, fields
-   * @returns Array of SalesReportDetailedItem (~70 fields, money amounts as string — use parseMoneyAmount)
-   * @throws {AuthenticationError} When token type is Basic or Test — this endpoint requires Personal or Service token (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/docs/openapi/financial-reports-and-accounting#tag/Finansovye-otchyoty/operation/postV1SalesReportsDetailed}
-   * @since v3.7.0
-   * @example
-   * ```typescript
-   * import { parseMoneyAmount } from 'daytona-wildberries-typescript-sdk';
-   *
-   * const rows = await sdk.finances.getSalesReportsDetailed({
-   *   dateFrom: '2026-03-17',
-   *   dateTo: '2026-03-20',
-   *   limit: 100000,
-   *   rrdId: 0,
-   *   fields: ['rrdId', 'nmId', 'forPay'],  // Optional: load only specific fields
-   * });
-   * const totalPayout = rows.reduce((sum, r) => sum + parseMoneyAmount(r.forPay), 0);
-   * ```
-   */
-  async getSalesReportsDetailed(e) {
-    return this.client.post(
-      "https://finance-api.wildberries.ru/api/finance/v1/sales-reports/detailed",
-      e,
-      { rateLimitKey: "finances.salesReportsDetailed" }
-    );
-  }
-  /**
-   * Детализации к отчётам реализации по ID отчёта (v1)
-   *
-   * Returns detailed rows for a specific report by its ID. Data available from 2025-01-01.
-   *
-   * **BigInt precision note**: For daily reports, `reportId` may exceed `Number.MAX_SAFE_INTEGER` (2^53).
-   * If you obtained the ID from `getSalesReportsList()` response (which returns `number`),
-   * standard JSON parsing may already have truncated precision. For precision-safe handling,
-   * fetch the ID via a custom BigInt-aware parser and pass it as `bigint` or `string`.
-   *
-   * **Available token types**: Personal, Service (NOT Basic or Test)
-   *
-   * Rate limit: 1 req/min, 1 minute interval, burst 1
-   *
-   * @param reportId - Report ID (number for typical use, bigint/string for BigInt precision on daily reports)
-   * @param data - Request body with optional limit, rrdId, fields
-   * @returns Array of SalesReportDetailedItem
-   * @throws {AuthenticationError} When token type is Basic or Test — this endpoint requires Personal or Service token (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/docs/openapi/financial-reports-and-accounting#tag/Finansovye-otchyoty/operation/postV1SalesReportsDetailedReportId}
-   * @since v3.7.0
-   * @example
-   * ```typescript
-   * // Typical weekly report usage:
-   * const rows = await sdk.finances.getSalesReportsDetailedByReportId(307401554);
-   *
-   * // Daily report with BigInt precision:
-   * const rows = await sdk.finances.getSalesReportsDetailedByReportId('9007199254740993', {
-   *   fields: ['rrdId', 'nmId', 'retailAmount'],
-   * });
-   * ```
-   */
-  async getSalesReportsDetailedByReportId(e, t = {}) {
-    return this.client.post(
-      `https://finance-api.wildberries.ru/api/finance/v1/sales-reports/detailed/${String(e)}`,
-      t,
-      { rateLimitKey: "finances.salesReportsDetailedByReportId" }
-    );
-  }
-  // ==========================================================================
-  // v1 Acquiring Reports (since v3.7.0) — payment acquisition costs (эквайринг)
-  // Available ONLY for Russian sellers. Personal/Service tokens only.
-  // ==========================================================================
-  /**
-   * Список отчётов об издержках на приём платежей (v1)
-   *
-   * Returns list of acquiring reports. **Available only to Russian sellers.**
-   *
-   * **Available token types**: Personal, Service (NOT Basic or Test)
-   *
-   * Rate limit: 1 req/min, 1 minute interval, burst 1
-   *
-   * @param data - Request body with dateFrom, dateTo, limit, offset
-   * @returns Array of AcquiringReportListItem (money sums as string — use parseMoneyAmount helper)
-   * @throws {AuthenticationError} When token type is Basic or Test — this endpoint requires Personal or Service token
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/docs/openapi/financial-reports-and-accounting#tag/Finansovye-otchyoty/operation/postV1AcquiringList}
-   * @since v3.7.0
-   * @example
-   * ```typescript
-   * import { parseMoneyAmount } from 'daytona-wildberries-typescript-sdk';
-   *
-   * const reports = await sdk.finances.getAcquiringReportsList({
-   *   dateFrom: '2026-03-17',
-   *   dateTo: '2026-03-20',
-   * });
-   * const totalFees = reports.reduce(
-   *   (sum, r) => sum + parseMoneyAmount(r.acquiringFeeSum), 0
-   * );
-   * ```
-   */
-  async getAcquiringReportsList(e) {
-    return this.client.post(
-      "https://finance-api.wildberries.ru/api/finance/v1/acquiring/list",
-      e,
-      { rateLimitKey: "finances.acquiringReportsList" }
-    );
-  }
-  /**
-   * Детализации к отчётам об издержках на приём платежей за период (v1)
-   *
-   * Returns detailed rows for acquiring reports within a date range.
-   * **Available only to Russian sellers.** Supports selective field loading via `fields` parameter.
-   *
-   * **Available token types**: Personal, Service (NOT Basic or Test)
-   *
-   * Rate limit: 1 req/min, 1 minute interval, burst 1
-   *
-   * @param data - Request body with dateFrom, dateTo, limit, rrdId, fields
-   * @returns Array of AcquiringReportDetailedItem (money amounts as string — use parseMoneyAmount)
-   * @throws {AuthenticationError} When token type is Basic or Test — this endpoint requires Personal or Service token
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/docs/openapi/financial-reports-and-accounting#tag/Finansovye-otchyoty/operation/postV1AcquiringDetailed}
-   * @since v3.7.0
-   * @example
-   * ```typescript
-   * import { parseMoneyAmount } from 'daytona-wildberries-typescript-sdk';
-   *
-   * const rows = await sdk.finances.getAcquiringReportsDetailed({
-   *   dateFrom: '2026-03-17',
-   *   dateTo: '2026-03-20',
-   *   limit: 100000,
-   *   rrdId: 0,
-   *   fields: ['rrdId', 'acquiringBank', 'acquiringFee'],
-   * });
-   * const totalFees = rows.reduce(
-   *   (sum, r) => sum + parseMoneyAmount(r.acquiringFee), 0
-   * );
-   * ```
-   */
-  async getAcquiringReportsDetailed(e) {
-    return this.client.post(
-      "https://finance-api.wildberries.ru/api/finance/v1/acquiring/detailed",
-      e,
-      { rateLimitKey: "finances.acquiringReportsDetailed" }
-    );
-  }
-  /**
-   * Детализации к отчётам об издержках на приём платежей по ID отчёта (v1)
-   *
-   * Returns detailed rows for a specific acquiring report by ID.
-   * **Available only to Russian sellers.**
-   *
-   * **BigInt precision note**: For daily reports, `reportId` may exceed `Number.MAX_SAFE_INTEGER`.
-   * Pass as `bigint` or `string` for precision-safe handling.
-   *
-   * **Available token types**: Personal, Service (NOT Basic or Test)
-   *
-   * Rate limit: 1 req/min, 1 minute interval, burst 1
-   *
-   * @param reportId - Report ID (number/bigint/string)
-   * @param data - Request body with optional limit, rrdId, fields
-   * @returns Array of AcquiringReportDetailedItem
-   * @throws {AuthenticationError} When token type is Basic or Test — this endpoint requires Personal or Service token
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/docs/openapi/financial-reports-and-accounting#tag/Finansovye-otchyoty/operation/postV1AcquiringDetailedReportId}
-   * @since v3.7.0
-   * @example
-   * ```typescript
-   * import { parseMoneyAmount } from 'daytona-wildberries-typescript-sdk';
-   *
-   * // Typical number reportId
-   * const rows = await sdk.finances.getAcquiringReportsDetailedByReportId(307401554);
-   *
-   * // BigInt precision for daily reports — pass as string or bigint
-   * const rows = await sdk.finances.getAcquiringReportsDetailedByReportId(
-   *   '9007199254740993',
-   *   { fields: ['rrdId', 'acquiringFee'] }
-   * );
-   * ```
-   */
-  async getAcquiringReportsDetailedByReportId(e, t = {}) {
-    return this.client.post(
-      `https://finance-api.wildberries.ru/api/finance/v1/acquiring/detailed/${String(e)}`,
-      t,
-      { rateLimitKey: "finances.acquiringReportsDetailedByReportId" }
-    );
-  }
-};
-var Fs = class {
-  constructor(e) {
-    this.client = e;
-  }
-  /**
-   * Получить список отчётов
-   *
-   * Метод возвращает список отчётов с расширенной аналитикой продавца. Ответ содержит ID созданных отчётов и статусы генерации.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, burst 3
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Analitika-prodavca-CSV}
-   * @example
-   * const result = await sdk.analytics.getNmReportDownloads({});
-   * console.log(result);
-   */
-  async getNmReportDownloads(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/v2/nm-report/downloads",
-      { params: e, rateLimitKey: "analytics.nmReportDownloads" }
-    );
-  }
-  /**
-   * Создать отчёт
-   *
-   * Метод создаёт задание на генерацию отчёта с расширенной аналитикой продавца.
-   * Вы можете создать CSV-версии отчётов по воронке продаж или параметрам поиска с группировкой по артикулам WB, предметам, брендам и ярлыкам.
-   * В отчётах по воронке продаж можно группировать данные по дням, неделям или месяцам.
-   * Параметры `includeSubstitutedSKUs` и `includeSearchTexts` не могут одновременно иметь значение `false`.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, burst 3
-   *
-   * @remarks Daily limit: 20 reports per day per seller account.
-   * @param [data] - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Analitika-prodavca-CSV}
-   * @example
-   * const result = await sdk.analytics.createNmReportDownload({});
-   * console.log(result);
-   */
-  async createNmReportDownload(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/v2/nm-report/downloads",
-      e,
-      { rateLimitKey: "analytics.postNmReportDownloads" }
-    );
-  }
-  /**
-   * Сгенерировать отчёт повторно
-   *
-   * Метод создает повторное задание на генерацию отчёта с расширенной аналитикой продавца.
-   * Необходимо, если при генерации отчёта вы получили статус `FAILED`.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, burst 3
-   *
-   * @param data - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Analitika-prodavca-CSV}
-   * @example
-   * const result = await sdk.analytics.createDownloadsRetry({});
-   * console.log(result);
-   */
-  async createDownloadsRetry(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/v2/nm-report/downloads/retry",
-      e,
-      { rateLimitKey: "analytics.postNmReportDownloadsRetry" }
-    );
-  }
-  /**
-   * Получить отчёт
-   *
-   * Метод возвращает отчёт с расширенной аналитикой продавца по ID задания на генерацию.
-   * Можно получить отчёт, который сгенерирован за последние 48 часов.
-   * Отчёт будет загружен внутри архива ZIP в формате CSV.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, burst 3
-   *
-   * @param downloadId - ID отчёта (UUID format)
-   * @returns Успешно - ZIP архив с CSV файлом
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Analitika-prodavca-CSV}
-   * @example
-   * const result = await sdk.analytics.getDownloadsFile('downloadId-value');
-   * console.log(result);
-   */
-  async getDownloadsFile(e) {
-    return this.client.get(
-      `https://seller-analytics-api.wildberries.ru/api/v2/nm-report/downloads/file/${e}`,
-      { rateLimitKey: "analytics.nmReportDownloadsFile" }
-    );
-  }
-  /**
-   * Основная страница
-   *
-   * Метод формирует набор данных для основной страницы отчёта по поисковым запросам с общей информацией, позициями товаров, данными по видимости и переходам в карточку, данными для таблицы по группам.
-   * Параметры `includeSubstitutedSKUs` и `includeSearchTexts` не могут одновременно иметь значение `false`.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, burst 3
-   *
-   * @param data - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Poiskovye-zaprosy}
-   * @example
-   * const result = await sdk.analytics.createSearchReportReport({});
-   * console.log(result);
-   */
-  async createSearchReportReport(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/v2/search-report/report",
-      e,
-      { rateLimitKey: "analytics.postSearchReportReport" }
-    );
-  }
-  /**
-   * Пагинация по группам
-   *
-   * Метод формирует дополнительные данные к основному отчёту с пагинацией по группам.
-   * Пагинация возможна только при наличии фильтра по бренду, предмету или ярлыку.
-   * Параметры `includeSubstitutedSKUs` и `includeSearchTexts` не могут одновременно иметь значение `false`.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, burst 3
-   *
-   * @param data - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Poiskovye-zaprosy}
-   * @example
-   * const result = await sdk.analytics.createTableGroup({});
-   * console.log(result);
-   */
-  async createTableGroup(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/v2/search-report/table/groups",
-      e,
-      { rateLimitKey: "analytics.postSearchReportTableGroups" }
-    );
-  }
-  /**
-   * Пагинация по товарам в группе
-   *
-   * Метод формирует дополнительные данные к основному отчёту с пагинацией по товарам в группе.
-   * Пагинация возможна вне зависимости от наличия фильтров.
-   * Параметры `includeSubstitutedSKUs` и `includeSearchTexts` не могут одновременно иметь значение `false`.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, burst 3
-   *
-   * @param data - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Poiskovye-zaprosy}
-   * @example
-   * const result = await sdk.analytics.createTableDetail({});
-   * console.log(result);
-   */
-  async createTableDetail(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/v2/search-report/table/details",
-      e,
-      { rateLimitKey: "analytics.postSearchReportTableDetails" }
-    );
-  }
-  /**
-   * Поисковые запросы по товару
-   *
-   * Метод формирует топ поисковых запросов по товару.
-   * Параметры `includeSubstitutedSKUs` и `includeSearchTexts` не могут одновременно иметь значение `false`.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, burst 3
-   *
-   * @param data - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Poiskovye-zaprosy}
-   * @example
-   * const result = await sdk.analytics.createProductSearchText({});
-   * console.log(result);
-   */
-  async createProductSearchText(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/v2/search-report/product/search-texts",
-      e,
-      { rateLimitKey: "analytics.postSearchReportProductSearchTexts" }
-    );
-  }
-  /**
-   * Заказы и позиции по поисковым запросам товара
-   *
-   * Метод формирует данные для таблицы по количеству заказов и позиций в поиске по запросам покупателя.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, burst 3
-   *
-   * @param data - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Poiskovye-zaprosy}
-   * @example
-   * const result = await sdk.analytics.createProductOrder({});
-   * console.log(result);
-   */
-  async createProductOrder(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/v2/search-report/product/orders",
-      e,
-      { rateLimitKey: "analytics.postSearchReportProductOrders" }
-    );
-  }
-  /**
-   * Данные по группам
-   *
-   * Метод формирует набор данных об остатках по группам товаров.
-   * Группа товаров описывается кортежем `subjectID, brandName, tagID`.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, burst 3
-   *
-   * @param data - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Istoriya-ostatkov}
-   * @example
-   * const result = await sdk.analytics.createProductsGroup({});
-   * console.log(result);
-   */
-  async createProductsGroup(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/v2/stocks-report/products/groups",
-      e,
-      { rateLimitKey: "analytics.postStocksReportProductsGroups" }
-    );
-  }
-  /**
-   * Данные по товарам
-   *
-   * Метод формирует набор данных об остатках по товарам.
-   * Можно получить данные как по отдельным товарам, так и в рамках всего отчёта — если в запросе отсутствуют фильтры: `nmIDs`, `subjectID`, `brandName`, `tagID`.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, burst 3
-   *
-   * @param data - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Istoriya-ostatkov}
-   * @example
-   * const result = await sdk.analytics.createProductsProduct({});
-   * console.log(result);
-   */
-  async createProductsProduct(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/v2/stocks-report/products/products",
-      e,
-      { rateLimitKey: "analytics.postStocksReportProductsProducts" }
-    );
-  }
-  /**
-   * Данные по размерам
-   *
-   * Метод формирует набор данных об остатках по размерам товара.
-   * Товар не имеет размера, если у него единственный размер с `"techSize":"0"`.
-   * Данные по складам Маркетплейс (FBS) приходят в агрегированном виде.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, burst 3
-   *
-   * @param data - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Istoriya-ostatkov}
-   * @example
-   * const result = await sdk.analytics.createProductsSize({});
-   * console.log(result);
-   */
-  async createProductsSize(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/v2/stocks-report/products/sizes",
-      e,
-      { rateLimitKey: "analytics.postStocksReportProductsSizes" }
-    );
-  }
-  /**
-   * Данные по складам
-   *
-   * Метод формирует набор данных об остатках по складам.
-   * Данные по складам Маркетплейс (FBS) приходят в агрегированном виде — по всем сразу, без детализации по конкретным складам.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, burst 3
-   *
-   * @param data - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Istoriya-ostatkov}
-   * @example
-   * const result = await sdk.analytics.createStocksReportOffice({});
-   * console.log(result);
-   */
-  async createStocksReportOffice(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/v2/stocks-report/offices",
-      e,
-      { rateLimitKey: "analytics.postStocksReportOffices" }
-    );
-  }
-  // ============ v3 Sales Funnel Methods ============
-  /**
-   * Статистика карточек товаров за период (v3)
-   *
-   * Возвращает отчёт о товарах с ключевыми показателями — переходы в карточку,
-   * добавления в корзину, заказы — за текущий и прошлый периоды.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, 3-request burst
-   *
-   * @param data - Request parameters
-   * @returns Sales funnel products statistics
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Voronka-prodazh}
-   * @example
-   * const result = await sdk.analytics.getSalesFunnelProducts({
-   *   selectedPeriod: { start: '2026-01-01', end: '2026-01-31' },
-   *   orderBy: { field: 'orderCount', mode: 'desc' },
-   *   limit: 10,
-   *   offset: 0,
-   * });
-   * console.log(result.products);
-   */
-  async getSalesFunnelProducts(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/analytics/v3/sales-funnel/products",
-      e,
-      { rateLimitKey: "analytics.postSalesFunnelProducts" }
-    );
-  }
-  /**
-   * Статистика карточек товаров по дням (v3)
-   *
-   * Возвращает статистику карточек товаров по дням или неделям.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, 3-request burst
-   *
-   * @param data - Request parameters
-   * @returns Products history statistics
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Voronka-prodazh}
-   * @example
-   * const result = await sdk.analytics.getSalesFunnelProductsHistory({
-   *   selectedPeriod: { start: '2026-01-01', end: '2026-01-07' },
-   *   nmIds: [268913787],
-   *   aggregationLevel: 'day',
-   * });
-   * console.log(result);
-   */
-  async getSalesFunnelProductsHistory(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/analytics/v3/sales-funnel/products/history",
-      e,
-      { rateLimitKey: "analytics.postSalesFunnelProductsHistory" }
-    );
-  }
-  /**
-   * Статистика групп карточек товаров по дням (v3)
-   *
-   * Возвращает статистику карточек товаров по дням, сгруппированных по предметам, брендам и ярлыкам.
-   *
-   * Rate limit: 3 requests/minute, 20-second interval, 3-request burst
-   *
-   * @param data - Request parameters
-   * @returns Grouped history statistics
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/seller-analytics#tag/Voronka-prodazh}
-   * @example
-   * const result = await sdk.analytics.getSalesFunnelGroupedHistory({
-   *   selectedPeriod: { start: '2026-01-01', end: '2026-01-07' },
-   *   aggregationLevel: 'day',
-   * });
-   * console.log(result);
-   */
-  async getSalesFunnelGroupedHistory(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/analytics/v3/sales-funnel/grouped/history",
-      e,
-      { rateLimitKey: "analytics.postSalesFunnelGroupedHistory" }
-    );
-  }
-  /**
-   * Текущие остатки на складах WB
-   *
-   * Возвращает актуальные остатки товаров на складах Wildberries.
-   * Данные обновляются раз в 30 минут. Одна строка = один размер на одном складе.
-   * Результаты отсортированы по возрастанию nmId.
-   *
-   * Доступен только для токенов типа Personal и Service.
-   *
-   * **Заменяет устаревший метод** `GET /api/v1/supplier/stocks`,
-   * который будет отключён 23 июня 2026.
-   *
-   * Rate limit: 3 requests per minute, 20-second interval, burst 1
-   *
-   * @param data - Filter and pagination parameters (all optional)
-   * @param data.nmIds - WB articles to filter (0-1000, empty = all)
-   * @param data.chrtIds - Size IDs (only for articles in nmIds)
-   * @param data.limit - Rows in response (max 250000, default 250000)
-   * @param data.offset - Skip N results for pagination (default 0)
-   * @returns Current inventory with warehouse IDs, region names, quantities
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @since 3.4.0
-   * @see {@link https://dev.wildberries.ru/docs/openapi/analytics#tag/Istoriya-ostatkov/operation/postV1StocksReportWbWarehouses}
-   * @example
-   * ```typescript
-   * // Get all inventory
-   * const stock = await sdk.analytics.getWbWarehousesStock();
-   * for (const item of stock.data.items) {
-   *   console.log(`${item.warehouseName} (${item.regionName}): ${item.quantity} шт.`);
-   * }
-   *
-   * // With filters and pagination
-   * const page = await sdk.analytics.getWbWarehousesStock({
-   *   nmIds: [395996251],
-   *   limit: 100,
-   *   offset: 0,
-   * });
-   * ```
-   */
-  async getWbWarehousesStock(e) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/analytics/v1/stocks-report/wb-warehouses",
-      e ?? {},
-      { rateLimitKey: "analytics.postStocksReportWbWarehouses" }
-    );
-  }
-};
-var xs = /^\d+:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}:[0-9a-f]+$/i;
-var Ns = {
-  MAX_MESSAGE_LENGTH: 1e3,
-  MAX_TOTAL_FILE_SIZE: 30 * 1024 * 1024,
-  MAX_PER_FILE_SIZE: 5 * 1024 * 1024,
-  MAX_REPLYSIGN_LENGTH: 255
-};
-var { MAX_MESSAGE_LENGTH: it, MAX_TOTAL_FILE_SIZE: Us, MAX_PER_FILE_SIZE: _s, MAX_REPLYSIGN_LENGTH: at } = Ns;
-var $s = {
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".png": "image/png",
-  ".pdf": "application/pdf"
-};
-function js(r) {
-  const e = r.toLowerCase();
-  for (const [t, s] of Object.entries($s))
-    if (e.endsWith(t)) return s;
-  return "application/octet-stream";
-}
-var Gs = class {
-  constructor(e) {
-    this.client = e;
-  }
-  /**
-   * Непросмотренные отзывы и вопросы
-   *
-   * Метод проверяет наличие непросмотренных [вопросов](/openapi/user-communication#tag/Voprosy/paths/~1api~1v1~1questions/get) и [отзывов](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get) от покупателей. Если у продавца есть непросмотренные вопросы или отзывы, возвращает `true`. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.newFeedbacksQuestions();
-  console.log(result);
-   */
-  async newFeedbacksQuestions() {
-    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/new-feedbacks-questions", {
-      rateLimitKey: "communications.newFeedbacksQuestions"
-    });
-  }
-  /**
-   * Неотвеченные вопросы
-   *
-   * Метод возвращает общее количество неотвеченных [вопросов](/openapi/user-communication#tag/Voprosy/paths/~1api~1v1~1questions/get) и количество неотвеченных вопросов за сегодня. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.getQuestionsCountUnanswered();
-  console.log(result);
-   */
-  async getQuestionsCountUnanswered() {
-    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/questions/count-unanswered", {
-      rateLimitKey: "communications.questionsCountUnanswered"
-    });
-  }
-  /**
-   * Количество вопросов
-   *
-   * Метод возвращает количество отвеченных или неотвеченных [вопросов](/openapi/user-communication#tag/Voprosy/paths/~1api~1v1~1questions/get) за заданный период. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.getQuestionsCount({});
-  console.log(result);
-   */
-  async getQuestionsCount(e) {
-    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/questions/count", {
-      params: e,
-      rateLimitKey: "communications.questionsCount"
-    });
-  }
-  /**
-   * Список вопросов
-   *
-   * Метод возвращает список вопросов по заданным фильтрам. Вы можете: - получить данные отвеченных и неотвеченных вопросов - сортировать вопросы по дате - настроить пагинацию и количество вопросов в ответе <div class="description_important"> Можно получить максимум 10 000 вопросов в одном ответе </div> <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.questions({});
-  console.log(result);
-   */
-  async questions(e) {
-    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/questions", {
-      params: e,
-      rateLimitKey: "communications.questions"
-    });
-  }
-  /**
-   * Работа с вопросами
-   *
-   * В зависимости от тела запроса, метод позволяет: - отметить [вопрос](/openapi/user-communication#tag/Voprosy/paths/~1api~1v1~1questions/get) как просмотренный - отклонить вопрос - ответить на вопрос или отредактировать ответ <div class="description_important"> Отредактировать ответ на вопрос можно 1 раз в течение 60 дней после отправки ответа </div> <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @param [data] - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.updateQuestion({});
-  console.log(result);
-   */
-  async updateQuestion(e) {
-    return this.client.patch("https://feedbacks-api.wildberries.ru/api/v1/questions", e, {
-      rateLimitKey: "communications.patchQuestions"
-    });
-  }
-  /**
-   * Получить вопрос по ID
-   *
-   * Метод возвращает данные [вопроса](/openapi/user-communication#tag/Voprosy/paths/~1api~1v1~1questions/get) по его ID. Далее вы можете [работать с этим вопросом](/openapi/user-communication#tag/Voprosy/paths/~1api~1v1~1questions/patch). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.question({});
-  console.log(result);
-   */
-  async question(e) {
-    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/question", {
-      params: e,
-      rateLimitKey: "communications.question"
-    });
-  }
-  /**
-   * Необработанные отзывы
-   *
-   * Метод возвращает: - количество необработанных [отзывов](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get) за сегодня и за всё время - среднюю оценку всех отзывов <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.getFeedbacksCountUnanswered();
-  console.log(result);
-   */
-  async getFeedbacksCountUnanswered() {
-    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/feedbacks/count-unanswered", {
-      rateLimitKey: "communications.feedbacksCountUnanswered"
-    });
-  }
-  /**
-   * Количество отзывов
-   *
-   * Метод возвращает количество обработанных или необработанных [отзывов](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get) за заданный период. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.getFeedbacksCount({});
-  console.log(result);
-   */
-  async getFeedbacksCount(e) {
-    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/feedbacks/count", {
-      params: e,
-      rateLimitKey: "communications.feedbacksCount"
-    });
-  }
-  /**
-   * Список отзывов
-   *
-   * Метод возвращает список отзывов по заданным фильтрам. Вы можете: - получить данные обработанных и необработанных отзывов - сортировать отзывы по дате - настроить пагинацию и количество отзывов в ответе <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.feedbacks({});
-  console.log(result);
-   */
-  async feedbacks(e) {
-    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/feedbacks", {
-      params: e,
-      rateLimitKey: "communications.feedbacks"
-    });
-  }
-  /**
-   * Ответить на отзыв
-   *
-   * Метод позволяет ответить на [отзыв](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get) покупателя. <div class="description_important"> ID отзыва не валидируется. Если в запросе вы передали некорректный ID, вы не получите ошибку. </div> <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @param [data] - Request body data
-   * @returns Response data
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.createFeedbacksAnswer({});
-   */
-  async createFeedbacksAnswer(e) {
-    return this.client.post("https://feedbacks-api.wildberries.ru/api/v1/feedbacks/answer", e, {
-      rateLimitKey: "communications.postFeedbacksAnswer"
-    });
-  }
-  /**
-   * Отредактировать ответ на отзыв
-   *
-   * Метод позволяет отредактировать уже отправленный [ответ на отзыв](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks~1answer/post) покупателя. <br><br> Отредактировать ответ можно только один раз в течение 60 дней c момента отправки. <div class="description_important"> ID отзыва не валидируется. Если в запросе вы передали некорректный ID, вы не получите ошибку. </div> <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @param [data] - Request body data
-   * @returns Response data
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.updateFeedbacksAnswer({});
-   */
-  async updateFeedbacksAnswer(e) {
-    return this.client.patch("https://feedbacks-api.wildberries.ru/api/v1/feedbacks/answer", e, {
-      rateLimitKey: "communications.patchFeedbacksAnswer"
-    });
-  }
-  /**
-   * Возврат товара по ID отзыва
-   *
-   * Метод запрашивает возврат товара, по которому оставлен [отзыв](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get). <br><br> Возврат доступен для отзывов с полем `"isAbleReturnProductOrders": true`. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @param data - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.createOrderReturn({});
-  console.log(result);
-   */
-  async createOrderReturn(e) {
-    return this.client.post("https://feedbacks-api.wildberries.ru/api/v1/feedbacks/order/return", e, {
-      rateLimitKey: "communications.postFeedbacksOrderReturn"
-    });
-  }
-  /**
-   * Получить отзыв по ID
-   *
-   * Метод возвращает данные [отзыва](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get) по его ID. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.feedback({});
-  console.log(result);
-   */
-  async feedback(e) {
-    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/feedback", {
-      params: e,
-      rateLimitKey: "communications.feedback"
-    });
-  }
-  /**
-   * Список архивных отзывов
-   *
-   * Метод возвращает список архивных [отзывов](/openapi/user-communication#tag/Otzyvy/paths/~1api~1v1~1feedbacks/get). <br><br> Отзыв становится архивным, если: - на отзыв получен ответ - на отзыв не получен ответ в течение 30 дней - в отзыве нет текста и фото <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца для всех методов категории <strong>Вопросы и отзывы</strong>: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 3 запроса | 333 миллисекунды | 6 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.getFeedbacksArchive({});
-  console.log(result);
-   */
-  async getFeedbacksArchive(e) {
-    return this.client.get("https://feedbacks-api.wildberries.ru/api/v1/feedbacks/archive", {
-      params: e,
-      rateLimitKey: "communications.feedbacksArchive"
-    });
-  }
-  /**
-   * Список чатов
-   *
-   * Метод возвращает список всех чатов продавца. По этим данным можно получить [события чатов](/openapi/user-communication#tag/Chat-s-pokupatelyami/paths/~1api~1v1~1seller~1events/get) или [отправить сообщение покупателю](/openapi/user-communication#tag/Chat-s-pokupatelyami/paths/~1api~1v1~1seller~1message/post). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 10 запросов | 1 секунда | 10 запросов | </div>
-   *
-   * **v3.13.0 — replySign format change (deadline 2026-06-04)**: WB updated the `replySign` field
-   * returned by this endpoint. If you cache `replySign` values, you must refresh them via this
-   * method before calling `createSellerMessage()` after 2026-06-04 — old-format values will be
-   * rejected by WB with HTTP 400. New format: `<version>:<UUID>:<crypto-signature>` (~135 chars).
-   * See docs/guides/chat-replysign-format-migration.md.
-   *
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const chats = await sdk.communications.getSellerChats();
-  console.log(chats.result);
-   */
-  async getSellerChats() {
-    return this.client.get(
-      "https://buyer-chat-api.wildberries.ru/api/v1/seller/chats",
-      { rateLimitKey: "communications.sellerChats" }
-    );
-  }
-  /**
-   * События чатов
-   *
-   * Метод возвращает список событий всех [чатов с покупателями](/openapi/user-communication#tag/Chat-s-pokupatelyami/paths/~1api~1v1~1seller~1chats/get). Чтобы получить все события: 1. Сделайте первый запрос без параметра `next`. 2. Повторяйте запрос со значением параметра `next` из ответа на предыдущий запрос, пока `totalEvents` не станет равным `0`. Это будет означать, что вы получили все события. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 10 запросов | 1 секунда | 10 запросов | </div>
-   *
-   * **v3.13.0 — replySign format change (deadline 2026-06-04)**: when `Event.isNewChat` is `true`,
-   * the event includes a `replySign` field in the new format (`<version>:<UUID>:<crypto-signature>`).
-   * Old-format `replySign` values (e.g. cached from before 2026-06-04) will be rejected by WB after
-   * the deadline. Prefer refreshing via `getSellerChats()` which always returns the latest values.
-   * See docs/guides/chat-replysign-format-migration.md.
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.getSellerEvents({});
-  console.log(result);
-   */
-  async getSellerEvents(e) {
-    return this.client.get(
-      "https://buyer-chat-api.wildberries.ru/api/v1/seller/events",
-      {
-        params: e,
-        rateLimitKey: "communications.sellerEvents"
-      }
-    );
-  }
-  /**
-     * Отправить сообщение покупателю (multipart/form-data)
-     *
-     * Метод отправляет сообщение в [чат с покупателем](/openapi/user-communication#tag/Chat-s-pokupatelyami/paths/~1api~1v1~1seller~1chats/get). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 10 запросов | 1 секунда | 10 запросов | </div>
-     *
-     * **v3.13.0 fix**: this method previously took zero parameters and always sent an empty body
-     * (broken since introduction). It now requires a `data` parameter with `replySign`.
-     *
-     * **replySign deadline 2026-06-04**: WB rejects old-format `replySign` values with HTTP 400.
-     * Always fetch a fresh `replySign` from `getSellerChats()` before sending. New-format pattern:
-     * `<version>:<UUID>:<crypto-signature>` (~135 chars, e.g. `1:1e265a58-a120-b178-008c-60af2460207c:66f136...`).
-     * If you pass a value that does not match this pattern the SDK emits a one-time `console.warn`
-     * (see `warnOnce` — key `communications.createSellerMessage:legacy-replysign-format`).
-     * See docs/guides/chat-replysign-format-migration.md.
-     *
-     * @param data - Request body: `replySign` (required), optional `message` and `file` attachments
-     * @returns Успешно
-     * @throws {ValidationError} When `replySign` is missing/empty/exceeds 255 chars, `message` > 1000 chars, or total file size > 30 MB
-     * @throws {AuthenticationError} When API key is invalid (401/403)
-     * @throws {RateLimitError} When rate limit exceeded (429)
-     * @throws {NetworkError} When network request fails or times out
-     * @example
-    // 1. Fetch chats to get a fresh replySign
-    const chats = await sdk.communications.getSellerChats();
-    const chat = chats.result?.[0];
-    if (!chat?.replySign) throw new Error('No chat found');
-  
-    // 2. Send message (optionally with attachments)
-    const result = await sdk.communications.createSellerMessage({
-      replySign: chat.replySign,
-      message: 'Thank you for your order!',
-    });
-    console.log(result);
-     */
-  async createSellerMessage(e) {
-    if (e == null)
-      throw new b("data is required: pass { replySign, message?, file? }");
-    if (e.replySign == null || typeof e.replySign != "string" || e.replySign.trim().length === 0)
-      throw new b("replySign is required (string, non-empty after trim)");
-    if (e.replySign.length > at)
-      throw new b(`replySign exceeds maxLength ${String(at)}`);
-    if (e.message && e.message.length > it)
-      throw new b(`message exceeds maxLength ${String(it)}`);
-    if (e.file) {
-      let s = 0;
-      for (const i of e.file) {
-        const a = i instanceof Blob ? i.size : i.content.length;
-        if (a > _s)
-          throw new b(
-            `file size exceeds 5 MB (got ${String(a)} bytes). WB limit: 5 MB per file.`
-          );
-        s += a;
-      }
-      if (s > Us)
-        throw new b(`total file size exceeds 30 MB (got ${String(s)} bytes)`);
-    }
-    xs.test(e.replySign) || q(
-      "communications.createSellerMessage:legacy-replysign-format",
-      "communications.createSellerMessage: `replySign` does not match the expected new-format pattern (version:UUID:signature). WB API rejects old-format `replySign` after 2026-06-04. Refresh via `getSellerChats()` to get current-format values. See docs/guides/chat-replysign-format-migration.md."
-    );
-    const t = new FormData();
-    if (t.append("replySign", e.replySign), e.message && t.append("message", e.message), e.file)
-      for (const s of e.file)
-        if (s instanceof Blob)
-          t.append("file", s);
-        else {
-          const i = js(s.filename);
-          t.append("file", new Blob([s.content], { type: i }), s.filename);
-        }
-    return this.client.post(
-      "https://buyer-chat-api.wildberries.ru/api/v1/seller/message",
-      t,
-      {
-        rateLimitKey: "communications.postSellerMessage",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- axios + FormData auto-sets
-        // multipart/form-data boundary; overriding to undefined removes the default application/json
-        headers: { "Content-Type": void 0 }
-      }
-    );
-  }
-  /**
-   * Получить файл из сообщения
-   *
-   * Метод возвращает файл или изображение из сообщения по его ID. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 10 запросов | 1 секунда | 10 запросов | </div>
-   *
-   * @param id - ID файла, см. значение поля `downloadID` в методе [События чатов](https://dev.wildberries.ru/openapi/user-communication#tag/Chat-s-pokupatelyami/paths/~1api~1v1~1seller~1events/get)
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.getSellerDownload('id-value');
-  console.log(result);
-   */
-  async getSellerDownload(e) {
-    return this.client.get(
-      `https://buyer-chat-api.wildberries.ru/api/v1/seller/download/${e}`,
-      {
-        rateLimitKey: "communications.sellerDownload"
-      }
-    );
-  }
-  /**
-   * Заявки покупателей на возврат
-   *
-   * Метод возвращает заявки покупателей на возврат товаров за последние 14 дней. Вы можете [отвечать на эти заявки](/openapi/user-communication#tag/Vozvraty-pokupatelyami/paths/~1api~1v1~1claim/patch). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 20 запросов | 3 секунды | 10 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Response data
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.claims({});
-  console.log(result);
-   */
-  async claims(e) {
-    return this.client.get("https://returns-api.wildberries.ru/api/v1/claims", {
-      params: e,
-      rateLimitKey: "communications.claims"
-    });
-  }
-  /**
-   * Ответ на заявку покупателя
-   *
-   * Метод отправляет ответ на [заявку](/openapi/user-communication#tag/Vozvraty-pokupatelyami/paths/~1api~1v1~1claims/get) покупателя на возврат товаров. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 20 запросов | 3 секунды | 10 запросов | </div>
-   *
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.communications.updateClaim();
-  console.log(result);
-   */
-  async updateClaim() {
-    return this.client.patch(
-      "https://returns-api.wildberries.ru/api/v1/claim",
-      void 0,
-      {
-        rateLimitKey: "communications.patchClaim"
-      }
-    );
-  }
-  // ============================================================================
-  // Pinned Reviews Methods (Закреплённые отзывы)
-  // ============================================================================
-  /**
-   * Get count of pinned/unpinned reviews
-   *
-   * Returns the count of pinned and unpinned reviews for the given filters.
-   * Unpinned reviews are only those that were automatically unpinned due to reasons
-   * specified in the `unpinnedCause` field.
-   *
-   * Rate limit: 3 requests per second with 333ms interval, burst of 6 requests.
-   *
-   * @param params - Optional filter parameters
-   * @returns Count of reviews matching the filter
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/user-communication#tag/Zakreplyonnye-otzyvy}
-   * @example
-   * ```typescript
-   * // Get count of all pinned reviews
-   * const count = await sdk.communications.getPinnedFeedbacksCount({ state: 'pinned' });
-   * console.log(`Pinned reviews: ${count.data}`);
-   *
-   * // Get count of pinned reviews on product cards
-   * const cardCount = await sdk.communications.getPinnedFeedbacksCount({
-   *   state: 'pinned',
-   *   pinOn: 'nm'
-   * });
-   * ```
-   */
-  async getPinnedFeedbacksCount(e) {
-    return this.client.get(
-      "https://feedbacks-api.wildberries.ru/api/feedbacks/v1/pins/count",
-      { params: e, rateLimitKey: "communications.getPinnedFeedbacksCount" }
-    );
-  }
-  /**
-   * Get limits for pinning reviews
-   *
-   * Returns the limits for pinning reviews by subscription and tariff option.
-   * Shows total limits, used count, remaining slots, and per-unit limits.
-   *
-   * Rate limit: 3 requests per second with 333ms interval, burst of 6 requests.
-   *
-   * @returns Limits data for subscription and tariff
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/user-communication#tag/Zakreplyonnye-otzyvy}
-   * @example
-   * ```typescript
-   * const limits = await sdk.communications.getPinnedFeedbacksLimits();
-   * if (limits.data.subscription) {
-   *   console.log(`Subscription remaining: ${limits.data.subscription.remaining}`);
-   * }
-   * if (limits.data.tariff) {
-   *   console.log(`Tariff remaining: ${limits.data.tariff.remaining}`);
-   * }
-   * ```
-   */
-  async getPinnedFeedbacksLimits() {
-    return this.client.get(
-      "https://feedbacks-api.wildberries.ru/api/feedbacks/v1/pins/limits",
-      { rateLimitKey: "communications.getPinnedFeedbacksLimits" }
-    );
-  }
-  /**
-   * Get list of pinned/unpinned reviews
-   *
-   * Returns a list of pinned and unpinned reviews with pagination support.
-   * Unpinned reviews are only those that were automatically unpinned due to reasons
-   * specified in the `unpinnedCause` field.
-   *
-   * Rate limit: 3 requests per second with 333ms interval, burst of 6 requests.
-   *
-   * @param params - Optional filter and pagination parameters
-   * @returns List of pinned/unpinned review items with pagination cursor
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/user-communication#tag/Zakreplyonnye-otzyvy}
-   * @example
-   * ```typescript
-   * // Get first page of pinned reviews
-   * const response = await sdk.communications.getPinnedFeedbacks({
-   *   state: 'pinned',
-   *   limit: 100
-   * });
-   * console.log(`Found ${response.data.length} pinned reviews`);
-   *
-   * // Get next page if available
-   * if (response.next) {
-   *   const nextPage = await sdk.communications.getPinnedFeedbacks({
-   *     state: 'pinned',
-   *     next: response.next
-   *   });
-   * }
-   * ```
-   */
-  async getPinnedFeedbacks(e) {
-    return this.client.get(
-      "https://feedbacks-api.wildberries.ru/api/feedbacks/v1/pins",
-      { params: e, rateLimitKey: "communications.getPinnedFeedbacks" }
-    );
-  }
-  /**
-   * Pin reviews to product cards or merged groups
-   *
-   * Pins reviews to a product card or group of merged product cards.
-   * Requires an active Jam subscription or tariff option for pinning reviews.
-   * Maximum 500 reviews can be pinned in a single request.
-   *
-   * Rate limit: 3 requests per second with 333ms interval, burst of 6 requests.
-   *
-   * @param data - Array of reviews to pin (max 500 items)
-   * @returns Result of pin operations with success/error details per item
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400)
-   * @throws {ForbiddenError} When no active subscription or tariff (403)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/user-communication#tag/Zakreplyonnye-otzyvy}
-   * @example
-   * ```typescript
-   * const result = await sdk.communications.pinFeedback([
-   *   {
-   *     pinMethod: 'subscription',
-   *     pinOn: 'imt',
-   *     feedbackId: 'VlbkVVl7mtw37wyWkJZz'
-   *   },
-   *   {
-   *     pinMethod: 'tariff',
-   *     pinOn: 'nm',
-   *     feedbackId: 'DibuRAImknLyiqgzvGcU'
-   *   }
-   * ]);
-   *
-   * result.data.forEach(item => {
-   *   if (item.isErrors) {
-   *     console.log(`Failed to pin ${item.feedbackId}:`, item.errors);
-   *   } else {
-   *     console.log(`Pinned ${item.feedbackId} with pinId: ${item.pinId}`);
-   *   }
-   * });
-   * ```
-   */
-  async pinFeedback(e) {
-    return this.client.post(
-      "https://feedbacks-api.wildberries.ru/api/feedbacks/v1/pins",
-      e,
-      { rateLimitKey: "communications.pinFeedback" }
-    );
-  }
-  /**
-   * Unpin reviews from product cards or merged groups
-   *
-   * Unpins reviews using their pin operation IDs (pinId).
-   * Get pinId values from the getPinnedFeedbacks method.
-   * Maximum 500 pin IDs can be unpinned in a single request.
-   *
-   * Rate limit: 3 requests per second with 333ms interval, burst of 6 requests.
-   *
-   * @param data - Array of pin IDs to unpin (max 500 items)
-   * @returns Array of successfully unpinned pin IDs
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/user-communication#tag/Zakreplyonnye-otzyvy}
-   * @example
-   * ```typescript
-   * // Get pinned reviews first to obtain pinIds
-   * const pinned = await sdk.communications.getPinnedFeedbacks({ state: 'pinned' });
-   * const pinIdsToUnpin = pinned.data.slice(0, 3).map(item => item.pinId);
-   *
-   * // Unpin the reviews
-   * const result = await sdk.communications.unpinFeedback(pinIdsToUnpin);
-   * console.log(`Successfully unpinned: ${result.data.join(', ')}`);
-   * ```
-   */
-  async unpinFeedback(e) {
-    return this.client.delete(
-      "https://feedbacks-api.wildberries.ru/api/feedbacks/v1/pins",
-      e,
-      { rateLimitKey: "communications.unpinFeedback" }
-    );
-  }
-};
-var Ws = class {
-  constructor(e) {
-    this.client = e;
-  }
-  /**
-   * Склады
-   *
-   * Метод возвращает количество остатков товаров на складах WB.<br>Данные обновляются раз в 30 минут. <br><br> Для одного ответа в системе установлено условное ограничение 60000 строк. Поэтому, чтобы получить все остатки, может потребоваться более, чем один запрос. Во втором и далее запросе в параметре `dateFrom` используйте полное значение поля `lastChangeDate` из последней строки ответа на предыдущий запрос.<br> Если в ответе отдаётся пустой массив `[]`, все остатки уже выгружены. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 1 запрос | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getSupplierStocks({});
-   * console.log(result);
-   */
-  async getSupplierStocks(e) {
-    return this.client.get(
-      "https://statistics-api.wildberries.ru/api/v1/supplier/stocks",
-      { params: e, rateLimitKey: "reports.supplierStocks" }
-    );
-  }
-  /**
-   * Заказы
-   *
-   * Метод возвращает информацию обо всех заказах.<br>Данные обновляются раз в 30 минут.<br><br> 1 строка = 1 заказ = 1 cборочное задание = 1 единица товара.<br>Для определения заказа рекомендуем использовать поле `srid`.<br><br> Информация о заказе хранится 90 дней с момента оформления.<br><br> Для одного ответа на запрос с `flag=0` или без `flag` в системе установлено условное ограничение 80000 строк. Поэтому, чтобы получить все заказы, может потребоваться более, чем один запрос. Во втором и далее запросе в параметре `dateFrom` используйте полное значение поля `lastChangeDate` из последней строки ответа на предыдущий запрос.<br> Если в ответе отдаётся пустой массив `[]`, все заказы уже выгружены. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 1 запрос | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getSupplierOrders({});
-   * console.log(result);
-   */
-  async getSupplierOrders(e) {
-    return this.client.get(
-      "https://statistics-api.wildberries.ru/api/v1/supplier/orders",
-      { params: e, rateLimitKey: "reports.supplierOrders" }
-    );
-  }
-  /**
-   * Продажи
-   *
-   * Метод возвращает информацию о продажах и возвратах.<br>Данные обновляются раз в 30 минут.<br><br> 1 строка = 1 заказ = 1 cборочное задание = 1 единица товара.<br>Для определения заказа рекомендуем использовать поле `srid`.<br><br> Информация о заказе хранится 90 дней с момента оформления.<br><br> Для одного ответа на запрос с `flag=0` или без `flag` в системе установлено условное ограничение 80000 строк. Поэтому, чтобы получить все продажи и возвраты, может потребоваться более, чем один запрос. Во втором и далее запросе в параметре `dateFrom `используйте полное значение поля `lastChangeDate` из последней строки ответа на предыдущий запрос.<br> Если в ответе отдаётся пустой массив `[]`, все продажи и возвраты уже выгружены. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 1 запрос | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getSupplierSales({});
-   * console.log(result);
-   */
-  async getSupplierSales(e) {
-    return this.client.get(
-      "https://statistics-api.wildberries.ru/api/v1/supplier/sales",
-      { params: e, rateLimitKey: "reports.supplierSales" }
-    );
-  }
-  /**
-   * Получить отчёт
-   *
-   * Метод возвращает отчёт с [операциями по товарам с обязательной маркировкой](https://seller.wildberries.ru/analytics-reports/excise-report).<br><br> Данный отчёт можно сохранить в [формате таблиц](https://dev.wildberries.ru/cases/1). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 5 часов | 10 запросов | 30 минут | 10 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @param [data] - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.createAnalyticsExciseReport({}, {});
-   * console.log(result);
-   */
-  async createAnalyticsExciseReport(e, t) {
-    return this.client.post(
-      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/excise-report",
-      t,
-      { params: e, rateLimitKey: "reports.postAnalyticsExciseReport" }
-    );
-  }
-  /**
-   * Создать отчёт
-   *
-   * Метод создаёт [задание на генерацию](/openapi/reports#tag/Otchyot-ob-ostatkah-na-skladah/paths/~1api~1v1~1warehouse_remains~1tasks~1%7Btask_id%7D~1status/get) отчёта об [остатках на складах WB](/openapi/reports#tag/Otchyot-ob-ostatkah-na-skladah/paths/~1api~1v1~1warehouse_remains~1tasks~1%7Btask_id%7D~1download/get).<br><br> Параметры `groupBy` и `filter` (группировки и фильтры) можно задать в любой комбинации — аналогично [версии](https://seller.wildberries.ru/analytics-reports/warehouse-remains) в личном кабинете. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 5 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.warehouseRemains({});
-   * console.log(result);
-   */
-  async warehouseRemains(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains",
-      { params: e, rateLimitKey: "reports.warehouse_remains" }
-    );
-  }
-  /**
-   * Проверить статус задания на генерацию отчёта об остатках на складах WB
-   *
-   * @param task_id - ID задания на генерацию
-   * @returns Статус задания
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getWarehouseRemainsTaskStatus('task-uuid');
-   * console.log(result.data?.status);
-   */
-  async getWarehouseRemainsTaskStatus(e) {
-    return this.client.get(
-      `https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains/tasks/${e}/status`,
-      { rateLimitKey: "reports.warehouse_remainsTasksStatus" }
-    );
-  }
-  /**
-   * Получить отчёт об остатках на складах WB
-   *
-   * @param task_id - ID задания на генерацию
-   * @returns Данные отчёта
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.downloadWarehouseRemainsReport('task-uuid');
-   * console.log(result);
-   */
-  async downloadWarehouseRemainsReport(e) {
-    return this.client.get(
-      `https://seller-analytics-api.wildberries.ru/api/v1/warehouse_remains/tasks/${e}/download`,
-      { rateLimitKey: "reports.warehouse_remainsTasksDownload" }
-    );
-  }
-  /**
-   * Самовыкупы
-   *
-   * Метод возвращает отчёт об удержаниях за самовыкупы. Отчёт формируется каждую неделю по средам, до 7:00 по московскому времени, и содержит данные за одну неделю.<br><br> Удержание за самовыкуп — 30% от стоимости товаров.<br>Минимальная сумма всех удержаний — 100 000 ₽, если за неделю в ПВЗ привезли ваших товаров больше, чем на сумму 100 000 ₽.<br><br> Данные доступны с августа 2023. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 100 минут | 10 запросов | 10 минут | 10 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Response data
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getAnalyticsAntifraudDetails({});
-   * console.log(result);
-   */
-  async getAnalyticsAntifraudDetails(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/antifraud-details",
-      { params: e, rateLimitKey: "reports.analyticsAntifraudDetails" }
-    );
-  }
-  /**
-   * Маркировка товара
-   *
-   * Метод возвращает отчёт о штрафах за отсутствие обязательной маркировки товаров.<br> В отчёте представлены фотографии товаров, на которых маркировка отсутствует либо не считывается.<br><br> Можно получить данные максимум за 31 день. Данные доступны с марта 2024. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 минут | 10 запросов | 1 минута | 10 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Response data
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getAnalyticsGoodsLabeling({});
-   * console.log(result);
-   */
-  async getAnalyticsGoodsLabeling(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/goods-labeling",
-      { params: e, rateLimitKey: "reports.analyticsGoodsLabeling" }
-    );
-  }
-  /**
-   * Создать отчёт
-   *
-   * Метод создаёт [задание на генерацию](/openapi/reports#tag/Platnaya-priyomka/paths/~1api~1v1~1acceptance_report~1tasks~1%7Btask_id%7D~1status/get) отчёта о [платной приёмке](/openapi/reports#tag/Platnaya-priyomka/paths/~1api~1v1~1acceptance_report~1tasks~1%7Btask_id%7D~1download/get).<br><br> Можно получить отчёт максимум за 31 день. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 1 запрос | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.acceptanceReport({});
-   * console.log(result);
-   */
-  async acceptanceReport(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/v1/acceptance_report",
-      { params: e, rateLimitKey: "reports.acceptance_report" }
-    );
-  }
-  /**
-   * Проверить статус задания на генерацию отчёта о платной приёмке
-   *
-   * @param task_id - ID задания на генерацию
-   * @returns Статус задания
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getAcceptanceReportTaskStatus('task-uuid');
-   * console.log(result.data?.status);
-   */
-  async getAcceptanceReportTaskStatus(e) {
-    return this.client.get(
-      `https://seller-analytics-api.wildberries.ru/api/v1/acceptance_report/tasks/${e}/status`,
-      { rateLimitKey: "reports.acceptance_reportTasksStatus" }
-    );
-  }
-  /**
-   * Получить отчёт о платной приёмке
-   *
-   * @param task_id - ID задания на генерацию
-   * @returns Данные отчёта
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.downloadAcceptanceReport('task-uuid');
-   * console.log(result);
-   */
-  async downloadAcceptanceReport(e) {
-    return this.client.get(
-      `https://seller-analytics-api.wildberries.ru/api/v1/acceptance_report/tasks/${e}/download`,
-      { rateLimitKey: "reports.acceptance_reportTasksDownload" }
-    );
-  }
-  /**
-   * Создать отчёт
-   *
-   * Метод создаёт [задание на генерацию](/openapi/reports#tag/Platnoe-hranenie/paths/~1api~1v1~1paid_storage~1tasks~1%7Btask_id%7D~1status/get) отчёта о [платном хранении](/openapi/reports#tag/Platnoe-hranenie/paths/~1api~1v1~1paid_storage~1tasks~1%7Btask_id%7D~1download/get).<br><br> Можно получить отчёт максимум за 8 дней. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 5 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.paidStorage({});
-   * console.log(result);
-   */
-  async paidStorage(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/v1/paid_storage",
-      { params: e, rateLimitKey: "reports.paid_storage" }
-    );
-  }
-  /**
-   * Проверить статус задания на генерацию отчёта о платном хранении
-   *
-   * @param task_id - ID задания на генерацию
-   * @returns Статус задания
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getPaidStorageTaskStatus('task-uuid');
-   * console.log(result.data?.status);
-   */
-  async getPaidStorageTaskStatus(e) {
-    return this.client.get(
-      `https://seller-analytics-api.wildberries.ru/api/v1/paid_storage/tasks/${e}/status`,
-      { rateLimitKey: "reports.paid_storageTasksStatus" }
-    );
-  }
-  /**
-   * Получить отчёт о платном хранении
-   *
-   * @param task_id - ID задания на генерацию
-   * @returns Данные отчёта
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.downloadPaidStorageReport('task-uuid');
-   * console.log(result);
-   */
-  async downloadPaidStorageReport(e) {
-    return this.client.get(
-      `https://seller-analytics-api.wildberries.ru/api/v1/paid_storage/tasks/${e}/download`,
-      { rateLimitKey: "reports.paid_storageTasksDownload" }
-    );
-  }
-  /**
-   * Получить отчёт
-   *
-   * Метод возвращает отчёт с [данными продаж, сгруппированных по регионам стран](https://seller.wildberries.ru/analytics-reports/region-sale).<br><br> Можно получить отчёт максимум за 31 день. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 1 запрос | 10 секунд | 5 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Response data
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getAnalyticsRegionSale({});
-   * console.log(result);
-   */
-  async getAnalyticsRegionSale(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/region-sale",
-      { params: e, rateLimitKey: "reports.analyticsRegionSale" }
-    );
-  }
-  /**
-   * Бренды продавца
-   *
-   * Метод возвращает список брендов продавца для отчёта о [доле бренда в продажах](https://seller.wildberries.ru/analytics-reports/brand-share). <br><br> Можно получить только бренды, которые: - Продавались за последние 90 дней. - Есть на складе WB. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 10 запросов | </div>
-   *
-   * @returns Response data
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getBrandShareBrands();
-   * console.log(result);
-   */
-  async getBrandShareBrands() {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/brand-share/brands",
-      { rateLimitKey: "reports.analyticsBrandShareBrands" }
-    );
-  }
-  /**
-   * Родительские категории бренда
-   *
-   * Метод возвращает родительские категории бренда продавца для отчёта о [доле бренда в продажах](https://seller.wildberries.ru/analytics-reports/brand-share).<br><br> Можно получить отчёт максимум за 365 дней. Данные доступны с 1 ноября 2022. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 5 секунд | 1 запрос | 5 секунд | 20 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Response data
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getBrandShareParentSubjects({});
-   * console.log(result);
-   */
-  async getBrandShareParentSubjects(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/brand-share/parent-subjects",
-      { params: e, rateLimitKey: "reports.analyticsBrandShareParentSubjects" }
-    );
-  }
-  /**
-   * Получить отчёт
-   *
-   * Метод возвращает отчёт о [доле бренда продавца в продажах](https://seller.wildberries.ru/analytics-reports/brand-share). <br><br> Можно получить отчёт максимум за 365 дней. Данные доступны с 1 ноября 2022. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 5 секунд | 1 запрос | 5 секунд | 20 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Response data
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getAnalyticsBrandShare({});
-   * console.log(result);
-   */
-  async getAnalyticsBrandShare(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/brand-share",
-      { params: e, rateLimitKey: "reports.analyticsBrandShare" }
-    );
-  }
-  /**
-   * Заблокированные карточки
-   *
-   * Метод возвращает список [заблокированных карточек товаров продавца](https://seller.wildberries.ru/analytics-reports/banned-products) с причинами блокировки. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 1 запрос | 10 секунд | 6 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getBannedProductsBlocked({});
-   * console.log(result);
-   */
-  async getBannedProductsBlocked(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/banned-products/blocked",
-      { params: e, rateLimitKey: "reports.analyticsBannedProductsBlocked" }
-    );
-  }
-  /**
-   * Скрытые из каталога
-   *
-   * Метод возвращает список [товаров продавца, скрытых из каталога](https://seller.wildberries.ru/analytics-reports/banned-products/shadowed). <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 10 секунд | 1 запрос | 10 секунд | 6 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getBannedProductsShadowed({});
-   * console.log(result);
-   */
-  async getBannedProductsShadowed(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/banned-products/shadowed",
-      { params: e, rateLimitKey: "reports.analyticsBannedProductsShadowed" }
-    );
-  }
-  /**
-   * Получить отчёт
-   *
-   * Метод возвращает отчёт о [возвратах товаров продавцу](https://seller.wildberries.ru/analytics-reports/goods-return). <br><br> Можно получить отчёт максимум за 31 день. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 1 запрос | 1 минута | 10 запросов | </div>
-   *
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.reports.getAnalyticsGoodsReturn({});
-   * console.log(result);
-   */
-  async getAnalyticsGoodsReturn(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/v1/analytics/goods-return",
-      { params: e, rateLimitKey: "reports.analyticsGoodsReturn" }
-    );
-  }
-  // ==========================================================================
-  // New Deduction Endpoints - EPIC 44
-  // ==========================================================================
-  /**
-   * Занижение габаритов упаковки (штрафы)
-   *
-   * Метод возвращает отчёт об удержаниях за занижение габаритов упаковки.
-   *
-   * Rate limit: 1 req/min, 1 min interval, burst 1
-   *
-   * @param options - Query parameters
-   * @param options.dateFrom - Start of reporting period (ISO 8601)
-   * @param options.dateTo - End of reporting period (ISO 8601, required)
-   * @param options.limit - Number of items in response (max 1000, required)
-   * @param options.offset - Number of items to skip (default 0)
-   * @returns Penalty reports with total count
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see EPIC 44 - New endpoint replacing tab=penalty on old warehouse-measurements
-   * @example
-   * const result = await sdk.reports.getMeasurementPenalties({
-   *   dateTo: '2026-02-06',
-   *   limit: 100
-   * });
-   * console.log(result.data?.reports);
-   */
-  async getMeasurementPenalties(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/analytics/v1/measurement-penalties",
-      { params: e, rateLimitKey: "reports.measurementPenalties" }
-    );
-  }
-  /**
-   * Замеры склада
-   *
-   * Метод возвращает отчёт о замерах склада.
-   *
-   * Rate limit: 1 req/min, 1 min interval, burst 1
-   *
-   * @param options - Query parameters
-   * @param options.dateFrom - Start of reporting period (ISO 8601)
-   * @param options.dateTo - End of reporting period (ISO 8601, required)
-   * @param options.limit - Number of items in response (max 1000, required)
-   * @param options.offset - Number of items to skip (default 0)
-   * @returns Measurement reports with total count
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see EPIC 44 - New endpoint replacing tab=measurement on old warehouse-measurements
-   * @example
-   * const result = await sdk.reports.getWarehouseMeasurementsV2({
-   *   dateTo: '2026-02-06',
-   *   limit: 100
-   * });
-   * console.log(result.data?.reports);
-   */
-  async getWarehouseMeasurementsV2(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/analytics/v1/warehouse-measurements",
-      { params: e, rateLimitKey: "reports.warehouseMeasurementsV2" }
-    );
-  }
-  /**
-   * Удержания за подмену и некорректные вложения
-   *
-   * Метод возвращает отчёт об удержаниях за подмену товара и некорректные вложения.
-   * Заменяет удалённый endpoint /api/v1/analytics/incorrect-attachments.
-   *
-   * Rate limit: 1 req/min, 1 min interval, burst 1
-   *
-   * @param options - Query parameters
-   * @param options.dateFrom - Start of reporting period (ISO 8601)
-   * @param options.dateTo - End of reporting period (ISO 8601, required)
-   * @param options.sort - Sort field: nmId, dtBonus, bonusSumm (default: dtBonus)
-   * @param options.order - Sort order: desc, asc (default: desc)
-   * @param options.limit - Number of items in response (max 1000, required)
-   * @param options.offset - Number of items to skip (default 0)
-   * @returns Deduction reports with total count
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see EPIC 44 - New endpoint replacing removed incorrect-attachments
-   * @example
-   * const result = await sdk.reports.getDeductions({
-   *   dateTo: '2026-02-06',
-   *   limit: 100,
-   *   sort: 'dtBonus',
-   *   order: 'desc'
-   * });
-   * console.log(result.data?.reports);
-   */
-  async getDeductions(e) {
-    return this.client.get(
-      "https://seller-analytics-api.wildberries.ru/api/analytics/v1/deductions",
-      { params: e, rateLimitKey: "reports.deductions" }
-    );
-  }
-};
-var Hs = class {
+var _i = class {
   constructor(e) {
     this.client = e;
   }
@@ -14807,27 +15385,6 @@ var Hs = class {
   async updateAuctionPlacement(e) {
     return this.client.put("https://advert-api.wildberries.ru/adv/v0/auction/placements", e, {
       rateLimitKey: "promotion.putAdvAuctionPlacements"
-    });
-  }
-  /**
-   * Изменение ставок в кампаниях
-   *
-   * Метод меняет ставки карточек товаров по артикулам WB в кампаниях типа `9` с единой или ручной ставкой. <br><br> Для кампаний в статусах `4`, `9` и `11`. <br><br> В запросе укажите место размещения в параметре `placement`: - `combined` — в поиске и рекомендациях для кампаний с единой ставкой - `search `или `recommendations` — в поиске или рекомендациях для кампаний с ручной ставкой <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 5 запросов | 200 миллисекунд | 5 запросов | </div>
-   *
-   * @deprecated Use updateBidsV2() instead for kopeck-based bidding.
-   * @param data - Request body data
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.promotion.updateAuctionBid({});
-  console.log(result);
-   */
-  async updateAuctionBid(e) {
-    return this.client.patch("https://advert-api.wildberries.ru/adv/v0/auction/bids", e, {
-      rateLimitKey: "promotion.patchAdvAuctionBids"
     });
   }
   /**
@@ -14936,66 +15493,6 @@ var Hs = class {
     });
   }
   /**
-   * Установка/удаление минус-фраз для кампании с единой ставкой
-   *
-   * <div class="description_important"> ⚠️ **DEPRECATED**: Этот метод устарел и будет отключён **2 февраля 2026**.<br><br> **Обновление**: Дата отключения перенесена с 15 января на 2 февраля 2026.<br><br> **Причина**: Переход от кампаний с единой ставкой (type 8) к кампаниям с ручной и единой ставкой (type 9).<br><br> **Альтернатива**: Для работы с минус-фразами в кампаниях type 9 используйте соответствующие методы управления кампаниями с ручной ставкой. </div> Метод устанавливает и удаляет минус-фразы для кампании [с единой ставкой](/openapi/promotion#tag/Sozdanie-kampanij/paths/~1adv~1v1~1save-ad/post).<br><br> Данные фразы можно выбрать из списка запросов, по которым покупатели находили ваш товар. Список запросов можно получить в [статистике ключевых фраз](/openapi/analytics#tag/Statistika-po-prodvizheniyu/paths/~1adv~1v0~1stats~1keywords/get).<br> Отправка пустого массива удаляет все минус-фразы из кампании. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 6 секунд | 1 запрос | 6 секунд | 5 запросов | </div>
-   *
-   * @deprecated This method will be disabled by Wildberries API on February 2, 2026.
-   * Use setNormqueryMinus() for type 9 campaigns with manual bidding instead.
-   * @see {@link https://dev.wildberries.ru/release-notes?id=388} Release notes
-   * @see {@link PromotionModule.setNormqueryMinus} New method
-   *
-   * @param data - Request body data
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.promotion.createAutoSetExcluded({}, {}); // February 2, 2026
-   * console.log(result);
-   */
-  async createAutoSetExcluded(e, t) {
-    return q(
-      "PromotionModule.createAutoSetExcluded",
-      "[DEPRECATED] createAutoSetExcluded() will be disabled by Wildberries API on February 2, 2026. Use setNormqueryMinus() for type 9 campaigns with manual bidding instead."
-    ), this.client.post("https://advert-api.wildberries.ru/adv/v1/auto/set-excluded", e, {
-      params: t,
-      rateLimitKey: "promotion.postAdvAutoSetExcluded"
-    });
-  }
-  /**
-   * Изменение списка карточек товаров в кампании с единой ставкой
-   *
-   * <div class="description_important"> ⚠️ **DEPRECATED**: Этот метод устарел и будет отключён **2 февраля 2026**.<br><br> **Причина**: Переход от кампаний с единой ставкой (type 8) к кампаниям с ручной и единой ставкой (type 9).<br><br> **Альтернатива**: Для работы с товарами в кампаниях type 9 используйте метод [Управление товарами в кампаниях](/openapi/promotion#tag/Upravlenie-kampaniyami/paths/~1adv~1v0~1auction~1nms/patch). </div> Метод добавляет и удаляет карточки товаров в кампании с единой ставкой.<br><br> <div class="description_important"> Добавить можно только те карточки товаров, которые вернутся в <a href="/openapi/promotion#tag/Parametry-avtomaticheskih-kampanij/paths/~1adv~1v1~1auto~1getnmtoadd/get">списке карточек товаров для кампании с единой ставкой</a>.<br>Удалить единственную карточку товара из кампании нельзя. </div> Проверки по параметру `delete` не предусмотрено. Если пришел ответ со статус-кодом `200`, а изменений не произошло, проверьте, чтобы запрос соответствовал документации. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 минута | 60 запросов | 1 секунда | 5 запросов | </div>
-   *
-   * @deprecated This method will be disabled by Wildberries API on February 2, 2026.
-   * Use updateAuctionNm() for type 9 campaigns instead.
-   * @see {@link https://dev.wildberries.ru/release-notes?id=388} Release notes
-   * @see {@link PromotionModule.updateAuctionNm} New method
-   *
-   * @param data - Request body data
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.promotion.createAutoUpdatenm({}, {}); // February 2, 2026
-   * console.log(result);
-   */
-  async createAutoUpdatenm(e, t) {
-    return q(
-      "PromotionModule.createAutoUpdatenm",
-      "[DEPRECATED] createAutoUpdatenm() will be disabled by Wildberries API on February 2, 2026. Use updateAuctionNm() for type 9 campaigns instead."
-    ), this.client.post("https://advert-api.wildberries.ru/adv/v1/auto/updatenm", e, {
-      params: t,
-      rateLimitKey: "promotion.postAdvAutoUpdatenm"
-    });
-  }
-  /**
    * Изменение списка карточек товаров в кампаниях
    *
    * Метод добавляет и удаляет карточки товаров в кампаниях. <br><br> Для кампаний в статусах `4`, `9` и `11`. <br><br> Для добавляемых товаров устанавливается текущая минимальная ставка. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 1 запрос | 1 секунда | 1 запрос | </div>
@@ -15095,28 +15592,6 @@ var Hs = class {
     return this.client.get(
       "https://advert-api.wildberries.ru/adv/v3/fullstats",
       { params: e, rateLimitKey: "promotion.advFullstats" }
-    );
-  }
-  /**
-   * Статистика по ключевым фразам
-   *
-   * Метод формирует статистику по ключевым фразам из поисковой строки: количество просмотров товара и затраты по одной ключевой фразе. Подходит для кампаний c единой и ручной ставкой. <br><br> Статистика формируется за каждый день, когда кампания была активна. В одном запросе можно получить данные максимум за 7 дней. <br> Данные обновляются каждый час. <div class="description_limit"> <a href="/openapi/api-information#tag/Vvedenie/Limity-zaprosov">Лимит запросов</a> на один аккаунт продавца: | Период | Лимит | Интервал | Всплеск | | --- | --- | --- | --- | | 1 секунда | 4 запроса | 250 миллисекунд | 4 запроса | </div>
-   *
-   * @deprecated This endpoint is deprecated. Use alternative methods for keyword statistics.
-   * @param [options] - Query parameters
-   * @returns Успешно
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-  const result = await sdk.promotion.getStatsKeywords({});
-  console.log(result);
-   */
-  async getStatsKeywords(e) {
-    return this.client.get(
-      "https://advert-api.wildberries.ru/adv/v0/stats/keywords",
-      { params: e, rateLimitKey: "promotion.advStatsKeywords" }
     );
   }
   /**
@@ -15226,70 +15701,6 @@ var Hs = class {
     );
   }
   // ============================================================================
-  // Deprecated V0/V1 Methods - Will be removed February 2, 2026
-  // ============================================================================
-  /**
-   * Получить информацию о кампаниях (устаревший метод)
-   *
-   * Метод возвращает информацию о рекламных кампаниях по их идентификаторам.
-   *
-   * @deprecated Будет удалён 2 февраля 2026. Используйте getAdvertsV2() вместо этого.
-   * @see {@link https://dev.wildberries.ru/release-notes?id=388} Release notes
-   * @see {@link PromotionModule.getAdvertsV2} Новый метод
-   *
-   * @param ids - Массив идентификаторов кампаний
-   * @returns Информация о кампаниях
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * ```typescript
-   * const adverts = await sdk.promotion.getPromotionAdverts([12345, 67890]);
-   * console.log(adverts);
-   * ```
-   */
-  async getPromotionAdverts(e) {
-    return q(
-      "PromotionModule.getPromotionAdverts",
-      "[DEPRECATED] getPromotionAdverts() \u0431\u0443\u0434\u0435\u0442 \u0443\u0434\u0430\u043B\u0451\u043D 2 \u0444\u0435\u0432\u0440\u0430\u043B\u044F 2026. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 getAdvertsV2()."
-    ), this.client.post(
-      "https://advert-api.wildberries.ru/adv/v1/promotion/adverts",
-      e,
-      { rateLimitKey: "promotion.postAdvPromotionAdverts" }
-    );
-  }
-  /**
-   * Получить список аукционных кампаний (устаревший метод)
-   *
-   * Метод возвращает список рекламных кампаний типа "аукцион".
-   *
-   * @deprecated Будет удалён 2 февраля 2026. Используйте getAdvertsV2() вместо этого.
-   * @see {@link https://dev.wildberries.ru/release-notes?id=388} Release notes
-   * @see {@link PromotionModule.getAdvertsV2} Новый метод
-   *
-   * @param params - Параметры фильтрации
-   * @returns Список аукционных кампаний
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * ```typescript
-   * const adverts = await sdk.promotion.getAuctionAdverts({ status: 9 });
-   * console.log(adverts);
-   * ```
-   */
-  async getAuctionAdverts(e) {
-    return q(
-      "PromotionModule.getAuctionAdverts",
-      "[DEPRECATED] getAuctionAdverts() \u0431\u0443\u0434\u0435\u0442 \u0443\u0434\u0430\u043B\u0451\u043D 2 \u0444\u0435\u0432\u0440\u0430\u043B\u044F 2026. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0439\u0442\u0435 getAdvertsV2()."
-    ), this.client.get("https://advert-api.wildberries.ru/adv/v0/auction/adverts", {
-      params: e,
-      rateLimitKey: "promotion.advAuctionAdverts"
-    });
-  }
-  // ============================================================================
   // Search Clusters (NormQuery) Methods - NEW in Feb 2026
   // ============================================================================
   /**
@@ -15316,12 +15727,82 @@ var Hs = class {
    * });
    * console.log(stats.stats);
    * ```
+   *
+   * @remarks Prefer the V1 successor {@link PromotionModule.getNormqueryStatsV1}
+   * (`/adv/v1/normquery/stats`), which returns daily-detailed statistics and supports
+   * both `cpm` and `cpc` campaigns.
    */
   async getNormqueryStats(e) {
     return this.client.post(
       "https://advert-api.wildberries.ru/adv/v0/normquery/stats",
       e,
       { rateLimitKey: "promotion.normqueryStats" }
+    );
+  }
+  /**
+   * Active and Inactive Search Cluster Lists
+   *
+   * Метод возвращает списки активных и неактивных поисковых кластеров
+   * с количеством просмотров от 100 по ID кампаний и артикулам WB.
+   *
+   * Rate limit: 5 requests per second, 200ms interval, burst 10
+   *
+   * @param data - Request body with campaign/product items (max 100)
+   * @returns Lists of active and inactive search clusters per campaign/product
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/promotion#tag/Search-Clusters/paths/~1adv~1v0~1normquery~1list/post}
+   * @example
+   * ```typescript
+   * const result = await sdk.promotion.getNormqueryList({
+   *   items: [{ advertId: 123456789, nmId: 987654321 }]
+   * });
+   * console.log(result.items?.[0]?.normQueries?.active);
+   * ```
+   */
+  async getNormqueryList(e) {
+    return this.client.post(
+      "https://advert-api.wildberries.ru/adv/v0/normquery/list",
+      e,
+      { rateLimitKey: "promotion.getNormqueryList" }
+    );
+  }
+  /**
+   * Daily Search Clusters Statistics (v1)
+   *
+   * Метод возвращает статистику (просмотры, клики, добавления в корзину, заказы,
+   * CTR, CPC, CPM и т.д.) по поисковым кластерам за указанный период с детализацией
+   * по дням. Применимо для кампаний с моделью оплаты `cpm` — за показы, и `cpc` —
+   * за клики.
+   *
+   * V1-преемник метода {@link PromotionModule.getNormqueryStats} (`/adv/v0/normquery/stats`).
+   *
+   * Rate limit: 10 requests per minute, 6 second interval, burst 20
+   *
+   * @param data - Request body with date range and campaign/product items (max 100)
+   * @returns Daily-detailed statistics for search clusters
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/openapi/promotion#tag/Statistics/paths/~1adv~1v1~1normquery~1stats/post}
+   * @example
+   * ```typescript
+   * const stats = await sdk.promotion.getNormqueryStatsV1({
+   *   from: '2026-01-01',
+   *   to: '2026-01-30',
+   *   items: [{ advertId: 123456789, nmId: 987654321 }]
+   * });
+   * console.log(stats.items[0]?.dailyStats);
+   * ```
+   */
+  async getNormqueryStatsV1(e) {
+    return this.client.post(
+      "https://advert-api.wildberries.ru/adv/v1/normquery/stats",
+      e,
+      { rateLimitKey: "promotion.getNormqueryStatsV1" }
     );
   }
   /**
@@ -15358,6 +15839,17 @@ var Hs = class {
    *
    * Метод устанавливает ставки на поисковые кластеры.
    * Можно использовать только для кампаний с ручной ставкой и моделью оплаты `cpm` — за показы.
+   *
+   * **Единицы**: `bid` указывается в **целых рублях (₽)**, а НЕ в копейках — это
+   *   ставка CPM (цена за 1000 показов) для конкретного поискового кластера
+   *   (`norm_query`). В отличие от {@link PromotionModule.updateBids}, где
+   *   `bid_kopecks` — в копейках и применяется к кампании/артикулу, а не к кластеру.
+   *   Не путайте единицы — частый footgun.
+   *
+   * **Модель**: это устаревшая поверхность биддинга normquery/catalog (`/adv/v0/...`).
+   *   Для нового кода предпочитайте {@link PromotionModule.updateBids} (V1, копейки);
+   *   этот метод — только если нужен CPM-контроль per search-cluster в ручной
+   *   `cpm`-кампании.
    *
    * Rate limit: 2 requests per second, 500ms interval, burst 4
    *
@@ -15416,6 +15908,76 @@ var Hs = class {
     await this.client.delete("https://advert-api.wildberries.ru/adv/v0/normquery/bids", e, {
       rateLimitKey: "promotion.normqueryDeleteBids"
     });
+  }
+  /**
+   * Конфигурация кабинета продвижения (V1)
+   *
+   * Возвращает валюту, код валюты [кабинета продавца](https://cmp.wildberries.ru/campaigns/finances)
+   * и допустимые шаги ставок (`cpmStep`, `cpcStep`) для метода
+   * {@link PromotionModule.postV1NormqueryBids}.
+   *
+   * Rate limit: 1 request per minute, 1 min interval, burst 10
+   *
+   * @returns Account currency, currency code and allowed bid steps (CPM and CPC)
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @since task-170
+   * @see {@link https://dev.wildberries.ru/openapi/promotion#tag/Kampanii/operation/getV1Config}
+   * @example
+   * ```typescript
+   * const config = await sdk.promotion.getV1Config();
+   * console.log(config.currency, config.currencyCode, config.cpmStep, config.cpcStep);
+   * ```
+   */
+  async getV1Config() {
+    return this.client.get(
+      "https://advert-api.wildberries.ru/api/advert/v1/config",
+      {
+        rateLimitKey: "promotion.v1Config"
+      }
+    );
+  }
+  /**
+   * Установить ставки для поисковых кластеров в валюте кабинета (V1)
+   *
+   * Устанавливает ставки для поисковых кластеров в валюте [кабинета продавца](https://cmp.wildberries.ru/campaigns/finances).
+   * Доступно только для кампаний с ручной ставкой и моделью оплаты `cpm` — за показы.
+   * Допустимый шаг ставки возвращается методом {@link PromotionModule.getV1Config}.
+   *
+   * Отличается от {@link PromotionModule.setNormqueryBids} (v0, `/adv/v0/normquery/bids`):
+   * v1 принимает ставку в `bidMinorUnits` и работает в валюте кабинета продавца.
+   *
+   * Rate limit: 2 requests per second, 500ms interval, burst 4
+   *
+   * @param data - Request body with bids in minor currency units (max 100 items)
+   * @returns Result with successfully applied bids and failed bids (with reasons)
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @throws {NetworkError} When network request fails or times out
+   * @since task-170
+   * @see {@link https://dev.wildberries.ru/openapi/promotion#tag/Poiskovye-klastery/operation/postV1NormqueryBids}
+   * @example
+   * ```typescript
+   * const result = await sdk.promotion.postV1NormqueryBids({
+   *   bids: [{
+   *     advertId: 1825035,
+   *     nmId: 983512347,
+   *     normQuery: 'Фраза 1',
+   *     bidMinorUnits: 1000
+   *   }]
+   * });
+   * console.log(result.success, result.failed);
+   * ```
+   */
+  async postV1NormqueryBids(e) {
+    return this.client.post(
+      "https://advert-api.wildberries.ru/api/advert/v1/normquery/bids",
+      e,
+      { rateLimitKey: "promotion.v1NormqueryBids" }
+    );
   }
   /**
    * Список минус-фраз кампаний
@@ -15493,7 +16055,7 @@ var Hs = class {
    * @param options.ids - Campaign IDs, comma-separated (max 50)
    * @param options.statuses - Campaign statuses: -1 (deleted), 4 (ready), 7 (finished), 8 (cancelled), 9 (active), 11 (paused)
    * @param options.payment_type - Payment type: cpm (per impressions) or cpc (per click)
-   * @returns List of campaigns with bid_type (auto/manual) and bids in kopecks
+   * @returns List of campaigns with bid_type (unified/manual) and bids in kopecks
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
@@ -15564,6 +16126,11 @@ var Hs = class {
    * Данные синхронизируются с базой раз в 3 минуты.
    * Для приостановленных кампаний `normQueries` может быть пустым массивом.
    *
+   * **Кэширование**: данные обновляются на стороне WB раз в ~3 минуты, поэтому
+   *   кэшируйте ответ на стороне клиента с TTL ~180 с. Это удержит вас в рамках
+   *   лимита 5 запросов/мин (и спасёт от 429) — более частые вызовы всё равно
+   *   вернут устаревшие данные.
+   *
    * Rate limit: 5 requests per minute, 12-second interval, burst 5
    *
    * @param params - Campaign ID and WB article ID
@@ -15595,41 +16162,6 @@ var Hs = class {
         rateLimitKey: "promotion.getBidsRecommendations"
       }
     );
-  }
-  /**
-   * Изменение ставок в кампаниях (V1 API)
-   *
-   * Метод меняет ставки карточек товаров по артикулам WB в кампаниях с единой или ручной ставкой.
-   * Для кампаний в статусах 4, 9 и 11. Replaces deprecated v0 endpoint.
-   *
-   * Rate limit: 5 requests per second, 200ms interval, burst 5
-   *
-   * @param data - Request body with bids in kopecks
-   * @returns Updated bids
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @see {@link https://dev.wildberries.ru/openapi/promotion#tag/Upravlenie-kampaniyami/paths/~1api~1advert~1v1~1bids/patch}
-   * @example
-   * ```typescript
-   * const result = await sdk.promotion.updateBidsV2({
-   *   bids: [{
-   *     advert_id: 12345,
-   *     nm_bids: [{
-   *       nm_id: 13335157,
-   *       bid_kopecks: 250,
-   *       placement: 'recommendations'
-   *     }]
-   *   }]
-   * });
-   * console.log(result.bids);
-   * ```
-   */
-  async updateBidsV2(e) {
-    return this.client.patch("https://advert-api.wildberries.ru/api/advert/v1/bids", e, {
-      rateLimitKey: "promotion.bidsV1"
-    });
   }
   // ============================================================================
   // Campaign Management Methods - NEW
@@ -15689,7 +16221,7 @@ var Hs = class {
    *   nms: [12345678, 87654321],
    *   bid_type: 'manual',
    *   payment_type: 'cpm',
-   *   placement_types: ['search', 'recommendations']
+   *   placement_types: ['search', 'recommendation']
    * });
    * console.log(`Created campaign with ID: ${campaignId}`);
    * ```
@@ -15956,6 +16488,22 @@ var Hs = class {
    *
    * **ВАЖНО**: Ставки указываются в КОПЕЙКАХ (bid_kopecks), не в рублях!
    *
+   * **Семантика placement** (поле `placement` каждой ставки):
+   * - `combined` — поиск и рекомендации вместе (кампании с **единой** ставкой,
+   *   `bid_type: unified` / Type 8)
+   * - `search` / `recommendations` — одно место размещения (кампании с **ручной**
+   *   ставкой, `bid_type: manual` / Type 9)
+   *
+   * **Идемпотентность**: повторная установка той же ставки не списывает средства
+   *   дважды, но каждый вызов всё равно расходует слот rate-limit (300/мин,
+   *   интервал 200 мс) — избегайте no-op обновлений.
+   *
+   * **Ошибки диапазона**: выход ставки за пределы допустимого диапазона возвращает
+   *   HTTP 400 с телом `wrong bid value: <received>; min: <floor>` — BaseClient
+   *   парсит его в {@link BidOutOfRangeError} (поля `received` / `min` / `max?`),
+   *   поэтому канонический минимальный bid доступен сразу, без отдельного запроса
+   *   {@link PromotionModule.getBidsRecommendations} (5/мин).
+   *
    * Rate limit: 5 requests per second, 200ms interval, burst 5
    *
    * @param data - Request body with bids in kopecks
@@ -16025,8 +16573,85 @@ var Hs = class {
       { rateLimitKey: "promotion.updateCampaignProducts" }
     );
   }
+  /**
+   * Get Seller Recommendations list (item recommendations in product cards)
+   *
+   * Returns the current seller-recommendation assignments for product cards
+   * (the "Seller Recommendations" block shown in product listings).
+   *
+   * Lives on the **content-api** domain (Content-category methods), although
+   * documented under the promotion tag. Auth: Personal or Service token
+   * (Content category). Gating: Jam subscription (Advanced/Premium) OR the
+   * "Seller Recommendations in listings" Tariff-Builder option.
+   *
+   * Rate limit: 100 requests per minute
+   *
+   * @param data - Optional filter (WB item numbers). The exact filter shape is
+   *   INFERRED — verify against the live spec (task-156 AC#9).
+   * @returns Recommendation entries per item in `data`; per-item `errors` on partial success (HTTP 200)
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/docs/openapi/work-with-products}
+   * @example
+   * ```typescript
+   * const result = await sdk.promotion.getRecommendationsList({ nmIDs: [12345678] });
+   * for (const entry of result.data ?? []) {
+   *   console.log(`${entry.nmID}: ${entry.tagsIDs.join(', ')}`);
+   * }
+   * ```
+   */
+  async getRecommendationsList(e) {
+    return this.client.post(
+      "https://content-api.wildberries.ru/api/content/v1/recommendations/list",
+      e,
+      { rateLimitKey: "promotion.getRecommendationsList" }
+    );
+  }
+  /**
+   * Set Seller Recommendations (item recommendations in product cards)
+   *
+   * Sets, updates, or removes seller recommendations for product cards.
+   * Send an empty `tagsIDs` array to clear a product's recommendations.
+   *
+   * PARTIAL SUCCESS: WB returns HTTP **200** even when some items fail — the
+   * per-item failures are listed in the `errors` array of the response body
+   * (each `{ nmID, error }`). Always inspect `result.errors` instead of relying
+   * on the status code.
+   *
+   * Lives on the **content-api** domain. Auth: Personal or Service token
+   * (Content category). Gating: Jam subscription (Advanced/Premium) OR the
+   * "Seller Recommendations in listings" Tariff-Builder option.
+   *
+   * Rate limit: 100 requests per minute
+   *
+   * @param data - Per-product recommendation assignments
+   * @returns Response envelope; `data` is `null`. Check `errors` for partial failures.
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://dev.wildberries.ru/docs/openapi/work-with-products}
+   * @example
+   * ```typescript
+   * const result = await sdk.promotion.setRecommendations([
+   *   { nmID: 12345678, tagsIDs: [11111111, 22222222] },
+   * ]);
+   * if (result.errors.length) {
+   *   console.warn('Partial failure:', result.errors);
+   * }
+   * ```
+   */
+  async setRecommendations(e) {
+    return this.client.post(
+      "https://content-api.wildberries.ru/api/content/v1/recommendations/set",
+      e,
+      { rateLimitKey: "promotion.setRecommendations" }
+    );
+  }
 };
-var Vs = class {
+var Ui = class {
   constructor(e) {
     this.client = e;
   }
@@ -16155,7 +16780,8 @@ var Vs = class {
     );
   }
 };
-var zs = class {
+var N = "https://marketplace-api.wildberries.ru";
+var $i = class {
   constructor(e) {
     this.client = e;
   }
@@ -16180,45 +16806,62 @@ var zs = class {
     );
   }
   /**
-   * Перевести на сборку
+   * Перевести на сборку (batch)
    *
-   * Метод переводит сборочное задание в статус confirm — на сборке.
+   * Moves up to 1000 assembly orders to `confirm` status in a single request.
+   * Replaces the dead single-order PATCH `.../orders/{id}/confirm` path.
    *
-   * @param orderId - ID сборочного задания
-   * @returns Response data
+   * @param orderIds - Array of assembly order IDs (1-1000 items)
+   * @returns Per-order confirmation results
+   * @throws {ValidationError} When orderIds array is empty or exceeds 1000
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
+   * @since 3.17.0
    * @example
-   * await sdk.inStorePickup.updateOrdersConfirm(12345);
+   * ```typescript
+   * const result = await sdk.inStorePickup.confirmBulk([123456, 234567]);
+   * ```
    */
-  async updateOrdersConfirm(e) {
-    return this.client.patch(
-      `https://marketplace-api.wildberries.ru/api/v3/click-collect/orders/${e}/confirm`,
-      {},
-      { rateLimitKey: "in-store-pickup.patchClickCollectOrdersConfirm" }
+  async confirmBulk(e) {
+    if (e.length === 0)
+      throw new a("orderIds array cannot be empty");
+    if (e.length > 1e3)
+      throw new a("orderIds array cannot exceed 1000 items");
+    return this.client.post(
+      `${N}/api/marketplace/v3/click-collect/orders/status/confirm`,
+      { ordersIds: e },
+      { rateLimitKey: "in-store-pickup.confirmBulk" }
     );
   }
   /**
-   * Сообщить, что сборочное задание готово к выдаче
+   * Сообщить, что сборочное задание готово к выдаче (batch)
    *
-   * Метод переводит сборочное задание в статус prepare — готово к выдаче.
+   * Moves up to 1000 assembly orders to `prepare` status (ready for pickup).
+   * Replaces the dead single-order PATCH `.../orders/{id}/prepare` path.
    *
-   * @param orderId - ID сборочного задания
-   * @returns Response data
+   * @param orderIds - Array of assembly order IDs (1-1000 items)
+   * @returns Per-order results
+   * @throws {ValidationError} When orderIds array is empty or exceeds 1000
+   * @throws {MetaValidationFailError} When B2B marking validation fails (409 — Chestny ZNAK; use checkMetaValidation for pre-flight)
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
+   * @since 3.17.0
    * @example
-   * await sdk.inStorePickup.updateOrdersPrepare(12345);
+   * ```typescript
+   * const result = await sdk.inStorePickup.prepareBulk([123456, 234567]);
+   * ```
    */
-  async updateOrdersPrepare(e) {
-    return this.client.patch(
-      `https://marketplace-api.wildberries.ru/api/v3/click-collect/orders/${e}/prepare`,
-      {},
-      { rateLimitKey: "in-store-pickup.patchClickCollectOrdersPrepare" }
+  async prepareBulk(e) {
+    if (e.length === 0)
+      throw new a("orderIds array cannot be empty");
+    if (e.length > 1e3)
+      throw new a("orderIds array cannot exceed 1000 items");
+    return this.client.post(
+      `${N}/api/marketplace/v3/click-collect/orders/status/prepare`,
+      { ordersIds: e },
+      { rateLimitKey: "in-store-pickup.prepareBulk" }
     );
   }
   /**
@@ -16268,67 +16911,94 @@ var zs = class {
     );
   }
   /**
-   * Сообщить, что заказ принят покупателем
+   * Сообщить, что заказ принят покупателем (batch)
    *
-   * Метод переводит сборочное задание в статус receive — получено покупателем.
+   * Moves up to 1000 assembly orders to `receive` status (received by buyer).
+   * Replaces the dead single-order PATCH `.../orders/{id}/receive` path.
    *
-   * @param orderId - ID сборочного задания
-   * @returns Response data
+   * NOTE: pickup `receive` takes NO passcodes (unlike DBS) — just order IDs.
+   *
+   * @param orderIds - Array of assembly order IDs (1-1000 items)
+   * @returns Per-order results
+   * @throws {ValidationError} When orderIds array is empty or exceeds 1000
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
+   * @since 3.17.0
    * @example
-   * await sdk.inStorePickup.updateOrdersReceive(12345);
+   * ```typescript
+   * const result = await sdk.inStorePickup.receiveBulk([123456, 234567]);
+   * ```
    */
-  async updateOrdersReceive(e) {
-    return this.client.patch(
-      `https://marketplace-api.wildberries.ru/api/v3/click-collect/orders/${e}/receive`,
-      {},
-      { rateLimitKey: "in-store-pickup.patchClickCollectOrdersReceive" }
-    );
-  }
-  /**
-   * Сообщить, что покупатель отказался от заказа
-   *
-   * Метод переводит сборочное задание в статус reject — отказ при получении.
-   *
-   * @param orderId - ID сборочного задания
-   * @returns Response data
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * await sdk.inStorePickup.updateOrdersReject(12345);
-   */
-  async updateOrdersReject(e) {
-    return this.client.patch(
-      `https://marketplace-api.wildberries.ru/api/v3/click-collect/orders/${e}/reject`,
-      {},
-      { rateLimitKey: "in-store-pickup.patchClickCollectOrdersReject" }
-    );
-  }
-  /**
-   * Получить статусы сборочных заданий
-   *
-   * Метод возвращает статусы сборочных заданий по их ID.
-   *
-   * @param data - Request body data
-   * @returns Статусы сборочных заданий
-   * @throws {AuthenticationError} When API key is invalid (401/403)
-   * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
-   * @throws {NetworkError} When network request fails or times out
-   * @example
-   * const result = await sdk.inStorePickup.createOrdersStatus({ orders: [12345] });
-   * console.log(result);
-   */
-  async createOrdersStatus(e) {
+  async receiveBulk(e) {
+    if (e.length === 0)
+      throw new a("orderIds array cannot be empty");
+    if (e.length > 1e3)
+      throw new a("orderIds array cannot exceed 1000 items");
     return this.client.post(
-      "https://marketplace-api.wildberries.ru/api/v3/click-collect/orders/status",
-      e,
-      { rateLimitKey: "in-store-pickup.postClickCollectOrdersStatus" }
+      `${N}/api/marketplace/v3/click-collect/orders/status/receive`,
+      { ordersIds: e },
+      { rateLimitKey: "in-store-pickup.receiveBulk" }
+    );
+  }
+  /**
+   * Сообщить, что покупатель отказался от заказа (batch)
+   *
+   * Moves up to 1000 assembly orders to `reject` status (buyer refused).
+   * Replaces the dead single-order PATCH `.../orders/{id}/reject` path.
+   *
+   * NOTE: pickup `reject` takes NO passcodes (unlike DBS) — just order IDs.
+   *
+   * @param orderIds - Array of assembly order IDs (1-1000 items)
+   * @returns Per-order results
+   * @throws {ValidationError} When orderIds array is empty or exceeds 1000
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {NetworkError} When network request fails or times out
+   * @since 3.17.0
+   * @example
+   * ```typescript
+   * const result = await sdk.inStorePickup.rejectBulk([123456, 234567]);
+   * ```
+   */
+  async rejectBulk(e) {
+    if (e.length === 0)
+      throw new a("orderIds array cannot be empty");
+    if (e.length > 1e3)
+      throw new a("orderIds array cannot exceed 1000 items");
+    return this.client.post(
+      `${N}/api/marketplace/v3/click-collect/orders/status/reject`,
+      { ordersIds: e },
+      { rateLimitKey: "in-store-pickup.rejectBulk" }
+    );
+  }
+  /**
+   * Получить статусы сборочных заданий (batch)
+   *
+   * Returns statuses for up to 1000 assembly orders in a single request.
+   * Replaces the dead single-batch POST `.../orders/status` path.
+   *
+   * @param orderIds - Array of assembly order IDs (1-1000 items)
+   * @returns Status information for each order
+   * @throws {ValidationError} When orderIds array is empty or exceeds 1000
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {NetworkError} When network request fails or times out
+   * @since 3.17.0
+   * @example
+   * ```typescript
+   * const result = await sdk.inStorePickup.getStatusesBulk([123456, 234567]);
+   * ```
+   */
+  async getStatusesBulk(e) {
+    if (e.length === 0)
+      throw new a("orderIds array cannot be empty");
+    if (e.length > 1e3)
+      throw new a("orderIds array cannot exceed 1000 items");
+    return this.client.post(
+      `${N}/api/marketplace/v3/click-collect/orders/status/info`,
+      { ordersIds: e },
+      { rateLimitKey: "in-store-pickup.getStatusesBulk" }
     );
   }
   /**
@@ -16354,170 +17024,274 @@ var zs = class {
     );
   }
   /**
-   * Отменить сборочное задание
+   * Отменить сборочное задание (batch)
    *
-   * Метод отменяет сборочное задание и переводит в статус cancel — отменено продавцом.
+   * Moves up to 1000 assembly orders to `cancel` status (canceled by seller).
+   * Replaces the dead single-order PATCH `.../orders/{id}/cancel` path.
    *
-   * @param orderId - ID сборочного задания
-   * @returns Response data
+   * @param orderIds - Array of assembly order IDs (1-1000 items)
+   * @returns Per-order results
+   * @throws {ValidationError} When orderIds array is empty or exceeds 1000
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
+   * @since 3.17.0
    * @example
-   * await sdk.inStorePickup.updateOrdersCancel(12345);
+   * ```typescript
+   * const result = await sdk.inStorePickup.cancelBulk([123456, 234567]);
+   * ```
    */
-  async updateOrdersCancel(e) {
-    return this.client.patch(
-      `https://marketplace-api.wildberries.ru/api/v3/click-collect/orders/${e}/cancel`,
-      {},
-      { rateLimitKey: "in-store-pickup.patchClickCollectOrdersCancel" }
+  async cancelBulk(e) {
+    if (e.length === 0)
+      throw new a("orderIds array cannot be empty");
+    if (e.length > 1e3)
+      throw new a("orderIds array cannot exceed 1000 items");
+    return this.client.post(
+      `${N}/api/marketplace/v3/click-collect/orders/status/cancel`,
+      { ordersIds: e },
+      { rateLimitKey: "in-store-pickup.cancelBulk" }
     );
   }
   /**
-   * Получить метаданные сборочного задания
+   * Получить идентификаторы маркировки сборочных заданий (batch)
    *
-   * Метод возвращает метаданные сборочного задания.
-   * Перечень метаданных, доступных для сборочного задания, можно получить в списке новых сборочных заданий, поле requiredMeta.
+   * Returns label identifiers for up to 1000 assembly orders in a single request.
+   * Replaces the dead single-order GET `.../orders/{id}/meta` path.
    *
-   * @param orderId - ID сборочного задания
-   * @returns Метаданные сборочного задания
+   * @param request - Request with order IDs (max 1000)
+   * @returns Label identifiers for each order
+   * @throws {ValidationError} When ordersIds array is empty or exceeds 1000
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
+   * @since 3.17.0
    * @example
-   * const result = await sdk.inStorePickup.getOrdersMeta(12345);
-   * console.log(result);
+   * ```typescript
+   * const result = await sdk.inStorePickup.getMetaBulk({ ordersIds: [123456] });
+   * ```
    */
-  async getOrdersMeta(e) {
-    return this.client.get(
-      `https://marketplace-api.wildberries.ru/api/v3/click-collect/orders/${e}/meta`,
-      { rateLimitKey: "in-store-pickup.clickCollectOrdersMeta" }
+  async getMetaBulk(e) {
+    if (e.ordersIds.length === 0)
+      throw new a("ordersIds array cannot be empty");
+    if (e.ordersIds.length > 1e3)
+      throw new a("ordersIds array cannot exceed 1000 items");
+    return this.client.post(
+      `${N}/api/marketplace/v3/click-collect/orders/meta/details`,
+      e,
+      { rateLimitKey: "in-store-pickup.getMetaBulk" }
     );
   }
   /**
-   * Удалить метаданные сборочного задания
+   * Удалить идентификаторы маркировки сборочных заданий (batch)
    *
-   * Метод удаляет значение метаданных сборочного задания для переданного ключа.
-   * Возможные метаданные: imei, uin, gtin, sgtin. Передается только одно значение.
+   * Deletes one label-identifier type (imei/uin/gtin/sgtin/customsDeclaration)
+   * for up to 1000 assembly orders. Replaces the dead single-order DELETE
+   * `.../orders/{id}/meta` path.
    *
-   * @param orderId - ID сборочного задания
-   * @param options - Query parameters
-   * @param options.key - Metadata key to delete (imei, uin, gtin, sgtin)
-   * @returns Response data
+   * @param request - Request with key + order IDs (max 1000)
+   * @returns Per-order results
+   * @throws {ValidationError} When ordersIds array is empty or exceeds 1000
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
-   * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
+   * @since 3.17.0
    * @example
-   * await sdk.inStorePickup.deleteOrdersMeta(12345, { key: 'imei' });
+   * ```typescript
+   * const result = await sdk.inStorePickup.deleteMetaBulk({ key: 'imei', ordersIds: [123456] });
+   * ```
    */
-  async deleteOrdersMeta(e, t) {
-    return this.client.delete(
-      `https://marketplace-api.wildberries.ru/api/v3/click-collect/orders/${e}/meta`,
-      {},
-      { params: t, rateLimitKey: "in-store-pickup.deleteClickCollectOrdersMeta" }
+  async deleteMetaBulk(e) {
+    if (e.ordersIds.length === 0)
+      throw new a("ordersIds array cannot be empty");
+    if (e.ordersIds.length > 1e3)
+      throw new a("ordersIds array cannot exceed 1000 items");
+    return this.client.post(
+      `${N}/api/marketplace/v3/click-collect/orders/meta/delete`,
+      e,
+      { rateLimitKey: "in-store-pickup.deleteMetaBulk" }
     );
   }
   /**
-   * Закрепить за сборочным заданием код маркировки товара (SGTIN)
+   * Закрепить за сборочными заданиями коды маркировки SGTIN (batch)
    *
-   * Метод закрепляет за сборочным заданием код маркировки Честный знак.
-   * Закрепить код маркировки можно только, если в метаданных есть поле sgtins,
-   * а сборочное задание находится в статусе confirm.
+   * Sets Chestny ZNAK labeling codes for up to 1000 assembly orders.
+   * Replaces the dead single-order PUT `.../orders/{id}/meta/sgtin` path.
    *
-   * @param orderId - ID сборочного задания
-   * @param data - Request body data
-   * @returns Response data
+   * @param request - Orders with SGTIN codes (max 1000)
+   * @returns Per-order results
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
+   * @since 3.17.0
    * @example
-   * await sdk.inStorePickup.updateMetaSgtin(12345, { sgtins: ['1234567890123456'] });
+   * ```typescript
+   * const result = await sdk.inStorePickup.setSgtinBulk({
+   *   orders: [{ orderId: 123456, sgtins: ['1234567890123456'] }]
+   * });
+   * ```
    */
-  async updateMetaSgtin(e, t) {
-    return this.client.put(
-      `https://marketplace-api.wildberries.ru/api/v3/click-collect/orders/${e}/meta/sgtin`,
-      t,
-      { rateLimitKey: "in-store-pickup.putClickCollectOrdersMetaSgtin" }
+  async setSgtinBulk(e) {
+    return this.client.post(
+      `${N}/api/marketplace/v3/click-collect/orders/meta/sgtin`,
+      e,
+      { rateLimitKey: "in-store-pickup.setSgtinBulk" }
     );
   }
   /**
-   * Закрепить за сборочным заданием УИН (уникальный идентификационный номер)
+   * Закрепить за сборочными заданиями УИН (batch)
    *
-   * Метод обновляет УИН сборочного задания. У одного сборочного задания может быть только один УИН.
-   * Добавлять маркировку можно только для сборочных заданий в статусе confirm.
+   * Sets UIN values for up to 1000 assembly orders. Replaces the dead
+   * single-order PUT `.../orders/{id}/meta/uin` path.
    *
-   * @param orderId - ID сборочного задания
-   * @param data - Request body data
-   * @returns Response data
+   * @param request - Orders with UIN values (max 1000)
+   * @returns Per-order results
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
+   * @since 3.17.0
    * @example
-   * await sdk.inStorePickup.updateMetaUin(12345, { uin: '1234567890123456' });
+   * ```typescript
+   * const result = await sdk.inStorePickup.setUinBulk({
+   *   orders: [{ orderId: 123456, uin: '1234567890123456' }]
+   * });
+   * ```
    */
-  async updateMetaUin(e, t) {
-    return this.client.put(
-      `https://marketplace-api.wildberries.ru/api/v3/click-collect/orders/${e}/meta/uin`,
-      t,
-      { rateLimitKey: "in-store-pickup.putClickCollectOrdersMetaUin" }
+  async setUinBulk(e) {
+    return this.client.post(
+      `${N}/api/marketplace/v3/click-collect/orders/meta/uin`,
+      e,
+      { rateLimitKey: "in-store-pickup.setUinBulk" }
     );
   }
   /**
-   * Закрепить за сборочным заданием IMEI
+   * Закрепить за сборочными заданиями IMEI (batch)
    *
-   * Метод обновляет IMEI сборочного задания. У одного сборочного задания может быть только один IMEI.
-   * Добавлять маркировку можно только для сборочных заданий в статусе confirm.
+   * Sets IMEI values for up to 1000 assembly orders. Replaces the dead
+   * single-order PUT `.../orders/{id}/meta/imei` path.
    *
-   * @param orderId - ID сборочного задания
-   * @param data - Request body data
-   * @returns Response data
+   * @param request - Orders with IMEI values (max 1000)
+   * @returns Per-order results
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
+   * @since 3.17.0
    * @example
-   * await sdk.inStorePickup.updateMetaImei(12345, { imei: '123456789012345' });
+   * ```typescript
+   * const result = await sdk.inStorePickup.setImeiBulk({
+   *   orders: [{ orderId: 123456, imei: '123456789012345' }]
+   * });
+   * ```
    */
-  async updateMetaImei(e, t) {
-    return this.client.put(
-      `https://marketplace-api.wildberries.ru/api/v3/click-collect/orders/${e}/meta/imei`,
-      t,
-      { rateLimitKey: "in-store-pickup.putClickCollectOrdersMetaImei" }
+  async setImeiBulk(e) {
+    return this.client.post(
+      `${N}/api/marketplace/v3/click-collect/orders/meta/imei`,
+      e,
+      { rateLimitKey: "in-store-pickup.setImeiBulk" }
     );
   }
   /**
-   * Закрепить за сборочным заданием GTIN
+   * Закрепить за сборочными заданиями GTIN (batch)
    *
-   * Метод обновляет GTIN (уникальный ID товара в Беларуси) сборочного задания.
-   * У одного сборочного задания может быть только один GTIN.
-   * Добавлять маркировку можно только для сборочных заданий в статусе confirm.
+   * Sets GTIN values for up to 1000 assembly orders. Replaces the dead
+   * single-order PUT `.../orders/{id}/meta/gtin` path.
    *
-   * @param orderId - ID сборочного задания
-   * @param data - Request body data
-   * @returns Response data
+   * @param request - Orders with GTIN values (max 1000)
+   * @returns Per-order results
    * @throws {AuthenticationError} When API key is invalid (401/403)
    * @throws {RateLimitError} When rate limit exceeded (429)
    * @throws {ValidationError} When request data is invalid (400/422)
    * @throws {NetworkError} When network request fails or times out
+   * @since 3.17.0
    * @example
-   * await sdk.inStorePickup.updateMetaGtin(12345, { gtin: '1234567890123456' });
+   * ```typescript
+   * const result = await sdk.inStorePickup.setGtinBulk({
+   *   orders: [{ orderId: 123456, gtin: '1234567890123' }]
+   * });
+   * ```
    */
-  async updateMetaGtin(e, t) {
-    return this.client.put(
-      `https://marketplace-api.wildberries.ru/api/v3/click-collect/orders/${e}/meta/gtin`,
-      t,
-      { rateLimitKey: "in-store-pickup.putClickCollectOrdersMetaGtin" }
+  async setGtinBulk(e) {
+    return this.client.post(
+      `${N}/api/marketplace/v3/click-collect/orders/meta/gtin`,
+      e,
+      { rateLimitKey: "in-store-pickup.setGtinBulk" }
+    );
+  }
+  // ============================================================================
+  // Bulk B2B marking validation + customs-declaration (task-158)
+  // ============================================================================
+  /**
+   * Check marking-metadata validation (B2B Chestny ZNAK pre-flight)
+   *
+   * Returns label-identifier validation statuses for assembly orders. Call BEFORE
+   * transferring an order to `prepare` to identify orders that would get 409
+   * MetaValidationFail. WB deprecated bulk `POST .../meta/info` on July 15 —
+   * use this `meta/details` method instead.
+   *
+   * Rate limit: 150 req/min, 400ms interval, burst 20 (4XX×10 penalty)
+   *
+   * @param orders - Array of assembly order IDs (max 1000)
+   * @returns Per-order label identifiers + validation statuses
+   * @throws {ValidationError} When orders array is empty or exceeds 1000
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @since 3.16.0
+   * @example
+   * ```typescript
+   * const result = await sdk.inStorePickup.checkMetaValidation([123456, 234567]);
+   * const invalid = result.orders.filter(o => o.isError);
+   * ```
+   */
+  async checkMetaValidation(e) {
+    if (e.length === 0)
+      throw new a("orders array cannot be empty");
+    if (e.length > 1e3)
+      throw new a("orders array cannot exceed 1000 items");
+    return this.client.post(
+      "https://marketplace-api.wildberries.ru/api/marketplace/v3/click-collect/orders/meta/details",
+      { ordersIds: e },
+      { rateLimitKey: "in-store-pickup.checkMetaValidation" }
+    );
+  }
+  /**
+   * Bulk add customs declaration numbers + country-of-origin codes (B2B)
+   *
+   * Sets customs declaration (ДТ) numbers + origin country codes for assembly
+   * orders (statuses `confirm` or `prepare` only). **B2B requirement (since
+   * 2026-07-08):** B2B orders MUST include `originCountryCode` (numeric ОКСМ
+   * code, https://esnsi.gosuslugi.ru/classifiers/16269). Invalid/missing code
+   * for a B2B order → HTTP 200 with `InvalidOriginCountryCode` in that order's
+   * `errors[]` (partial success — check `results[].isError`).
+   *
+   * Rate limit: 20 req/min, 3s interval, burst 500 (4XX×10 penalty)
+   *
+   * @param request - Orders with customs declarations + origin country codes
+   * @returns Per-order results
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {ValidationError} When request data is invalid (400/422)
+   * @since 3.16.0
+   * @example
+   * ```typescript
+   * const result = await sdk.inStorePickup.setCustomsDeclarationBulk({
+   *   orders: [{ orderId: 123456, customsDeclaration: '10704010/010624/0000302', originCountryCode: '643' }]
+   * });
+   * const failed = result.results.filter(r => r.isError);
+   * ```
+   */
+  async setCustomsDeclarationBulk(e) {
+    return this.client.post(
+      "https://marketplace-api.wildberries.ru/api/marketplace/v3/click-collect/orders/meta/customs-declaration",
+      e,
+      { rateLimitKey: "in-store-pickup.setCustomsDeclarationBulk" }
     );
   }
 };
-var M = "https://marketplace-api.wildberries.ru";
-var Js = 30 * 24 * 60 * 60;
-var Xs = class {
+var R = "https://marketplace-api.wildberries.ru";
+var ji = 720 * 60 * 60;
+var Wi = class {
   constructor(e) {
     this.client = e;
   }
@@ -16553,7 +17327,7 @@ var Xs = class {
    * ```
    */
   async getNewOrders() {
-    return this.client.get(`${M}/api/v3/dbs/orders/new`, {
+    return this.client.get(`${R}/api/v3/dbs/orders/new`, {
       rateLimitKey: "orders-dbs.getNewOrders"
     });
   }
@@ -16568,8 +17342,8 @@ var Xs = class {
    * @param params - Query parameters for filtering and pagination
    * @param params.limit - Number of orders to return (1-1000)
    * @param params.next - Pagination cursor (0 for first request)
-   * @param params.dateFrom - Start date as Unix timestamp
-   * @param params.dateTo - End date as Unix timestamp
+   * @param params.dateFrom - Start date as Unix timestamp in SECONDS (not JS ms — use `Math.floor(Date.now()/1000)`)
+   * @param params.dateTo - End date as Unix timestamp in SECONDS (not JS ms — use `Math.floor(Date.now()/1000)`)
    * @returns Promise resolving to orders and next pagination cursor
    * @throws {ValidationError} When parameters are invalid (limit out of range, date range > 30 days)
    * @throws {AuthenticationError} When API key is invalid (401/403)
@@ -16600,15 +17374,15 @@ var Xs = class {
    */
   async getOrders(e) {
     if (e.limit < 1 || e.limit > 1e3)
-      throw new b("limit must be between 1 and 1000");
+      throw new a("limit must be between 1 and 1000");
     if (e.next < 0)
-      throw new b("next must be >= 0");
+      throw new a("next must be >= 0");
     const t = e.dateTo - e.dateFrom;
-    if (t > Js)
-      throw new b("Date range cannot exceed 30 calendar days");
+    if (t > ji)
+      throw new a("Date range cannot exceed 30 calendar days");
     if (t < 0)
-      throw new b("dateFrom must be less than or equal to dateTo");
-    return this.client.get(`${M}/api/v3/dbs/orders`, {
+      throw new a("dateFrom must be less than or equal to dateTo");
+    return this.client.get(`${R}/api/v3/dbs/orders`, {
       params: {
         limit: e.limit,
         next: e.next,
@@ -16649,9 +17423,9 @@ var Xs = class {
    */
   async getClientInfo(e) {
     if (e.length === 0)
-      throw new b("orderIds array cannot be empty");
+      throw new a("orderIds array cannot be empty");
     return this.client.post(
-      `${M}/api/v3/dbs/orders/client`,
+      `${R}/api/v3/dbs/orders/client`,
       { orders: e },
       { rateLimitKey: "orders-dbs.getClientInfo" }
     );
@@ -16695,11 +17469,11 @@ var Xs = class {
    */
   async getB2BInfo(e) {
     if (e.length === 0)
-      throw new b("orderIds array cannot be empty");
+      throw new a("orderIds array cannot be empty");
     if (e.length > 1e3)
-      throw new b("orderIds array cannot exceed 1000 items");
+      throw new a("orderIds array cannot exceed 1000 items");
     return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/b2b/info`,
+      `${R}/api/marketplace/v3/dbs/orders/b2b/info`,
       { ordersIds: e },
       { rateLimitKey: "orders-dbs.getB2BInfo" }
     );
@@ -16719,7 +17493,7 @@ var Xs = class {
    * ```
    */
   async getGroupsInfo(e) {
-    return this.client.post(`${M}/api/v3/dbs/groups/info`, e, {
+    return this.client.post(`${R}/api/v3/dbs/groups/info`, e, {
       rateLimitKey: "orders-dbs.getGroupsInfo"
     });
   }
@@ -16736,7 +17510,7 @@ var Xs = class {
    */
   async getDeliveryDates(e) {
     return this.client.post(
-      `${M}/api/v3/dbs/orders/delivery-date`,
+      `${R}/api/v3/dbs/orders/delivery-date`,
       e,
       { rateLimitKey: "orders-dbs.getDeliveryDates" }
     );
@@ -16744,27 +17518,6 @@ var Xs = class {
   // ==========================================================================
   // Bulk Metadata Endpoints (Story 26.2) - Replace deprecated single-order methods
   // ==========================================================================
-  /**
-   * Get metadata for multiple orders (bulk)
-   *
-   * Replaces the deprecated single-order getMeta() method.
-   * Rate limit: 150 requests/min, 400ms interval, 20 burst
-   *
-   * @param request - Request with order IDs
-   * @returns Promise resolving to bulk metadata response
-   *
-   * @example
-   * ```typescript
-   * const meta = await sdk.ordersDBS.getMetaBulk({ orders: [123456, 234567] });
-   * ```
-   */
-  async getMetaBulk(e) {
-    return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/meta/info`,
-      e,
-      { rateLimitKey: "orders-dbs.getMetaBulk" }
-    );
-  }
   /**
    * Delete metadata for multiple orders (bulk)
    *
@@ -16781,7 +17534,7 @@ var Xs = class {
    */
   async deleteMetaBulk(e) {
     return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/meta/delete`,
+      `${R}/api/marketplace/v3/dbs/orders/meta/delete`,
       e,
       { rateLimitKey: "orders-dbs.deleteMetaBulk" }
     );
@@ -16804,7 +17557,7 @@ var Xs = class {
    */
   async setSgtinBulk(e) {
     return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/meta/sgtin`,
+      `${R}/api/marketplace/v3/dbs/orders/meta/sgtin`,
       e,
       { rateLimitKey: "orders-dbs.setSgtinBulk" }
     );
@@ -16827,7 +17580,7 @@ var Xs = class {
    */
   async setUinBulk(e) {
     return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/meta/uin`,
+      `${R}/api/marketplace/v3/dbs/orders/meta/uin`,
       e,
       { rateLimitKey: "orders-dbs.setUinBulk" }
     );
@@ -16850,7 +17603,7 @@ var Xs = class {
    */
   async setImeiBulk(e) {
     return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/meta/imei`,
+      `${R}/api/marketplace/v3/dbs/orders/meta/imei`,
       e,
       { rateLimitKey: "orders-dbs.setImeiBulk" }
     );
@@ -16873,7 +17626,7 @@ var Xs = class {
    */
   async setGtinBulk(e) {
     return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/meta/gtin`,
+      `${R}/api/marketplace/v3/dbs/orders/meta/gtin`,
       e,
       { rateLimitKey: "orders-dbs.setGtinBulk" }
     );
@@ -16885,18 +17638,23 @@ var Xs = class {
    * Rate limit: 500 requests/min, 120ms interval, 20 burst
    *
    * @param request - Request with order customs declaration data
-   * @returns Promise resolving to bulk set response
+   * @returns Promise resolving to bulk set response. Orders that fail validation return in the
+   *   response with error `InvalidOriginCountryCode` in the errors array (HTTP 200, partial
+   *   success — not thrown).
+   *
+   * **B2B requirement (since 2026-07-08):** B2B orders MUST include `originCountryCode` (numeric
+   * country code, Russian classifier of countries). Without it the declaration cannot be linked.
    *
    * @example
    * ```typescript
    * const result = await sdk.ordersDBS.setCustomsDeclarationBulk({
-   *   orders: [{ orderId: 123456, customsDeclaration: 'CD-123456789' }]
+   *   orders: [{ orderId: 123456, customsDeclaration: 'CD-123456789', originCountryCode: 643 }]
    * });
    * ```
    */
   async setCustomsDeclarationBulk(e) {
     return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/meta/customs-declaration`,
+      `${R}/api/marketplace/v3/dbs/orders/meta/customs-declaration`,
       e,
       { rateLimitKey: "orders-dbs.setCustomsDeclarationBulk" }
     );
@@ -16936,11 +17694,11 @@ var Xs = class {
    */
   async getStatusesBulk(e) {
     if (e.length === 0)
-      throw new b("orderIds array cannot be empty");
+      throw new a("orderIds array cannot be empty");
     if (e.length > 1e3)
-      throw new b("orderIds array cannot exceed 1000 items");
+      throw new a("orderIds array cannot exceed 1000 items");
     return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/status/info`,
+      `${R}/api/marketplace/v3/dbs/orders/status/info`,
       { orders: e },
       { rateLimitKey: "orders-dbs.getStatusesBulk" }
     );
@@ -16979,11 +17737,11 @@ var Xs = class {
    */
   async confirmBulk(e) {
     if (e.length === 0)
-      throw new b("orderIds array cannot be empty");
+      throw new a("orderIds array cannot be empty");
     if (e.length > 1e3)
-      throw new b("orderIds array cannot exceed 1000 items");
+      throw new a("orderIds array cannot exceed 1000 items");
     return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/status/confirm`,
+      `${R}/api/marketplace/v3/dbs/orders/status/confirm`,
       { orders: e },
       { rateLimitKey: "orders-dbs.confirmBulk" }
     );
@@ -17030,11 +17788,11 @@ var Xs = class {
    */
   async deliverBulk(e) {
     if (e.length === 0)
-      throw new b("orderIds array cannot be empty");
+      throw new a("orderIds array cannot be empty");
     if (e.length > 1e3)
-      throw new b("orderIds array cannot exceed 1000 items");
+      throw new a("orderIds array cannot exceed 1000 items");
     return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/status/deliver`,
+      `${R}/api/marketplace/v3/dbs/orders/status/deliver`,
       { orders: e },
       { rateLimitKey: "orders-dbs.deliverBulk" }
     );
@@ -17077,17 +17835,17 @@ var Xs = class {
    */
   async receiveBulk(e) {
     if (e.length === 0)
-      throw new b("orders array cannot be empty");
+      throw new a("orders array cannot be empty");
     if (e.length > 1e3)
-      throw new b("orders array cannot exceed 1000 items");
+      throw new a("orders array cannot exceed 1000 items");
     for (const t of e) {
       if (t.orderId <= 0)
-        throw new b("orderId must be a positive number");
+        throw new a("orderId must be a positive number");
       if (!t.code || t.code === "")
-        throw new b("code cannot be empty");
+        throw new a("code cannot be empty");
     }
     return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/status/receive`,
+      `${R}/api/marketplace/v3/dbs/orders/status/receive`,
       { orders: e },
       { rateLimitKey: "orders-dbs.receiveBulk" }
     );
@@ -17131,17 +17889,17 @@ var Xs = class {
    */
   async rejectBulk(e) {
     if (e.length === 0)
-      throw new b("orders array cannot be empty");
+      throw new a("orders array cannot be empty");
     if (e.length > 1e3)
-      throw new b("orders array cannot exceed 1000 items");
+      throw new a("orders array cannot exceed 1000 items");
     for (const t of e) {
       if (t.orderId <= 0)
-        throw new b("orderId must be a positive number");
+        throw new a("orderId must be a positive number");
       if (!t.code || t.code === "")
-        throw new b("code cannot be empty");
+        throw new a("code cannot be empty");
     }
     return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/status/reject`,
+      `${R}/api/marketplace/v3/dbs/orders/status/reject`,
       { orders: e },
       { rateLimitKey: "orders-dbs.rejectBulk" }
     );
@@ -17180,17 +17938,94 @@ var Xs = class {
    */
   async cancelBulk(e) {
     if (e.length === 0)
-      throw new b("orderIds array cannot be empty");
+      throw new a("orderIds array cannot be empty");
     if (e.length > 1e3)
-      throw new b("orderIds array cannot exceed 1000 items");
+      throw new a("orderIds array cannot exceed 1000 items");
     return this.client.post(
-      `${M}/api/marketplace/v3/dbs/orders/status/cancel`,
+      `${R}/api/marketplace/v3/dbs/orders/status/cancel`,
       { orders: e },
       { rateLimitKey: "orders-dbs.cancelBulk" }
     );
   }
+  /**
+   * Check marking-metadata validation (B2B Chestny ZNAK pre-flight)
+   *
+   * Returns per-order marking-metadata validation status. Call BEFORE
+   * status/deliver to identify orders that would get 409 MetaValidationFail.
+   * Replaces the deprecated getMetaBulk() (meta/info, shutdown July 27).
+   *
+   * Rate limit: 300 req/min, 200ms interval, burst 20 (4XX×10 penalty)
+   *
+   * @param request - Request with DBS order IDs (max 1000)
+   * @returns Per-order validation details
+   * @throws {ValidationError} When orders array is empty or exceeds 1000
+   * @since 3.16.0
+   * @example
+   * ```typescript
+   * const validation = await sdk.ordersDBS.checkMetaValidation({ orders: [123456, 234567] });
+   * const invalid = validation.metaDetails.filter(d => d.status === 'invalid');
+   * if (invalid.length > 0) {
+   *   // fix marking metadata (sgtin/imei/uin/gtin), then deliver
+   * }
+   * await sdk.ordersDBS.deliverStatus({ orders: [123456, 234567] });
+   * ```
+   */
+  async checkMetaValidation(e) {
+    if (e.orders.length === 0)
+      throw new a("orders array cannot be empty");
+    if (e.orders.length > 1e3)
+      throw new a("orders array cannot exceed 1000 items");
+    return this.client.post(
+      `${R}/api/marketplace/v3/dbs/orders/meta/details`,
+      e,
+      { rateLimitKey: "orders-dbs.checkMetaValidation" }
+    );
+  }
+  /**
+   * Get DBS assembly-order stickers
+   *
+   * Returns stickers for DBS (Delivery by Seller) assembly orders with delivery
+   * to a pickup point, in SVG, ZPLV, ZPLH, or PNG format. Maximum 100 stickers
+   * per request.
+   *
+   * Mirrors the FBS `createOrdersSticker` method at the DBS endpoint path.
+   * Request/response shape mirrors FBS stickers — verify field-level details
+   * against the live orders-dbs spec.
+   *
+   * Access (expanded): available to registered/authorized services via a basic
+   * token + secret, as well as personal/service tokens.
+   *
+   * Rate limit: 300 requests per minute, 200ms interval, burst 20 (mirrors FBS
+   * stickers; confirm against the live spec).
+   *
+   * @param options - Sticker format and dimensions (`type`, `width`, `height`)
+   * @param data - Request body containing order IDs (max 100)
+   * @returns Promise resolving to the stickers response
+   * @throws {ValidationError} When the orders array exceeds 100 items
+   * @throws {AuthenticationError} When API key is invalid (401/403)
+   * @throws {RateLimitError} When rate limit exceeded (429)
+   * @throws {NetworkError} When network request fails or times out
+   * @see {@link https://openapi.wildberries.ru/#tag/Sborochnye-zadaniya-DBS/paths/~1api~1marketplace~1v3~1dbs~1orders~1stickers/post}
+   * @example
+   * ```typescript
+   * const result = await sdk.ordersDBS.createOrdersStickers(
+   *   { type: 'png', width: 58, height: 40 },
+   *   { orders: [123, 456] },
+   * );
+   * console.log(result.stickers);
+   * ```
+   */
+  async createOrdersStickers(e, t) {
+    if (t != null && t.orders && t.orders.length > 100)
+      throw new a("orders array cannot exceed 100 items");
+    return this.client.post(
+      `${R}/api/marketplace/v3/dbs/orders/stickers`,
+      t,
+      { params: e, rateLimitKey: "orders-dbs.createOrdersStickers" }
+    );
+  }
 };
-var Qs = class {
+var Hi = class {
   constructor(e) {
     this.client = e;
   }
@@ -17351,48 +18186,48 @@ var Qs = class {
     });
   }
 };
-function Ae(r) {
-  if (!r) return "other";
-  const e = r.toLowerCase().trim();
+function He(r2) {
+  if (!r2) return "other";
+  const e = r2.toLowerCase().trim();
   return e ? /повреждени|поврежд|сломан|разбит|потёрт|царапин|деформ|помят/.test(e) ? "damage" : /брак|дефект|неисправн|не работает|сломалось|не включается/.test(e) ? "defect" : /не подошёл размер|не подошел размер|не по размеру|размер не подошёл|размер не подошел|маловат|великоват|узк|шир/.test(
     e
   ) ? "wrong_size" : /не тот товар|неправильный товар|ошибк[аи] комплект|пришло другое|перепутали/.test(e) ? "wrong_item" : /срок годности|истёк срок|истек срок|просроч|время.*возврат/.test(e) ? "expired" : /не соответств|не как на фото|описан|качество|не оправда/.test(e) ? "not_as_described" : /отказ|раздума|передумал|не понравил|не нужен|вернуть/.test(e) ? "customer_refused" : "other" : "other";
 }
-function Ys(r) {
-  if (r == null || r === "") return 0;
-  const e = parseFloat(r);
+function Gi(r2) {
+  if (r2 == null || r2 === "") return 0;
+  const e = parseFloat(r2);
   return Number.isNaN(e) ? 0 : e;
 }
-function Zs(r, e) {
-  const t = new Date(r), s = new Date(e);
+function Vi(r2, e) {
+  const t = new Date(r2), s3 = new Date(e);
   if (isNaN(t.getTime()))
-    throw new Error(`Invalid dateFrom: '${r}' is not a valid date string`);
-  if (isNaN(s.getTime()))
+    throw new Error(`Invalid dateFrom: '${r2}' is not a valid date string`);
+  if (isNaN(s3.getTime()))
     throw new Error(`Invalid dateTo: '${e}' is not a valid date string`);
-  const a = (s.getTime() - t.getTime()) / (1e3 * 60 * 60 * 24);
-  if (a < 0)
-    throw new Error(`dateFrom (${r}) must be <= dateTo (${e})`);
-  if (a > 31)
+  const n = (s3.getTime() - t.getTime()) / (1e3 * 60 * 60 * 24);
+  if (n < 0)
+    throw new Error(`dateFrom (${r2}) must be <= dateTo (${e})`);
+  if (n > 31)
     throw new Error(
-      `Date range exceeds 31-day limit (got ${Math.round(a)} days). WB getAnalyticsGoodsReturn supports max 31 days. Split your range and call getReturns() multiple times.`
+      `Date range exceeds 31-day limit (got ${Math.round(n)} days). WB getAnalyticsGoodsReturn supports max 31 days. Split your range and call getReturns() multiple times.`
     );
 }
-function ei(r) {
-  return r.isStatusActive === 1 ? "initiated" : r.isStatusActive === 0 && r.completedDt ? "processed" : "received";
+function zi(r2) {
+  return r2.isStatusActive === 1 ? "initiated" : r2.isStatusActive === 0 && r2.completedDt ? "processed" : "received";
 }
-function ti(r) {
+function Ji(r2) {
   const e = [];
-  for (const t of r) {
+  for (const t of r2) {
     if (t.nmId === void 0 || !t.orderId && t.orderId !== 0) continue;
-    const s = t.completedDt ?? t.readyToReturnDt ?? t.orderDt;
-    s && e.push({
+    const s3 = t.completedDt ?? t.readyToReturnDt ?? t.orderDt;
+    s3 && e.push({
       orderId: String(t.orderId),
       nmId: t.nmId,
       orderType: "fbo",
-      returnDate: s,
-      returnStatus: ei(t),
+      returnDate: s3,
+      returnStatus: zi(t),
       returnReason: t.reason ?? "",
-      returnReasonCode: Ae(t.reason ?? ""),
+      returnReasonCode: He(t.reason ?? ""),
       returnCategory: "unknown",
       quantity: 1,
       srid: t.srid
@@ -17400,39 +18235,39 @@ function ti(r) {
   }
   return e;
 }
-function ri(r, e) {
-  if (e.length === 0) return r;
-  const t = /* @__PURE__ */ new Map(), s = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Map();
-  for (const a of e) {
-    const n = a.forPay !== void 0 ? Ys(a.forPay) : 0;
-    if (a.srid && t.set(a.srid, (t.get(a.srid) ?? 0) + n), a.orderId !== void 0 && a.nmId !== void 0) {
-      const o = `${a.orderId}:${a.nmId}`;
-      s.set(o, (s.get(o) ?? 0) + n), a.srid && !i.has(o) && i.set(o, a.srid);
+function Xi(r2, e) {
+  if (e.length === 0) return r2;
+  const t = /* @__PURE__ */ new Map(), s3 = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Map();
+  for (const n of e) {
+    const a2 = n.forPay !== void 0 ? Gi(n.forPay) : 0;
+    if (n.srid && t.set(n.srid, (t.get(n.srid) ?? 0) + a2), n.orderId !== void 0 && n.nmId !== void 0) {
+      const o2 = `${n.orderId}:${n.nmId}`;
+      s3.set(o2, (s3.get(o2) ?? 0) + a2), n.srid && !i.has(o2) && i.set(o2, n.srid);
     }
   }
-  return r.map((a) => {
-    let n, o;
-    if (a.srid && t.has(a.srid))
-      n = t.get(a.srid);
+  return r2.map((n) => {
+    let a2, o2;
+    if (n.srid && t.has(n.srid))
+      a2 = t.get(n.srid);
     else {
-      const u = `${a.orderId}:${a.nmId}`;
-      s.has(u) && (n = s.get(u), o = i.get(u));
+      const u = `${n.orderId}:${n.nmId}`;
+      s3.has(u) && (a2 = s3.get(u), o2 = i.get(u));
     }
-    return n === void 0 ? a : { ...a, returnAmount: n, srid: a.srid ?? o };
+    return a2 === void 0 ? n : { ...n, returnAmount: a2, srid: n.srid ?? o2 };
   });
 }
-function si(r) {
+function Qi(r2) {
   const e = /* @__PURE__ */ new Set();
-  return r.filter((t) => t.srid ? e.has(t.srid) ? false : (e.add(t.srid), true) : true);
+  return r2.filter((t) => t.srid ? e.has(t.srid) ? false : (e.add(t.srid), true) : true);
 }
-var ii = class {
+var Yi = class {
   /**
    * Constructor parameters `_client` and `_ordersFBS` are reserved for
    * v3.10.1 FBS status history implementation. The `_` prefix satisfies
    * TypeScript `noUnusedParameters` while preserving the full DI contract
    * documented in story 13.2.
    */
-  constructor(e, t, s, i) {
+  constructor(e, t, s3, i) {
     this.reports = t, this.finances = i;
   }
   /**
@@ -17440,24 +18275,24 @@ var ii = class {
    * Returns up to FINANCE_PAGE_LIMIT × FINANCE_MAX_PAGES rows; if truncated,
    * pushes a warning into the supplied warnings array.
    */
-  async fetchAllFinanceLines(e, t, s) {
-    const n = [];
-    let o = 0;
+  async fetchAllFinanceLines(e, t, s3) {
+    const a2 = [];
+    let o2 = 0;
     for (let u = 0; u < 5; u++) {
-      const l = await this.finances.getSalesReportsDetailed({
+      const l2 = await this.finances.getSalesReportsDetailed({
         dateFrom: e,
         dateTo: t,
         limit: 1e5,
-        rrdId: o
+        rrdId: o2
       });
-      if (l.length === 0 || (n.push(...l), l.length < 1e5)) break;
-      const p = l[l.length - 1];
-      if (p.rrdId === void 0) break;
-      o = p.rrdId;
+      if (l2.length === 0 || (a2.push(...l2), l2.length < 1e5)) break;
+      const d2 = l2[l2.length - 1];
+      if (d2.rrdId === void 0) break;
+      o2 = d2.rrdId;
     }
-    return n.length >= 1e5 * 5 && s.push(
-      `Finance source truncated at ${n.length} lines (safety cap). Some returnAmount values may be missing for high-volume sellers \u2014 narrow your date range and call getReturns() multiple times.`
-    ), n;
+    return a2.length >= 1e5 * 5 && s3.push(
+      `Finance source truncated at ${a2.length} lines (safety cap). Some returnAmount values may be missing for high-volume sellers \u2014 narrow your date range and call getReturns() multiple times.`
+    ), a2;
   }
   /**
    * Unified return analytics aggregator.
@@ -17489,31 +18324,31 @@ var ii = class {
    * @since v3.10.0
    */
   async getReturns(e) {
-    Zs(e.dateFrom, e.dateTo);
-    const t = e.orderType !== "fbs", s = [];
-    e.orderType !== "fbo" && (e.includeFbsStatusHistory === true ? s.push(
+    Vi(e.dateFrom, e.dateTo);
+    const t = e.orderType !== "fbs", s3 = [];
+    e.orderType !== "fbo" && (e.includeFbsStatusHistory === true ? s3.push(
       "FBS status history fetching is reserved for future implementation in v3.10.0; FBS source skipped"
-    ) : s.push(
+    ) : s3.push(
       "FBS status history skipped \u2014 pass includeFbsStatusHistory: true to include (currently no-op in v3.10.0)"
     ));
-    const [i, a] = await Promise.allSettled([
+    const [i, n] = await Promise.allSettled([
       t ? this.reports.getAnalyticsGoodsReturn({
         dateFrom: e.dateFrom,
         dateTo: e.dateTo
       }) : Promise.resolve(null),
-      this.fetchAllFinanceLines(e.dateFrom, e.dateTo, s)
-    ]), n = [];
-    i.status === "rejected" && n.push({
+      this.fetchAllFinanceLines(e.dateFrom, e.dateTo, s3)
+    ]), a2 = [];
+    i.status === "rejected" && a2.push({
       source: "fbo",
       error: i.reason instanceof Error ? i.reason.message : String(i.reason)
-    }), a.status === "rejected" && n.push({
+    }), n.status === "rejected" && a2.push({
       source: "finance",
-      error: a.reason instanceof Error ? a.reason.message : String(a.reason)
+      error: n.reason instanceof Error ? n.reason.message : String(n.reason)
     });
-    const o = i.status === "fulfilled" && i.value ? ti(i.value.report ?? []) : [], u = a.status === "fulfilled" ? a.value : [], l = {
+    const o2 = i.status === "fulfilled" && i.value ? Ji(i.value.report ?? []) : [], u = n.status === "fulfilled" ? n.value : [], l2 = {
       sources: {
         fbo: t ? {
-          fetched: o.length,
+          fetched: o2.length,
           skipped: false,
           failed: i.status === "rejected",
           reason: i.status === "rejected" ? "fetch failed" : void 0
@@ -17527,14 +18362,14 @@ var ii = class {
         finance: {
           fetched: u.length,
           skipped: false,
-          failed: a.status === "rejected",
-          reason: a.status === "rejected" ? "fetch failed" : void 0
+          failed: n.status === "rejected",
+          reason: n.status === "rejected" ? "fetch failed" : void 0
         }
       }
-    }, p = ri(o, u), f = si(p), m = e.nmIds, g = m ? f.filter((L) => m.includes(L.nmId)) : f;
-    g.sort((L, w) => w.returnDate.localeCompare(L.returnDate));
-    const d = e.offset ?? 0, h = g.length, y = e.limit ?? g.length;
-    return { data: g.slice(d, d + y), total: h, warnings: s, partialFailures: n, _meta: l };
+    }, d2 = Xi(o2, u), m2 = Qi(d2), p2 = e.nmIds, f2 = p2 ? m2.filter((v) => p2.includes(v.nmId)) : m2;
+    f2.sort((v, w2) => w2.returnDate.localeCompare(v.returnDate));
+    const b2 = e.offset ?? 0, S2 = f2.length, g2 = e.limit ?? f2.length;
+    return { data: f2.slice(b2, b2 + g2), total: S2, warnings: s3, partialFailures: a2, _meta: l2 };
   }
   /**
    * Convenience: fetch a single return record by WB orderId.
@@ -17614,44 +18449,44 @@ var ii = class {
       nmIds: e.nmIds,
       orderType: e.orderType
       // No limit — we want ALL records for accurate stats
-    }), s = /* @__PURE__ */ new Map();
-    for (const a of t.data) {
-      let n;
+    }), s3 = /* @__PURE__ */ new Map();
+    for (const n of t.data) {
+      let a2;
       switch (e.groupBy) {
         case "nmId":
-          n = String(a.nmId);
+          a2 = String(n.nmId);
           break;
         case "category":
-          n = a.returnCategory;
+          a2 = n.returnCategory;
           break;
         case "orderType":
-          n = a.orderType;
+          a2 = n.orderType;
           break;
         default: {
           const u = e.groupBy;
           throw new Error(`Unsupported groupBy value: ${String(u)}`);
         }
       }
-      const o = s.get(n) ?? { count: 0, totalAmount: 0, pendingFinanceCount: 0 };
-      o.count++, a.returnAmount !== void 0 ? o.totalAmount += a.returnAmount : o.pendingFinanceCount++, s.set(n, o);
+      const o2 = s3.get(a2) ?? { count: 0, totalAmount: 0, pendingFinanceCount: 0 };
+      o2.count++, n.returnAmount !== void 0 ? o2.totalAmount += n.returnAmount : o2.pendingFinanceCount++, s3.set(a2, o2);
     }
-    const i = Array.from(s.entries()).map(([a, n]) => ({
-      key: a,
-      count: n.count,
-      totalAmount: n.totalAmount,
-      pendingFinanceCount: n.pendingFinanceCount
+    const i = Array.from(s3.entries()).map(([n, a2]) => ({
+      key: n,
+      count: a2.count,
+      totalAmount: a2.totalAmount,
+      pendingFinanceCount: a2.pendingFinanceCount
     }));
-    return i.sort((a, n) => n.count !== a.count ? n.count - a.count : a.key.localeCompare(n.key)), {
+    return i.sort((n, a2) => a2.count !== n.count ? a2.count - n.count : n.key.localeCompare(a2.key)), {
       buckets: i,
-      totalReturns: i.reduce((a, n) => a + n.count, 0),
-      totalAmount: i.reduce((a, n) => a + n.totalAmount, 0),
+      totalReturns: i.reduce((n, a2) => n + a2.count, 0),
+      totalAmount: i.reduce((n, a2) => n + a2.totalAmount, 0),
       warnings: t.warnings,
       partialFailures: t.partialFailures,
       _meta: t._meta
     };
   }
 };
-var aa = class {
+var ca = class {
   /**
    * Initialize the Wildberries SDK with configuration
    *
@@ -17673,17 +18508,18 @@ var aa = class {
    */
   constructor(e) {
     if (!e.apiKey || e.apiKey.trim() === "")
-      throw new Te(
+      throw new et(
         "API key is required. Please provide a valid Wildberries API key in the configuration.",
         401
       );
-    this.client = new Rs(e);
+    this.client = new Di(e);
     const t = e.tokenType ?? "personal";
     (t === "basic" || t === "test") && console.warn(
       `[WildberriesSDK] ${t.charAt(0).toUpperCase() + t.slice(1)} token detected. Reduced rate limits apply. Consider upgrading to a Personal or Service token. See https://dev.wildberries.ru/news/281`
-    ), this.general = new Bs(this.client), this.products = new Os(this.client), this.ordersFBS = new Es(this.client), this.ordersFBW = new Ds(this.client), this.finances = new Is(this.client), this.analytics = new Fs(this.client), this.communications = new Gs(this.client), this.reports = new Ws(this.client), this.promotion = new Hs(this.client), this.tariffs = new Vs(this.client), this.inStorePickup = new zs(this.client), this.ordersDBS = new Xs(this.client), this.userManagement = new Qs(this.client), this.returns = new ii(this.client, this.reports, this.ordersFBS, this.finances);
+    ), this.general = new Ii(this.client), this.products = new xi(this.client), this.ordersFBS = new Ni(this.client), this.ordersFBW = new Fi(this.client), this.finances = new s(this.client), this.analytics = new r(this.client), this.communications = new S(this.client), this.reports = new s2(this.client), this.promotion = new _i(this.client), this.tariffs = new Ui(this.client), this.inStorePickup = new $i(this.client), this.ordersDBS = new Wi(this.client), this.userManagement = new Hi(this.client), this.returns = new Yi(this.client, this.reports, this.ordersFBS, this.finances);
   }
 };
+var ua = mr.version;
 
 // scripts/sync-modules/prices.mjs
 var FETCH_TIMEOUT2 = 3e4;
@@ -17699,7 +18535,7 @@ var noopLog2 = {
 };
 async function wbFetchOfficialPrices(apiKey, log2 = noopLog2) {
   if (!apiKey) return /* @__PURE__ */ new Map();
-  const sdk = new aa({
+  const sdk = new ca({
     apiKey,
     timeout: FETCH_TIMEOUT2
   });
@@ -17715,10 +18551,10 @@ async function wbFetchOfficialPrices(apiKey, log2 = noopLog2) {
       });
       const goods = response?.data?.listGoods || [];
       if (goods.length === 0) break;
-      for (const g of goods) {
-        const size = g.sizes?.[0];
+      for (const g2 of goods) {
+        const size = g2.sizes?.[0];
         if (size?.price != null) {
-          priceMap.set(g.nmID, {
+          priceMap.set(g2.nmID, {
             price: size.price,
             discountedPrice: size.discountedPrice
           });
@@ -17751,7 +18587,7 @@ var noopLog3 = {
 };
 async function wbFetchStocks(nmIDs, apiKey, log2 = noopLog3) {
   if (!nmIDs || nmIDs.length === 0 || !apiKey) return /* @__PURE__ */ new Map();
-  const sdk = new aa({
+  const sdk = new ca({
     apiKey,
     timeout: FETCH_TIMEOUT3
   });
@@ -20686,7 +21522,7 @@ async function ozonFetchAllProducts(clientId, apiKey, log2) {
     log2.write(` ${allItems.length}`);
     lastId = data?.result?.last_id;
     if (!lastId || items.length < 1e3) break;
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise((r2) => setTimeout(r2, 200));
   }
   log2.line(` \u2014 ${allItems.length} products`);
   return allItems;
@@ -20702,7 +21538,7 @@ async function ozonFetchProductInfo(clientId, apiKey, offerIds, log2) {
       visibility: "ALL"
     });
     results.push(...data.items || []);
-    await new Promise((r) => setTimeout(r, REQUEST_DELAY));
+    await new Promise((r2) => setTimeout(r2, REQUEST_DELAY));
   }
   const infoMap = /* @__PURE__ */ new Map();
   for (const item of results) infoMap.set(String(item.offer_id), item);
@@ -20720,7 +21556,7 @@ async function ozonFetchProductAttributes(clientId, apiKey, offerIds, log2) {
       limit: BATCH_SIZE2
     });
     results.push(...data.result || []);
-    await new Promise((r) => setTimeout(r, REQUEST_DELAY));
+    await new Promise((r2) => setTimeout(r2, REQUEST_DELAY));
   }
   const attrMap = /* @__PURE__ */ new Map();
   for (const item of results) attrMap.set(String(item.offer_id), item);
@@ -20814,7 +21650,7 @@ function formatChanges(db, updates) {
         changes.push(`${label}: ${oldVal} \u2192 ${newVal}`);
       }
     } else if (typeof newVal === "boolean" && typeof oldVal === "boolean") {
-      const yesno = (v2) => v2 ? "\u0435\u0441\u0442\u044C" : "\u043D\u0435\u0442";
+      const yesno = (v) => v ? "\u0435\u0441\u0442\u044C" : "\u043D\u0435\u0442";
       if (oldVal !== newVal) changes.push(`${label}: ${yesno(oldVal)} \u2192 ${yesno(newVal)}`);
     } else if (key === "images" && Array.isArray(newVal)) {
       changes.push(`${label}: ${oldVal?.length || 0} \u2192 ${newVal.length} \u0448\u0442`);
@@ -20868,7 +21704,7 @@ async function wbFetch(baseUrl, path, options = {}, attempt = 1) {
     const retryAfter = parseInt(resp.headers.get("Retry-After") || "1", 10);
     const delay = Math.min(retryAfter * 1e3, 3e4);
     log.line(`  429 (\u043F\u043E\u043F\u044B\u0442\u043A\u0430 ${attempt}): \u043F\u043E\u0432\u0442\u043E\u0440 \u0447\u0435\u0440\u0435\u0437 ${delay}\u043C\u0441`);
-    await new Promise((r) => setTimeout(r, delay));
+    await new Promise((r2) => setTimeout(r2, delay));
     return wbFetch(baseUrl, path, options, attempt + 1);
   }
   if (!resp.ok) {
@@ -20895,7 +21731,7 @@ async function wbFetchAllCards(apiKey, trash = false) {
     log.write(` ${allCards.length}/${total}`);
     if (data.cursor && cards.length === ITEMS_PER_WB_CARDS) {
       cursor = data.cursor;
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r2) => setTimeout(r2, 200));
     } else {
       break;
     }
@@ -20906,10 +21742,10 @@ async function wbFetchAllCards(apiKey, trash = false) {
 async function getExistingProducts(prisma) {
   const all = await prisma.product.findMany({ orderBy: { id: "asc" } });
   return {
-    byWbArticle: new Map(all.filter((p) => p.wbArticle).map((p) => [Number(p.wbArticle), p])),
-    byOzonArticle: new Map(all.filter((p) => p.ozonArticle).map((p) => [Number(p.ozonArticle), p])),
-    byId: new Map(all.map((p) => [p.id, p])),
-    bySku: new Map(all.filter((p) => p.sku).map((p) => [p.sku, p])),
+    byWbArticle: new Map(all.filter((p2) => p2.wbArticle).map((p2) => [Number(p2.wbArticle), p2])),
+    byOzonArticle: new Map(all.filter((p2) => p2.ozonArticle).map((p2) => [Number(p2.ozonArticle), p2])),
+    byId: new Map(all.map((p2) => [p2.id, p2])),
+    bySku: new Map(all.filter((p2) => p2.sku).map((p2) => [p2.sku, p2])),
     all
   };
 }
@@ -20993,8 +21829,8 @@ async function updateProduct(prisma, id, data) {
     "sku",
     "ozonArticle"
   ];
-  for (const f of fields) {
-    if (data[f] !== void 0) updateData[f] = data[f];
+  for (const f2 of fields) {
+    if (data[f2] !== void 0) updateData[f2] = data[f2];
   }
   if (Object.keys(updateData).length === 0) return false;
   if (!flags.dry) {
@@ -21028,7 +21864,7 @@ async function main() {
   const prisma = new PrismaClient({
     adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || "" })
   });
-  const sleep = (ms2) => new Promise((r) => setTimeout(r, ms2));
+  const sleep = (ms2) => new Promise((r2) => setTimeout(r2, ms2));
   async function prismaRetry(fn) {
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
@@ -21200,20 +22036,20 @@ async function main() {
         if (shouldRun("ozon-info")) {
           log.progress("ozon-info", 0, 1);
           fetches.push(
-            ozonFetchProductInfo(ozonClientId, ozonApiKey, offerIdList, log).then((r) => {
-              infoMap = r;
+            ozonFetchProductInfo(ozonClientId, ozonApiKey, offerIdList, log).then((r2) => {
+              infoMap = r2;
               log.progress("ozon-info", 1, 1);
-              return r;
+              return r2;
             })
           );
         }
         if (shouldRun("ozon-attrs")) {
           log.progress("ozon-attrs", 0, 1);
           fetches.push(
-            ozonFetchProductAttributes(ozonClientId, ozonApiKey, offerIdList, log).then((r) => {
-              attrMap = r;
+            ozonFetchProductAttributes(ozonClientId, ozonApiKey, offerIdList, log).then((r2) => {
+              attrMap = r2;
               log.progress("ozon-attrs", 1, 1);
-              return r;
+              return r2;
             })
           );
         }
@@ -21223,8 +22059,8 @@ async function main() {
       if (shouldRun("ozon-process")) {
         log.line("\u041E\u0431\u0440\u0430\u0431\u043E\u0442\u043A\u0430 \u0442\u043E\u0432\u0430\u0440\u043E\u0432 Ozon...");
         const ozonLocks = /* @__PURE__ */ new Map();
-        for (const p of existing.all) {
-          if (p.ozonArticle) ozonLocks.set(Number(p.ozonArticle), p.id);
+        for (const p2 of existing.all) {
+          if (p2.ozonArticle) ozonLocks.set(Number(p2.ozonArticle), p2.id);
         }
         const skippedOzonFixes = [];
         const totalOzonItems = ozonItems.filter((i) => i.offerId || i.productId).length;
@@ -21289,7 +22125,7 @@ async function main() {
               composition: ozonComp,
               rating: null,
               inStock: info.stocks?.stocks?.some(
-                (s) => (s.present || 0) - (s.reserved || 0) > 0
+                (s3) => (s3.present || 0) - (s3.reserved || 0) > 0
               ) ?? true,
               nameAutoGenerated: true,
               descAutoGenerated: true

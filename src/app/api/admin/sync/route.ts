@@ -6,6 +6,7 @@
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -37,10 +38,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const runId = runWbSync();
-    // После синхронизации (когда завершится) — сбросить все кеши данных.
-    // Инвалидация делается здесь сразу, т.к. sync-runner сохраняет
-    // результат в историю, а свежие данные нужны с момента запуска.
     invalidateCache();
+    revalidatePath("/");
+    revalidatePath("/catalog");
     return NextResponse.json({ runId, status: "started" });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Sync failed";

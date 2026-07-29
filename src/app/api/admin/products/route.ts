@@ -5,6 +5,7 @@
    ============================================= */
 
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -167,6 +168,8 @@ export async function POST(request: NextRequest) {
 
   invalidateCache("all-products");
   invalidateCache("all-categories");
+  revalidatePath("/");
+  revalidatePath("/catalog");
 
   return NextResponse.json(serializeProduct(product as Record<string, unknown>), { status: 201 });
 }

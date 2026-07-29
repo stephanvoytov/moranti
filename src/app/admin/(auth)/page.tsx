@@ -1,4 +1,4 @@
-import { getProducts, getCategories } from "@/data/products";
+import { getCategories } from "@/data/products";
 import { getWbSyncStatus } from "@/lib/wb-sync";
 import { getOzonSyncStatus } from "@/lib/ozon-sync";
 import Link from "next/link";
@@ -37,97 +37,102 @@ function SyncSection({ label, sync, href }: { label: string; sync: SyncRunRecord
 }
 
 export default async function AdminDashboard() {
-  const [products, categories, models] = await Promise.all([
-    getProducts(),
+  const [allProducts, categories, models, wbSync, ozonSync] = await Promise.all([
+    prismaQuery(() => prisma.product.findMany({ orderBy: { createdAt: "asc" } })),
     getCategories(),
     prismaQuery(() => prisma.model.findMany({
       include: { variants: { where: { archivedAt: null }, select: { id: true, wbArticle: true, ozonArticle: true } } },
+      orderBy: { createdAt: "desc" },
     })),
+    getWbSyncStatus(),
+    getOzonSyncStatus(),
   ]);
-  const [wbSync, ozonSync] = await Promise.all([getWbSyncStatus(), getOzonSyncStatus()]);
 
-  const totalProducts = products.length;
+  const totalProducts = allProducts.length;
   const totalModels = models.length;
   const totalCategories = categories.length;
-  const totalSum = products.reduce((s, p) => s + p.price, 0);
-  const avgPrice = totalProducts ? Math.round(totalSum / totalProducts) : 0;
 
-  const withWb = products.filter((p) => p.wbArticle).length;
-  const withOzon = products.filter((p) => p.ozonArticle).length;
-  const withImages = products.filter((p) => p.images?.length).length;
-  const withColorName = products.filter((p) => p.colorName).length;
-  const linkedToModel = products.filter((p) => p.modelId).length;
+  const inStock = allProducts.filter((p) => p.inStock && !p.archivedAt);
+  const outOfStock = allProducts.filter((p) => !p.inStock && !p.archivedAt);
+  const archived = allProducts.filter((p) => p.archivedAt);
+  const totalSum = inStock.reduce((s, p) => s + p.price, 0);
+  const avgPrice = inStock.length ? Math.round(totalSum / inStock.length) : 0;
 
-  const modelsOnWb = models.filter((m) => m.variants.some((v) => v.wbArticle)).length;
-  const modelsOnOzon = models.filter((m) => m.variants.some((v) => v.ozonArticle)).length;
-  const modelsOnBoth = models.filter((m) => m.variants.some((v) => v.wbArticle) && m.variants.some((v) => v.ozonArticle)).length;
-  const modelsOnlyWb = modelsOnWb - modelsOnBoth;
-  const modelsOnlyOzon = modelsOnOzon - modelsOnBoth;
-  const modelsOnMarketplaces = models.filter((m) => m.variants.some((v) => v.wbArticle || v.ozonArticle)).length;
+  const onWb = allProducts.filter((p) => p.wbArticle);
+  const wbInStock = onWb.filter((p) => (p.wbStock ?? 0) > 0);
+  const wbOutOfStock = onWb.filter((p) => !(p.wbStock ?? 0) > 0);
+
+  const onOzon = allProducts.filter((p) => p.ozonArticle);
+  const ozonInStock = onOzon.filter((p) => (p.ozonStock ?? 0) > 0);
+  const ozonOutOfStock = onOzon.filter((p) => !(p.ozonStock ?? 0) > 0);
+
+  const withImages = allProducts.filter((p) => p.images?.length).length;
+  const withColorName = allProducts.filter((p) => p.colorName).length;
+  const linkedToModel = allProducts.filter((p) => p.modelId).length;
 
   const issues: Issue[] = [];
-  for (const p of products) {
+  for (const p of allProducts) {
+    if (p.archivedAt) continue;
     const tags: Issue["tags"] = [];
     if (!p.colorName) tags.push({ text: "Нет цвета" });
     if (!p.composition) tags.push({ text: "Нет материала" });
     if (!p.images?.length) tags.push({ text: "Нет фото", warn: true });
     if (!p.wbArticle && !p.ozonArticle) tags.push({ text: "Нет в продаже", warn: true });
+    if (p.wbArticle && !(p.wbStock ?? 0) > 0) tags.push({ text: "Нет на WB", warn: true });
+    if (p.ozonArticle && !(p.ozonStock ?? 0) > 0) tags.push({ text: "Нет на Ozon", warn: true });
     if (tags.length) issues.push({ productId: p.id, productName: p.name, tags });
   }
   issues.sort((a, b) => b.tags.length - a.tags.length);
 
-  const recentModels = [...models]
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-    .slice(0, 5);
-
+  const recentModels = models.slice(0, 5);
   const catNames = new Map(categories.map((c) => [c.slug, c.name]));
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>Дашборд</h1>
-        <p className={styles.subtitle}>Моделей {totalModels} · Вариантов {totalProducts} · Средняя цена {avgPrice.toLocaleString("ru-RU")} ₽</p>
+        <p className={styles.subtitle}>
+          Всего вариантов {totalProducts} · В наличии {inStock.length} · Архив {archived.length} · Средняя цена {avgPrice.toLocaleString("ru-RU")} ₽
+        </p>
       </header>
 
-      {/* ——— Marketplace coverage ——— */}
+      {/* ——— Marketplace stock ——— */}
       <div className={styles.grid}>
         <div className={styles.card}>
-          <span className={styles.cardValue}>{modelsOnWb}</span>
-          <span className={styles.cardLabel}>Моделей на WB</span>
+          <span className={styles.cardValue}>{onWb.length}</span>
+          <span className={styles.cardLabel}>На WB</span>
         </div>
         <div className={styles.card}>
-          <span className={styles.cardValue}>{modelsOnOzon}</span>
-          <span className={styles.cardLabel}>Моделей на Ozon</span>
+          <span className={styles.cardValue}>{wbInStock.length}</span>
+          <span className={styles.cardLabel}>В наличии на WB</span>
         </div>
         <div className={styles.card}>
-          <span className={styles.cardValue}>{modelsOnBoth}</span>
-          <span className={styles.cardLabel}>На обеих площадках</span>
-        </div>
-        <div className={styles.card}>
-          <span className={styles.cardValue}>{withWb}</span>
-          <span className={styles.cardLabel}>Вариантов на WB</span>
-        </div>
-        <div className={styles.card}>
-          <span className={styles.cardValue}>{withOzon}</span>
-          <span className={styles.cardLabel}>Вариантов на Ozon</span>
-        </div>
-        <div className={styles.card}>
-          <span className={styles.cardValue}>
-            {totalSum.toLocaleString("ru-RU")} ₽
+          <span className={`${styles.cardValue} ${!wbOutOfStock.length ? styles.cardValueMuted : ""}`}>
+            {wbOutOfStock.length || "—"}
           </span>
-          <span className={styles.cardLabel}>Сумма каталога</span>
+          <span className={styles.cardLabel}>Нет в остатке WB</span>
         </div>
         <div className={styles.card}>
-          <span className={`${styles.cardValue} ${!modelsOnlyWb ? styles.cardValueMuted : ""}`}>
-            {modelsOnlyWb || "—"}
-          </span>
-          <span className={styles.cardLabel}>Только на WB</span>
+          <span className={styles.cardValue}>{onOzon.length}</span>
+          <span className={styles.cardLabel}>На Ozon</span>
         </div>
         <div className={styles.card}>
-          <span className={`${styles.cardValue} ${!modelsOnlyOzon ? styles.cardValueMuted : ""}`}>
-            {modelsOnlyOzon || "—"}
+          <span className={styles.cardValue}>{ozonInStock.length}</span>
+          <span className={styles.cardLabel}>В наличии на Ozon</span>
+        </div>
+        <div className={styles.card}>
+          <span className={`${styles.cardValue} ${!ozonOutOfStock.length ? styles.cardValueMuted : ""}`}>
+            {ozonOutOfStock.length || "—"}
           </span>
-          <span className={styles.cardLabel}>Только на Ozon</span>
+          <span className={styles.cardLabel}>Нет в остатке Ozon</span>
+        </div>
+        <div className={styles.card}>
+          <span className={styles.cardValue}>{inStock.length}</span>
+          <span className={styles.cardLabel}>В наличии всего</span>
+        </div>
+        <div className={styles.card}>
+          <span className={styles.cardValue}>{outOfStock.length}</span>
+          <span className={styles.cardLabel}>Нет в наличии</span>
         </div>
       </div>
 
@@ -153,7 +158,7 @@ export default async function AdminDashboard() {
         </span>
         <span className={styles.summaryItem}>
           <span className={`${styles.summaryDot} ${styles.summaryDotInfo}`} />
-          {modelsOnMarketplaces} моделей на маркетплейсах
+          {totalModels} моделей
         </span>
         <span className={styles.summaryItem}>
           <span className={`${styles.summaryDot} ${styles.summaryDotWarn}`} />
@@ -173,7 +178,7 @@ export default async function AdminDashboard() {
             <span className={`${styles.sectionBadge} ${styles.sectionBadgeDanger}`}>{issues.length}</span>
           </div>
           <div className={styles.table}>
-            {issues.slice(0, 10).map((issue) => (
+            {issues.slice(0, 20).map((issue) => (
               <div key={issue.productId} className={styles.issueRow}>
                 <div className={styles.issueInfo}>
                   <span className={styles.issueName}>{issue.productName}</span>
@@ -232,8 +237,8 @@ export default async function AdminDashboard() {
           <thead>
             <tr>
               <th>Категория</th>
-              <th>Моделей</th>
               <th>Вариантов</th>
+              <th>В наличии</th>
               <th>На WB</th>
               <th>На Ozon</th>
               <th>Средняя цена</th>
@@ -241,16 +246,16 @@ export default async function AdminDashboard() {
           </thead>
           <tbody>
             {categories.map((cat) => {
-              const catProducts = products.filter((p) => p.category === cat.slug);
-              const catModels = models.filter((m) => m.category === cat.slug);
-              const catAvg = catProducts.length
-                ? Math.round(catProducts.reduce((s, p) => s + p.price, 0) / catProducts.length)
+              const catProducts = allProducts.filter((p) => p.category === cat.slug);
+              const catInStock = catProducts.filter((p) => p.inStock && !p.archivedAt);
+              const catAvg = catInStock.length
+                ? Math.round(catInStock.reduce((s, p) => s + p.price, 0) / catInStock.length)
                 : 0;
               return (
                 <tr key={cat.slug}>
                   <td>{cat.name}</td>
-                  <td>{catModels.length}</td>
                   <td>{catProducts.length}</td>
+                  <td>{catInStock.length}</td>
                   <td>{catProducts.filter((p) => p.wbArticle).length}</td>
                   <td>{catProducts.filter((p) => p.ozonArticle).length}</td>
                   <td>{catAvg.toLocaleString("ru-RU")} ₽</td>
