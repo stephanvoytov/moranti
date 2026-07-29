@@ -3,7 +3,7 @@ import { getProducts, getCategories } from "@/data/products";
 import { readSettings } from "@/lib/settings";
 import CatalogPage from "./catalog-content";
 
-export const revalidate = 60;
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Каталог кожаных сумок",
