@@ -492,10 +492,10 @@ async function main() {
         log.line("[SKIP] WB_PRICES_API_KEY не задан — цены не обновляются");
       }
 
-      if (shouldRun("wb-stocks") && wbAnalyticsKey) {
+      if (shouldRun("wb-stocks") && wbApiKey) {
         log.progress("wb-stocks", 0, 1);
-        log.line("Загрузка стоков WB (через SDK)...");
-        wbStockMap = await wbFetchStocks(wbArticles, wbAnalyticsKey, log);
+        log.line("Загрузка стоков WB (полный отчёт)...");
+        wbStockMap = await wbFetchStocks(wbArticles, wbApiKey, log);
         // Накладываем стоки на wbPriceMap
         let mergedCount = 0;
         for (const [nmId, stock] of wbStockMap) {
@@ -511,15 +511,8 @@ async function main() {
           log.line(`  Стоки наложены на ${mergedCount} товаров`);
         }
         log.progress("wb-stocks", 1, 1);
-
-        // Товары WB, которых нет в ответе API — явно ставим stock = 0
-        for (const nmId of wbArticles) {
-          if (!wbPriceMap.has(nmId)) {
-            wbPriceMap.set(nmId, { price: null, discountedPrice: null, stock: 0 });
-          }
-        }
-      } else if (shouldRun("wb-stocks") && !wbAnalyticsKey) {
-        log.line("[SKIP] WB_ANALYTICS_API_KEY не задан — стоки не обновляются");
+      } else if (shouldRun("wb-stocks") && !wbApiKey) {
+        log.line("[SKIP] WB_API_KEY не задан — стоки не обновляются");
       }
 
       if (shouldRun("wb-analytics") && wbAnalyticsKey) {

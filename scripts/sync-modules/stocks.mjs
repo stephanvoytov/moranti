@@ -1,21 +1,20 @@
 /**
- * stocks.mjs — WB Analytics API (остатки/стоки) через SDK.
+ * stocks.mjs — остатки/стоки WB через полный отчёт Analytics API.
  *
- * Использует daytona-wildberries-typescript-sdk:
- *   sdk.analytics.createProductsProduct() → POST /api/v3/analytics/stocks/product
+ * Использует POST /api/v2/stocks-report/products/products БЕЗ фильтра по nmIDs,
+ * чтобы получить данные по ВСЕМ товарам продавца за один запрос.
  *
- * Возвращает stockCount (общий остаток на всех складах) для каждого nmID.
- * Данные обновляются раз в 30 минут.
+ * Без nmIDs API возвращает полный отчёт по всем товарам — включая stockCount
+ * (остатки на текущий день). Период 365 дней, чтобы захватить товары
+ * с минимальной активностью.
  *
- * Требует токен категории «Аналитика» (WB_ANALYTICS_API_KEY).
+ * Не требует отдельного токена — работает с базовым JWT (WB_API_KEY).
  *
  * @module sync-modules/stocks
  */
 
-import { WildberriesSDK } from "daytona-wildberries-typescript-sdk";
-
+const BASE_URL = "https://seller-analytics-api.wildberries.ru";
 const FETCH_TIMEOUT = 30000;
-const BATCH_SIZE = 1000;
 
 /** Логгер по умолчанию — тихий, для тестов. */
 const noopLog = {
@@ -26,69 +25,93 @@ const noopLog = {
 };
 
 /**
- * Получение стоков через Wildberries SDK.
+ * Получение стоков через полный отчёт Analytics API.
  *
- * @param {number[]} nmIDs — массив артикулов WB
- * @param {string}  apiKey — токен категории «Аналитика»
+ * @param {number[]} _nmIDs — игнорируется (используется полный отчёт)
+ * @param {string}  apiKey — токен WB (любой с доступом к Analytics)
  * @param {object}  log    — логгер (опционально, по умолчанию noop)
- * @returns {Promise<Map<number, number>>} nmID → stockCount
+ * @returns {Promise<Map<number, number|null>>} nmID → stockCount (null если нет в отчёте)
  */
-export async function wbFetchStocks(nmIDs, apiKey, log = noopLog) {
-  if (!nmIDs || nmIDs.length === 0 || !apiKey) return new Map();
-
-  const sdk = new WildberriesSDK({
-    apiKey,
-    timeout: FETCH_TIMEOUT,
-  });
+export async function wbFetchStocks(_nmIDs, apiKey, log = noopLog) {
+  if (!apiKey) return new Map();
 
   const stockMap = new Map();
   const now = new Date();
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-  const periodStart = thirtyDaysAgo.toISOString().split("T")[0];
+  const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+  const periodStart = ninetyDaysAgo.toISOString().split("T")[0];
   const periodEnd = now.toISOString().split("T")[0];
 
-  log.write(`  Fetching WB stocks (via SDK) for ${nmIDs.length} cards:`);
+  log.write("  Fetching WB stocks (full report, 90d)...");
 
   try {
-    let offset = 0;
-
-    while (offset < nmIDs.length) {
-      const chunk = nmIDs.slice(offset, offset + BATCH_SIZE);
-
-      const response = await sdk.analytics.createProductsProduct({
-        nmIDs: chunk,
+    const resp = await fetch(`${BASE_URL}/api/v2/stocks-report/products/products`, {
+      method: "POST",
+      headers: {
+        Authorization: apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         currentPeriod: { start: periodStart, end: periodEnd },
         stockType: "",
         skipDeletedNm: true,
         availabilityFilters: [],
         orderBy: { field: "stockCount", mode: "desc" },
-        limit: BATCH_SIZE,
+        limit: 1000,
         offset: 0,
-      });
+      }),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT),
+    });
 
-      const items = response?.data?.items || [];
-
+    if (resp.status === 429) {
+      log.line(`\n  ⚠️ 429 Rate limit, ждём 30с и повторяем...`);
+      await new Promise((r) => setTimeout(r, 30000));
+      try {
+        const retryResp = await fetch(`${BASE_URL}/api/v2/stocks-report/products/products`, {
+          method: "POST",
+          headers: { Authorization: apiKey, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            currentPeriod: { start: periodStart, end: periodEnd },
+            stockType: "",
+            skipDeletedNm: true,
+            availabilityFilters: [],
+            orderBy: { field: "stockCount", mode: "desc" },
+            limit: 1000,
+            offset: 0,
+          }),
+          signal: AbortSignal.timeout(FETCH_TIMEOUT),
+        });
+        if (!retryResp.ok) {
+          log.line(`\n  ⚠️ Retry тоже ${retryResp.status}, пропускаем стоки`);
+          return stockMap;
+        }
+        const data = await retryResp.json();
+        const items = data?.data?.items || [];
+        for (const item of items) {
+          if (item.nmID) stockMap.set(item.nmID, item.metrics?.stockCount ?? null);
+        }
+      } catch (retryErr) {
+        log.line(`\n  ⚠️ Retry error: ${retryErr.message}, пропускаем стоки`);
+        return stockMap;
+      }
+    } else if (resp.ok) {
+      const data = await resp.json();
+      const items = data?.data?.items || [];
       for (const item of items) {
-        if (item.nmID && item.metrics?.stockCount != null) {
-          stockMap.set(item.nmID, item.metrics.stockCount);
+        if (item.nmID) {
+          stockMap.set(item.nmID, item.metrics?.stockCount ?? null);
         }
       }
-
-      log.write(` ${stockMap.size}`);
-
-      offset += BATCH_SIZE;
+    } else {
+      const errText = await resp.text().catch(() => "");
+      log.line(`\n  ⚠️ Stocks API ${resp.status}: ${errText.slice(0, 200)}`);
+      return stockMap;
     }
 
-    log.line(` — ${stockMap.size} products`);
-
-    // Товары, которых нет в ответе API (остаток = 0), явно ставим 0
-    for (const nmId of nmIDs) {
-      if (!stockMap.has(nmId)) {
-        stockMap.set(nmId, 0);
-      }
-    }
+    const inStock = [...stockMap.values()].filter((s) => s !== null && s > 0).length;
+    const zeroStock = [...stockMap.values()].filter((s) => s !== null && s === 0).length;
+    log.line(` — ${stockMap.size} товаров (со стоком: ${inStock}, без: ${zeroStock})`);
   } catch (err) {
-    log.line(`\n  SDK stocks API error: ${err.message}`);
+    log.line(`\n  ⚠️ Stocks API error: ${err.message}`);
   }
 
   return stockMap;
