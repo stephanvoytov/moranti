@@ -85,9 +85,7 @@ const SKIP_PHASE = flags.fromPhase ? new Set() : null;
 
 const PHASES = [
   "wb-cards",
-  "wb-official-prices",
-  "wb-stocks",
-  "wb-analytics",
+  "wb-cards-v4",      // card.wb.ru — цены + стоки + рейтинг
   "wb-process",
   "ozon-list",
   "ozon-info",
@@ -286,9 +284,7 @@ async function wbFetchAllCards(apiKey, trash = false) {
   return allCards;
 }
 
-import { wbFetchAnalytics } from "./sync-modules/analytics.mjs";
-import { wbFetchOfficialPrices } from "./sync-modules/prices.mjs";
-import { wbFetchStocks } from "./sync-modules/stocks.mjs";
+import { wbFetchCardsV4 } from "./sync-modules/wb-cards-v4.mjs";
 
 import {
   ozonFetchAllProducts,
@@ -399,8 +395,6 @@ async function main() {
 
   // ─── Проверка ключей ───
   const wbApiKey = process.env.WB_API_KEY;
-  const wbAnalyticsKey = process.env.WB_ANALYTICS_API_KEY;
-  const wbPricesKey = process.env.WB_PRICES_API_KEY;
   const ozonClientId = process.env.OZON_CLIENT_ID;
   const ozonApiKey = process.env.OZON_API_KEY;
 
@@ -457,9 +451,7 @@ async function main() {
     let trashArticles = [];
     let wbCards = [];
     let wbTrashCards = [];
-    let wbPriceMap = new Map();
-    let wbStockMap = new Map();
-    let wbAnalyticsMap = new Map();
+    let wbCardV4Map = new Map();
     let infoMap, attrMap;
 
     // ═══════════════════════════════════════════
@@ -483,45 +475,11 @@ async function main() {
         log.progress("wb-trash", 1, 1);
       }
 
-      if (shouldRun("wb-official-prices") && wbPricesKey) {
-        log.progress("wb-official-prices", 0, 1);
-        log.line("Загрузка цен WB (через SDK)...");
-        wbPriceMap = await wbFetchOfficialPrices(wbPricesKey, log);
-        log.progress("wb-official-prices", 1, 1);
-      } else if (shouldRun("wb-official-prices") && !wbPricesKey) {
-        log.line("[SKIP] WB_PRICES_API_KEY не задан — цены не обновляются");
-      }
-
-      if (shouldRun("wb-stocks") && wbApiKey) {
-        log.progress("wb-stocks", 0, 1);
-        log.line("Загрузка стоков WB (полный отчёт)...");
-        wbStockMap = await wbFetchStocks(wbArticles, wbApiKey, log);
-        // Накладываем стоки на wbPriceMap
-        let mergedCount = 0;
-        for (const [nmId, stock] of wbStockMap) {
-          const existing = wbPriceMap.get(nmId);
-          if (existing) {
-            wbPriceMap.set(nmId, { ...existing, stock });
-            mergedCount++;
-          } else {
-            wbPriceMap.set(nmId, { price: null, discountedPrice: null, stock });
-          }
-        }
-        if (mergedCount > 0) {
-          log.line(`  Стоки наложены на ${mergedCount} товаров`);
-        }
-        log.progress("wb-stocks", 1, 1);
-      } else if (shouldRun("wb-stocks") && !wbApiKey) {
-        log.line("[SKIP] WB_API_KEY не задан — стоки не обновляются");
-      }
-
-      if (shouldRun("wb-analytics") && wbAnalyticsKey) {
-        log.progress("wb-analytics", 0, 1);
-        log.line("Загрузка аналитики WB (рейтинг)...");
-        wbAnalyticsMap = await wbFetchAnalytics(wbArticles, wbAnalyticsKey, log);
-        log.progress("wb-analytics", 1, 1);
-      } else if (shouldRun("wb-analytics") && !wbAnalyticsKey) {
-        log.line("[SKIP] WB_ANALYTICS_API_KEY не задан — рейтинг и стоки только из Content API");
+      if (shouldRun("wb-cards-v4") && wbArticles?.length > 0) {
+        log.progress("wb-cards-v4", 0, 1);
+        log.line("Загрузка цен/стоков/рейтинга через card.wb.ru...");
+        wbCardV4Map = await wbFetchCardsV4(null, log, wbArticles);
+        log.progress("wb-cards-v4", 1, 1);
       }
 
       if (shouldRun("wb-process")) {
@@ -542,12 +500,15 @@ async function main() {
           let db = vendorCode ? existing.bySku.get(vendorCode) : null;
           if (!db) db = existing.byWbArticle.get(article);
 
-          const wbPrices = wbPriceMap.get(article) || null;
-
-          // WB rating: аналитика (productRating) приоритетнее Content API (card.rating)
-          const analytics = wbAnalyticsMap.get(article) || null;
-          const wbRating = analytics?.productRating != null
-            ? { rating: analytics.productRating, feedbacks: card.feedbacks ?? 0 }
+          // Данные из card.wb.ru (цены, стоки, рейтинг) — приоритетнее Content API
+          const v4 = wbCardV4Map.get(article) || null;
+          const wbPrices = v4 ? {
+            price: v4.price,
+            discountedPrice: v4.discountedPrice,
+            stock: v4.stock,
+          } : null;
+          const wbRating = v4?.rating != null
+            ? { rating: v4.rating, feedbacks: v4.feedbacks ?? card.feedbacks ?? 0 }
             : (card.rating != null
               ? { rating: card.rating, feedbacks: card.feedbacks ?? 0 }
               : null);
@@ -802,7 +763,7 @@ async function main() {
     log.line(`  WB создано:              ${stats.wbCreated}`);
     log.line(`  WB обновлено:            ${stats.wbUpdated}`);
     log.line(`  WB пропущено:            ${stats.wbSkipped}`);
-    log.line(`  WB аналитика:            ${wbAnalyticsMap.size} товаров`);
+    log.line(`  WB card.wb.ru:           ${wbCardV4Map.size} товаров`);
     log.line(`  Ozon создано:            ${stats.ozonCreated}`);
     log.line(`  Ozon обновлено:          ${stats.ozonUpdated}`);
     log.line(`  Ozon пропущено:          ${stats.ozonSkipped}`);
