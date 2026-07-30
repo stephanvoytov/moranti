@@ -88,8 +88,8 @@ export default async function Home() {
               итальянской кожи.
             </p>
             <div className={styles.featuredGrid}>
-              {featured.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {featured.map((product, i) => (
+                <ProductCard key={product.id} product={product} priority={i === 0} />
               ))}
             </div>
           </div>

@@ -14,7 +14,7 @@ export default function Footer() {
             </p>
           </div>
           <div className={styles.col}>
-            <h4>Коллекции</h4>
+            <h3>Коллекции</h3>
             <a href="/catalog?category=crossbody">Кросс-боди</a>
             <a href="/catalog?category=na-plecho">На плечо</a>
             <a href="/catalog?category=baguette">Багет</a>
@@ -23,13 +23,13 @@ export default function Footer() {
             <a href="/catalog?category=backpack">Рюкзаки</a>
           </div>
           <div className={styles.col}>
-            <h4>Помощь</h4>
+            <h3>Помощь</h3>
             <a href="/delivery">Доставка и оплата</a>
             <a href="/care">Уход за сумками</a>
 
           </div>
           <div className={styles.col}>
-            <h4>Магазины</h4>
+            <h3>Магазины</h3>
             <a href={MARKETPLACE_URLS.wbSeller} target="_blank" rel="noopener noreferrer">Wildberries</a>
             <a href={MARKETPLACE_URLS.ozonSeller} target="_blank" rel="noopener noreferrer">Ozon</a>
             <a href="https://www.instagram.com/_utrends/" target="_blank" rel="noopener noreferrer">Instagram</a>

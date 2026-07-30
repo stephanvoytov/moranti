@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Каталог кожаных сумок",
   description:
     "Каталог женских сумок Moranti из натуральной кожи. Модели: crossbody, na-plecho, baguette, tote, saddle, backpack. Более 50 моделей.",
+  alternates: { canonical: "/catalog" },
   openGraph: {
     title: "Каталог сумок Moranti — натуральная кожа",
     description:

@@ -355,6 +355,7 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
                 className={styles.filterSelect}
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value)}
+                aria-label="Сортировка"
               >
                 <option value="default">По умолчанию</option>
                 <option value="popular">По популярности</option>
@@ -433,6 +434,7 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
                   onChange={(e) =>
                     setSelectedMaterial(e.target.value || null)
                   }
+                  aria-label="Материал"
                 >
                   <option value="">Материал</option>
                   {materialOptions.map((mat) => (

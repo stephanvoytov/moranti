@@ -181,9 +181,12 @@ export async function getProducts(): Promise<Product[]> {
   return cacheGet("all-products", async () => {
     try {
       const rows = await prismaQuery(() =>
-        prisma.product.findMany({ orderBy: { createdAt: "asc" } }),
+        prisma.product.findMany({
+          where: { archivedAt: null, inStock: true },
+          orderBy: { createdAt: "asc" },
+        }),
       );
-      return rows.filter((p) => !p.archivedAt && p.inStock).map(mapProduct);
+      return rows.map(mapProduct);
     } catch (err) {
       logger.warn("DB unavailable, fallback to products.json", {
         error: (err as Error)?.message,

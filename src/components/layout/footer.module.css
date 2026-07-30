@@ -35,6 +35,7 @@
   margin: 0;
 }
 
+.col h3,
 .col h4 {
   font-family: var(--font-sans);
   font-size: 11px;
