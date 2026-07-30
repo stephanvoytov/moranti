@@ -44,8 +44,9 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
   const data = {};
 
   // ─── Цены ───
-  const wbPrice = wbPrices?.discountedPrice ?? db?.wbPrice ?? null;
-  const wbOrigPrice = wbPrices?.price ?? db?.wbOriginalPrice ?? null;
+  // WB API: price = current (со скидкой), discountedPrice = оригинал
+  const wbPrice = wbPrices?.price ?? db?.wbPrice ?? null;
+  const wbOrigPrice = wbPrices?.discountedPrice ?? db?.wbOriginalPrice ?? null;
   const ozonPriceVal = ozonInfo?.price != null ? Number(ozonInfo.price) : db?.ozonPrice ?? null;
   const ozonOrigPriceVal = ozonInfo?.old_price != null ? Number(ozonInfo.old_price) : db?.ozonOriginalPrice ?? null;
 

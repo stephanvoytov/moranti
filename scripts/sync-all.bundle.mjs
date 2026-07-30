@@ -655,8 +655,8 @@ function makeSlug(s3) {
 var import_name_generator = __toESM(require_name_generator(), 1);
 function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAttrs, ozonRating, db) {
   const data = {};
-  const wbPrice = wbPrices?.discountedPrice ?? db?.wbPrice ?? null;
-  const wbOrigPrice = wbPrices?.price ?? db?.wbOriginalPrice ?? null;
+  const wbPrice = wbPrices?.price ?? db?.wbPrice ?? null;
+  const wbOrigPrice = wbPrices?.discountedPrice ?? db?.wbOriginalPrice ?? null;
   const ozonPriceVal = ozonInfo?.price != null ? Number(ozonInfo.price) : db?.ozonPrice ?? null;
   const ozonOrigPriceVal = ozonInfo?.old_price != null ? Number(ozonInfo.old_price) : db?.ozonOriginalPrice ?? null;
   if (wbPrice !== (db?.wbPrice ?? null)) data.wbPrice = wbPrice;
