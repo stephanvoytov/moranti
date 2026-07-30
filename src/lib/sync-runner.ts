@@ -4,6 +4,10 @@
  * Запускает sync-all.mjs в том же процессе через import() вместо child_process,
  * потому что на Vercel node_modules недоступны дочерним процессам на файловой системе.
  *
+ * Бандл синхронизации загружается динамически (import()) только в рантайме,
+ * чтобы Turbopack не пытался трассировать его зависимости (http2-wrapper,
+ * ozon-seller-sdk) во время сборки.
+ *
  * API:
  *   startSync(platform) → runId
  *   getSyncProgress(runId) → SyncProgress | null
@@ -14,17 +18,6 @@ import { revalidatePath } from "next/cache";
 import { invalidateCache } from "@/lib/data-cache";
 import { addSyncRun, getLastSyncRun } from "./sync-history";
 import type { SyncRunRecord, SyncRunDetail } from "./sync-history";
-// Явные импорты для Vercel File Tracer — включает SDK в Lambda
-import { WildberriesSDK } from "daytona-wildberries-typescript-sdk";
-import { ApiError } from "ozon-seller-sdk";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
-// Статический импорт бандла синхронизации — Turbopack трассирует его,
-// включает все зависимости (6.1мб) в бандл серверлесс-функции.
-// outputFileTracingIncludes (next.config.ts) гарантирует, что файл в деплое.
-import { runWbSync, runOzonSync } from "../../scripts/sync-all.bundle.mjs";
-
-[WildberriesSDK, ApiError, PrismaPg, PrismaClient];
 
 /* ─── Типы прогресса ─── */
 
@@ -250,13 +243,17 @@ async function runSync(runId: string, platform: "wb" | "ozon") {
       throw new Error(msg);
     }) as (code?: number) => never;
 
-    // Статический импорт уже загружен наверху (runWbSync, runOzonSync).
+    // Динамический импорт бандла — загружается только в рантайме, на Vercel файл
+    // включён через outputFileTracingIncludes в next.config.ts.
     // console.log и process.exit перехватываются через глобальные объекты
-    // — все функции используют их, т.к. это не замыкания, а рантайм-глобалы.
+    // — функции внутри бандла используют их, т.к. это не замыкания, а рантайм-глобалы.
+    const { runWbSync: runWb, runOzonSync: runOz } = await import(
+      "../../scripts/sync-all.bundle.mjs"
+    );
     if (platform === "wb") {
-      await runWbSync();
+      await runWb();
     } else {
-      await runOzonSync();
+      await runOz();
     }
 
     // Успех — парсим статистику
