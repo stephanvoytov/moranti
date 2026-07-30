@@ -24,7 +24,6 @@ export default function Hero({ settings }: { settings: HeroSettings }) {
       )}
       <div className={styles.overlay} />
       <div className={styles.content}>
-        <p className={styles.kicker}>{settings.subtitle || "Премиальный бренд женских сумок"}</p>
         <h1 className={styles.title}>{settings.title}</h1>
         <p className={styles.tagline}>{settings.tagline}</p>
         <Link href="/catalog" className={styles.cta}>

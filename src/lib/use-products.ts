@@ -27,6 +27,27 @@ function fetchProducts(): Promise<ProductsData> {
   return globalPromise;
 }
 
+/* ——— Для страниц, где нужны и нет в наличии (избранное, недавние) ——— */
+
+let allPromise: Promise<ProductsData> | null = null;
+
+function fetchAllProducts(): Promise<ProductsData> {
+  if (allPromise) return allPromise;
+
+  allPromise = fetch("/api/data/products/all")
+    .then((res) => res.json())
+    .then((data) => {
+      allPromise = null;
+      return data;
+    })
+    .catch((err) => {
+      allPromise = null;
+      throw err;
+    });
+
+  return allPromise;
+}
+
 export function useProducts(): ProductsData {
   const [data, setData] = useState<ProductsData>({
     products: [],
@@ -36,6 +57,24 @@ export function useProducts(): ProductsData {
   useEffect(() => {
     let cancelled = false;
     fetchProducts().then((result) => {
+      if (!cancelled) setData(result);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  return data;
+}
+
+/** Все товары, включая нет в наличии — для избранного и недавно просмотренных */
+export function useAllProducts(): ProductsData {
+  const [data, setData] = useState<ProductsData>({
+    products: [],
+    categories: [],
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchAllProducts().then((result) => {
       if (!cancelled) setData(result);
     });
     return () => { cancelled = true; };

@@ -28,7 +28,7 @@ export interface SiteSettings {
 const DEFAULTS: SiteSettings = {
   hero: {
     title: "Moranti",
-    tagline: "Минимум пафоса — максимум качества.",
+    tagline: "Сумки из натуральной итальянской кожи. Минимум пафоса — максимум качества. Из Италии.",
     subtitle: "Кожаные сумки на каждый день",
     image: "",
   },

@@ -116,18 +116,26 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         <div className={styles.name}>
           <Link href={link}>{product.name}</Link>
         </div>
-        <div className={styles.priceRow}>
-          <span
-            className={`${styles.currentPrice} ${!loading && livePrice ? styles.livePrice : ""}`}
-          >
-            {displayPrice.toLocaleString("ru-RU")} ₽
-          </span>
-          {showOriginal && (
-            <span className={styles.oldPrice}>
-              {displayOriginal.toLocaleString("ru-RU")} ₽
+        {product.inStock === false || product.archivedAt ? (
+          <div className={styles.priceRow}>
+            <span className={styles.outOfStockText}>
+              {product.archivedAt ? "Архивирован" : "Нет в наличии"}
             </span>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className={styles.priceRow}>
+            <span
+              className={`${styles.currentPrice} ${!loading && livePrice ? styles.livePrice : ""}`}
+            >
+              {displayPrice.toLocaleString("ru-RU")} ₽
+            </span>
+            {showOriginal && (
+              <span className={styles.oldPrice}>
+                {displayOriginal.toLocaleString("ru-RU")} ₽
+              </span>
+            )}
+          </div>
+        )}
         {product.rating && product.rating > 4 ? (
           <div className={styles.rating}>
             <span className={styles.stars}>

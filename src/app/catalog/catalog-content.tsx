@@ -165,16 +165,23 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
     return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
   }, [selectedMarketplace, selectedCategory, selectedColor, selectedMaterial, sortOption, searchInput, priceMin, priceMax, page]);
 
-  // ― Recently viewed ―
+  // ― Recently viewed (все товары, включая нет в наличии) ―
   const [recentlyViewed, setRecentlyViewed] = useState<number[]>([]);
+  const [allForRecent, setAllForRecent] = useState<Product[]>([]);
   const drag = useDragScroll<HTMLDivElement>();
 
   useEffect(() => {
     setRecentlyViewed(getRecentlyViewed());
+    // Загружаем все товары (вкл. нет в наличии) для recently viewed
+    fetch("/api/data/products/all")
+      .then((res) => res.json())
+      .then((data) => setAllForRecent(data.products))
+      .catch(() => {});
   }, []);
 
+  const recentSource = allForRecent.length > 0 ? allForRecent : products;
   const recentProducts = recentlyViewed
-    .map((article) => products.find((p) => p.wbArticle === article))
+    .map((article) => recentSource.find((p) => p.wbArticle === article))
     .filter((p): p is NonNullable<typeof p> => p != null);
 
   // Reset category when URL changes

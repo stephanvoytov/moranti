@@ -195,6 +195,25 @@ export async function getProducts(): Promise<Product[]> {
   });
 }
 
+/** Все товары, включая нет в наличии (кроме архивных) */
+export async function getAllProducts(): Promise<Product[]> {
+  return cacheGet("all-products-all", async () => {
+    try {
+      const rows = await prismaQuery(() =>
+        prisma.product.findMany({ orderBy: { createdAt: "asc" } }),
+      );
+      return rows.filter((p) => !p.archivedAt).map(mapProduct);
+    } catch (err) {
+      logger.warn("DB unavailable, fallback to products.json (all)", {
+        error: (err as Error)?.message,
+      });
+      const fallback = loadJsonFallback<{ products: Product[] }>("products.json");
+      if (!fallback?.products) throw err;
+      return fallback.products;
+    }
+  });
+}
+
 export async function getProduct(slug: string): Promise<Product | null> {
   // ——— Сначала ищем в кеше неархивных продуктов ———
   const all = await getProducts();

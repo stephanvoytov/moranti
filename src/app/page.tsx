@@ -47,7 +47,7 @@ export default async function Home() {
             найдётся для любого сценария.
           </p>
           <div className={styles.collectionsGrid}>
-            {categories.map((cat) => {
+            {categories.filter((cat) => cat.count > 0).map((cat) => {
               const img = getCategoryImage(products, cat.slug, categoryImages);
               return (
                 <Link

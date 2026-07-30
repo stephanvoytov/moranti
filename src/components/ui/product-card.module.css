@@ -172,6 +172,15 @@
   font-variant-numeric: tabular-nums;
 }
 
+.outOfStockText {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 /* ——— Rating ——— */
 
 .rating {

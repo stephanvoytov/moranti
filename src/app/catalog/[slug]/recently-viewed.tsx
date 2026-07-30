@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { getRecentlyViewed } from "@/lib/recently-viewed";
-import { useProducts } from "@/lib/use-products";
+import { useAllProducts } from "@/lib/use-products";
 import { useDragScroll } from "@/lib/use-drag-scroll";
 import ProductCard from "@/components/ui/product-card";
 import styles from "./page.module.css";
 
 export default function RecentlyViewed() {
-  const { products } = useProducts();
+  const { products } = useAllProducts();
   const [recentArticles, setRecentArticles] = useState<number[]>([]);
   const drag = useDragScroll<HTMLDivElement>();
 

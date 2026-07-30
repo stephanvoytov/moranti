@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useFavorites } from "@/lib/favorites-context";
-import { useProducts } from "@/lib/use-products";
+import { useAllProducts } from "@/lib/use-products";
 import ProductCard from "@/components/ui/product-card";
 import styles from "./page.module.css";
 
 export default function FavoritesPage() {
-  const { products } = useProducts();
+  const { products } = useAllProducts();
   const { favorites, count, clearFavorites } = useFavorites();
 
   const favProducts = products.filter((p) => favorites.includes(p.wbArticle));
