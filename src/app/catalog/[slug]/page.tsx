@@ -26,20 +26,29 @@ export async function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
 }
 
+const CATEGORY_NAMES: Record<string, string> = {
+  crossbody: "кросс-боди", "na-plecho": "на плечо", baguette: "багет",
+  tote: "тоут", saddle: "седло", backpack: "рюкзак",
+};
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProduct(slug);
   if (!product) return { title: "Товар не найден" };
 
+  const catName = CATEGORY_NAMES[product.category] || product.category;
+  const composition = product.composition || "натуральной кожи";
+  const metaDesc = `Купить ${product.name} в интернет-магазине Moranti. ${catName} из ${composition}. Цена: ${product.price.toLocaleString("ru-RU")} ₽. Доставка по России.`;
+
   return {
     title: product.name,
-    description: product.description,
+    description: metaDesc,
     alternates: {
       canonical: `/catalog/${product.slug}`,
     },
     openGraph: {
       title: `${product.name} — Moranti`,
-      description: product.description,
+      description: metaDesc,
       url: `/catalog/${product.slug}`,
       type: "website",
       images: product.image
@@ -146,6 +155,17 @@ export default async function ProductPage({ params }: Props) {
         availability: "https://schema.org/InStock",
       };
 
+  const catName = CATEGORY_NAMES[product.category] || product.category;
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Главная", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Каталог", item: `${siteUrl}/catalog` },
+      { "@type": "ListItem", position: 3, name: product.name, item: `${siteUrl}/catalog/${product.slug}` },
+    ],
+  };
+
   const productJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -172,6 +192,13 @@ export default async function ProductPage({ params }: Props) {
       {/* Track recently viewed */}
       <RecentlyViewedTracker wbArticle={product.wbArticle} />
 
+      {/* BreadcrumbList JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd),
+        }}
+      />
       {/* Product JSON-LD */}
       <script
         type="application/ld+json"
@@ -280,6 +307,11 @@ export default async function ProductPage({ params }: Props) {
               ))}
             </div>
           )}
+
+          {/* SEO H2 */}
+          <h2 className={styles.seoH2}>
+            {product.name} — {catName} из {product.composition || "натуральной кожи"}
+          </h2>
 
           {/* Tabs: Description / Characteristics / Dimensions */}
           <ProductTabs
