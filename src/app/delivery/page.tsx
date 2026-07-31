@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Доставка",
   description:
     "Как заказать и получить сумку Moranti. Доставка через Wildberries и Ozon.",
+  alternates: {
+    canonical: "/delivery",
+  },
   openGraph: {
     title: "Доставка — Moranti",
     description: "Заказ и доставка сумок Moranti.",

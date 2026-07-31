@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Уход за сумками",
   description:
     "Рекомендации по уходу за сумками Moranti из натуральной итальянской кожи и замши. Как чистить, хранить и продлить срок службы.",
+  alternates: {
+    canonical: "/care",
+  },
   openGraph: {
     title: "Уход за сумками — Moranti",
     description: "Как ухаживать за сумками из натуральной кожи и замши.",

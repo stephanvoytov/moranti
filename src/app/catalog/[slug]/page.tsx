@@ -43,18 +43,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const color = (product.colorName ?? "").split(",")[0].trim();
   const colorPart = color ? ` (${color})` : "";
 
-  // Если имя + цвет повторяются у другой модели — добавляем артикул WB
-  // Считаем по всем неархивным товарам (нет в наличии тоже индексируются)
+  // Если имя + цвет повторяются у другой модели — добавляем цену
+  // (анализ на 102 товарах: остаётся 2 группы дублей вместо 20 без дискриминатора)
   const all = await getAllProducts();
   const twins = all.filter(
     (p) =>
       p.name === product.name &&
       ((p.colorName ?? "").split(",")[0].trim()) === color,
   );
-  const articlePart =
-    twins.length > 1 && product.wbArticle ? ` №${product.wbArticle}` : "";
+  const pricePart =
+    twins.length > 1 ? `, ${product.price.toLocaleString("ru-RU")} ₽` : "";
 
-  const title = `${product.name}${colorPart}${articlePart} — купить | Moranti`;
+  const title = `${product.name}${colorPart}${pricePart} — купить | Moranti`;
 
   // Архивные товары: страница доступна, но из индекса убираем (тупик для пользователя)
   const noindex = Boolean(product.archivedAt);
@@ -74,7 +74,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       canonical: `/catalog/${product.slug}`,
     },
     openGraph: {
-      title: `${product.name}${colorPart}${articlePart} — Moranti`,
+      title: `${product.name}${colorPart}${pricePart} — Moranti`,
       description: metaDesc,
       url: `/catalog/${product.slug}`,
       type: "website",
@@ -337,7 +337,7 @@ export default async function ProductPage({ params }: Props) {
 
           {/* SEO H2 */}
           <h2 className={styles.seoH2}>
-            {product.name} — {catName} из {product.composition || "натуральной кожи"}
+            {product.name} — {catName}, {product.composition || "натуральная кожа"}
           </h2>
 
           {/* Tabs: Description / Characteristics / Dimensions */}

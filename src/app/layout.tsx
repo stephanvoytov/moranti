@@ -77,9 +77,6 @@ export async function generateMetadata(): Promise<Metadata> {
       "женские сумки", "сумки через плечо", "сумки из замши", "классические сумки",
       "кросс-боди", "тоут", "багет", "рюкзак кожаный",
     ],
-    alternates: {
-      canonical: "/",
-    },
     openGraph: {
       title: defaultTitle,
       description: defaultDescription,
