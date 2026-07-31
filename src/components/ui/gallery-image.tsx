@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import SmartImage from "./smart-image";
 
 interface Props {
@@ -24,7 +24,12 @@ function upgradeUrl(url: string): string {
   return url.replace("/c516x688/", "/big/");
 }
 
-export default function GalleryImage({
+export default function GalleryImage(props: Props) {
+  // key={src} пересоздаёт состояние при смене картинки — без useEffect
+  return <GalleryImageInner key={props.src} {...props} />;
+}
+
+function GalleryImageInner({
   src,
   alt,
   width = 600,
@@ -37,10 +42,6 @@ export default function GalleryImage({
 }: Props) {
   const [currentSrc, setCurrentSrc] = useState(() => upgradeUrl(src));
 
-  useEffect(() => {
-    setCurrentSrc(upgradeUrl(src));
-  }, [src]);
-
   // big не загрузился → пробуем оригинальный URL; если и он не загрузился —
   // currentSrc не изменится, и SmartImage перейдёт в состояние «нет фото»
   const onError = useCallback(() => {
@@ -49,7 +50,6 @@ export default function GalleryImage({
 
   return (
     <SmartImage
-      key={src}
       src={currentSrc}
       alt={alt}
       width={width}

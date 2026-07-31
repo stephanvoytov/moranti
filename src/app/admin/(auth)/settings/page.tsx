@@ -65,7 +65,6 @@ export default function AdminSettingsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [form, setForm] = useState<SettingsForm>(emptyForm);
-  const [rawSettings, setRawSettings] = useState<Record<string, unknown>>({});
   const [jsonText, setJsonText] = useState("");
   const [mode, setMode] = useState<"form" | "json">("form");
   const [loading, setLoading] = useState(true);
@@ -86,7 +85,6 @@ export default function AdminSettingsPage() {
           setError(data.error);
           return;
         }
-        setRawSettings(data);
         setJsonText(JSON.stringify(data, null, 2));
         setForm({
           heroTitle: data.hero?.title || "",
@@ -241,7 +239,6 @@ export default function AdminSettingsPage() {
   function switchToForm() {
     try {
       const parsed = JSON.parse(jsonText);
-      setRawSettings(parsed);
       setForm({
         heroTitle: parsed.hero?.title || "",
         heroTagline: parsed.hero?.tagline || "",

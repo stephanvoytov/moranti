@@ -5,6 +5,7 @@
 
 import { readFileSync, existsSync } from "fs";
 import path from "path";
+import type { Prisma } from "@prisma/client";
 import prisma, { prismaQuery } from "@/lib/prisma";
 import { cacheGet, invalidateCache } from "@/lib/data-cache";
 import { logger } from "@/lib/logger";
@@ -93,8 +94,8 @@ export async function writeSettings(
   await prismaQuery(() =>
     prisma.settings.upsert({
       where: { id: "singleton" },
-      create: { id: "singleton", data: merged as any },
-      update: { data: merged as any },
+      create: { id: "singleton", data: merged as unknown as Prisma.InputJsonValue },
+      update: { data: merged as unknown as Prisma.InputJsonValue },
     }),
   );
 

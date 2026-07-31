@@ -31,7 +31,8 @@ export default function AdminLoading() {
             key={i}
             style={{
               height: 16,
-              width: 80 + Math.random() * 60,
+              // Детерминированная вариация ширины (без Math.random в рендере)
+              width: 80 + (i % 4) * 20,
               borderRadius: 4,
               background: "#ddd",
               animation: "pulse 1.5s ease-in-out infinite",

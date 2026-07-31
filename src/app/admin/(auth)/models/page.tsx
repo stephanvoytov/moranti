@@ -90,6 +90,8 @@ export default function AdminModelsKanban() {
     } finally { setLoading(false); }
   }, [router]);
 
+  // Fetch on mount — легитимный паттерн загрузки данных при монтировании.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchData(); }, [fetchData]);
 
   // ─── Build columns ───
@@ -350,7 +352,6 @@ export default function AdminModelsKanban() {
       {/* ─── Kanban board ─── */}
       <div className={styles.board}>
         {columns.map((col) => {
-          const isEmpty = col.id !== "__unassigned" && col.items.length === 0;
           const isOver = dragOverCol === col.id;
 
           return (

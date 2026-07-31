@@ -1,4 +1,5 @@
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
+import Link from "next/link";
 import styles from "./footer.module.css";
 
 export default function Footer() {
@@ -15,17 +16,17 @@ export default function Footer() {
           </div>
           <div className={styles.col}>
             <h3>Коллекции</h3>
-            <a href="/catalog?category=crossbody">Кросс-боди</a>
-            <a href="/catalog?category=na-plecho">На плечо</a>
-            <a href="/catalog?category=baguette">Багет</a>
-            <a href="/catalog?category=tote">Тоут</a>
-            <a href="/catalog?category=saddle">Седло</a>
-            <a href="/catalog?category=backpack">Рюкзаки</a>
+            <Link href="/catalog?category=crossbody">Кросс-боди</Link>
+            <Link href="/catalog?category=na-plecho">На плечо</Link>
+            <Link href="/catalog?category=baguette">Багет</Link>
+            <Link href="/catalog?category=tote">Тоут</Link>
+            <Link href="/catalog?category=saddle">Седло</Link>
+            <Link href="/catalog?category=backpack">Рюкзаки</Link>
           </div>
           <div className={styles.col}>
             <h3>Помощь</h3>
-            <a href="/delivery">Доставка и оплата</a>
-            <a href="/care">Уход за сумками</a>
+            <Link href="/delivery">Доставка и оплата</Link>
+            <Link href="/care">Уход за сумками</Link>
 
           </div>
           <div className={styles.col}>

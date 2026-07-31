@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import styles from "./smart-image.module.css";
 
 interface SmartImageProps {
@@ -24,10 +24,18 @@ interface SmartImageProps {
  * Рендерит fragment — placeholder позиционируется absolute относительно
  * родителя (у родителя должен быть position: relative).
  *
- * Анти-мерцание: после первой успешной загрузки placeholder при смене src
- * не показывается — важно для hover-циклов карточек (кеш-хиты).
+ * Анти-мерцание: уже загруженные src запоминаются в модульном кэше, и при
+ * повторной смене src (hover-циклы карточек, кеш-хиты) placeholder не
+ * показывается — состояние пересоздаётся через key при смене src.
  */
-export default function SmartImage({
+const loadedCache = new Set<string>();
+
+export default function SmartImage(props: SmartImageProps) {
+  // key={src} пересоздаёт состояние при смене картинки — без useEffect
+  return <SmartImageInner key={props.src ?? ""} {...props} />;
+}
+
+function SmartImageInner({
   src,
   alt,
   className,
@@ -40,17 +48,11 @@ export default function SmartImage({
   onError,
   placeholderClassName,
 }: SmartImageProps) {
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(() => (src ? loadedCache.has(src) : false));
   const [failed, setFailed] = useState(false);
-  const everLoaded = useRef(false);
-
-  useEffect(() => {
-    if (!everLoaded.current) setLoaded(false);
-    setFailed(false);
-  }, [src]);
 
   const handleLoad = () => {
-    everLoaded.current = true;
+    if (src) loadedCache.add(src);
     setLoaded(true);
   };
 

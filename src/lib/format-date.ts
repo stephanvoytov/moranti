@@ -2,23 +2,10 @@
  * format-date.ts — утилиты форматирования дат без внешних зависимостей.
  */
 
-const RU_RELATIVE: Record<string, string> = {
-  justNow: "только что",
-  minuteAgo: "1 минуту назад",
-  minutesAgo: "мин. назад",
-  hourAgo: "1 час назад",
-  hoursAgo: "ч. назад",
-  yesterday: "вчера",
-  daysAgo: "дн. назад",
-};
-
 /**
  * Human-readable "time ago" on Russian.
  */
-export function formatDistanceToNow(
-  date: Date,
-  options?: { addSuffix?: boolean; locale?: string }
-): string {
+export function formatDistanceToNow(date: Date): string {
   const now = Date.now();
   const diffMs = now - date.getTime();
 

@@ -5,7 +5,7 @@
  * (миграция не накатана), падает на JSON-файл в /tmp.
  */
 
-import { prisma, prismaQuery } from "./prisma";
+import { prisma } from "./prisma";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import path from "path";
 import { logger } from "./logger";

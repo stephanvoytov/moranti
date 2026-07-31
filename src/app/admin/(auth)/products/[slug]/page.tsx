@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, FormEvent, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, FormEvent, useRef, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import ProductCard from "@/components/ui/product-card";
 import AdminButton from "@/components/admin/admin-button";
@@ -106,7 +106,7 @@ export default function ProductEditorPage() {
     modelId: form.modelId || undefined,
     inStock: form.inStock,
     photoCount: form.images?.length || 1,
-  }), [form, params.slug]);
+  }), [form, params.slug, isNew]);
 
   // Load product data for editing
   useEffect(() => {

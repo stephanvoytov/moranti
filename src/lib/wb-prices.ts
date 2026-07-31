@@ -80,7 +80,6 @@ const MAX_RETRIES = 3;
 
 let snapshot: Map<number, PriceSnapshotEntry> | null = null;
 let snapshotTimestamp = 0;
-let snapshotFetchInProgress: Promise<void> | null = null;
 
 function isSnapshotFresh(): boolean {
   return snapshot !== null && Date.now() - snapshotTimestamp < CACHE_TTL_MS;

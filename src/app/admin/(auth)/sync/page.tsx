@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./sync.module.css";
-import { formatDistanceToNow } from "@/lib/format-date";
 import { useLiveAgo, useElapsed, usePulse } from "@/lib/use-live-ago";
 
 /* ─── Types ─── */
@@ -273,14 +272,6 @@ function fmtDur(ms: number) {
   return `${m}м ${s}с`;
 }
 
-function fmtDate(ts: string) {
-  try {
-    return new Date(ts).toLocaleString("ru-RU");
-  } catch {
-    return ts;
-  }
-}
-
 function phaseLabel(phase: string): string {
   return PHASE_LABELS[phase] || phase;
 }
@@ -291,7 +282,6 @@ export default function AdminSyncPage() {
   const router = useRouter();
   const [wbHistory, setWbHistory] = useState<SyncRunRecord[]>([]);
   const [ozonHistory, setOzonHistory] = useState<SyncRunRecord[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   // Progress per platform
@@ -313,13 +303,12 @@ export default function AdminSyncPage() {
       setOzonHistory(data.ozon || []);
     } catch {
       setError("Не удалось загрузить историю");
-    } finally {
-      setLoading(false);
     }
   }, [router]);
 
-  // Check for active runs on mount
+  // Check for active runs on mount — загрузка истории и статусов при монтировании.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadHistory();
     checkActiveRun("wb");
     checkActiveRun("ozon");
@@ -382,9 +371,10 @@ export default function AdminSyncPage() {
 
   // Cleanup polling on unmount
   useEffect(() => {
+    const timers = pollingRef.current;
     return () => {
-      if (pollingRef.current.wb) clearInterval(pollingRef.current.wb);
-      if (pollingRef.current.ozon) clearInterval(pollingRef.current.ozon);
+      if (timers.wb) clearInterval(timers.wb);
+      if (timers.ozon) clearInterval(timers.ozon);
     };
   }, []);
 
@@ -467,7 +457,6 @@ export default function AdminSyncPage() {
 /* ─── Platform Card ─── */
 
 function PlatformCard({
-  platform,
   config,
   lastRun,
   progress,
@@ -495,10 +484,12 @@ function PlatformCard({
   const [expandedHistory, setExpandedHistory] = useState(false);
   const [expandedDetails, setExpandedDetails] = useState(false);
 
-  // Auto-collapse when starting a new run
+  // Auto-collapse when starting a new run — реакция на смену статуса из поллинга.
   useEffect(() => {
     if (isRunning) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setExpandedHistory(false);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setExpandedDetails(false);
     }
   }, [isRunning]);

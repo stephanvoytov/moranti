@@ -433,7 +433,6 @@ export default function ModelEditorPage() {
                     .filter((p) => !p.wbArticle || true) // all products
                     .map((p) => {
                       const isSelected = selectedVariantIds.has(p.id);
-                      const alreadyLinked = model.variants.some((v) => v.id === p.id);
                       return (
                         <label
                           key={p.id}
