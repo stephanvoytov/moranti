@@ -42,12 +42,15 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 /* ─── Таймаут запроса ─── */
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Query timed out after ${ms}ms`)), ms),
-    ),
-  ]);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`Query timed out after ${ms}ms`)), ms);
+  });
+  // clearTimeout обязателен: без него каждый успешный запрос оставляет
+  // живой таймер на `ms` мс — под нагрузкой копятся сотни висящих таймеров
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
 }
 
 /* ─── Ретрай с exponential backoff ─── */

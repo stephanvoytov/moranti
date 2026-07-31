@@ -110,33 +110,35 @@ export async function getProductsPrices(skus, { delayMs = 500 } = {}) {
   const results = [];
   let hasError = false;
 
-  for (let i = 0; i < skus.length; i++) {
-    const sku = skus[i];
-    try {
-      const result = await getProductPrice(sku);
-      results.push(result);
+  try {
+    for (let i = 0; i < skus.length; i++) {
+      const sku = skus[i];
+      try {
+        const result = await getProductPrice(sku);
+        results.push(result);
 
-      if (result.cardPrice != null) {
-        console.error(
-          `[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: cardPrice=${result.cardPrice} price=${result.price} oldPrice=${result.oldPrice}`
-        );
-      } else {
-        console.error(`[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: нет цен (${result.price ?? "—"})`);
+        if (result.cardPrice != null) {
+          console.error(
+            `[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: cardPrice=${result.cardPrice} price=${result.price} oldPrice=${result.oldPrice}`
+          );
+        } else {
+          console.error(`[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: нет цен (${result.price ?? "—"})`);
+        }
+      } catch (err) {
+        hasError = true;
+        console.error(`[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: ошибка — ${err.message}`);
+        // Продолжаем со следующим
       }
-    } catch (err) {
-      hasError = true;
-      console.error(`[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: ошибка — ${err.message}`);
-      // Продолжаем со следующим
-    }
 
-    // Задержка между запросами (кроме последнего)
-    if (i < skus.length - 1) {
-      await new Promise((r) => setTimeout(r, delayMs));
+      // Задержка между запросами (кроме последнего)
+      if (i < skus.length - 1) {
+        await new Promise((r) => setTimeout(r, delayMs));
+      }
     }
+  } finally {
+    // Гарантированно закрываем браузер — даже при исключении в цикле
+    await shutdown();
   }
-
-  // Закрываем браузер после всех запросов
-  await shutdown();
 
   if (hasError) {
     console.error(`[OzonPrice] Завершено с ошибками: ${results.length}/${skus.length} успешно`);

@@ -48,6 +48,9 @@ let context = null;
 let mainPage = null;
 let initPromise = null;
 let challenged = false;
+// Флаг фатального сбоя Variti: если челлендж однажды провален, дальнейшие
+// попытки бессмысленны (каждая стоит ~13s на перезапуск). Дальше — быстрый отказ.
+let challengeBroken = false;
 
 function log(...args) {
   console.error("[OzonBrowser]", ...args);
@@ -83,10 +86,13 @@ async function launch() {
 
   browser.on("disconnected", () => {
     log("browser disconnected — будет перезапущен при следующем запросе");
+    // Безопасно закрываем остатки (child-процесс Chromium), ошибки игнорируем
+    const dead = browser;
     browser = null;
     context = null;
     mainPage = null;
     challenged = false;
+    dead?.close().catch(() => {});
   });
 
   context = await browser.newContext({
@@ -101,6 +107,10 @@ async function launch() {
 async function ensureContext() {
   if (!isBrowserAvailable()) {
     throw new Error("patchright/Chromium недоступен (Vercel или production build)");
+  }
+
+  if (challengeBroken) {
+    throw new Error("Variti challenge не пройден ранее — пропуск фазы");
   }
 
   if (context && challenged) return context;
@@ -124,6 +134,7 @@ async function ensureContext() {
 
     const title = await mainPage.title();
     if (/antibot|ограничен|доступ/i.test(title)) {
+      challengeBroken = true; // фатально: дальше ретраить бессмысленно (по ~13s на попытку)
       throw new Error(`Variti challenge не пройден (title: ${title})`);
     }
 

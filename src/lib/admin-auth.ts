@@ -57,13 +57,43 @@ function decrypt(payload: string, key: Buffer): string | null {
 
 /* ——— Public API ——— */
 
+/* Rate limiting логина (в памяти, на процесс):
+   5 неудачных попыток → блокировка на 60 секунд.
+   Достаточно против брутфорса дефолтного пароля, без внешних зависимостей. */
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCK_MS = 60_000;
+let failCount = 0;
+let lockUntil = 0;
+
+let warnedDefaultPassword = false;
+
 export function getAdminPassword(): string {
-  return process.env.ADMIN_PASSWORD || "admin";
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password && !warnedDefaultPassword) {
+    warnedDefaultPassword = true;
+    console.warn(
+      "[admin-auth] ADMIN_PASSWORD не задан — используется дефолтный пароль \"admin\". Задайте ADMIN_PASSWORD в проде!"
+    );
+  }
+  return password || "admin";
 }
 
 /** Проверить пароль и вернуть зашифрованный токен (или null) */
 export function login(password: string): string | null {
-  if (password !== getAdminPassword()) return null;
+  // Заблокировано? Отказываем сразу (без сравнения — экономия CPU на PBKDF2 не нужна тут, но и пароль не подбираем)
+  if (Date.now() < lockUntil) return null;
+
+  if (password !== getAdminPassword()) {
+    failCount += 1;
+    if (failCount >= MAX_FAILED_ATTEMPTS) {
+      lockUntil = Date.now() + LOCK_MS;
+      failCount = 0;
+    }
+    return null;
+  }
+
+  failCount = 0;
+  lockUntil = 0;
 
   const now = Date.now();
   const payload = JSON.stringify({

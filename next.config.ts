@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
     "@prisma/adapter-pg",
     "got-scraping",
     "http2-wrapper",
+    // patchright: coreBundle.js требует chromium-bidi (не установлен),
+    // Turbopack не может его заинлайнить — держим внешним, как got-scraping
+    "patchright",
+    "patchright-core",
   ],
 
   /* ─── Include sync bundle in API routes (Vercel file tracing) ─── */

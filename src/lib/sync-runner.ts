@@ -29,6 +29,8 @@ export interface SyncProgress {
   phaseLabel: string;
   current: number;
   total: number;
+  /** Лог построчно (join при чтении — O(n), не O(n²) конкатенацией) */
+  logLines: string[];
   log: string;
   error?: string;
   details: { updated: SyncRunDetail[]; added: SyncRunDetail[] };
@@ -41,6 +43,20 @@ const running = new Map<string, SyncProgress>();
 const activePlatformRun = new Map<string, string>();
 let runCounter = 0;
 
+/** Завершённые запуски старше 1 часа удаляются, чтобы Map не рос бесконечно */
+const FINISHED_TTL_MS = 60 * 60 * 1_000;
+
+function cleanupFinishedRuns() {
+  const now = Date.now();
+  for (const [runId, p] of running) {
+    if (p.status !== "running" && now - p.startedAt > FINISHED_TTL_MS) {
+      running.delete(runId);
+      // Удаляем из active-мапы, если это активный запуск платформы
+      if (activePlatformRun.get(p.platform) === runId) activePlatformRun.delete(p.platform);
+    }
+  }
+}
+
 function nextRunId(platform: string): string {
   runCounter++;
   const ts = Date.now().toString(36);
@@ -52,12 +68,11 @@ function nextRunId(platform: string): string {
 const PHASE_LABELS: Record<string, string> = {
   "wb-cards": "Получение активных карточек WB",
   "wb-trash": "Получение карточек WB в корзине",
-  "wb-prices": "Получение цен WB",
+  "wb-cards-v4": "Получение карточек WB (card.wb.ru)",
   "wb-process": "Обработка товаров WB",
   "ozon-list": "Получение списка товаров Ozon",
   "ozon-info": "Получение информации о товарах Ozon",
   "ozon-attrs": "Получение характеристик Ozon",
-  "ozon-ratings": "Получение рейтингов Ozon",
   "ozon-process": "Обработка товаров Ozon",
   "ozon-prices": "Получение реальных цен Ozon",
   "ozon-models": "Синхронизация моделей Ozon",
@@ -183,6 +198,7 @@ export function startSync(platform: "wb" | "ozon"): string {
     phaseLabel: "Запуск…",
     current: 0,
     total: 0,
+    logLines: [],
     log: "",
     details: { updated: [], added: [] },
     startedAt: Date.now(),
@@ -190,6 +206,7 @@ export function startSync(platform: "wb" | "ozon"): string {
 
   running.set(runId, progress);
   activePlatformRun.set(platform, runId);
+  cleanupFinishedRuns(); // не даём Map расти бесконечно
 
   // Запускаем синхронизацию асинхронно (не блокируем ответ API)
   runSync(runId, platform).catch((err) => {
@@ -221,7 +238,7 @@ async function runSync(runId: string, platform: "wb" | "ozon") {
     // Перехватываем console.log, чтобы парсить [PROGRESS] и [DETAIL] в реальном времени
     console.log = (...args) => {
       const line = args.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ");
-      p.log += line + "\n";
+      p.logLines.push(line); // O(1) на строку; join — только при чтении
 
       const prog = parseProgressLine(line);
       if (prog) Object.assign(p, prog);
@@ -240,7 +257,7 @@ async function runSync(runId: string, platform: "wb" | "ozon") {
     const origExit = process.exit;
     ((process as unknown) as Record<string, unknown>).exit = ((code?: number) => {
       const msg = `process.exit(${code}) was called — sync прерван`;
-      p.log += msg + "\n";
+      p.logLines.push(msg);
       throw new Error(msg);
     }) as (code?: number) => never;
 
@@ -258,9 +275,10 @@ async function runSync(runId: string, platform: "wb" | "ozon") {
     }
 
     // Успех — парсим статистику
-    const stats = parseStats(p.log);
-    const success = !p.log.includes("FATAL:") && !p.log.includes("ERROR:");
-    const errorMsg = success ? undefined : extractError(p.log);
+    const fullLog = p.logLines.join("\n");
+    const stats = parseStats(fullLog);
+    const success = !p.logLines.some((l) => l.includes("FATAL:") || l.includes("ERROR:"));
+    const errorMsg = success ? undefined : extractError(fullLog);
 
     await addSyncRun({
       platform,
@@ -276,7 +294,7 @@ async function runSync(runId: string, platform: "wb" | "ozon") {
         errors: stats.errors,
         total: stats.added + stats.updated + stats.archived + (stats.skipped || 0),
       },
-      log: p.log,
+      log: fullLog,
     });
 
     p.status = success ? "completed" : "failed";
@@ -288,7 +306,7 @@ async function runSync(runId: string, platform: "wb" | "ozon") {
   } catch (err) {
     if (p.status !== "failed") {
       const msg = err instanceof Error ? err.message : String(err);
-      p.log += `\nFATAL: ${msg}\n`;
+      p.logLines.push(`\nFATAL: ${msg}\n`);
       p.status = "failed";
       p.error = msg.slice(0, 500);
       p.phase = "done";
@@ -301,7 +319,7 @@ async function runSync(runId: string, platform: "wb" | "ozon") {
         success: false,
         error: msg.slice(0, 500),
         stats: { added: 0, updated: 0, archived: 0, skipped: 0, errors: 1, total: 0 },
-        log: p.log,
+        log: p.logLines.join("\n"),
       });
     }
   } finally {
@@ -334,7 +352,10 @@ function clearStaleRun(platform: "wb" | "ozon") {
 /* ─── Получение прогресса ─── */
 
 export function getSyncProgress(runId: string): SyncProgress | null {
-  return running.get(runId) ?? null;
+  const p = running.get(runId);
+  if (!p) return null;
+  // log пересобираем только при чтении (O(n)), в рантайме копим logLines (O(1))
+  return { ...p, log: p.logLines.join("\n") };
 }
 
 export function getActiveRunId(platform: "wb" | "ozon"): string | null {

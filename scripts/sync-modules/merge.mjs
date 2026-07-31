@@ -47,8 +47,12 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
   // WB API: price = current (со скидкой), discountedPrice = оригинал
   const wbPrice = wbPrices?.price ?? db?.wbPrice ?? null;
   const wbOrigPrice = wbPrices?.discountedPrice ?? db?.wbOriginalPrice ?? null;
-  const ozonPriceVal = ozonInfo?.price != null ? Number(ozonInfo.price) : db?.ozonPrice ?? null;
-  const ozonOrigPriceVal = ozonInfo?.old_price != null ? Number(ozonInfo.old_price) : db?.ozonOriginalPrice ?? null;
+  // ВАЖНО: цены Ozon берутся ТОЛЬКО из БД (db.ozonPrice), куда их пишет фаза
+  // ozon-prices (реальные покупательские цены из headless-браузера, patchright).
+  // ozonInfo.price/old_price из официального API — это цены продавца, они НЕ
+  // используются: сайт показывает покупательские цены Ozon (решение от 07.2026).
+  const ozonPriceVal = db?.ozonPrice ?? null;
+  const ozonOrigPriceVal = db?.ozonOriginalPrice ?? null;
 
   if (wbPrice !== (db?.wbPrice ?? null)) data.wbPrice = wbPrice;
   if (wbOrigPrice !== (db?.wbOriginalPrice ?? null)) data.wbOriginalPrice = wbOrigPrice;

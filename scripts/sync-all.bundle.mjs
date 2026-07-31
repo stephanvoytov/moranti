@@ -483,10 +483,13 @@ async function launch() {
   });
   browser.on("disconnected", () => {
     log("browser disconnected \u2014 \u0431\u0443\u0434\u0435\u0442 \u043F\u0435\u0440\u0435\u0437\u0430\u043F\u0443\u0449\u0435\u043D \u043F\u0440\u0438 \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0435\u043C \u0437\u0430\u043F\u0440\u043E\u0441\u0435");
+    const dead = browser;
     browser = null;
     context = null;
     mainPage = null;
     challenged = false;
+    dead?.close().catch(() => {
+    });
   });
   context = await browser.newContext({
     viewport: { width: 1920, height: 1080 },
@@ -498,6 +501,9 @@ async function launch() {
 async function ensureContext() {
   if (!isBrowserAvailable()) {
     throw new Error("patchright/Chromium \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D (Vercel \u0438\u043B\u0438 production build)");
+  }
+  if (challengeBroken) {
+    throw new Error("Variti challenge \u043D\u0435 \u043F\u0440\u043E\u0439\u0434\u0435\u043D \u0440\u0430\u043D\u0435\u0435 \u2014 \u043F\u0440\u043E\u043F\u0443\u0441\u043A \u0444\u0430\u0437\u044B");
   }
   if (context && challenged) return context;
   if (initPromise) {
@@ -515,6 +521,7 @@ async function ensureContext() {
     await mainPage.waitForTimeout(CHALLENGE_WAIT_MS);
     const title = await mainPage.title();
     if (/antibot|ограничен|доступ/i.test(title)) {
+      challengeBroken = true;
       throw new Error(`Variti challenge \u043D\u0435 \u043F\u0440\u043E\u0439\u0434\u0435\u043D (title: ${title})`);
     }
     challenged = true;
@@ -577,7 +584,7 @@ async function shutdown() {
   browser = null;
   log("browser closed");
 }
-var HOME, API, CHALLENGE_WAIT_MS, NAV_TIMEOUT_MS, LAUNCH_ARGS, USER_AGENT, browser, context, mainPage, initPromise, challenged, DEAD;
+var HOME, API, CHALLENGE_WAIT_MS, NAV_TIMEOUT_MS, LAUNCH_ARGS, USER_AGENT, browser, context, mainPage, initPromise, challenged, challengeBroken, DEAD;
 var init_ozon_browser = __esm({
   "scripts/sync-modules/ozon-browser.mjs"() {
     "use strict";
@@ -603,6 +610,7 @@ var init_ozon_browser = __esm({
     mainPage = null;
     initPromise = null;
     challenged = false;
+    challengeBroken = false;
     DEAD = /Target page, context or browser has been closed|Session closed|Connection closed|browser has been closed/i;
   }
 });
@@ -654,27 +662,30 @@ async function getProductsPrices(skus, { delayMs = 500 } = {}) {
   }
   const results = [];
   let hasError = false;
-  for (let i = 0; i < skus.length; i++) {
-    const sku = skus[i];
-    try {
-      const result = await getProductPrice(sku);
-      results.push(result);
-      if (result.cardPrice != null) {
-        console.error(
-          `[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: cardPrice=${result.cardPrice} price=${result.price} oldPrice=${result.oldPrice}`
-        );
-      } else {
-        console.error(`[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: \u043D\u0435\u0442 \u0446\u0435\u043D (${result.price ?? "\u2014"})`);
+  try {
+    for (let i = 0; i < skus.length; i++) {
+      const sku = skus[i];
+      try {
+        const result = await getProductPrice(sku);
+        results.push(result);
+        if (result.cardPrice != null) {
+          console.error(
+            `[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: cardPrice=${result.cardPrice} price=${result.price} oldPrice=${result.oldPrice}`
+          );
+        } else {
+          console.error(`[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: \u043D\u0435\u0442 \u0446\u0435\u043D (${result.price ?? "\u2014"})`);
+        }
+      } catch (err) {
+        hasError = true;
+        console.error(`[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: \u043E\u0448\u0438\u0431\u043A\u0430 \u2014 ${err.message}`);
       }
-    } catch (err) {
-      hasError = true;
-      console.error(`[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: \u043E\u0448\u0438\u0431\u043A\u0430 \u2014 ${err.message}`);
+      if (i < skus.length - 1) {
+        await new Promise((r) => setTimeout(r, delayMs));
+      }
     }
-    if (i < skus.length - 1) {
-      await new Promise((r) => setTimeout(r, delayMs));
-    }
+  } finally {
+    await shutdown();
   }
-  await shutdown();
   if (hasError) {
     console.error(`[OzonPrice] \u0417\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u043E \u0441 \u043E\u0448\u0438\u0431\u043A\u0430\u043C\u0438: ${results.length}/${skus.length} \u0443\u0441\u043F\u0435\u0448\u043D\u043E`);
   } else {
@@ -899,8 +910,8 @@ function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAttrs, oz
   const data = {};
   const wbPrice = wbPrices?.price ?? db?.wbPrice ?? null;
   const wbOrigPrice = wbPrices?.discountedPrice ?? db?.wbOriginalPrice ?? null;
-  const ozonPriceVal = ozonInfo?.price != null ? Number(ozonInfo.price) : db?.ozonPrice ?? null;
-  const ozonOrigPriceVal = ozonInfo?.old_price != null ? Number(ozonInfo.old_price) : db?.ozonOriginalPrice ?? null;
+  const ozonPriceVal = db?.ozonPrice ?? null;
+  const ozonOrigPriceVal = db?.ozonOriginalPrice ?? null;
   if (wbPrice !== (db?.wbPrice ?? null)) data.wbPrice = wbPrice;
   if (wbOrigPrice !== (db?.wbOriginalPrice ?? null)) data.wbOriginalPrice = wbOrigPrice;
   if (ozonPriceVal !== (db?.ozonPrice ?? null)) data.ozonPrice = ozonPriceVal;
@@ -4631,7 +4642,43 @@ async function wbFetchAllCards(apiKey, trash = false) {
   return allCards;
 }
 async function getExistingProducts(prisma) {
-  const all = await prisma.product.findMany({ orderBy: { id: "asc" } });
+  const all = await prisma.product.findMany({
+    orderBy: { id: "asc" },
+    select: {
+      id: true,
+      name: true,
+      sku: true,
+      category: true,
+      description: true,
+      image: true,
+      images: true,
+      ozonImage: true,
+      ozonImages: true,
+      price: true,
+      originalPrice: true,
+      wbArticle: true,
+      ozonArticle: true,
+      wbPrice: true,
+      wbOriginalPrice: true,
+      ozonPrice: true,
+      ozonOriginalPrice: true,
+      wbStock: true,
+      ozonStock: true,
+      inStock: true,
+      photoCount: true,
+      rating: true,
+      reviewsCount: true,
+      colorName: true,
+      composition: true,
+      characteristics: true,
+      nameAutoGenerated: true,
+      descAutoGenerated: true,
+      wbCreatedAt: true,
+      wbUpdatedAt: true,
+      archivedAt: true,
+      modelId: true
+    }
+  });
   return {
     byWbArticle: new Map(all.filter((p) => p.wbArticle).map((p) => [Number(p.wbArticle), p])),
     byOzonArticle: new Map(all.filter((p) => p.ozonArticle).map((p) => [Number(p.ozonArticle), p])),
@@ -4649,43 +4696,52 @@ async function generateId(prisma) {
   return "mor-" + String(num).padStart(3, "0");
 }
 async function createProduct(prisma, data) {
-  const id = await generateId(prisma);
-  const sku = data.sku || null;
-  const slug = sku ? makeSlug(sku) : id;
-  await prisma.product.create({
-    data: {
-      id,
-      slug,
-      sku,
-      name: data.name || "",
-      price: data.price || 0,
-      originalPrice: data.originalPrice || 0,
-      currency: "\u20BD",
-      category: data.category || "crossbody",
-      description: data.description || "",
-      image: data.image || "",
-      images: data.images || [],
-      wbArticle: toBigInt(data.wbArticle),
-      ozonArticle: toBigInt(data.ozonArticle),
-      wbPrice: data.wbPrice ?? null,
-      wbOriginalPrice: data.wbOriginalPrice ?? null,
-      ozonPrice: data.ozonPrice ?? null,
-      ozonOriginalPrice: data.ozonOriginalPrice ?? null,
-      rating: data.rating ?? null,
-      reviewsCount: data.reviewsCount ?? null,
-      colorName: data.colorName ?? null,
-      composition: data.composition ?? null,
-      inStock: data.inStock ?? true,
-      photoCount: data.photoCount || 1,
-      characteristics: data.characteristics ?? null,
-      nameAutoGenerated: data.nameAutoGenerated ?? true,
-      descAutoGenerated: data.descAutoGenerated ?? true,
-      wbCreatedAt: data.wbCreatedAt ?? null,
-      wbUpdatedAt: data.wbUpdatedAt ?? null,
-      archivedAt: data.archivedAt ?? null
+  if (flags.dry) return `mor-000`;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const id = await generateId(prisma);
+    const sku = data.sku || null;
+    const slug = sku ? makeSlug(sku) : id;
+    try {
+      await prisma.product.create({
+        data: {
+          id,
+          slug,
+          sku,
+          name: data.name || "",
+          price: data.price || 0,
+          originalPrice: data.originalPrice || 0,
+          currency: "\u20BD",
+          category: data.category || "crossbody",
+          description: data.description || "",
+          image: data.image || "",
+          images: data.images || [],
+          wbArticle: toBigInt(data.wbArticle),
+          ozonArticle: toBigInt(data.ozonArticle),
+          wbPrice: data.wbPrice ?? null,
+          wbOriginalPrice: data.wbOriginalPrice ?? null,
+          ozonPrice: data.ozonPrice ?? null,
+          ozonOriginalPrice: data.ozonOriginalPrice ?? null,
+          rating: data.rating ?? null,
+          reviewsCount: data.reviewsCount ?? null,
+          colorName: data.colorName ?? null,
+          composition: data.composition ?? null,
+          inStock: data.inStock ?? true,
+          photoCount: data.photoCount || 1,
+          characteristics: data.characteristics ?? null,
+          nameAutoGenerated: data.nameAutoGenerated ?? true,
+          descAutoGenerated: data.descAutoGenerated ?? true,
+          wbCreatedAt: data.wbCreatedAt ?? null,
+          wbUpdatedAt: data.wbUpdatedAt ?? null,
+          archivedAt: data.archivedAt ?? null
+        }
+      });
+      return id;
+    } catch (err) {
+      const code = err?.code;
+      if (code === "P2002" && attempt < 2) continue;
+      throw err;
     }
-  });
-  return id;
+  }
 }
 async function updateProduct(prisma, id, data) {
   const updateData = {};
@@ -4952,8 +5008,7 @@ async function main() {
                 }
               }
             }
-            const ozonInfoNoPrices = { ...info, price: void 0, old_price: void 0 };
-            const updates = mergeProductSources(null, null, null, ozonInfoNoPrices, attrs, null, db);
+            const updates = mergeProductSources(null, null, null, info, attrs, null, db);
             const allUpdates = { ...ensureFields, ...updates };
             if (Object.keys(allUpdates).length > 0) {
               const ok = await updateProduct(prisma, db.id, allUpdates);
