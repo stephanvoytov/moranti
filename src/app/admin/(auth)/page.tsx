@@ -4,11 +4,13 @@ import { getOzonSyncStatus } from "@/lib/ozon-sync";
 import Link from "next/link";
 import prisma, { prismaQuery } from "@/lib/prisma";
 import type { SyncRunRecord } from "@/lib/sync-history";
+import UpdatedBadge from "@/components/admin/updated-badge";
 import styles from "./dashboard.module.css";
 
 interface Issue {
   productId: string;
   productName: string;
+  updatedAt?: string;
   tags: { text: string; warn?: boolean }[];
 }
 
@@ -78,7 +80,7 @@ export default async function AdminDashboard() {
     if (!p.wbArticle && !p.ozonArticle) tags.push({ text: "Нет в продаже", warn: true });
     if (p.wbArticle && (p.wbStock ?? 0) <= 0) tags.push({ text: "Нет остатка WB", warn: true });
     if (p.ozonArticle && (p.ozonStock ?? 0) <= 0) tags.push({ text: "Нет остатка Ozon", warn: true });
-    if (tags.length) issues.push({ productId: p.id, productName: p.name, tags });
+    if (tags.length) issues.push({ productId: p.id, productName: p.name, updatedAt: p.updatedAt?.toISOString(), tags });
   }
   issues.sort((a, b) => b.tags.length - a.tags.length);
 
@@ -190,6 +192,7 @@ export default async function AdminDashboard() {
               <div key={issue.productId} className={styles.issueRow}>
                 <div className={styles.issueInfo}>
                   <span className={styles.issueName}>{issue.productName}</span>
+                  <UpdatedBadge iso={issue.updatedAt} />
                   <span className={styles.issueTags}>
                     {issue.tags.map((t) => (
                       <span key={t.text} className={`${styles.issueTag} ${t.warn ? styles.issueTagWarn : ""}`}>{t.text}</span>

@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import AdminButton from "@/components/admin/admin-button";
+import UpdatedBadge from "@/components/admin/updated-badge";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import styles from "./editor.module.css";
 
@@ -20,6 +21,7 @@ interface Variant {
   composition?: string;
   image?: string;
   images?: string[];
+  updatedAt?: string;
 }
 
 interface ModelData {
@@ -359,6 +361,9 @@ export default function ModelEditorPage() {
                     <Link href={`/admin/products/${v.slug}`} className={styles.variantLink}>
                       {v.name}
                     </Link>
+                    <span className={styles.variantUpdated}>
+                      <UpdatedBadge iso={v.updatedAt} />
+                    </span>
                   </span>
                   <span className={styles.variantPrice}>{formatPrice(v.price)}</span>
                   <span className={styles.variantWb}>

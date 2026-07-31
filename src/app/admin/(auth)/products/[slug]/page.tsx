@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent, useRef, useMemo, useCallback } from "re
 import { useRouter, useParams } from "next/navigation";
 import ProductCard from "@/components/ui/product-card";
 import AdminButton from "@/components/admin/admin-button";
+import UpdatedBadge from "@/components/admin/updated-badge";
 import { useToast } from "@/lib/toast-context";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import styles from "./editor.module.css";
@@ -421,6 +422,11 @@ export default function ProductEditorPage() {
           <h1 className={styles.title}>
             {isNew ? "Новый товар" : "Редактировать товар"}
           </h1>
+          {!isNew && productData?.updatedAt ? (
+            <div className={styles.headerMeta}>
+              <UpdatedBadge iso={productData.updatedAt as string} />
+            </div>
+          ) : null}
           {!isNew && neighbors.length > 0 && (
             <div className={styles.navBtns}>
               {(() => {

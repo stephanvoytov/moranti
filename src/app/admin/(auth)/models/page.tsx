@@ -10,6 +10,7 @@ import { MARKETPLACE_FAVICONS, MARKETPLACE_URLS } from "@/lib/marketplaces";
 import AdminButton from "@/components/admin/admin-button";
 import AdminModal from "@/components/admin/admin-modal";
 import SmartImage from "@/components/ui/smart-image";
+import UpdatedBadge from "@/components/admin/updated-badge";
 
 interface ProductBrief {
   id: string;
@@ -27,6 +28,7 @@ interface ProductBrief {
   ozonImage?: string;
   modelId?: string | null;
   archivedAt?: string | null;
+  updatedAt?: string;
 }
 
 interface ModelBrief {
@@ -457,6 +459,7 @@ export default function AdminModelsKanban() {
                             {item.colorName}
                           </div>
                         )}
+                        {item.updatedAt && <UpdatedBadge iso={item.updatedAt} className={styles.cardUpdated} />}
                         <div className={styles.cardArticles}>
                           {item.wbArticle && (
                             <a href={MARKETPLACE_URLS.wbProduct(item.wbArticle)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className={`${styles.cardArt} ${isArchived ? styles.cardArtArchived : ""} ${wbOos ? styles.cardArtOos : ""}`}>

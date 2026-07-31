@@ -476,6 +476,10 @@
   border: 1px solid rgba(0,0,0,0.08);
 }
 
+.cardUpdated {
+  margin-top: 5px;
+}
+
 .cardArticles {
   display: flex;
   gap: 6px;
