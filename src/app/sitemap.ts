@@ -13,6 +13,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  // Категории каталога (фильтры с query-параметром)
+  const categoryUrls: MetadataRoute.Sitemap = [
+    "crossbody",
+    "na-plecho",
+    "baguette",
+    "tote",
+    "saddle",
+    "backpack",
+  ].map((cat) => ({
+    url: `${siteUrl}/catalog?category=${cat}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
+
   return [
     {
       url: siteUrl,
@@ -38,6 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.5,
     },
+    ...categoryUrls,
     ...productUrls,
   ];
 }

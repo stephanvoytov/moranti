@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { CharacteristicGroup } from "@/data/products";
-import { getProducts, getProduct } from "@/data/products";
+import { getProducts, getProduct, getAllProducts } from "@/data/products";
 import PriceClient from "./price-client";
 import ColorSwatches from "./color-swatches";
 import GalleryClient from "./gallery-client";
@@ -38,16 +38,43 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const catName = CATEGORY_NAMES[product.category] || product.category;
   const composition = product.composition || "натуральной кожи";
-  const metaDesc = `Купить ${product.name} в интернет-магазине Moranti. ${catName} из ${composition}. Цена: ${product.price.toLocaleString("ru-RU")} ₽. Доставка по России.`;
+
+  // Цвет из colorName («песочный, бежевый» → «песочный») — для уникальности title
+  const color = (product.colorName ?? "").split(",")[0].trim();
+  const colorPart = color ? ` (${color})` : "";
+
+  // Если имя + цвет повторяются у другой модели — добавляем артикул WB
+  // Считаем по всем неархивным товарам (нет в наличии тоже индексируются)
+  const all = await getAllProducts();
+  const twins = all.filter(
+    (p) =>
+      p.name === product.name &&
+      ((p.colorName ?? "").split(",")[0].trim()) === color,
+  );
+  const articlePart =
+    twins.length > 1 && product.wbArticle ? ` №${product.wbArticle}` : "";
+
+  const title = `${product.name}${colorPart}${articlePart} — купить | Moranti`;
+
+  // Архивные товары: страница доступна, но из индекса убираем (тупик для пользователя)
+  const noindex = Boolean(product.archivedAt);
+
+  // Склонение для description: «Сумка-тоут…» → «сумку-тоут…» (все названия начинаются с «Сумка»)
+  const declineName = product.name.startsWith("Сумка")
+    ? `сумку${product.name.slice(5)}`
+    : product.name.toLowerCase();
+
+  const metaDesc = `Купить ${declineName}${colorPart} в Moranti. ${catName}, ${composition}. Цена: ${product.price.toLocaleString("ru-RU")} ₽. Доставка по России.`;
 
   return {
-    title: product.name,
+    title: { absolute: title },
     description: metaDesc,
+    robots: noindex ? { index: false, follow: true } : undefined,
     alternates: {
       canonical: `/catalog/${product.slug}`,
     },
     openGraph: {
-      title: `${product.name} — Moranti`,
+      title: `${product.name}${colorPart}${articlePart} — Moranti`,
       description: metaDesc,
       url: `/catalog/${product.slug}`,
       type: "website",

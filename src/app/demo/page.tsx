@@ -2,9 +2,16 @@
    DEMO — MASTLE-стиль для Moranti
    Тестовый прототип, не влияет на основной сайт
    ============================================ */
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getProducts } from "@/data/products";
 import "./demo.css";
+
+// Тестовый прототип — исключаем из поиска
+export const metadata: Metadata = {
+  title: "Демо-прототип",
+  robots: { index: false, follow: false },
+};
 
 const HERO_IMG =
   "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=1400&q=80";

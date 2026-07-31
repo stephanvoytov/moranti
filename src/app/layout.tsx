@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { Playfair_Display, Montserrat, Inter } from "next/font/google";
 import { FavoritesProvider } from "@/lib/favorites-context";
 import { readSettings } from "@/lib/settings";
+import type { SiteSettings } from "@/lib/settings";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import ScrollToTop from "@/components/ui/scroll-to-top";
@@ -39,52 +40,75 @@ const siteUrl = process.env.SITE_URL || "http://localhost:3001";
 
 /* ——— Metadata ——— */
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "Moranti — премиальные кожаные сумки",
-    template: "%s — Moranti",
-  },
-  description:
-    "Moranti — женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов. Доставка по всей России.",
-  keywords: [
-    "сумки", "Moranti", "кожаные сумки", "натуральная итальянская кожа",
-    "женские сумки", "сумки через плечо", "сумки из замши", "классические сумки",
-    "кросс-боди", "тоут", "багет", "рюкзак кожаный",
-  ],
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    title: "Moranti — премиальные кожаные сумки",
-    description:
-      "Женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов.",
-    url: "/",
-    siteName: "Moranti",
-    type: "website",
-    locale: "ru_RU",
-    images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Moranti — премиальные кожаные сумки",
-    description:
-      "Женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов.",
-    images: ["/twitter-image.png"],
-  },
-  icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/icon.svg", type: "image/svg+xml" },
+/** Настройки с таймаутом 2с — если БД не отвечает, не блокируем рендер */
+async function readSettingsSafe(): Promise<SiteSettings | null> {
+  try {
+    return await Promise.race([
+      readSettings(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("settings timeout")), 2000),
+      ),
+    ]);
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await readSettingsSafe();
+
+  // Defaults из админки (settings.seo), фолбэк на хардкод
+  const seoTitle = settings?.seo?.defaultTitle?.trim();
+  const seoDesc = settings?.seo?.defaultDescription?.trim();
+  const defaultTitle = seoTitle || "Moranti — премиальные кожаные сумки";
+  const defaultDescription =
+    seoDesc ||
+    "Moranti — женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов. Доставка по всей России.";
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: defaultTitle,
+      template: "%s — Moranti",
+    },
+    description: defaultDescription,
+    keywords: [
+      "сумки", "Moranti", "кожаные сумки", "натуральная итальянская кожа",
+      "женские сумки", "сумки через плечо", "сумки из замши", "классические сумки",
+      "кросс-боди", "тоут", "багет", "рюкзак кожаный",
     ],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
-  },
-  manifest: "/manifest.json",
-  verification: {
-    // Можно задать через YANDEX_VERIFICATION в .env.local
-    yandex: process.env.YANDEX_VERIFICATION || undefined,
-  },
-};
+    alternates: {
+      canonical: "/",
+    },
+    openGraph: {
+      title: defaultTitle,
+      description: defaultDescription,
+      url: "/",
+      siteName: "Moranti",
+      type: "website",
+      locale: "ru_RU",
+      images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: defaultTitle,
+      description: defaultDescription,
+      images: ["/twitter-image.png"],
+    },
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "any" },
+        { url: "/icon.svg", type: "image/svg+xml" },
+      ],
+      apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    },
+    manifest: "/manifest.json",
+    verification: {
+      // Можно задать через YANDEX_VERIFICATION в .env.local
+      yandex: process.env.YANDEX_VERIFICATION || undefined,
+    },
+  };
+}
 
 export const viewport = {
   themeColor: "#2C2420",
@@ -99,18 +123,8 @@ export default async function RootLayout({
 }>) {
   // Yandex Metrika ID: из админки или .env.local
   // Таймаут 2 секунды — если БД не отвечает, не блокируем рендер
-  let ymId: string | undefined;
-  try {
-    const settings = await Promise.race([
-      readSettings(),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("settings timeout")), 2000),
-      ),
-    ]);
-    ymId = settings.yandexMetrikaId || process.env.YANDEX_METRIKA_ID;
-  } catch {
-    ymId = process.env.YANDEX_METRIKA_ID;
-  }
+  const settings = await readSettingsSafe();
+  const ymId = settings?.yandexMetrikaId || process.env.YANDEX_METRIKA_ID;
 
   // ─── CSP nonce (per-request, prevents XSS via inline scripts) ───
   const nonce = randomUUID();
