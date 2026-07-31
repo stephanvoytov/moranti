@@ -645,7 +645,12 @@ async function main() {
               }
             }
 
-            const updates = mergeProductSources(null, null, null, info, attrs, null, db);
+            // Цены Ozon — ТОЛЬКО из браузера (фаза ozon-prices), официальное
+            // API их не отдаёт (info.price = наша цена продавца, не покупательская).
+            // Не передаём цены в merge — чтобы не перезаписывать ozonPrice/
+            // ozonOriginalPrice и не пересчитывать price/originalPrice.
+            const ozonInfoNoPrices = { ...info, price: undefined, old_price: undefined };
+            const updates = mergeProductSources(null, null, null, ozonInfoNoPrices, attrs, null, db);
             const allUpdates = { ...ensureFields, ...updates };
             if (Object.keys(allUpdates).length > 0) {
               const ok = await updateProduct(prisma, db.id, allUpdates);
@@ -659,18 +664,18 @@ async function main() {
               stats.ozonSkipped++;
             }
           } else {
-            const ozonPrice = info.price != null ? Number(info.price) : null;
-            const ozonOrigPrice = info.old_price != null ? Number(info.old_price) : null;
+            // Новый товар: цены неизвестны (официальное API не даёт реальных цен).
+            // Появятся после фазы ozon-prices (браузер) при следующем синке.
             const ozonCat = ozonExtractCategory(info, attrs);
             const ozonComp = ozonExtractComposition(attrs);
 
             const id = await createProduct(prisma, {
               sku: offerId || null,
               name: info.name || "",
-              price: ozonPrice || 0,
-              originalPrice: ozonOrigPrice || 0,
-              ozonPrice,
-              ozonOriginalPrice: ozonOrigPrice,
+              price: 0,
+              originalPrice: 0,
+              ozonPrice: null,
+              ozonOriginalPrice: null,
               category: ozonCat || "crossbody",
               description: ozonExtractDescription(attrs),
               image: info.images?.[0] || "",

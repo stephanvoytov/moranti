@@ -74,7 +74,13 @@ export default function AdminModelsKanban() {
         return;
       }
       const data = await res.json();
-      setModels(data.items || []);
+      setModels(
+        (data.items || []).sort((a: ModelBrief, b: ModelBrief) => {
+          const inStockA = a.variants.filter((v) => (v.wbStock ?? 0) > 0 || (v.ozonStock ?? 0) > 0).length;
+          const inStockB = b.variants.filter((v) => (v.wbStock ?? 0) > 0 || (v.ozonStock ?? 0) > 0).length;
+          return inStockB - inStockA; // больше в наличии — выше
+        })
+      );
       setUnassigned(data.unassigned || []);
     } catch {
       setError("Не удалось загрузить данные. Сервер БД не отвечает?");

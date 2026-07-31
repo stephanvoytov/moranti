@@ -28,7 +28,7 @@
 }
 
 .desc {
-  font-weight: 300;
+  font-weight: 400;
   color: rgba(255, 255, 255, 0.5);
   max-width: 320px;
   line-height: 1.7;
@@ -51,7 +51,7 @@
   color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
   transition: color var(--transition-fast);
-  font-weight: 300;
+  font-weight: 400;
   padding: 2px 0;
 }
 

@@ -459,7 +459,7 @@
 .subtitle {
   font-family: var(--font-body);
   font-size: 13px;
-  font-weight: 300;
+  font-weight: 400;
   color: var(--text-muted);
   margin: 0 0 var(--space-md);
 }
@@ -722,7 +722,7 @@
 .description {
   font-family: var(--font-body);
   font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
   color: var(--text-secondary);
   line-height: 1.8;
   margin: 0 0 var(--space-lg);
@@ -731,7 +731,7 @@
 .composition {
   font-family: var(--font-body);
   font-size: 12px;
-  font-weight: 300;
+  font-weight: 400;
   color: var(--muted);
   margin: 0 0 var(--space-xl);
   padding: 12px 0 0;
@@ -785,7 +785,7 @@
   gap: 6px;
   font-family: var(--font-body);
   font-size: 12px;
-  font-weight: 300;
+  font-weight: 400;
   color: var(--muted);
   background: none;
   border: none;
@@ -812,7 +812,7 @@
   gap: 6px;
   font-family: var(--font-body);
   font-size: 12px;
-  font-weight: 300;
+  font-weight: 400;
   color: var(--muted);
   background: none;
   border: none;
@@ -840,7 +840,7 @@
   text-decoration: none;
   transition: color var(--transition-fast);
   align-self: flex-start;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .backLink:hover {

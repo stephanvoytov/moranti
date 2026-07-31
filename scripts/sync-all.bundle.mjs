@@ -4952,7 +4952,8 @@ async function main() {
                 }
               }
             }
-            const updates = mergeProductSources(null, null, null, info, attrs, null, db);
+            const ozonInfoNoPrices = { ...info, price: void 0, old_price: void 0 };
+            const updates = mergeProductSources(null, null, null, ozonInfoNoPrices, attrs, null, db);
             const allUpdates = { ...ensureFields, ...updates };
             if (Object.keys(allUpdates).length > 0) {
               const ok = await updateProduct(prisma, db.id, allUpdates);
@@ -4966,17 +4967,15 @@ async function main() {
               stats.ozonSkipped++;
             }
           } else {
-            const ozonPrice = info.price != null ? Number(info.price) : null;
-            const ozonOrigPrice = info.old_price != null ? Number(info.old_price) : null;
             const ozonCat = ozonExtractCategory(info, attrs);
             const ozonComp = ozonExtractComposition(attrs);
             const id = await createProduct(prisma, {
               sku: offerId || null,
               name: info.name || "",
-              price: ozonPrice || 0,
-              originalPrice: ozonOrigPrice || 0,
-              ozonPrice,
-              ozonOriginalPrice: ozonOrigPrice,
+              price: 0,
+              originalPrice: 0,
+              ozonPrice: null,
+              ozonOriginalPrice: null,
               category: ozonCat || "crossbody",
               description: ozonExtractDescription(attrs),
               image: info.images?.[0] || "",

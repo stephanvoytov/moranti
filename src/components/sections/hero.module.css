@@ -85,7 +85,7 @@
 .tagline {
   font-family: var(--font-body);
   font-size: clamp(16px, 2vw, 20px);
-  font-weight: 300;
+  font-weight: 400;
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 40px;
   line-height: 1.6;
