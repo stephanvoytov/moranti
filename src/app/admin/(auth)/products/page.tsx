@@ -7,6 +7,7 @@ import { CATEGORIES } from "@/lib/categories";
 import AdminModal from "@/components/admin/admin-modal";
 import AdminButton from "@/components/admin/admin-button";
 import AdminPageHeader from "@/components/admin/admin-page-header";
+import UpdatedBadge from "@/components/admin/updated-badge";
 import { useToast } from "@/lib/toast-context";
 import { MARKETPLACE_URLS, MARKETPLACE_FAVICONS } from "@/lib/marketplaces";
 import styles from "./products.module.css";
@@ -27,6 +28,7 @@ interface Product {
   ozonImage?: string;
   rating?: number;
   archivedAt?: string | null;
+  updatedAt?: string;
   colorName?: string;
   model?: { id: string; name: string } | null;
 }
@@ -69,6 +71,7 @@ export default function AdminProductsPage() {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [assignModelId, setAssignModelId] = useState("");
   const [models, setModels] = useState<ModelBrief[]>([]);
+  const modelsFetchedRef = useRef(false);
 
   // Sorting — по умолчанию сортируем по наличию на WB
   const [sortBy, setSortBy] = useState("wbStock");
@@ -111,6 +114,10 @@ export default function AdminProductsPage() {
     [search, category, archivedParam, marketplaceParam, sortBy, sortOrder, router],
   );
 
+  // Fetch on mount — легитимный паттерн: загрузка списка при монтировании.
+  // Первый setState (setLoading) здесь синхронный по определению; React 19
+  // автоматически батчит повторные рендеры, каскада нет.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchProducts(1); }, [fetchProducts]);
 
   // ─── Lightbox keyboard ───
@@ -168,10 +175,9 @@ export default function AdminProductsPage() {
 
   // ─── Assign model ───
 
-  let modelsFetched = false;
   async function fetchModelsOnce() {
-    if (modelsFetched && models.length > 0) return;
-    modelsFetched = true;
+    if (modelsFetchedRef.current && models.length > 0) return;
+    modelsFetchedRef.current = true;
     try {
       const res = await fetch("/api/admin/models");
       if (res.ok) {
@@ -468,6 +474,9 @@ export default function AdminProductsPage() {
                 </span>
               </th>
               <th>Рейтинг</th>
+              <th className={styles.sortable} onClick={() => toggleSort("updatedAt")}>
+                Обновлён{sortBy === "updatedAt" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
+              </th>
               <th></th>
             </tr>
           </thead>
@@ -484,11 +493,12 @@ export default function AdminProductsPage() {
                   <td><div className={`${styles.skeleton}`} style={{ height: 14, width: 60, borderRadius: 3 }} /></td>
                   <td><div className={`${styles.skeleton}`} style={{ height: 14, width: '45%', borderRadius: 3 }} /></td>
                   <td><div className={`${styles.skeleton}`} style={{ height: 14, width: 35, borderRadius: 3 }} /></td>
+                  <td><div className={`${styles.skeleton}`} style={{ height: 14, width: 90, borderRadius: 3 }} /></td>
                   <td><div style={{ width: 24, height: 24 }} /></td>
                 </tr>
               ))
             ) : products.length === 0 ? (
-              <tr><td colSpan={10} className={styles.empty}>
+              <tr><td colSpan={11} className={styles.empty}>
                 {statusTab === "archived" ? "Нет архивных товаров" : "Нет товаров"}
               </td></tr>
             ) : (
@@ -578,6 +588,9 @@ export default function AdminProductsPage() {
                       {!p.wbArticle && !p.ozonArticle && <span className={styles.muted}>—</span>}
                     </td>
                     <td>{p.rating ? `${p.rating.toFixed(1)} ★` : "—"}</td>
+                    <td>
+                      <UpdatedBadge iso={p.updatedAt} />
+                    </td>
                     <td>
                       <button
                         className={styles.deleteBtn}
@@ -745,7 +758,7 @@ function AdminProductPhoto({
         </div>
       ) : (
         <div className={styles.photoPlaceholder}>
-          <span className={styles.photoMutedLabel}>нет артикула</span>
+          <span className={styles.photoMutedLabel}>—</span>
         </div>
       )}
     </div>
