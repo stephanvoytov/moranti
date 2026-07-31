@@ -78,8 +78,6 @@ export default async function AdminDashboard() {
     if (!p.colorName) tags.push({ text: "Нет цвета" });
     if (!p.images?.length) tags.push({ text: "Нет фото", warn: true });
     if (!p.wbArticle && !p.ozonArticle) tags.push({ text: "Нет в продаже", warn: true });
-    if (p.wbArticle && (p.wbStock ?? 0) <= 0) tags.push({ text: "Нет остатка WB", warn: true });
-    if (p.ozonArticle && (p.ozonStock ?? 0) <= 0) tags.push({ text: "Нет остатка Ozon", warn: true });
     if (tags.length) issues.push({ productId: p.id, productName: p.name, updatedAt: p.updatedAt?.toISOString(), tags });
   }
   issues.sort((a, b) => b.tags.length - a.tags.length);
