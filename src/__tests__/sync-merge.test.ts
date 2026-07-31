@@ -50,11 +50,12 @@ function makeWbCard(overrides = {}) {
   };
 }
 
-// ─── wbPrices (формат search API → mergeProductSources) ───
+// ─── wbPrices (формат wb-cards-v4 → mergeProductSources) ───
+// v4: price = текущая цена на сайте (со скидкой), discountedPrice = оригинал
 function makeWbPrices(overrides = {}) {
   return {
-    price: 4990,        // оригинал (копейки уже /100 на этапе prices.mjs)
-    discountedPrice: 3490,
+    price: 3490,        // текущая цена на сайте (уже /100 на этапе v4)
+    discountedPrice: 4990, // оригинал без скидки
     stock: 5,
     ...overrides,
   };

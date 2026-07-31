@@ -91,6 +91,7 @@ const PHASES = [
   "ozon-info",
   "ozon-attrs",
   "ozon-process",
+  "ozon-prices",
   "wb-models",
   "ozon-models",
   "archive",
@@ -523,7 +524,9 @@ async function main() {
               const ok = await updateProduct(prisma, db.id, allUpdates);
               if (ok) {
                 stats.wbUpdated++;
-                log.detail("updated", db.id, db.name, formatChanges(db, allUpdates));
+                const changes = formatChanges(db, allUpdates);
+                log.line(`  ${db.id} wb-${article} «${db.name}»: ${changes.join(", ")}`);
+                log.detail("updated", db.id, db.name, changes);
               }
             } else {
               stats.wbSkipped++;
@@ -648,7 +651,9 @@ async function main() {
               const ok = await updateProduct(prisma, db.id, allUpdates);
               if (ok) {
                 stats.ozonUpdated++;
-                log.detail("updated", db.id, db.name, formatChanges(db, allUpdates));
+                const changes = formatChanges(db, allUpdates);
+                log.line(`  ${db.id} offer-${offerId} «${db.name}»: ${changes.join(", ")}`);
+                log.detail("updated", db.id, db.name, changes);
               }
             } else {
               stats.ozonSkipped++;
@@ -713,6 +718,114 @@ async function main() {
 
         log.line(`  Ozon: ${stats.ozonUpdated} обновлено\n`);
       }
+    }
+
+    // ═══════════════════════════════════════════
+    // PHASE 2.5: Ozon Real Prices (через headless браузер)
+    // ═══════════════════════════════════════════
+
+    if (shouldRun("ozon-prices") && !flags.wbOnly) {
+      log.progress("ozon-prices", 0, 1);
+
+      // Собираем все товары с ozonArticle
+      const ozonSkuList = existing.all
+        .filter((p) => p.ozonArticle)
+        .map((p) => Number(p.ozonArticle))
+        .filter((n) => n > 0);
+
+      if (ozonSkuList.length > 0) {
+        log.line(
+          `[Ozon Prices] Получение реальных цен для ${ozonSkuList.length} товаров через headless браузер...`
+        );
+
+        try {
+          const { getProductsPrices } = await import(
+            "./sync-modules/ozon-price.mjs"
+          );
+          const prices = await getProductsPrices(ozonSkuList);
+
+          let updated = 0;
+          for (const { sku, cardPrice, price, oldPrice } of prices) {
+            const numSku = Number(sku);
+            const db = existing.byOzonArticle.get(numSku);
+            if (!db) continue;
+
+            // Эффективная цена: cardPrice (с картой) или price (без карты)
+            const effectivePrice = cardPrice ?? price;
+            if (effectivePrice == null) continue;
+
+            const updates = {};
+            const changes = [];
+
+            if (effectivePrice !== db.ozonPrice) {
+              updates.ozonPrice = effectivePrice;
+              changes.push(
+                `ozonPrice ${fmtPrice(db.ozonPrice)} → ${fmtPrice(effectivePrice)}`
+              );
+            }
+            if (oldPrice != null && oldPrice !== db.ozonOriginalPrice) {
+              updates.ozonOriginalPrice = oldPrice;
+              changes.push(
+                `ozonOriginalPrice ${fmtPrice(db.ozonOriginalPrice)} → ${fmtPrice(oldPrice)}`
+              );
+            }
+
+            // Пересчитываем общую price = min(wbPrice, ozonPrice)
+            const wbP = db.wbPrice ?? null;
+            const allPrices = [wbP, effectivePrice].filter((p) => p != null);
+            if (allPrices.length > 0) {
+              const newPrice = Math.min(...allPrices);
+              if (newPrice !== db.price) {
+                updates.price = newPrice;
+                changes.push(
+                  `price ${fmtPrice(db.price)} → ${fmtPrice(newPrice)}`
+                );
+              }
+            }
+
+            // Пересчитываем originalPrice = min(wbOriginalPrice, ozonOriginalPrice)
+            const origPrice = oldPrice ?? db.ozonOriginalPrice ?? null;
+            const wbOrigP = db.wbOriginalPrice ?? null;
+            const allOrigPrices = [wbOrigP, origPrice].filter((p) => p != null);
+            if (allOrigPrices.length > 0) {
+              const newOrigPrice = Math.min(...allOrigPrices);
+              if (newOrigPrice !== db.originalPrice) {
+                updates.originalPrice = newOrigPrice;
+                changes.push(
+                  `originalPrice ${fmtPrice(db.originalPrice)} → ${fmtPrice(newOrigPrice)}`
+                );
+              }
+            }
+
+            if (Object.keys(updates).length > 0) {
+              const ok = await updateProduct(prisma, db.id, updates);
+              if (ok) {
+                updated++;
+                log.line(`  ${db.id} ozon-${sku} «${db.name}»: ${changes.join(", ")}`);
+                log.detail("updated", db.id, db.name, formatChanges(db, updates));
+              }
+            }
+          }
+
+          const skipped = prices.length - updated;
+          log.line(`  Ozon Prices: ${updated} товаров обновлено` +
+            (skipped > 0 ? `, ${skipped} без изменений` : ""));
+        } catch (err) {
+          if (
+            err.message?.includes("недоступен") ||
+            err.message?.includes("Chromium")
+          ) {
+            log.line("  [Ozon Prices] Пропущено — нет Chromium (Vercel / сборка)");
+          } else {
+            log.line(`  [Ozon Prices] Ошибка: ${err.message}`);
+            stats.errors++;
+          }
+        }
+      } else {
+        log.line("[Ozon Prices] Нет товаров с ozonArticle");
+      }
+
+      log.progress("ozon-prices", 1, 1);
     }
 
     // ═══════════════════════════════════════════

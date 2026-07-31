@@ -21,6 +21,17 @@ jobs:
 
       - run: npm ci
 
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install patchright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx patchright install chromium
+
       - run: npx prisma generate
 
       # sync-all.mjs использует официальные WB API (Content + Pricing + Stocks + Analytics)

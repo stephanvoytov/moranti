@@ -61,7 +61,7 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
   if (prices.length > 0) { const np = Math.min(...prices); if (np !== db?.price) data.price = np; }
   if (origPrices.length > 0) { const np = Math.min(...origPrices); if (np !== db?.originalPrice) data.originalPrice = np; }
 
-  // ─── Стоки (количество) — читаем, но НЕ меняем inStock ───
+  // ─── Стоки (количество) ───
   if (wbPrices?.stock !== undefined) {
     if (wbPrices.stock !== (db?.wbStock ?? null)) data.wbStock = wbPrices.stock;
   }

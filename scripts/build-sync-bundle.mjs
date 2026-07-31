@@ -16,7 +16,13 @@ const OUT = "scripts/sync-all.bundle.mjs";
 console.log(`[bundle] Сборка ${OUT}...`);
 
 execSync(
-  `npx esbuild scripts/sync-all.mjs --bundle --platform=node --format=esm --external:@prisma/client --external:@prisma/adapter-pg --outfile=${OUT}`,
+  // got-scraping external: его дерево (http2-wrapper, header-generator,
+  // browserslist, caniuse-lite) использует динамические require(), которые
+  // esbuild не может заинлайнить, а Turbopack (Vercel) отклоняет в рантайме
+  // ("dynamic usage of require is not supported"). Пакет уже есть в
+  // serverExternalPackages в next.config.ts — на Vercel он грузится из
+  // node_modules как обычный CJS.
+  `npx esbuild scripts/sync-all.mjs --bundle --platform=node --format=esm --external:@prisma/client --external:@prisma/adapter-pg --external:playwright --external:patchright --external:got-scraping --outfile=${OUT}`,
   { stdio: "inherit", cwd: process.cwd() }
 );
 

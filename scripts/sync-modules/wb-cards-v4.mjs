@@ -98,9 +98,20 @@ export async function wbFetchCardsV4(_apiKey, log = noopLog, nmIds = []) {
       for (const p of products) {
         const size = p.sizes?.[0];
 
-        // Недоступные товары (архив, нет на WB) приходят с price.product=0.
-        // Пропускаем их — в БД остаются старые цены, а archive-фаза архивирует.
-        if (!size?.price?.product || size.price.product <= 0) continue;
+        // Недоступные товары (архив, нет на WB) приходят с price.product=0
+        // (или без size). Кладём их в map со стоком 0, чтобы merge выставил
+        // inStock=false, но НЕ обновляем цену (null → берётся старая из БД)
+        // и НЕ трогаем рейтинг (WB отдаёт 0 — null → fallback на card.rating).
+        if (!size?.price?.product || size.price.product <= 0) {
+          cardMap.set(p.id, {
+            price: null,
+            discountedPrice: null,
+            stock: 0,
+            rating: p.rating || null,
+            feedbacks: p.feedbacks || null,
+          });
+          continue;
+        }
 
         // Товар без стоков, но с ценой — временно нет в наличии.
         // Цену сохраняем, inStock выставится в 0 на стороне merge.

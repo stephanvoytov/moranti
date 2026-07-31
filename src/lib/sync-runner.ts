@@ -59,6 +59,7 @@ const PHASE_LABELS: Record<string, string> = {
   "ozon-attrs": "Получение характеристик Ozon",
   "ozon-ratings": "Получение рейтингов Ozon",
   "ozon-process": "Обработка товаров Ozon",
+  "ozon-prices": "Получение реальных цен Ozon",
   "ozon-models": "Синхронизация моделей Ozon",
   "wb-models": "Синхронизация моделей WB",
   "archive": "Архивация удалённых товаров",
