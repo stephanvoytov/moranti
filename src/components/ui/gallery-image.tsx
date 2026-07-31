@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import SmartImage from "./smart-image";
 
 interface Props {
   src: string;
@@ -17,6 +18,7 @@ interface Props {
 /**
  * Галерея — сырой <img> с WB CDN, без next/image.
  * URL уже в размере big (900×1200), но если попадётся c516x688 — апгрейдит.
+ * Ошибка big → fallback на оригинал → иначе SmartImage покажет «нет фото».
  */
 function upgradeUrl(url: string): string {
   return url.replace("/c516x688/", "/big/");
@@ -39,13 +41,14 @@ export default function GalleryImage({
     setCurrentSrc(upgradeUrl(src));
   }, [src]);
 
+  // big не загрузился → пробуем оригинальный URL; если и он не загрузился —
+  // currentSrc не изменится, и SmartImage перейдёт в состояние «нет фото»
   const onError = useCallback(() => {
-    if (currentSrc !== src) setCurrentSrc(src);
-  }, [currentSrc, src]);
+    setCurrentSrc((cur) => (cur !== src ? src : cur));
+  }, [src]);
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <SmartImage
       key={src}
       src={currentSrc}
       alt={alt}
@@ -53,8 +56,7 @@ export default function GalleryImage({
       height={height}
       className={className}
       style={style}
-      loading={priority ? "eager" : "lazy"}
-      fetchPriority={priority ? "high" : undefined}
+      priority={priority}
       draggable={draggable}
       onMouseDown={onMouseDown}
       onError={onError}

@@ -3,6 +3,7 @@ import { getProducts, getCategories } from "@/data/products";
 import Link from "next/link";
 import Hero from "@/components/sections/hero";
 import ProductCard from "@/components/ui/product-card";
+import SmartImage from "@/components/ui/smart-image";
 import HomeClient from "./home-client";
 import styles from "./page.module.css";
 
@@ -56,11 +57,10 @@ export default async function Home() {
                   className={styles.collectionCard}
                 >
                   {img ? (
-                    <img
+                    <SmartImage
                       src={img}
                       alt={cat.name}
                       className={styles.collectionImg}
-                      loading="lazy"
                     />
                   ) : (
                     <div className={styles.collectionImgFallback} />

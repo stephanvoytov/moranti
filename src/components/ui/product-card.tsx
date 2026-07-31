@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Product } from "@/data/products";
 import { useFavorites } from "@/lib/favorites-context";
 import { useLivePrice } from "@/lib/use-live-price";
+import SmartImage from "./smart-image";
 import styles from "./product-card.module.css";
 
 interface ProductCardProps {
@@ -89,11 +90,11 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
     <article className={styles.card} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <div className={styles.imageWrap}>
         <Link href={link} aria-label={product.name} className={styles.imageLink}>
-          <img
+          <SmartImage
             src={images[hoverIndex]}
             alt={product.name}
             className={styles.image}
-            loading={priority ? "eager" : "lazy"}
+            priority={priority}
             draggable={false}
           />
         </Link>

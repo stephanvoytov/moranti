@@ -9,6 +9,7 @@ import { resolveColor } from "@/lib/color-map";
 import { MARKETPLACE_FAVICONS, MARKETPLACE_URLS } from "@/lib/marketplaces";
 import AdminButton from "@/components/admin/admin-button";
 import AdminModal from "@/components/admin/admin-modal";
+import SmartImage from "@/components/ui/smart-image";
 
 interface ProductBrief {
   id: string;
@@ -99,18 +100,31 @@ export default function AdminModelsKanban() {
     return map[slug] || "#999";
   };
 
+  // Сортировка внутри столбца: в наличии (wbStock/ozonStock > 0) — сверху,
+  // затем не в наличии, архивные — в самом низу. Стабильная, сохраняет
+  // исходный порядок для равных.
+  const sortVariantsByStock = (items: ProductBrief[]): ProductBrief[] =>
+    [...items].sort((a, b) => {
+      const inStockA = (a.wbStock ?? 0) > 0 || (a.ozonStock ?? 0) > 0;
+      const inStockB = (b.wbStock ?? 0) > 0 || (b.ozonStock ?? 0) > 0;
+      if (inStockA !== inStockB) return inStockA ? -1 : 1;
+      const archivedA = a.archivedAt ? 1 : 0;
+      const archivedB = b.archivedAt ? 1 : 0;
+      return archivedA - archivedB;
+    });
+
   const columns: Column[] = [
     {
       id: "__unassigned",
       title: "Без модели",
       catColor: "#aaa",
-      items: unassigned,
+      items: sortVariantsByStock(unassigned),
     },
     ...models.map((m) => ({
       id: m.id,
       title: m.name,
       catColor: catColor(m.category),
-      items: m.variants,
+      items: sortVariantsByStock(m.variants),
     })),
   ];
 
@@ -398,19 +412,19 @@ export default function AdminModelsKanban() {
                             {canSwap ? (
                               <>
                                 <div className={`${styles.cardImgSlot} ${styles.cardImgSlotWb} ${wbOos ? styles.cardSlotOos : ""}`}>
-                                  <img src={item.image} alt="" className={styles.cardImgSlotInner} />
+                                  <SmartImage src={item.image} alt="" className={styles.cardImgSlotInner} draggable={false} />
                                   <img src={MARKETPLACE_FAVICONS.wb} alt="" className={styles.cardSlotBadge} />
                                   {wbOos && <div className={styles.cardSlotOosOverlay}>НЕТ</div>}
                                 </div>
                                 <div className={`${styles.cardImgSlot} ${styles.cardImgSlotOzon} ${ozonOos ? styles.cardSlotOos : ""}`}>
-                                  <img src={item.ozonImage} alt="" className={styles.cardImgSlotInner} />
+                                  <SmartImage src={item.ozonImage} alt="" className={styles.cardImgSlotInner} draggable={false} />
                                   <img src={MARKETPLACE_FAVICONS.ozon} alt="" className={styles.cardSlotBadge} />
                                   {ozonOos && <div className={styles.cardSlotOosOverlay}>НЕТ</div>}
                                 </div>
                               </>
                             ) : (
                               <div className={`${styles.cardImgSlot} ${styles.cardImgSlotSingle} ${wbOos ? styles.cardSlotOos : ""}`}>
-                                <img src={item.image} alt="" className={styles.cardImgSlotInner} />
+                                <SmartImage src={item.image} alt="" className={styles.cardImgSlotInner} draggable={false} />
                                 <img src={MARKETPLACE_FAVICONS.wb} alt="" className={styles.cardSlotBadge} />
                                 {wbOos && <div className={styles.cardSlotOosOverlay}>НЕТ</div>}
                               </div>

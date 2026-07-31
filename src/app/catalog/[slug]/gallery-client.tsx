@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import GalleryImage from "@/components/ui/gallery-image";
+import SmartImage from "@/components/ui/smart-image";
 import styles from "./page.module.css";
 
 interface GalleryClientProps {
@@ -315,7 +316,7 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
                 onClick={() => goTo(i)}
                 aria-label={`${alt} — фото ${i + 1}`}
               >
-                <img src={thumbUrl(src)} alt="" className={styles.thumbImage} loading="lazy" draggable={false} />
+                <SmartImage src={thumbUrl(src)} alt="" className={styles.thumbImage} draggable={false} />
               </button>
             ))}
           </div>

@@ -711,6 +711,7 @@ function AdminProductPhoto({
   isArchived?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const show = hasArticle && src && !failed;
   const isPlaceholder = hasArticle && (!src || failed);
   const isOutOfStock = hasArticle && !inStock;
@@ -719,12 +720,14 @@ function AdminProductPhoto({
     <div className={`${styles.photoItem} ${isArchived ? styles.photoArchived : ""}`}>
       {show ? (
         <div className={`${styles.photoWrapper} ${isOutOfStock ? styles.photoOutOfStock : ""}`}>
+          {!loaded && <div className={styles.photoLoading} />}
           <img
             src={src}
             alt=""
             className={styles.photoImg}
             onClick={onLightbox}
-            onError={() => setFailed(true)}
+            onLoad={() => setLoaded(true)}
+            onError={() => { setFailed(true); setLoaded(true); }}
             title="Увеличить"
           />
           {isArchived && <div className={styles.archiveCorner} title="В архиве" />}

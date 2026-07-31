@@ -1,0 +1,49 @@
+/* =============================================
+   SmartImage — placeholder для медленно грузящихся
+   / битых картинок (WB CDN)
+   ============================================= */
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  color: var(--text-muted);
+  pointer-events: none;
+  overflow: hidden;
+  /* Без z-index: всё, что в DOM после (overlay, бейджи, стрелки), рисуется поверх */
+}
+
+.placeholder svg {
+  opacity: 0.35;
+}
+
+/* Shimmer — бегущая полоса света */
+.placeholder::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 70%
+  );
+  animation: smartImageShimmer 1.4s ease-in-out infinite;
+}
+
+/* Битое фото — без анимации, просто иконка */
+.placeholderFailed::after {
+  display: none;
+}
+
+@keyframes smartImageShimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}

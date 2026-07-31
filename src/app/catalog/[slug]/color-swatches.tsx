@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { swatchUrl, cdnImageUrl } from "@/lib/product-images";
+import SmartImage from "@/components/ui/smart-image";
 import styles from "./page.module.css";
 
 interface SwatchProduct {
@@ -91,11 +92,10 @@ export default function ColorSwatches({ current, siblings }: ColorSwatchesProps)
             className={`${styles.swatch} ${styles.swatchActive}`}
             title={label(current, siblings)}
           >
-            <img
+            <SmartImage
               src={swatchUrl(current.wbArticle)}
               alt={label(current, siblings)}
               className={styles.swatchImage}
-              loading="lazy"
             />
           </Link>
         </div>
@@ -115,11 +115,10 @@ export default function ColorSwatches({ current, siblings }: ColorSwatchesProps)
                 className={styles.swatch}
                 title={label(s, siblings)}
               >
-                <img
+                <SmartImage
                   src={swatchUrl(s.wbArticle)}
                   alt={label(s, siblings)}
                   className={`${styles.swatchImage} ${isOutOfStock ? styles.swatchImageOos : ""}`}
-                  loading="lazy"
                 />
               </Link>
               {isOutOfStock && (
