@@ -91,6 +91,8 @@ function isBrowserAvailable() {
 
 async function launch() {
   log("launching Chromium (patchright)…");
+  const proxy = getProxyConfig();
+  if (proxy) log(`using proxy: ${proxy.server} (user: ${proxy.username ?? "—"})`);
   // patchright — недетектируемый форк Playwright, проходит Variti.
   // Обычный playwright здесь НЕ работает (Variti блокирует headless).
   const { chromium } = await import("patchright");
@@ -111,11 +113,12 @@ async function launch() {
     dead?.close().catch(() => {});
   });
 
+  const proxyCfg = getProxyConfig();
   context = await browser.newContext({
     viewport: { width: 1920, height: 1080 },
     userAgent: USER_AGENT,
     locale: "ru-RU",
-    ...(getProxyConfig() ? { proxy: getProxyConfig() } : {}),
+    ...(proxyCfg ? { proxy: proxyCfg } : {}),
   });
 
   challenged = false;
@@ -143,10 +146,17 @@ async function ensureContext() {
     // Страница остаётся открытой — все fetch() идут с неё, наследуя сессию.
     mainPage = await context.newPage();
     log("passing Variti anti-bot challenge…");
-    await mainPage.goto(HOME, {
-      waitUntil: "domcontentloaded",
-      timeout: NAV_TIMEOUT_MS,
-    });
+    let navStatus = "—";
+    try {
+      const resp = await mainPage.goto(HOME, {
+        waitUntil: "domcontentloaded",
+        timeout: NAV_TIMEOUT_MS,
+      });
+      navStatus = resp?.status() ?? "no-response";
+    } catch (err) {
+      navStatus = `ERR: ${String(err?.message).slice(0, 80)}`;
+    }
+    log(`homepage status: ${navStatus}`);
     await mainPage.waitForTimeout(CHALLENGE_WAIT_MS);
 
     const title = await mainPage.title();
