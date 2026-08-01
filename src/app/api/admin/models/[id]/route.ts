@@ -11,6 +11,14 @@ import { enforceRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
 import prisma, { prismaQuery, serializeProduct, serializeModel } from "@/lib/prisma";
 import { VALID_CATEGORIES } from "@/lib/schemas";
+import { invalidateCache } from "@/lib/data-cache";
+
+/** Мутации моделей меняют и товары (modelId, updatedAt) — сбрасываем всё продуктовое */
+function invalidateProductCaches(): void {
+  invalidateCache("all-products");
+  invalidateCache("all-products-all");
+  invalidateCache("dashboard-stats");
+}
 
 const updateModelSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
@@ -115,6 +123,7 @@ export async function PUT(
     prisma.model.update({ where: { id }, data })
   );
 
+  invalidateProductCaches();
   return NextResponse.json(serializeModel(updated as Record<string, unknown>));
 }
 
@@ -149,6 +158,7 @@ export async function DELETE(
 
   await prismaQuery(() => prisma.model.delete({ where: { id } }));
 
+  invalidateProductCaches();
   return NextResponse.json({ ok: true });
 }
 
@@ -189,6 +199,7 @@ export async function PATCH(
         data: { modelId: null },
       })
     );
+    invalidateProductCaches();
     return NextResponse.json({ ok: true });
   }
 
@@ -221,5 +232,6 @@ export async function PATCH(
     }
   }
 
+  invalidateProductCaches();
   return NextResponse.json({ ok: true, linkedCount: parsed.data.variantIds.length });
 }

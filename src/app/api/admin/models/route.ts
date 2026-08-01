@@ -11,6 +11,7 @@ import { enforceRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
 import prisma, { prismaQuery, serializeProduct, serializeModel } from "@/lib/prisma";
 import { VALID_CATEGORIES } from "@/lib/schemas";
+import { invalidateCache } from "@/lib/data-cache";
 
 const createModelSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -118,6 +119,7 @@ export async function POST(request: NextRequest) {
     })
   );
 
+  invalidateCache("dashboard-stats");
   return NextResponse.json(model, { status: 201 });
 }
 

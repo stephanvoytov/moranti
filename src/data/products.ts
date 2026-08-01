@@ -197,7 +197,8 @@ export async function getProducts(): Promise<Product[]> {
       if (!fallback?.products) throw err;
       return fallback.products;
     }
-  });
+    // 60s свежих + SWR-окно 10 мин: мутации продуктов инвалидируют ключ
+  }, 60_000, 600_000);
 }
 
 /** Все товары, включая нет в наличии (кроме архивных) */
@@ -216,7 +217,7 @@ export async function getAllProducts(): Promise<Product[]> {
       if (!fallback?.products) throw err;
       return fallback.products;
     }
-  });
+  }, 60_000, 600_000);
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
@@ -237,7 +238,7 @@ export async function getProduct(slug: string): Promise<Product | null> {
     }
     const fallback = loadJsonFallback<{ products: Product[] }>("products.json");
     return fallback?.products?.find((p) => p.slug === slug) ?? null;
-  });
+  }, 60_000, 600_000);
 }
 
 export async function getProductsByCategory(
@@ -291,7 +292,8 @@ export async function getCategories(): Promise<ProductCategory[]> {
       if (!fallback?.categories) throw err;
       return fallback.categories;
     }
-  });
+    // Счётчики категорий меняются только на мутациях — 5 мин свежести
+  }, 300_000, 600_000);
 }
 
 export async function getAllSlugs(): Promise<string[]> {

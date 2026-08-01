@@ -179,6 +179,7 @@ export async function POST(request: NextRequest) {
   );
 
   invalidateCache("all-products");
+  invalidateCache("all-products-all");
   invalidateCache("all-categories");
   revalidatePath("/");
   revalidatePath("/catalog");

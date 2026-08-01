@@ -35,22 +35,34 @@ export async function POST(request: Request) {
 
     if (file.size > MAX_UPLOAD_SIZE) {
       return NextResponse.json(
-        { error: `File too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Max: 10 MB` },
+        { error: `File too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Max: ${MAX_UPLOAD_SIZE / 1024 / 1024} MB` },
         { status: 400 },
       );
     }
 
-    const ext = file.name.split(".").pop() || "jpg";
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
     const timestamp = Date.now();
     const random = Math.random().toString(36).slice(2, 6);
     const filename = `images/products/${timestamp}-${random}.${ext}`;
 
-    const blob = await put(filename, file, { access: "public" });
+    // addRandomSuffix: официальная рекомендация SDK — исключает конфликты путей;
+    // contentType передаём явно из File.type (SDK берёт из расширения по умолчанию).
+    const blob = await put(filename, file, {
+      access: "public",
+      addRandomSuffix: true,
+      contentType: file.type,
+    });
 
     return NextResponse.json({ url: blob.url, filename });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     logger.error("Upload failed", { error: message, stack: err instanceof Error ? err.stack : undefined });
+    if (message.includes("BLOB_READ_WRITE_TOKEN")) {
+      return NextResponse.json(
+        { error: "Upload failed", detail: "Missing Vercel Blob token. Please configure BLOB_READ_WRITE_TOKEN in .env.local" },
+        { status: 500 }
+      );
+    }
     return NextResponse.json({ error: "Upload failed", detail: message }, { status: 500 });
   }
 }

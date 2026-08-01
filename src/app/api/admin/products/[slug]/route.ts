@@ -135,7 +135,9 @@ export async function PUT(
     prisma.product.update({ where: { slug }, data })
   );
   invalidateCache("all-products");
+  invalidateCache("all-products-all");
   invalidateCache("all-categories");
+  invalidateCache(`product:${slug}`);
   revalidatePath("/");
   revalidatePath("/catalog");
   return NextResponse.json(serializeProduct(updated as Record<string, unknown>));
@@ -164,6 +166,8 @@ export async function DELETE(
 
   await prismaQuery(() => prisma.product.delete({ where: { slug } }));
   invalidateCache("all-products");
+  invalidateCache("all-products-all");
   invalidateCache("all-categories");
+  invalidateCache(`product:${slug}`);
   return NextResponse.json({ ok: true });
 }

@@ -299,7 +299,17 @@ export default function ProductEditorPage() {
     setError("");
 
     try {
+      // Держим синхронно с MAX_UPLOAD_SIZE в src/lib/schemas.ts
+      // (4 МБ — лимит тела запроса классического serverless Vercel)
+      const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
       for (let i = 0; i < files.length; i++) {
+        if (files[i].size > MAX_UPLOAD_BYTES) {
+          throw new Error(
+            `Файл ${files[i].name} слишком большой (${(files[i].size / 1024 / 1024).toFixed(1)} МБ). Макс. 4 МБ`,
+          );
+        }
+
         const body = new FormData();
         body.append("file", files[i]);
 

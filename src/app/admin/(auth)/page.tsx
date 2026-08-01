@@ -3,6 +3,7 @@ import { getWbSyncStatus } from "@/lib/wb-sync";
 import { getOzonSyncStatus } from "@/lib/ozon-sync";
 import Link from "next/link";
 import prisma, { prismaQuery } from "@/lib/prisma";
+import { cacheGet } from "@/lib/data-cache";
 import type { SyncRunRecord } from "@/lib/sync-history";
 import UpdatedBadge from "@/components/admin/updated-badge";
 import styles from "./dashboard.module.css";
@@ -39,16 +40,26 @@ function SyncSection({ label, sync, href }: { label: string; sync: SyncRunRecord
 }
 
 export default async function AdminDashboard() {
-  const [allProducts, categories, models, wbSync, ozonSync] = await Promise.all([
-    prismaQuery(() => prisma.product.findMany({ orderBy: { createdAt: "asc" } })),
-    getCategories(),
-    prismaQuery(() => prisma.model.findMany({
-      include: { variants: { where: { archivedAt: null }, select: { id: true, wbArticle: true, ozonArticle: true } } },
-      orderBy: { createdAt: "desc" },
-    })),
-    getWbSyncStatus(),
-    getOzonSyncStatus(),
-  ]);
+  // 5 запросов к БД объединены в один кэш-ключ: навигация по админке
+  // не дёргает БД при каждом визите. 15с свежести + 60с stale-окно —
+  // после мутаций данные обновляются максимум через минуту, а
+  // invalidateCache() из sync/models/products-роутов сбрасывает и раньше.
+  const [allProducts, categories, models, wbSync, ozonSync] = await cacheGet(
+    "dashboard-stats",
+    async () =>
+      Promise.all([
+        prismaQuery(() => prisma.product.findMany({ orderBy: { createdAt: "asc" } })),
+        getCategories(),
+        prismaQuery(() => prisma.model.findMany({
+          include: { variants: { where: { archivedAt: null }, select: { id: true, wbArticle: true, ozonArticle: true } } },
+          orderBy: { createdAt: "desc" },
+        })),
+        getWbSyncStatus(),
+        getOzonSyncStatus(),
+      ]),
+    15_000,
+    60_000,
+  );
 
   const totalProducts = allProducts.length;
   const totalModels = models.length;

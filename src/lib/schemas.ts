@@ -140,4 +140,6 @@ export const ALLOWED_UPLOAD_TYPES = [
   "image/avif",
 ] as const;
 
-export const MAX_UPLOAD_SIZE = 10 * 1024 * 1024; // 10 MB
+// 4 МБ: безопасно для лимита тела запроса классического serverless Vercel (4.5 МБ).
+// На Fluid Compute лимит выше, но единый порог исключает 413 до route handler.
+export const MAX_UPLOAD_SIZE = 4 * 1024 * 1024; // 4 MB

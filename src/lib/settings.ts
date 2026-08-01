@@ -78,7 +78,8 @@ export async function readSettings(): Promise<SiteSettings> {
       if (fallback) return fallback;
       return defaultSettings();
     }
-  });
+    // Настройки меняются редко; writeSettings инвалидирует ключ после записи
+  }, 300_000, 600_000);
 }
 
 export async function writeSettings(

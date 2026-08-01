@@ -120,6 +120,14 @@ export default function AdminSettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Держим синхронно с MAX_UPLOAD_SIZE в src/lib/schemas.ts
+    // (4 МБ — лимит тела запроса классического serverless Vercel)
+    const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setError(`Файл слишком большой (${(file.size / 1024 / 1024).toFixed(1)} МБ). Макс. 4 МБ`);
+      return;
+    }
+
     setUploading(true);
     setError("");
 
