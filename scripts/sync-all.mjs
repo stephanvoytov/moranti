@@ -406,7 +406,8 @@ async function updateProduct(prisma, id, data) {
   const updateData = {};
   const fields = [
     "name", "price", "originalPrice", "wbPrice", "wbOriginalPrice",
-    "ozonPrice", "ozonOriginalPrice", "category", "description",
+    "ozonPrice", "ozonOriginalPrice", "ozonRating", "ozonReviewsCount",
+    "category", "description",
     "image", "images", "rating", "reviewsCount", "colorName", "composition",
     "inStock", "photoCount", "wbStock", "ozonStock",
     "ozonImage", "ozonImages", "characteristics",
@@ -791,7 +792,7 @@ async function main() {
           const prices = await getProductsPrices(ozonSkuList);
 
           let updated = 0;
-          for (const { sku, cardPrice, price, oldPrice } of prices) {
+          for (const { sku, cardPrice, price, oldPrice, rating, reviewsCount } of prices) {
             const numSku = Number(sku);
             const db = existing.byOzonArticle.get(numSku);
             if (!db) continue;
@@ -814,6 +815,35 @@ async function main() {
               changes.push(
                 `ozonOriginalPrice ${fmtPrice(db.ozonOriginalPrice)} → ${fmtPrice(oldPrice)}`
               );
+            }
+
+            // Звёздный рейтинг и отзывы с витрины Ozon (webReviewProductScore).
+            // Сохраняем в отдельные поля — merge.mjs учитывает их в итоговых
+            // rating/reviewsCount (приоритет WB-рейтинга при этом сохраняется).
+            if (rating != null && rating !== db.ozonRating) {
+              updates.ozonRating = rating;
+              changes.push(`ozonRating ${db.ozonRating ?? "—"} → ${rating}`);
+            }
+            if (reviewsCount != null && reviewsCount !== db.ozonReviewsCount) {
+              updates.ozonReviewsCount = reviewsCount;
+              changes.push(
+                `ozonReviewsCount ${db.ozonReviewsCount ?? "—"} → ${reviewsCount}`
+              );
+            }
+
+            // Нет WB-рейтинга — витринный Ozon-рейтинг/отзывы сразу в итог
+            if (db.rating == null && rating != null && rating !== db.rating) {
+              updates.rating = rating;
+              changes.push(`rating — → ${rating}`);
+            }
+            if (
+              db.rating == null &&
+              db.ozonRating == null &&
+              reviewsCount != null &&
+              reviewsCount !== (db.reviewsCount ?? null)
+            ) {
+              updates.reviewsCount = reviewsCount;
+              changes.push(`reviewsCount — → ${reviewsCount}`);
             }
 
             // Пересчитываем общую price = min(wbPrice, ozonPrice)
@@ -901,13 +931,20 @@ async function main() {
 
     if (shouldRun("archive")) {
       log.progress("archive", 0, 1);
-      log.line("Архивация удалённых товаров...");
-      const archiveResult = await archiveGoneProducts(
-        prisma, existing.all, wbArticles, ozonItems, trashArticles,
-        !flags.ozonOnly, !flags.wbOnly, log, flags,
-      );
-      stats.archived = archiveResult.archived;
-      stats.outOfStock = archiveResult.markedOutOfStock;
+      if (wbArticles.length === 0 && ozonItems.length === 0) {
+        // Списки маркетплейсов не загружены (например, --from-phase с пропуском
+        // фаз загрузки) — архивировать нельзя: все товары показались бы
+        // «снятыми с продажи» и ушли бы в архив (архив всего каталога).
+        log.line("Архивация пропущена: списки WB и Ozon не загружены");
+      } else {
+        log.line("Архивация удалённых товаров...");
+        const archiveResult = await archiveGoneProducts(
+          prisma, existing.all, wbArticles, ozonItems, trashArticles,
+          !flags.ozonOnly, !flags.wbOnly, log, flags,
+        );
+        stats.archived = archiveResult.archived;
+        stats.outOfStock = archiveResult.markedOutOfStock;
+      }
       log.progress("archive", 1, 1);
     }
 

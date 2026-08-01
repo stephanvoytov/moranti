@@ -90,6 +90,8 @@ function makeDb(overrides = {}) {
     colorName: "Бежевый",
     rating: null,
     reviewsCount: null,
+    ozonRating: null,
+    ozonReviewsCount: null,
     inStock: false,
     wbStock: 0,
     ozonStock: null,
@@ -145,6 +147,48 @@ describe("mergeProductSources — интеграция с WB", () => {
     expect(result.rating).toBe(4.5);
     // Количество отзывов суммируется (реальные counts)
     expect(result.reviewsCount).toBe(21); // 14 wb + 7 ozon
+  });
+
+  it("Ozon звёздный рейтинг с витрины (db.ozonRating) — fallback без WB рейтинга", () => {
+    const db = makeDb({ rating: null, reviewsCount: null, ozonRating: 4.8, ozonReviewsCount: 6 });
+
+    // WB рейтинг отсутствует — берём витринный рейтинг Ozon (totalScore 1-5)
+    const result = mergeProductSources(null, null, null, null, null, null, db) as Record<string, any>;
+
+    expect(result.rating).toBe(4.8);
+    expect(result.reviewsCount).toBe(6);
+  });
+
+  it("свежий WB рейтинг приоритетнее витринного Ozon", () => {
+    const wbRating = makeWbRating({ rating: 4.2, feedbacks: 10 });
+    const db = makeDb({ rating: null, reviewsCount: null, ozonRating: 4.8, ozonReviewsCount: 6 });
+
+    const result = mergeProductSources(null, null, wbRating, null, null, null, db) as Record<string, any>;
+
+    expect(result.rating).toBe(4.2);            // WB главный
+    expect(result.reviewsCount).toBe(16);       // 10 wb + 6 ozon (браузерный счётчик)
+  });
+
+  it("браузерный счётчик отзывов Ozon приоритетнее Seller API reviews_count", () => {
+    const wbRating = makeWbRating({ rating: 4.5, feedbacks: 14 });
+    // Seller API говорит 7, но браузер с витрины видел 6 — берём браузерное
+    const ozonInfo = { reviews_count: 7 };
+    const db = makeDb({ rating: null, reviewsCount: null, ozonRating: null, ozonReviewsCount: 6 });
+
+    const result = mergeProductSources(null, null, wbRating, ozonInfo, null, null, db) as Record<string, any>;
+
+    expect(result.reviewsCount).toBe(20); // 14 wb + 6 ozon (не 21)
+  });
+
+  it("старый WB рейтинг в БД без свежего WB — счётчик отзывов не удваивается", () => {
+    // В БД уже сумма: 14 wb + 7 ozon = 21. Свежего WB нет, браузерный ozon = 7.
+    const db = makeDb({ rating: 4.5, reviewsCount: 21, ozonRating: null, ozonReviewsCount: 7 });
+
+    const result = mergeProductSources(null, null, null, null, null, null, db) as Record<string, any>;
+
+    // Рейтинг сохраняется, счётчик не превращается в 21 + 7
+    expect(result.rating).toBeUndefined();
+    expect(result.reviewsCount).toBeUndefined();
   });
 
   it("обновляет inStock если wbPrices.stock > 0", () => {

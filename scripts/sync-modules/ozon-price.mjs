@@ -29,6 +29,57 @@ function priceToNumber(text) {
 }
 
 /**
+ * Извлекает цены, звёздный рейтинг и количество отзывов из JSON composer-api
+ * страницы товара.
+ *
+ * В widgetStates:
+ *  - "webPrice-{id}-default-1" → { cardPrice, price, originalPrice }
+ *  - "webReviewProductScore-{id}-default-1" → { totalScore (1–5), reviewsCount }
+ *
+ * @param {object} page — результат composer-api (распарсенный JSON)
+ * @returns {{ cardPrice: number|null, price: number|null, oldPrice: number|null,
+ *             rating: number|null, reviewsCount: number|null }}
+ */
+export function parseProductPage(page) {
+  const ws = page?.widgetStates || {};
+  const result = { cardPrice: null, price: null, oldPrice: null, rating: null, reviewsCount: null };
+  if (!ws || typeof ws !== "object") return result;
+
+  // Ищем widget с именем "webPrice" (часть до первого "-")
+  const priceKey = Object.keys(ws).find((k) => String(k).split("-")[0] === "webPrice");
+  if (priceKey) {
+    try {
+      const widget = JSON.parse(ws[priceKey]);
+      result.cardPrice = priceToNumber(widget.cardPrice);
+      result.price = priceToNumber(widget.price);
+      result.oldPrice = priceToNumber(widget.originalPrice);
+    } catch {
+      // невалидный виджет — цены остаются null
+    }
+  }
+
+  // Ищем widget с именем "webReviewProductScore" — звёздный рейтинг (1-5) и отзывы
+  const ratingKey = Object.keys(ws).find(
+    (k) => String(k).split("-")[0] === "webReviewProductScore"
+  );
+  if (ratingKey) {
+    try {
+      const widget = JSON.parse(ws[ratingKey]);
+      if (typeof widget.totalScore === "number" && widget.totalScore > 0) {
+        result.rating = Math.round(widget.totalScore * 10) / 10;
+      }
+      if (typeof widget.reviewsCount === "number" && widget.reviewsCount > 0) {
+        result.reviewsCount = widget.reviewsCount;
+      }
+    } catch {
+      // невалидный виджет — рейтинг/отзывы остаются null
+    }
+  }
+
+  return result;
+}
+
+/**
  * Извлекает цены из JSON composer-api страницы товара.
  *
  * В widgetStates есть ключ вида "webPrice-{id}-default-1",
@@ -38,49 +89,29 @@ function priceToNumber(text) {
  * @returns {{ cardPrice: number|null, price: number|null, oldPrice: number|null }}
  */
 export function parsePrices(page) {
-  const ws = page?.widgetStates || {};
-  if (!ws || typeof ws !== "object") {
-    return { cardPrice: null, price: null, oldPrice: null };
-  }
-
-  // Ищем widget с именем "webPrice" (часть до первого "-")
-  const priceKey = Object.keys(ws).find((k) => String(k).split("-")[0] === "webPrice");
-  if (!priceKey) {
-    return { cardPrice: null, price: null, oldPrice: null };
-  }
-
-  let widget;
-  try {
-    widget = JSON.parse(ws[priceKey]);
-  } catch {
-    return { cardPrice: null, price: null, oldPrice: null };
-  }
-
-  return {
-    cardPrice: priceToNumber(widget.cardPrice),
-    price: priceToNumber(widget.price),
-    oldPrice: priceToNumber(widget.originalPrice),
-  };
+  const { cardPrice, price, oldPrice } = parseProductPage(page);
+  return { cardPrice, price, oldPrice };
 }
 
 /**
- * Получает цены для одного SKU Ozon.
+ * Получает цены, рейтинг и отзывы для одного SKU Ozon.
  *
  * @param {string|number} sku — артикул Ozon (публичный SKU)
- * @returns {Promise<{ sku: string, cardPrice: number|null, price: number|null, oldPrice: number|null }>}
+ * @returns {Promise<{ sku: string, cardPrice: number|null, price: number|null,
+ *   oldPrice: number|null, rating: number|null, reviewsCount: number|null }>}
  */
 export async function getProductPrice(sku) {
   const path = `/product/${sku}/`;
 
-  // Основная страница товара — тут лежит webPrice
+  // Основная страница товара — тут лежат webPrice и webReviewProductScore
   const basePage = await fetchJson(path);
-  const prices = parsePrices(basePage);
+  const pageData = parseProductPage(basePage);
 
-  return { sku: String(sku), ...prices };
+  return { sku: String(sku), ...pageData };
 }
 
 /**
- * Получает цены для нескольких SKU Ozon.
+ * Получает цены, рейтинг и отзывы для нескольких SKU Ozon.
  *
  * Последовательные запросы с задержкой 500мс, чтобы не нагружать Ozon.
  * При ошибке одного SKU остальные продолжаются.
@@ -88,7 +119,8 @@ export async function getProductPrice(sku) {
  * @param {Array<string|number>} skus — массив артикулов Ozon
  * @param {object} [opts]
  * @param {number} [opts.delayMs=500] — задержка между запросами
- * @returns {Promise<Array<{ sku: string, cardPrice: number|null, price: number|null, oldPrice: number|null }>>}
+ * @returns {Promise<Array<{ sku: string, cardPrice: number|null, price: number|null,
+ *   oldPrice: number|null, rating: number|null, reviewsCount: number|null }>>}
  */
 export async function getProductsPrices(skus, { delayMs = 500 } = {}) {
   if (!isEnabled()) {
@@ -108,7 +140,7 @@ export async function getProductsPrices(skus, { delayMs = 500 } = {}) {
 
         if (result.cardPrice != null) {
           console.error(
-            `[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: cardPrice=${result.cardPrice} price=${result.price} oldPrice=${result.oldPrice}`
+            `[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: cardPrice=${result.cardPrice} price=${result.price} oldPrice=${result.oldPrice} rating=${result.rating} reviews=${result.reviewsCount}`
           );
         } else {
           console.error(`[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: нет цен (${result.price ?? "—"})`);

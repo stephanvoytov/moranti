@@ -644,7 +644,8 @@ var ozon_price_exports = {};
 __export(ozon_price_exports, {
   getProductPrice: () => getProductPrice,
   getProductsPrices: () => getProductsPrices,
-  parsePrices: () => parsePrices
+  parsePrices: () => parsePrices,
+  parseProductPage: () => parseProductPage
 });
 function priceToNumber(text) {
   if (text == null) return null;
@@ -652,32 +653,46 @@ function priceToNumber(text) {
   const digits = str.replace(/[^\d]/g, "");
   return digits ? parseInt(digits, 10) : null;
 }
-function parsePrices(page) {
+function parseProductPage(page) {
   const ws = page?.widgetStates || {};
-  if (!ws || typeof ws !== "object") {
-    return { cardPrice: null, price: null, oldPrice: null };
-  }
+  const result = { cardPrice: null, price: null, oldPrice: null, rating: null, reviewsCount: null };
+  if (!ws || typeof ws !== "object") return result;
   const priceKey = Object.keys(ws).find((k) => String(k).split("-")[0] === "webPrice");
-  if (!priceKey) {
-    return { cardPrice: null, price: null, oldPrice: null };
+  if (priceKey) {
+    try {
+      const widget = JSON.parse(ws[priceKey]);
+      result.cardPrice = priceToNumber(widget.cardPrice);
+      result.price = priceToNumber(widget.price);
+      result.oldPrice = priceToNumber(widget.originalPrice);
+    } catch {
+    }
   }
-  let widget;
-  try {
-    widget = JSON.parse(ws[priceKey]);
-  } catch {
-    return { cardPrice: null, price: null, oldPrice: null };
+  const ratingKey = Object.keys(ws).find(
+    (k) => String(k).split("-")[0] === "webReviewProductScore"
+  );
+  if (ratingKey) {
+    try {
+      const widget = JSON.parse(ws[ratingKey]);
+      if (typeof widget.totalScore === "number" && widget.totalScore > 0) {
+        result.rating = Math.round(widget.totalScore * 10) / 10;
+      }
+      if (typeof widget.reviewsCount === "number" && widget.reviewsCount > 0) {
+        result.reviewsCount = widget.reviewsCount;
+      }
+    } catch {
+    }
   }
-  return {
-    cardPrice: priceToNumber(widget.cardPrice),
-    price: priceToNumber(widget.price),
-    oldPrice: priceToNumber(widget.originalPrice)
-  };
+  return result;
+}
+function parsePrices(page) {
+  const { cardPrice, price, oldPrice } = parseProductPage(page);
+  return { cardPrice, price, oldPrice };
 }
 async function getProductPrice(sku) {
   const path = `/product/${sku}/`;
   const basePage = await fetchJson(path);
-  const prices = parsePrices(basePage);
-  return { sku: String(sku), ...prices };
+  const pageData = parseProductPage(basePage);
+  return { sku: String(sku), ...pageData };
 }
 async function getProductsPrices(skus, { delayMs = 500 } = {}) {
   if (!isEnabled()) {
@@ -694,7 +709,7 @@ async function getProductsPrices(skus, { delayMs = 500 } = {}) {
         results.push(result);
         if (result.cardPrice != null) {
           console.error(
-            `[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: cardPrice=${result.cardPrice} price=${result.price} oldPrice=${result.oldPrice}`
+            `[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: cardPrice=${result.cardPrice} price=${result.price} oldPrice=${result.oldPrice} rating=${result.rating} reviews=${result.reviewsCount}`
           );
         } else {
           console.error(`[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: \u043D\u0435\u0442 \u0446\u0435\u043D (${result.price ?? "\u2014"})`);
@@ -1011,12 +1026,19 @@ function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAttrs, oz
   const ozonColor = ozonInfo ? ozonExtractColor(ozonInfo, ozonAttrs) : null;
   const newColor = wbColor || ozonColor || db?.colorName || null;
   if (newColor !== db?.colorName) data.colorName = newColor;
-  const wbRatingVal = wbRating?.rating ?? db?.rating ?? null;
-  const wbFeedbacks = wbRating?.feedbacks ?? db?.reviewsCount ?? 0;
-  const ozonReviewsCount = ozonInfo?.reviews_count != null ? Number(ozonInfo.reviews_count) : 0;
+  const freshWbRating = wbRating?.rating ?? null;
+  const wbRatingVal = freshWbRating ?? (db?.rating ?? null);
+  const hasFreshWb = freshWbRating != null;
+  const wbFeedbacks = wbRating?.feedbacks ?? null;
+  const ozonReviewsCount = db?.ozonReviewsCount != null ? db.ozonReviewsCount : ozonInfo?.reviews_count != null ? Number(ozonInfo.reviews_count) : 0;
+  const ozonRatingVal = db?.ozonRating ?? null;
   if (wbRatingVal != null) {
-    const totalRC = wbFeedbacks + ozonReviewsCount;
+    const totalRC = hasFreshWb && wbFeedbacks != null ? wbFeedbacks + ozonReviewsCount : db?.reviewsCount ?? 0;
     if (wbRatingVal !== db?.rating) data.rating = Math.round(wbRatingVal * 10) / 10;
+    if (totalRC !== (db?.reviewsCount ?? 0)) data.reviewsCount = totalRC;
+  } else if (ozonRatingVal != null) {
+    if (ozonRatingVal !== db?.rating) data.rating = Math.round(ozonRatingVal * 10) / 10;
+    const totalRC = ozonReviewsCount || (db?.reviewsCount ?? 0);
     if (totalRC !== (db?.reviewsCount ?? 0)) data.reviewsCount = totalRC;
   } else if (ozonReviewsCount > 0) {
     if (ozonReviewsCount !== (db?.reviewsCount ?? 0)) data.reviewsCount = ozonReviewsCount;
@@ -4774,6 +4796,8 @@ async function updateProduct(prisma, id, data) {
     "wbOriginalPrice",
     "ozonPrice",
     "ozonOriginalPrice",
+    "ozonRating",
+    "ozonReviewsCount",
     "category",
     "description",
     "image",
@@ -5106,7 +5130,7 @@ async function main() {
           const { getProductsPrices: getProductsPrices2 } = await Promise.resolve().then(() => (init_ozon_price(), ozon_price_exports));
           const prices = await getProductsPrices2(ozonSkuList);
           let updated = 0;
-          for (const { sku, cardPrice, price, oldPrice } of prices) {
+          for (const { sku, cardPrice, price, oldPrice, rating, reviewsCount } of prices) {
             const numSku = Number(sku);
             const db = existing.byOzonArticle.get(numSku);
             if (!db) continue;
@@ -5125,6 +5149,24 @@ async function main() {
               changes.push(
                 `ozonOriginalPrice ${fmtPrice(db.ozonOriginalPrice)} \u2192 ${fmtPrice(oldPrice)}`
               );
+            }
+            if (rating != null && rating !== db.ozonRating) {
+              updates.ozonRating = rating;
+              changes.push(`ozonRating ${db.ozonRating ?? "\u2014"} \u2192 ${rating}`);
+            }
+            if (reviewsCount != null && reviewsCount !== db.ozonReviewsCount) {
+              updates.ozonReviewsCount = reviewsCount;
+              changes.push(
+                `ozonReviewsCount ${db.ozonReviewsCount ?? "\u2014"} \u2192 ${reviewsCount}`
+              );
+            }
+            if (db.rating == null && rating != null && rating !== db.rating) {
+              updates.rating = rating;
+              changes.push(`rating \u2014 \u2192 ${rating}`);
+            }
+            if (db.rating == null && db.ozonRating == null && reviewsCount != null && reviewsCount !== (db.reviewsCount ?? null)) {
+              updates.reviewsCount = reviewsCount;
+              changes.push(`reviewsCount \u2014 \u2192 ${reviewsCount}`);
             }
             const wbP = db.wbPrice ?? null;
             const allPrices = [wbP, effectivePrice].filter((p) => p != null);
@@ -5191,20 +5233,24 @@ async function main() {
     }
     if (shouldRun("archive")) {
       log2.progress("archive", 0, 1);
-      log2.line("\u0410\u0440\u0445\u0438\u0432\u0430\u0446\u0438\u044F \u0443\u0434\u0430\u043B\u0451\u043D\u043D\u044B\u0445 \u0442\u043E\u0432\u0430\u0440\u043E\u0432...");
-      const archiveResult = await archiveGoneProducts(
-        prisma,
-        existing.all,
-        wbArticles,
-        ozonItems,
-        trashArticles,
-        !flags.ozonOnly,
-        !flags.wbOnly,
-        log2,
-        flags
-      );
-      stats.archived = archiveResult.archived;
-      stats.outOfStock = archiveResult.markedOutOfStock;
+      if (wbArticles.length === 0 && ozonItems.length === 0) {
+        log2.line("\u0410\u0440\u0445\u0438\u0432\u0430\u0446\u0438\u044F \u043F\u0440\u043E\u043F\u0443\u0449\u0435\u043D\u0430: \u0441\u043F\u0438\u0441\u043A\u0438 WB \u0438 Ozon \u043D\u0435 \u0437\u0430\u0433\u0440\u0443\u0436\u0435\u043D\u044B");
+      } else {
+        log2.line("\u0410\u0440\u0445\u0438\u0432\u0430\u0446\u0438\u044F \u0443\u0434\u0430\u043B\u0451\u043D\u043D\u044B\u0445 \u0442\u043E\u0432\u0430\u0440\u043E\u0432...");
+        const archiveResult = await archiveGoneProducts(
+          prisma,
+          existing.all,
+          wbArticles,
+          ozonItems,
+          trashArticles,
+          !flags.ozonOnly,
+          !flags.wbOnly,
+          log2,
+          flags
+        );
+        stats.archived = archiveResult.archived;
+        stats.outOfStock = archiveResult.markedOutOfStock;
+      }
       log2.progress("archive", 1, 1);
     }
     log2.progress("done", 1, 1);

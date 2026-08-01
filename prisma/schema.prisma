@@ -103,6 +103,12 @@ model Product {
   ozonPrice         Float?
   /// Цена "до скидки" на Ozon.
   ozonOriginalPrice Float?
+  /// Звёздный рейтинг (1–5) с витрины Ozon — из webReviewProductScore.totalScore
+  /// (браузерный парсинг, фаза ozon-prices). Fallback рейтинга при отсутствии WB.
+  ozonRating        Float?
+  /// Количество отзывов с витрины Ozon — из webReviewProductScore.reviewsCount
+  /// (браузерный парсинг, фаза ozon-prices). Приоритетнее reviews_count из Seller API.
+  ozonReviewsCount  Int?
   /// Рейтинг товара. Weighted average из WB и Ozon.
   /// Показывается на сайте только если > 4.
   rating            Float?

@@ -148,19 +148,40 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
   if (newColor !== db?.colorName) data.colorName = newColor;
 
   // ─── Рейтинг ───
-  // Используем ТОЛЬКО WB feedbackRating (реальный звёздный рейтинг отзывов 1-5).
-  // Ozon content rating (0-100, качество карточки) НЕ является звёздным рейтингом
-  // и НЕ участвует в расчёте — см. sync-all.mjs ozonFetchRatings().
-  const wbRatingVal = wbRating?.rating ?? db?.rating ?? null;
-  const wbFeedbacks = wbRating?.feedbacks ?? db?.reviewsCount ?? 0;
-  const ozonReviewsCount = ozonInfo?.reviews_count != null ? Number(ozonInfo.reviews_count) : 0;
+  // Приоритет: свежий WB feedbackRating (звёздный 1-5). Если WB рейтинга нет —
+  // звёздный рейтинг с витрины Ozon (db.ozonRating, пишет фаза ozon-prices из
+  // webReviewProductScore.totalScore). Ozon content rating (0-100, качество
+  // карточки) НЕ является звёздным рейтингом и не используется.
+  const freshWbRating = wbRating?.rating ?? null;
+  const wbRatingVal = freshWbRating ?? (db?.rating ?? null);
+  const hasFreshWb = freshWbRating != null;
+  const wbFeedbacks = wbRating?.feedbacks ?? null;
+  // Количество отзывов Ozon: браузерный счётчик с витрины (db.ozonReviewsCount,
+  // фаза ozon-prices) приоритетнее reviews_count из Seller API.
+  const ozonReviewsCount =
+    db?.ozonReviewsCount != null
+      ? db.ozonReviewsCount
+      : ozonInfo?.reviews_count != null
+        ? Number(ozonInfo.reviews_count)
+        : 0;
+  const ozonRatingVal = db?.ozonRating ?? null;
 
   if (wbRatingVal != null) {
-    const totalRC = wbFeedbacks + ozonReviewsCount;
+    // Свежий WB рейтинг — он главный; счётчик = WB отзывы + Ozon отзывы.
+    // Без свежего WB-счётчика отзывов не пересчитываем (защита от удвоения).
+    const totalRC =
+      hasFreshWb && wbFeedbacks != null
+        ? wbFeedbacks + ozonReviewsCount
+        : (db?.reviewsCount ?? 0);
     if (wbRatingVal !== db?.rating) data.rating = Math.round(wbRatingVal * 10) / 10;
     if (totalRC !== (db?.reviewsCount ?? 0)) data.reviewsCount = totalRC;
+  } else if (ozonRatingVal != null) {
+    // Нет WB рейтинга — используем звёздный рейтинг с витрины Ozon
+    if (ozonRatingVal !== db?.rating) data.rating = Math.round(ozonRatingVal * 10) / 10;
+    const totalRC = ozonReviewsCount || (db?.reviewsCount ?? 0);
+    if (totalRC !== (db?.reviewsCount ?? 0)) data.reviewsCount = totalRC;
   } else if (ozonReviewsCount > 0) {
-    // Нет WB рейтинга, но есть Ozon отзывы — обновляем только счётчик
+    // Нет рейтинга, но есть Ozon отзывы — обновляем только счётчик
     if (ozonReviewsCount !== (db?.reviewsCount ?? 0)) data.reviewsCount = ozonReviewsCount;
   }
 
