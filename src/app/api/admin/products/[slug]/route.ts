@@ -10,7 +10,7 @@ import { getSession } from "@/lib/admin-auth";
 import { csrfGuard } from "@/lib/csrf";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
-import { updateProductSchema, VALID_CATEGORIES } from "@/lib/schemas";
+import { updateProductSchema } from "@/lib/schemas";
 import prisma, { prismaQuery, serializeProduct } from "@/lib/prisma";
 import { invalidateCache } from "@/lib/data-cache";
 

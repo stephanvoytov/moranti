@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
 
@@ -8,12 +8,16 @@ import styles from "./page.module.css";
  * Минимальный клиентский компонент — кнопка входа в админку.
  * Использует localStorage, поэтому только на клиенте.
  */
-export default function HomeClient() {
-  const [isAdmin, setIsAdmin] = useState(false);
+const subscribeAdminFlag = () => () => {};
 
-  useEffect(() => {
-    setIsAdmin(localStorage.getItem("moranti_admin") === "1");
-  }, []);
+function getAdminFlag(): boolean {
+  return localStorage.getItem("moranti_admin") === "1";
+}
+
+export default function HomeClient() {
+  // useSyncExternalStore: на сервере (SSG) всегда false, на клиенте читаем
+  // localStorage без setState-в-эффекте. Снапшот — примитив, стабилен.
+  const isAdmin = useSyncExternalStore(subscribeAdminFlag, getAdminFlag, () => false);
 
   if (!isAdmin) return null;
 

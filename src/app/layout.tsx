@@ -235,6 +235,8 @@ export default async function RootLayout({
             />
             <noscript>
               <div>
+                {/* Яндекс.Метрика noscript-пиксель — стандартный сниппет, next/image неприменим */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`https://mc.yandex.ru/watch/${ymId}`}
                   style={{ position: "absolute", left: "-9999px" }}

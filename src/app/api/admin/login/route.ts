@@ -9,7 +9,6 @@ import { login, setSessionCookie } from "@/lib/admin-auth";
 import { loginSchema } from "@/lib/schemas";
 import { enforceRateLimit, getClientIp } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
-import { rateLimitResponse } from "@/lib/rate-limit";
 
 const LOGIN_OPTS = { max: 15, windowMs: 60_000 };
 

@@ -48,19 +48,20 @@ function fetchAllProducts(): Promise<ProductsData> {
   return allPromise;
 }
 
-export function useProducts(): ProductsData {
+export function useProducts(enabled = true): ProductsData {
   const [data, setData] = useState<ProductsData>({
     products: [],
     categories: [],
   });
 
   useEffect(() => {
+    if (!enabled) return;
     let cancelled = false;
     fetchProducts().then((result) => {
       if (!cancelled) setData(result);
     });
     return () => { cancelled = true; };
-  }, []);
+  }, [enabled]);
 
   return data;
 }

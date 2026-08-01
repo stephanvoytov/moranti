@@ -11,7 +11,6 @@ import { PrismaClient } from "@prisma/client";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
-const { CATEGORY_RU } = require("./wb-categories");
 const { generateName } = require("./name-generator");
 
 // Категории напрямую из WB filter API (/__internal/u-catalog/brands/v8/filters)

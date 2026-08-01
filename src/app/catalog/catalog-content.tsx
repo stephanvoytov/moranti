@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, Suspense } from "react";
+import { useState, useEffect, useMemo, useRef, Suspense, useSyncExternalStore } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import ProductCard from "@/components/ui/product-card";
 import type { Product, ProductCategory } from "@/data/products";
 import { useProducts } from "@/lib/use-products";
-import { getRecentlyViewed } from "@/lib/recently-viewed";
+import {
+  subscribeRecentlyViewed,
+  getRecentlyViewedSnapshot,
+} from "@/lib/recently-viewed";
 import { useDragScroll } from "@/lib/use-drag-scroll";
 import { resolveColor, getBasicColorName } from "@/lib/color-map";
 import styles from "./page.module.css";
@@ -54,16 +57,16 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
   const pathname = usePathname();
   const router = useRouter();
 
-  // Use server-provided initial data if available (first load), fall back to API fetch
+  // Use server-provided initial data if available (first load), fall back to API fetch.
+  // Хук вызывается БЕЗУСЛОВНО (enabled = !hasInitialData) — порядок хуков стабилен,
+  // даже если hasInitialData поменяется после router.refresh() на фокусе.
   const hasInitialData = initialProducts && initialProducts.length > 0;
-  const { products, categories } = hasInitialData
-    ? { products: initialProducts, categories: initialCategories ?? [] }
-    : useProducts();
+  const fetched = useProducts(!hasInitialData);
+  const products = hasInitialData ? (initialProducts as Product[]) : fetched.products;
+  const categories = hasInitialData ? (initialCategories ?? []) : fetched.categories;
 
-  const [loaded, setLoaded] = useState(hasInitialData);
-  useEffect(() => {
-    if (!hasInitialData && products.length > 0) setLoaded(true);
-  }, [products, hasInitialData]);
+  // Производное значение — загрузка завершена (state+эффект не нужны)
+  const loaded = hasInitialData || products.length > 0;
 
   // Refresh RSC data on focus — подхватывает изменения после админки
   useEffect(() => {
@@ -163,15 +166,19 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
       router.replace(newUrl, { scroll: false });
     }, 50);
     return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
-  }, [selectedMarketplace, selectedCategory, selectedColor, selectedMaterial, sortOption, searchInput, priceMin, priceMax, page]);
+  }, [selectedMarketplace, selectedCategory, selectedColor, selectedMaterial, sortOption, searchInput, priceMin, priceMax, page, pathname, router]);
 
   // ― Recently viewed (все товары, включая нет в наличии) ―
-  const [recentlyViewed, setRecentlyViewed] = useState<number[]>([]);
+  const recentlyViewed = useSyncExternalStore(
+    subscribeRecentlyViewed,
+    getRecentlyViewedSnapshot,
+    getRecentlyViewedSnapshot,
+  );
   const [allForRecent, setAllForRecent] = useState<Product[]>([]);
-  const drag = useDragScroll<HTMLDivElement>();
+  const { ref: dragRef, onMouseDown, onMouseMove, onMouseUp, onDragStart } =
+    useDragScroll<HTMLDivElement>();
 
   useEffect(() => {
-    setRecentlyViewed(getRecentlyViewed());
     // Загружаем все товары (вкл. нет в наличии) для recently viewed
     fetch("/api/data/products/all")
       .then((res) => res.json())
@@ -184,11 +191,15 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
     .map((article) => recentSource.find((p) => p.wbArticle === article))
     .filter((p): p is NonNullable<typeof p> => p != null);
 
-  // Reset category when URL changes
-  useEffect(() => {
+  // Reset category when URL changes (back/forward) — официальный паттерн
+  // «adjust state during render»: URL — единственный источник правды для
+  // навигации по истории, поэтому без setState-в-эффекте не обойтись.
+  const [prevUrlCategory, setPrevUrlCategory] = useState(urlCategory);
+  if (urlCategory !== prevUrlCategory) {
+    setPrevUrlCategory(urlCategory);
     setSelectedCategory(urlCategory ?? null);
     setPage(1);
-  }, [urlCategory]);
+  }
 
   // ― Extract unique colors (normalized) and materials from products ―
   const colorOptions = useMemo(() => {
@@ -307,11 +318,11 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
         <section className={styles.recentlySection}>
           <h2 className={styles.recentlyTitle}>Вы недавно смотрели</h2>
           <div className={styles.recentlyRow}
-            ref={drag.ref}
-            onMouseDown={drag.onMouseDown}
-            onMouseMove={drag.onMouseMove}
-            onMouseUp={drag.onMouseUp}
-            onDragStart={drag.onDragStart}
+            ref={dragRef}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={onMouseUp}
+            onDragStart={onDragStart}
             style={{ cursor: "grab" }}
           >
             {recentProducts.map((product, i) => (

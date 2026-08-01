@@ -37,18 +37,11 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
 
   const getSlideW = () => wrapperRef.current?.clientWidth || 0;
 
-  // Stable nav functions (use ref for current index)
+  // Stable nav functions (use ref for current index) — refs обновляются в эффекте
+  // после каждого рендера (паттерн «latest»): кнопки и клавиатурные обработчики
+  // всегда вызывают актуальные замыкания, а правила хуков соблюдены.
   const prevRef = useRef<() => void>(() => {});
   const nextRef = useRef<() => void>(() => {});
-
-  prevRef.current = () => {
-    const idx = activeIndexRef.current;
-    goTo(Math.max(0, idx - 1));
-  };
-  nextRef.current = () => {
-    const idx = activeIndexRef.current;
-    goTo(Math.min(images.length - 1, idx + 1));
-  };
 
   const goTo = (index: number) => {
     if (!trackRef.current || !getSlideW()) return;
@@ -58,6 +51,17 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
     trackRef.current.style.transform = `translateX(${-index * w}px)`;
     setActiveIndex(index);
   };
+
+  useEffect(() => {
+    prevRef.current = () => {
+      const idx = activeIndexRef.current;
+      goTo(Math.max(0, idx - 1));
+    };
+    nextRef.current = () => {
+      const idx = activeIndexRef.current;
+      goTo(Math.min(images.length - 1, idx + 1));
+    };
+  });
 
   // Keyboard navigation
   useEffect(() => {
@@ -92,14 +96,16 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
     return () => { document.body.style.overflow = ""; };
   }, [lightboxOpen]);
 
-  // Touch handlers via useRef (stable, no re-attach)
+  // Touch handlers via useRef (stable, no re-attach) — обновляются в эффекте
+  // после каждого рендера, чтобы замыкания всегда были свежими
   const touchHandlersRef = useRef<{
     start: (e: TouchEvent) => void;
     move: (e: TouchEvent) => void;
     end: () => void;
   } | null>(null);
 
-  touchHandlersRef.current = {
+  useEffect(() => {
+    touchHandlersRef.current = {
     start: (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
       isDragging.current = true;
@@ -181,6 +187,7 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
       wasSwiped.current = false;
     }
   };
+  });
 
   // Attach non-passive touch listeners
   useEffect(() => {
@@ -222,7 +229,7 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
     setPinchTransform("");
   };
 
-  const applyPinchTransform = (animated = false) => {
+  const applyPinchTransform = () => {
     const s = pinchScale.current;
     if (s <= 1 && pinchTranslateX.current === 0 && pinchTranslateY.current === 0) {
       setPinchTransform("");

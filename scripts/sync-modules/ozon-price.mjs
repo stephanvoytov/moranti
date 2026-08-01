@@ -64,17 +64,6 @@ export function parsePrices(page) {
 }
 
 /**
- * Извлекает SKU из URL страницы товара.
- * @param {string} url — URL со страницы composer-api
- * @returns {string|null}
- */
-function skuFromUrl(url) {
-  if (!url) return null;
-  const m = String(url).match(/-(\d+)\/?(?:\?|$)/);
-  return m ? m[1] : null;
-}
-
-/**
  * Получает цены для одного SKU Ozon.
  *
  * @param {string|number} sku — артикул Ozon (публичный SKU)

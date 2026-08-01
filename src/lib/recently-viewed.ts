@@ -5,6 +5,28 @@
 const STORAGE_KEY = "moranti_recently_viewed";
 const MAX_ITEMS = 10;
 
+/* ——— Snapshot cache + subscription (для useSyncExternalStore) ——— */
+
+let snapshotCache: number[] | null = null;
+const listeners = new Set<() => void>();
+
+function emit() {
+  for (const cb of listeners) cb();
+}
+
+export function subscribeRecentlyViewed(cb: () => void): () => void {
+  listeners.add(cb);
+  return () => {
+    listeners.delete(cb);
+  };
+}
+
+/** Стабильный снапшот между записями — чтобы useSyncExternalStore не зациклился */
+export function getRecentlyViewedSnapshot(): number[] {
+  if (snapshotCache === null) snapshotCache = getRecentlyViewed();
+  return snapshotCache;
+}
+
 /* ——— Read ——— */
 
 export function getRecentlyViewed(): number[] {
@@ -31,6 +53,8 @@ export function addRecentlyViewed(wbArticle: number): void {
       MAX_ITEMS,
     );
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    snapshotCache = updated;
+    emit();
   } catch {
     // localStorage unavailable
   }
@@ -42,6 +66,8 @@ export function clearRecentlyViewed(): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.removeItem(STORAGE_KEY);
+    snapshotCache = [];
+    emit();
   } catch {
     // localStorage unavailable
   }

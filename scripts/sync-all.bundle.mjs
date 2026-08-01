@@ -85,7 +85,7 @@ var require_wb_categories = __commonJS({
       \u0441\u0435\u0434\u043B: "saddle",
       \u0440\u044E\u043A\u0437\u0430\u043A: "backpack"
     };
-    var CATEGORY_RU3 = {
+    var CATEGORY_RU2 = {
       crossbody: "\u0421\u0443\u043C\u043A\u0430 \u043A\u0440\u043E\u0441\u0441-\u0431\u043E\u0434\u0438",
       "na-plecho": "\u0421\u0443\u043C\u043A\u0430 \u043D\u0430 \u043F\u043B\u0435\u0447\u043E",
       baguette: "\u0421\u0443\u043C\u043A\u0430-\u0431\u0430\u0433\u0435\u0442",
@@ -93,7 +93,7 @@ var require_wb_categories = __commonJS({
       saddle: "\u0421\u0443\u043C\u043A\u0430-\u0441\u0435\u0434\u043B\u043E",
       backpack: "\u0421\u0443\u043C\u043A\u0430-\u0440\u044E\u043A\u0437\u0430\u043A"
     };
-    function wbToCategory3(subjectId, subjectName, subjId) {
+    function wbToCategory2(subjectId, subjectName, subjId) {
       if (subjId && CATEGORY_MAP[subjId]) {
         return CATEGORY_MAP[subjId];
       }
@@ -108,7 +108,7 @@ var require_wb_categories = __commonJS({
       }
       return null;
     }
-    module.exports = { CATEGORY_MAP, CATEGORY_RU: CATEGORY_RU3, wbToCategory: wbToCategory3 };
+    module.exports = { CATEGORY_MAP, CATEGORY_RU: CATEGORY_RU2, wbToCategory: wbToCategory2 };
   }
 });
 
@@ -116,10 +116,10 @@ var require_wb_categories = __commonJS({
 var require_name_generator = __commonJS({
   "scripts/name-generator.js"(exports, module) {
     "use strict";
-    var { CATEGORY_RU: CATEGORY_RU3 } = require_wb_categories();
+    var { CATEGORY_RU: CATEGORY_RU2 } = require_wb_categories();
     function generateName3({ category, composition, wbName }) {
       const cat = category || "crossbody";
-      const base = CATEGORY_RU3[cat] || cat;
+      const base = CATEGORY_RU2[cat] || cat;
       const lower = (wbName || "").toLowerCase();
       const isMini = lower.includes("\u043C\u0438\u043D\u0438") || lower.includes("mini");
       let name = isMini ? base + " \u043C\u0438\u043D\u0438" : base;
@@ -1365,7 +1365,7 @@ async function syncOzonModels(prisma, attrMap, log3) {
   let created = 0;
   let assigned = 0;
   let skipped = 0;
-  for (const [ozonModelName, offerIds] of groups) {
+  for (const [, offerIds] of groups) {
     const products = await prisma.product.findMany({
       where: { sku: { in: offerIds } },
       select: { id: true, sku: true, name: true, modelId: true, category: true }
@@ -1463,7 +1463,6 @@ async function archiveGoneProducts(prisma, dbProducts, wbArticles, ozonItems, tr
 }
 
 // scripts/sync-all.mjs
-var import_wb_categories2 = __toESM(require_wb_categories(), 1);
 var import_name_generator2 = __toESM(require_name_generator(), 1);
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -4498,7 +4497,6 @@ try {
 } catch {
 }
 var WB_CONTENT_API = "https://content-api.wildberries.ru";
-var SUPPLIER_ID = Number(process.env.WB_SUPPLIER_ID) || 312222;
 var ITEMS_PER_WB_CARDS = 100;
 var FETCH_TIMEOUT = 3e4;
 var flags = {
@@ -4511,7 +4509,6 @@ var fromIdx = process.argv.indexOf("--from-phase");
 if (fromIdx !== -1 && fromIdx + 1 < process.argv.length) {
   flags.fromPhase = process.argv[fromIdx + 1];
 }
-var SKIP_PHASE = flags.fromPhase ? /* @__PURE__ */ new Set() : null;
 var PHASES = [
   "wb-cards",
   "wb-cards-v4",
@@ -4865,7 +4862,6 @@ async function main() {
       errors: 0
     };
     let wbArticles = [];
-    let ozonArticles = [];
     let ozonItems = [];
     let trashArticles = [];
     let wbCards = [];
@@ -4966,7 +4962,6 @@ async function main() {
         log2.progress("ozon-list", 0, 1);
         log2.line("[Ozon] \u0417\u0430\u0433\u0440\u0443\u0437\u043A\u0430 \u0441\u043F\u0438\u0441\u043A\u0430 \u0442\u043E\u0432\u0430\u0440\u043E\u0432...");
         ozonItems = await ozonFetchAllProducts(ozonClientId, ozonApiKey, log2);
-        ozonArticles = ozonItems.map((i) => i.productId).filter((id) => id > 0);
         log2.line(`  ${ozonItems.length} \u0442\u043E\u0432\u0430\u0440\u043E\u0432 Ozon
 `);
         log2.progress("ozon-list", 1, 1);

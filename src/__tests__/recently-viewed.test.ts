@@ -5,12 +5,9 @@ import {
   clearRecentlyViewed,
 } from "@/lib/recently-viewed";
 
-const STORAGE_KEY = "moranti_recently_viewed";
-
 beforeEach(() => {
   localStorage.clear();
 });
-
 describe("recently-viewed", () => {
   it("returns empty array initially", () => {
     expect(getRecentlyViewed()).toEqual([]);

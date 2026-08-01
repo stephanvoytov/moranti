@@ -172,7 +172,7 @@ export async function syncOzonModels(prisma, attrMap, log) {
   let assigned = 0;
   let skipped = 0;
 
-  for (const [ozonModelName, offerIds] of groups) {
+  for (const [, offerIds] of groups) {
     const products = await prisma.product.findMany({
       where: { sku: { in: offerIds } },
       select: { id: true, sku: true, name: true, modelId: true, category: true },

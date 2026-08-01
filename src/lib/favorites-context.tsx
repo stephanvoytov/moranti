@@ -3,7 +3,7 @@
 import {
   createContext,
   useContext,
-  useState,
+  useSyncExternalStore,
   useEffect,
   useCallback,
   type ReactNode,
@@ -31,25 +31,66 @@ function readFavorites(): number[] {
   }
 }
 
-export function FavoritesProvider({ children }: { children: ReactNode }) {
-  const [favorites, setFavorites] = useState<number[]>(readFavorites);
+/* ——— Snapshot cache + subscription (useSyncExternalStore) ———
+   Гидрация консистентна с SSR: снапшот кэшируется модульно, на сервере
+   всегда [] (typeof window guard), на клиенте меняется только через
+   toggle/clear/storage-событие. Никакого setState в инициализаторе. */
 
-  // Sync across tabs
+let snapshotCache: number[] | null = null;
+const listeners = new Set<() => void>();
+
+function emit() {
+  for (const cb of listeners) cb();
+}
+
+function getFavoritesSnapshot(): number[] {
+  if (snapshotCache === null) snapshotCache = readFavorites();
+  return snapshotCache;
+}
+
+function setFavoritesCache(next: number[]) {
+  snapshotCache = next;
+  emit();
+}
+
+function subscribeFavorites(cb: () => void): () => void {
+  listeners.add(cb);
+  return () => {
+    listeners.delete(cb);
+  };
+}
+
+export function FavoritesProvider({ children }: { children: ReactNode }) {
+  const favorites = useSyncExternalStore(
+    subscribeFavorites,
+    getFavoritesSnapshot,
+    () => [],
+  );
+
+  // Sync across tabs — обновляем модульный кэш напрямую (без setState-в-эффекте)
   useEffect(() => {
-    const onStorage = () => setFavorites(readFavorites());
+    const onStorage = () => {
+      snapshotCache = readFavorites();
+      emit();
+    };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  const toggleFavorite = useCallback((article: number) => {
-    setFavorites((prev) => {
-      const next = prev.includes(article)
-        ? prev.filter((a) => a !== article)
-        : [...prev, article];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
-  }, []);
+  const toggleFavorite = useCallback(
+    (article: number) => {
+      const next = favorites.includes(article)
+        ? favorites.filter((a) => a !== article)
+        : [...favorites, article];
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        // localStorage unavailable
+      }
+      setFavoritesCache(next);
+    },
+    [favorites],
+  );
 
   const isFavorite = useCallback(
     (article: number) => favorites.includes(article),
@@ -57,8 +98,12 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   );
 
   const clearFavorites = useCallback(() => {
-    setFavorites([]);
-    localStorage.removeItem(STORAGE_KEY);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // localStorage unavailable
+    }
+    setFavoritesCache([]);
   }, []);
 
   return (

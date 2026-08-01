@@ -26,7 +26,6 @@ try {
  *   sync-modules/models.mjs      — управление моделями и архивация
  */
 
-import { writeFileSync, existsSync, readFileSync, mkdirSync } from "fs";
 import { fileURLToPath } from "url";
 
 // --- Imports из модулей ---
@@ -49,7 +48,6 @@ import { syncModels, syncOzonModels, archiveGoneProducts } from "./sync-modules/
 // --- Зависимости (прямой import — esbuild трассирует его для бандла) ---
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { wbToCategory, CATEGORY_RU } from "./wb-categories.js";
 import { generateName } from "./name-generator.js";
 
 // ============================================================
@@ -57,9 +55,6 @@ import { generateName } from "./name-generator.js";
 // ============================================================
 
 const WB_CONTENT_API = "https://content-api.wildberries.ru";
-const WB_ANALYTICS_API = "https://seller-analytics-api.wildberries.ru";
-const WB_PRICES_API = "https://discounts-prices-api.wildberries.ru";
-const SUPPLIER_ID = Number(process.env.WB_SUPPLIER_ID) || 312222;
 
 const ITEMS_PER_WB_CARDS = 100;
 const FETCH_TIMEOUT = 30000;
@@ -76,8 +71,6 @@ const fromIdx = process.argv.indexOf("--from-phase");
 if (fromIdx !== -1 && fromIdx + 1 < process.argv.length) {
   flags.fromPhase = process.argv[fromIdx + 1];
 }
-
-const SKIP_PHASE = flags.fromPhase ? new Set() : null;
 
 // ============================================================
 // Фазы синхронизации (для --from-phase)
@@ -497,7 +490,6 @@ async function main() {
     };
 
     let wbArticles = [];
-    let ozonArticles = [];
     let ozonItems = [];
     let trashArticles = [];
     let wbCards = [];
@@ -621,7 +613,6 @@ async function main() {
         log.progress("ozon-list", 0, 1);
         log.line("[Ozon] Загрузка списка товаров...");
         ozonItems = await ozonFetchAllProducts(ozonClientId, ozonApiKey, log);
-        ozonArticles = ozonItems.map((i) => i.productId).filter((id) => id > 0);
         log.line(`  ${ozonItems.length} товаров Ozon\n`);
         log.progress("ozon-list", 1, 1);
       }

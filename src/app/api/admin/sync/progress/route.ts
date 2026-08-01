@@ -7,7 +7,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/admin-auth";
 import { getSyncProgress } from "@/lib/sync-runner";
-import { getSyncHistory } from "@/lib/sync-history";
 import { invalidateCache } from "@/lib/data-cache";
 
 export async function GET(request: NextRequest) {

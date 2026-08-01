@@ -5,6 +5,9 @@
 import styles from "./page.module.css";
 
 export default function CatalogLoading() {
+  // Детерминированные ширины пилюль (вместо Math.random — рендер должен быть чистым)
+  const FILTER_WIDTHS = [48, 96, 112, 88, 104, 92];
+
   return (
     <section className={styles.catalog}>
       <div className={styles.header}>
@@ -19,7 +22,7 @@ export default function CatalogLoading() {
             key={i}
             style={{
               height: 32,
-              width: i === 0 ? 48 : 80 + Math.random() * 60,
+              width: FILTER_WIDTHS[i % FILTER_WIDTHS.length],
               borderRadius: 0,
               background: "var(--card-bg)",
               animation: "pulse 1.5s ease-in-out infinite",

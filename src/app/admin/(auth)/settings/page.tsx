@@ -370,7 +370,6 @@ export default function AdminSettingsPage() {
                   </div>
                   {form.heroImage && (
                     <div className={styles.imagePreview}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={form.heroImage} alt="Hero preview" />
                     </div>
                   )}
@@ -422,7 +421,6 @@ export default function AdminSettingsPage() {
                       />
                       {form.catImages[slug] && (
                         <div className={styles.catImagePreview}>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={form.catImages[slug]} alt={CATEGORY_NAMES[slug]} />
                         </div>
                       )}

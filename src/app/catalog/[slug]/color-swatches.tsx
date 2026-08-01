@@ -140,6 +140,8 @@ export default function ColorSwatches({ current, siblings }: ColorSwatchesProps)
           onMouseEnter={keepPreview}
           onMouseLeave={hidePreview}
         >
+          {/* Превью с CDN — next/image не настроен на remotePatterns CDN, img осознанно */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={cdnImageUrl(preview.article, 1, "c246x328")}
             alt=""

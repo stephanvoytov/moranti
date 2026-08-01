@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getRecentlyViewed } from "@/lib/recently-viewed";
+import { useSyncExternalStore } from "react";
+import {
+  subscribeRecentlyViewed,
+  getRecentlyViewedSnapshot,
+} from "@/lib/recently-viewed";
 import { useAllProducts } from "@/lib/use-products";
 import { useDragScroll } from "@/lib/use-drag-scroll";
 import ProductCard from "@/components/ui/product-card";
@@ -9,12 +12,13 @@ import styles from "./page.module.css";
 
 export default function RecentlyViewed() {
   const { products } = useAllProducts();
-  const [recentArticles, setRecentArticles] = useState<number[]>([]);
-  const drag = useDragScroll<HTMLDivElement>();
-
-  useEffect(() => {
-    setRecentArticles(getRecentlyViewed());
-  }, []);
+  const recentArticles = useSyncExternalStore(
+    subscribeRecentlyViewed,
+    getRecentlyViewedSnapshot,
+    getRecentlyViewedSnapshot,
+  );
+  const { ref: dragRef, onMouseDown, onMouseMove, onMouseUp, onDragStart } =
+    useDragScroll<HTMLDivElement>();
 
   const recentProducts = recentArticles
     .map((article) => products.find((p) => p.wbArticle === article))
@@ -28,11 +32,11 @@ export default function RecentlyViewed() {
       <div className={styles.recentlyRowWrap}>
         <div
           className={styles.recentlyRow}
-          ref={drag.ref}
-          onMouseDown={drag.onMouseDown}
-          onMouseMove={drag.onMouseMove}
-          onMouseUp={drag.onMouseUp}
-          onDragStart={drag.onDragStart}
+          ref={dragRef}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+          onDragStart={onDragStart}
           style={{ cursor: "grab" }}
         >
           {recentProducts.map((product, i) => (
