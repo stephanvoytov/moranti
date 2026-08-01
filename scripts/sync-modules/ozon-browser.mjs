@@ -43,6 +43,22 @@ const LAUNCH_ARGS = [
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
+// Прокси (например, свой VPS с tinyproxy) — IP дата-центра GitHub Actions
+// Variti блокирует, домашний/VPS IP проходит. Задаётся env-переменными:
+//   OZON_PROXY_SERVER=http://host:port  (обязательный для прокси)
+//   OZON_PROXY_USER=login               (basic auth, опционально)
+//   OZON_PROXY_PASS=password            (basic auth, опционально)
+function getProxyConfig() {
+  const server = process.env.OZON_PROXY_SERVER;
+  if (!server) return null;
+  const cfg = { server };
+  if (process.env.OZON_PROXY_USER) {
+    cfg.username = process.env.OZON_PROXY_USER;
+    cfg.password = process.env.OZON_PROXY_PASS ?? "";
+  }
+  return cfg;
+}
+
 let browser = null;
 let context = null;
 let mainPage = null;
@@ -99,6 +115,7 @@ async function launch() {
     viewport: { width: 1920, height: 1080 },
     userAgent: USER_AGENT,
     locale: "ru-RU",
+    ...(getProxyConfig() ? { proxy: getProxyConfig() } : {}),
   });
 
   challenged = false;
@@ -133,7 +150,11 @@ async function ensureContext() {
     await mainPage.waitForTimeout(CHALLENGE_WAIT_MS);
 
     const title = await mainPage.title();
-    if (/antibot|ограничен|доступ/i.test(title)) {
+    // Заглушки вместо реальной страницы = челлендж не пройден. Реальный title
+    // главной Ozon: «OZON маркетплейс — миллионы товаров...». Всё остальное —
+    // антибот-заглушка или страница ошибки браузера: распознаём и фатально падаем,
+    // чтобы не гонять ~13s перезапусков на каждый SKU впустую.
+    if (/antibot|ограничен|доступ|соединени|no internet|offline/i.test(title)) {
       challengeBroken = true; // фатально: дальше ретраить бессмысленно (по ~13s на попытку)
       throw new Error(`Variti challenge не пройден (title: ${title})`);
     }
