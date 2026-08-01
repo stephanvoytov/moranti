@@ -38,6 +38,9 @@ function readFavorites(): number[] {
 
 let snapshotCache: number[] | null = null;
 const listeners = new Set<() => void>();
+/** Стабильная ссылка для getServerSnapshot — иначе React предупреждает
+    о бесконечном цикле (новый массив на каждый вызов). */
+const EMPTY_FAVORITES: number[] = [];
 
 function emit() {
   for (const cb of listeners) cb();
@@ -64,7 +67,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   const favorites = useSyncExternalStore(
     subscribeFavorites,
     getFavoritesSnapshot,
-    () => [],
+    () => EMPTY_FAVORITES,
   );
 
   // Sync across tabs — обновляем модульный кэш напрямую (без setState-в-эффекте)

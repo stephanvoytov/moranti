@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import type { CharacteristicGroup } from "@/data/products";
 import { getProducts, getProduct, getAllProducts } from "@/data/products";
+import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import PriceClient from "./price-client";
 import ColorSwatches from "./color-swatches";
 import GalleryClient from "./gallery-client";
@@ -164,9 +165,21 @@ export default async function ProductPage({ params }: Props) {
     })
     .slice(0, 4);
 
+  // Маркетплейс в наличии, если остаток ненулевой
+  const mpInStock = (name: string): boolean =>
+    name === "Wildberries"
+      ? (product.wbStock ?? 0) > 0
+      : name === "Ozon"
+        ? (product.ozonStock ?? 0) > 0
+        : true;
+
+  const availableMarketplaces = (product.marketplaces ?? []).filter((mp) =>
+    mpInStock(mp.name)
+  );
+
   // Product JSON-LD structured data
-  const offers = product.marketplaces?.length
-    ? product.marketplaces.map((mp) => ({
+  const offers = availableMarketplaces.length
+    ? availableMarketplaces.map((mp) => ({
         "@type": "Offer",
         name: `Купить на ${mp.name}`,
         url: mp.url,
@@ -317,20 +330,29 @@ export default async function ProductPage({ params }: Props) {
             </div>
           ) : null}
 
-          {/* Marketplace CTAs */}
+          {/* Marketplace CTAs — только маркетплейсы с ненулевым остатком */}
           {!product.archivedAt && (
             <div className={styles.ctas}>
-              {product.marketplaces.map((mp) => (
+              {product.wbArticle && (product.wbStock ?? 0) > 0 && (
                 <a
-                  key={mp.name}
-                  href={mp.url}
+                  href={MARKETPLACE_URLS.wbProduct(product.wbArticle)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.cta}
                 >
-                  {mp.name}
+                  Купить на Wildberries
                 </a>
-              ))}
+              )}
+              {product.ozonArticle && (product.ozonStock ?? 0) > 0 && (
+                <a
+                  href={MARKETPLACE_URLS.ozonProduct(product.ozonArticle)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.cta}
+                >
+                  Купить на Ozon
+                </a>
+              )}
             </div>
           )}
 

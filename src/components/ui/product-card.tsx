@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Product } from "@/data/products";
 import { useFavorites } from "@/lib/favorites-context";
@@ -34,9 +34,36 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const slug = product.slug;
   const link = `/catalog/${slug}`;
   const fav = isFavorite(product.wbArticle);
-  const images = product.images?.length ? product.images : [product.image];
+  const images = useMemo(
+    () => (product.images?.length ? product.images : [product.image]),
+    [product.images, product.image]
+  );
   const [hoverIndex, setHoverIndex] = useState(0);
   const hoverTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const cardRef = useRef<HTMLElement>(null);
+
+  // Предзагрузка hover-фото: когда карточка попадает во вьюпорт (чуть заранее),
+  // скачиваем images[1..3] в HTTP-кэш браузера. К моменту наведения они уже
+  // готовы — карусель сменяет фото мгновенно, без белого placeholder'а.
+  useEffect(() => {
+    if (images.length < 2) return;
+    if (typeof IntersectionObserver === "undefined") return;
+    const el = cardRef.current;
+    if (!el) return;
+    const hoverImages = images.slice(1, Math.min(images.length, 4));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        for (const url of hoverImages) {
+          if (url) new Image().src = url;
+        }
+        observer.disconnect();
+      },
+      { rootMargin: "300px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [images]);
 
   // Цены берутся из данных товара (БД через getProducts())
   const displayPrice = product.price;
@@ -85,7 +112,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   };
 
   return (
-    <article className={styles.card} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <article ref={cardRef} className={styles.card} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <div className={styles.imageWrap}>
         <Link href={link} aria-label={product.name} className={styles.imageLink}>
           <SmartImage
