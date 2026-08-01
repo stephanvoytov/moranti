@@ -579,7 +579,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 3px 0;
+  /* 10px слева — обводка выбранного кружка (3px box-shadow) не обрезается */
+  padding: 3px 0 3px 10px;
 }
 
 /* ——— Swatch Hover Preview Tooltip ——— */
