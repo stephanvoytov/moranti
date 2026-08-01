@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/lib/toast-context";
+import { CATEGORY_SLUGS, getCategoryName } from "@/lib/categories";
 import styles from "./settings.module.css";
 
 interface SettingsForm {
@@ -12,9 +13,6 @@ interface SettingsForm {
   heroImage: string;
   featuredIds: string;
   catalogOrder: string;
-  wbApiKey: string;
-  ozonClientId: string;
-  ozonApiKey: string;
   yandexMetrikaId: string;
   instagram: string;
   vk: string;
@@ -28,17 +26,6 @@ interface SettingsForm {
   catImages: Record<string, string>;
 }
 
-const CATEGORY_SLUGS = ["crossbody", "na-plecho", "baguette", "tote", "saddle", "backpack"];
-
-const CATEGORY_NAMES: Record<string, string> = {
-  crossbody: "Кросс-боди",
-  "na-plecho": "На плечо",
-  baguette: "Багет",
-  tote: "Тоут",
-  saddle: "Седло",
-  backpack: "Рюкзаки",
-};
-
 const emptyForm: SettingsForm = {
   heroTitle: "",
   heroTagline: "",
@@ -46,9 +33,6 @@ const emptyForm: SettingsForm = {
   heroImage: "",
   featuredIds: "",
   catalogOrder: "",
-  wbApiKey: "",
-  ozonClientId: "",
-  ozonApiKey: "",
   yandexMetrikaId: "",
   instagram: "",
   vk: "",
@@ -93,9 +77,6 @@ export default function AdminSettingsPage() {
           heroImage: data.hero?.image || "",
           featuredIds: Array.isArray(data.featuredIds) ? data.featuredIds.join(", ") : "",
           catalogOrder: Array.isArray(data.catalogOrder) ? data.catalogOrder.join(", ") : "",
-          wbApiKey: data.wbApiKey || "",
-          ozonClientId: data.ozonClientId || "",
-          ozonApiKey: data.ozonApiKey || "",
           yandexMetrikaId: data.yandexMetrikaId || "",
           catImages: data.categoryImages || {},
           instagram: data.social?.instagram || "",
@@ -172,9 +153,6 @@ export default function AdminSettingsPage() {
       featuredIds: featuredIdsArray,
       catalogOrder: form.catalogOrder.split(",").map((s) => s.trim()).filter(Boolean),
       categoryImages: catImages,
-      wbApiKey: form.wbApiKey,
-      ozonClientId: form.ozonClientId,
-      ozonApiKey: form.ozonApiKey,
       yandexMetrikaId: form.yandexMetrikaId,
       social: {
         instagram: form.instagram,
@@ -254,9 +232,6 @@ export default function AdminSettingsPage() {
         heroImage: parsed.hero?.image || "",
         featuredIds: Array.isArray(parsed.featuredIds) ? parsed.featuredIds.join(", ") : "",
         catalogOrder: Array.isArray(parsed.catalogOrder) ? parsed.catalogOrder.join(", ") : "",
-        wbApiKey: parsed.wbApiKey || "",
-        ozonClientId: parsed.ozonClientId || "",
-        ozonApiKey: parsed.ozonApiKey || "",
         yandexMetrikaId: parsed.yandexMetrikaId || "",
         instagram: parsed.social?.instagram || "",
         vk: parsed.social?.vk || "",
@@ -405,7 +380,7 @@ export default function AdminSettingsPage() {
               <div className={styles.catImageGrid}>
                 {CATEGORY_SLUGS.map((slug) => (
                   <label key={slug} className={styles.catImageLabel}>
-                    <span className={styles.catImageName}>{CATEGORY_NAMES[slug]}</span>
+                    <span className={styles.catImageName}>{getCategoryName(slug)}</span>
                     <div className={styles.catImageRow}>
                       <input
                         type="text"
@@ -421,7 +396,7 @@ export default function AdminSettingsPage() {
                       />
                       {form.catImages[slug] && (
                         <div className={styles.catImagePreview}>
-                          <img src={form.catImages[slug]} alt={CATEGORY_NAMES[slug]} />
+                          <img src={form.catImages[slug]} alt={getCategoryName(slug)} />
                         </div>
                       )}
                     </div>
@@ -448,49 +423,20 @@ export default function AdminSettingsPage() {
               </label>
             </section>
 
-            {/* API Keys */}
+            {/* API Keys — хранятся в переменных окружения (Vercel), не в настройках */}
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>API ключи</h2>
+              <p className={styles.hint}>
+                Ключи Wildberries и Ozon задаются переменными окружения (WB_API_KEY,
+                OZON_CLIENT_ID, OZON_API_KEY) — на Vercel это Settings → Environment
+                Variables. Здесь они не хранятся.
+              </p>
+            </section>
+
+            {/* Analytics */}
+            <section className={styles.section}>
+              <h2 className={styles.sectionTitle}>Аналитика</h2>
               <div className={styles.fieldGrid}>
-                <label className={styles.label}>
-                  WB API Key
-                  <input
-                    type="password"
-                    className={styles.input}
-                    value={form.wbApiKey}
-                    onChange={(e) => updateField("wbApiKey", e.target.value)}
-                    placeholder="оставьте пустым, если не используется"
-                  />
-                  <span className={styles.hint}>
-                    Для живых цен с Wildberries. Без ключа — статические цены
-                  </span>
-                </label>
-                <label className={styles.label}>
-                  Ozon Client ID
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={form.ozonClientId}
-                    onChange={(e) => updateField("ozonClientId", e.target.value)}
-                    placeholder="оставьте пустым, если не используется"
-                  />
-                  <span className={styles.hint}>
-                    ID клиента из настроек API Ozon Seller
-                  </span>
-                </label>
-                <label className={styles.label}>
-                  Ozon API Key
-                  <input
-                    type="password"
-                    className={styles.input}
-                    value={form.ozonApiKey}
-                    onChange={(e) => updateField("ozonApiKey", e.target.value)}
-                    placeholder="оставьте пустым, если не используется"
-                  />
-                  <span className={styles.hint}>
-                    Секретный ключ из настроек API Ozon Seller
-                  </span>
-                </label>
                 <label className={styles.label}>
                   Яндекс.Метрика ID
                   <input

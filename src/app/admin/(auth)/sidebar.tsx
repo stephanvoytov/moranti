@@ -20,6 +20,9 @@ export default function AdminSidebar() {
 
   async function handleLogout() {
     await fetch("/api/admin/logout", { method: "POST" });
+    // Флаг «админ» в localStorage используется на витрине (home-client);
+    // без очистки кнопка-якорь останется даже после выхода.
+    localStorage.removeItem("moranti_admin");
     router.push("/admin/login");
   }
 

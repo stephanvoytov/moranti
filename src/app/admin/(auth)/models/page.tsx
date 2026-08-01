@@ -4,13 +4,15 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./models.module.css";
-import { CATEGORIES } from "@/lib/categories";
+import { CATEGORIES, getCategoryName, getCategoryColor } from "@/lib/categories";
 import { resolveColor } from "@/lib/color-map";
 import { MARKETPLACE_FAVICONS, MARKETPLACE_URLS } from "@/lib/marketplaces";
 import AdminButton from "@/components/admin/admin-button";
 import AdminModal from "@/components/admin/admin-modal";
 import SmartImage from "@/components/ui/smart-image";
 import UpdatedBadge from "@/components/admin/updated-badge";
+import MarketplaceStats from "@/components/admin/marketplace-stats";
+import { formatPrice } from "@/lib/format";
 
 interface ProductBrief {
   id: string;
@@ -96,14 +98,6 @@ export default function AdminModelsKanban() {
 
   // ─── Build columns ───
 
-  const catColor = (slug: string): string => {
-    const map: Record<string, string> = {
-      crossbody: "#8B6F5C", "na-plecho": "#5B7B6F", baguette: "#7B5B8B",
-      tote: "#8B7B5B", saddle: "#8B5B5B", backpack: "#5B6F8B",
-    };
-    return map[slug] || "#999";
-  };
-
   // Сортировка внутри столбца: в наличии (wbStock/ozonStock > 0) — сверху,
   // затем не в наличии, архивные — в самом низу. Стабильная, сохраняет
   // исходный порядок для равных.
@@ -127,7 +121,7 @@ export default function AdminModelsKanban() {
     ...models.map((m) => ({
       id: m.id,
       title: m.name,
-      catColor: catColor(m.category),
+      catColor: getCategoryColor(m.category),
       items: sortVariantsByStock(m.variants),
     })),
   ];
@@ -249,14 +243,6 @@ export default function AdminModelsKanban() {
   const ozInStock = onOzon.filter((v) => (v.ozonStock ?? 0) > 0);
   const ozNoStock = onOzon.filter((v) => (v.ozonStock ?? 0) <= 0);
 
-  // ─── Helpers ───
-
-  function formatPrice(n?: number) {
-    return n ? n.toLocaleString("ru-RU") + " ₽" : "";
-  }
-
-  const catName = (slug: string) => CATEGORIES.find((c) => c.slug === slug)?.name || slug;
-
   // ─── Render ───
 
   if (loading) {
@@ -302,50 +288,20 @@ export default function AdminModelsKanban() {
       <section className={styles.summarySection}>
         <p className={styles.summaryCount}>Вариантов всего: {totalVariants}</p>
         <div className={styles.summaryRow}>
-          <div className={styles.mpCard}>
-            <div className={styles.mpHeader}>
-              <div className={styles.mpIcon}>WB</div>
-              <span className={styles.mpTitle}>Wildberries</span>
-            </div>
-            <div className={styles.mpStats}>
-              <div className={styles.mpStat}>
-                <span className={styles.mpStatValue}>{wbInStock.length}</span>
-                <span className={styles.mpStatLabel}>в наличии</span>
-              </div>
-              <div className={styles.mpDivider} />
-              <div className={styles.mpStat}>
-                <span className={styles.mpStatValue}>{wbNoStock.length}</span>
-                <span className={styles.mpStatLabel}>без остатка</span>
-              </div>
-              <div className={styles.mpDivider} />
-              <div className={styles.mpStat}>
-                <span className={styles.mpStatValue}>{onWb.length}</span>
-                <span className={styles.mpStatLabel}>всего на WB</span>
-              </div>
-            </div>
-          </div>
-          <div className={styles.mpCard}>
-            <div className={styles.mpHeader}>
-              <div className={`${styles.mpIcon} ${styles.mpIconOzon}`}>OZ</div>
-              <span className={styles.mpTitle}>Ozon</span>
-            </div>
-            <div className={styles.mpStats}>
-              <div className={styles.mpStat}>
-                <span className={styles.mpStatValue}>{ozInStock.length}</span>
-                <span className={styles.mpStatLabel}>в наличии</span>
-              </div>
-              <div className={styles.mpDivider} />
-              <div className={styles.mpStat}>
-                <span className={styles.mpStatValue}>{ozNoStock.length}</span>
-                <span className={styles.mpStatLabel}>без остатка</span>
-              </div>
-              <div className={styles.mpDivider} />
-              <div className={styles.mpStat}>
-                <span className={styles.mpStatValue}>{onOzon.length}</span>
-                <span className={styles.mpStatLabel}>всего на Ozon</span>
-              </div>
-            </div>
-          </div>
+          <MarketplaceStats
+            platform="wb"
+            inStock={wbInStock.length}
+            noStock={wbNoStock.length}
+            total={onWb.length}
+            totalLabel="всего на WB"
+          />
+          <MarketplaceStats
+            platform="ozon"
+            inStock={ozInStock.length}
+            noStock={ozNoStock.length}
+            total={onOzon.length}
+            totalLabel="всего на Ozon"
+          />
         </div>
       </section>
 
@@ -378,7 +334,7 @@ export default function AdminModelsKanban() {
                   </div>
                 </div>
                 {col.id !== "__unassigned" && col.items.length > 0 && (
-                  <span className={styles.colCatName}>{catName(col.items[0].category)}</span>
+                  <span className={styles.colCatName}>{getCategoryName(col.items[0].category)}</span>
                 )}
               </div>
 
@@ -449,6 +405,16 @@ export default function AdminModelsKanban() {
                         <div className={styles.cardNameRow}>
                           <Link href={`/admin/products/${item.slug}`} className={styles.cardName}>
                             {item.name || "—"}
+                          </Link>
+                          <Link
+                            href={`/catalog/${item.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className={styles.cardViewLink}
+                            title="Открыть на витрине"
+                          >
+                            ↗
                           </Link>
                           {isArchived && <span className={styles.cardArchivedBadge}>A</span>}
                         </div>

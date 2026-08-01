@@ -3,12 +3,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CATEGORIES } from "@/lib/categories";
+import { CATEGORIES, getCategoryName } from "@/lib/categories";
 import AdminModal from "@/components/admin/admin-modal";
 import AdminButton from "@/components/admin/admin-button";
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import UpdatedBadge from "@/components/admin/updated-badge";
 import { useToast } from "@/lib/toast-context";
+import { formatPrice } from "@/lib/format";
 import { MARKETPLACE_URLS, MARKETPLACE_FAVICONS } from "@/lib/marketplaces";
 import styles from "./products.module.css";
 
@@ -73,7 +74,7 @@ export default function AdminProductsPage() {
   const [models, setModels] = useState<ModelBrief[]>([]);
   const modelsFetchedRef = useRef(false);
 
-  // Sorting — по умолчанию сортируем по наличию на WB
+  // Sorting вЂ” РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ СЃРѕСЂС‚РёСЂСѓРµРј РїРѕ РЅР°Р»РёС‡РёСЋ РЅР° WB
   const [sortBy, setSortBy] = useState("wbStock");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
@@ -114,13 +115,13 @@ export default function AdminProductsPage() {
     [search, category, archivedParam, marketplaceParam, sortBy, sortOrder, router],
   );
 
-  // Fetch on mount — легитимный паттерн: загрузка списка при монтировании.
-  // Первый setState (setLoading) здесь синхронный по определению; React 19
-  // автоматически батчит повторные рендеры, каскада нет.
+  // Fetch on mount вЂ” Р»РµРіРёС‚РёРјРЅС‹Р№ РїР°С‚С‚РµСЂРЅ: Р·Р°РіСЂСѓР·РєР° СЃРїРёСЃРєР° РїСЂРё РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё.
+  // РџРµСЂРІС‹Р№ setState (setLoading) Р·РґРµСЃСЊ СЃРёРЅС…СЂРѕРЅРЅС‹Р№ РїРѕ РѕРїСЂРµРґРµР»РµРЅРёСЋ; React 19
+  // Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё Р±Р°С‚С‡РёС‚ РїРѕРІС‚РѕСЂРЅС‹Рµ СЂРµРЅРґРµСЂС‹, РєР°СЃРєР°РґР° РЅРµС‚.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchProducts(1); }, [fetchProducts]);
 
-  // ─── Lightbox keyboard ───
+  // в”Ђв”Ђв”Ђ Lightbox keyboard в”Ђв”Ђв”Ђ
   useEffect(() => {
     if (!lightboxImage) return;
     const handler = (e: KeyboardEvent) => {
@@ -130,7 +131,7 @@ export default function AdminProductsPage() {
     return () => document.removeEventListener("keydown", handler);
   }, [lightboxImage]);
 
-  // ─── Bulk actions ───
+  // в”Ђв”Ђв”Ђ Bulk actions в”Ђв”Ђв”Ђ
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) => {
@@ -161,19 +162,19 @@ export default function AdminProductsPage() {
       if (res.ok) {
         setSelectedIds(new Set());
         fetchProducts(pagination.page);
-        const labels = { archive: "Архивировано", unarchive: "Разархивировано", delete: "Удалено", "assign-model": "Модель назначена" };
-        toast.success(`${labels[action]} ${selectedIds.size} товаров`);
+        const labels = { archive: "РђСЂС…РёРІРёСЂРѕРІР°РЅРѕ", unarchive: "Р Р°Р·Р°СЂС…РёРІРёСЂРѕРІР°РЅРѕ", delete: "РЈРґР°Р»РµРЅРѕ", "assign-model": "РњРѕРґРµР»СЊ РЅР°Р·РЅР°С‡РµРЅР°" };
+        toast.success(`${labels[action]} ${selectedIds.size} С‚РѕРІР°СЂРѕРІ`);
       } else {
-        toast.error("Ошибка при выполнении операции");
+        toast.error("РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РѕРїРµСЂР°С†РёРё");
       }
     } catch {
-      toast.error("Ошибка соединения");
+      toast.error("РћС€РёР±РєР° СЃРѕРµРґРёРЅРµРЅРёСЏ");
     } finally {
       setBulkProcessing(false);
     }
   }
 
-  // ─── Assign model ───
+  // в”Ђв”Ђв”Ђ Assign model в”Ђв”Ђв”Ђ
 
   async function fetchModelsOnce() {
     if (modelsFetchedRef.current && models.length > 0) return;
@@ -189,20 +190,20 @@ export default function AdminProductsPage() {
     } catch { /* ignore */ }
   }
 
-  // ─── Single delete ───
+  // в”Ђв”Ђв”Ђ Single delete в”Ђв”Ђв”Ђ
 
   async function handleDelete(id: string) {
-    if (!confirm("Удалить товар?")) return;
+    if (!confirm("РЈРґР°Р»РёС‚СЊ С‚РѕРІР°СЂ?")) return;
     const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
     if (res.ok) {
       fetchProducts(pagination.page);
-      toast.success("Товар удалён");
+      toast.success("РўРѕРІР°СЂ СѓРґР°Р»С‘РЅ");
     } else {
-      toast.error("Ошибка при удалении");
+      toast.error("РћС€РёР±РєР° РїСЂРё СѓРґР°Р»РµРЅРёРё");
     }
   }
 
-  // ─── Reorder mode ───
+  // в”Ђв”Ђв”Ђ Reorder mode в”Ђв”Ђв”Ђ
 
   async function enterReorderMode() {
     setLoading(true);
@@ -289,13 +290,7 @@ export default function AdminProductsPage() {
     }
   }
 
-  // ─── Helpers ───
-
-  function formatPrice(n?: number) {
-    return n != null ? n.toLocaleString("ru-RU") + " ₽" : "—";
-  }
-
-  const catName = (slug: string) => CATEGORIES.find((c) => c.slug === slug)?.name || slug;
+  // в”Ђв”Ђв”Ђ Helpers в”Ђв”Ђв”Ђ
 
   function toggleSort(field: string) {
     if (sortBy === field) {
@@ -306,25 +301,25 @@ export default function AdminProductsPage() {
     }
   }
 
-  // ─── Render ───
+  // в”Ђв”Ђв”Ђ Render в”Ђв”Ђв”Ђ
 
   if (reorderMode) {
     return (
       <div className={styles.page}>
         <AdminPageHeader
-          title="Порядок товаров"
-          subtitle={`${allProducts.length} активных товаров`}
+          title="РџРѕСЂСЏРґРѕРє С‚РѕРІР°СЂРѕРІ"
+          subtitle={`${allProducts.length} Р°РєС‚РёРІРЅС‹С… С‚РѕРІР°СЂРѕРІ`}
         >
-          {orderSaved && <span className={styles.savedBadge}>Сохранено</span>}
+          {orderSaved && <span className={styles.savedBadge}>РЎРѕС…СЂР°РЅРµРЅРѕ</span>}
           <AdminButton variant="primary" onClick={saveOrder} disabled={savingOrder} loading={savingOrder}>
-            Сохранить порядок
+            РЎРѕС…СЂР°РЅРёС‚СЊ РїРѕСЂСЏРґРѕРє
           </AdminButton>
           <AdminButton variant="ghost" onClick={exitReorderMode}>
-            Закрыть
+            Р—Р°РєСЂС‹С‚СЊ
           </AdminButton>
         </AdminPageHeader>
         <p className={styles.reorderHint}>
-          Перетащите товары в нужном порядке и нажмите «Сохранить порядок»
+          РџРµСЂРµС‚Р°С‰РёС‚Рµ С‚РѕРІР°СЂС‹ РІ РЅСѓР¶РЅРѕРј РїРѕСЂСЏРґРєРµ Рё РЅР°Р¶РјРёС‚Рµ В«РЎРѕС…СЂР°РЅРёС‚СЊ РїРѕСЂСЏРґРѕРєВ»
         </p>
         <div className={styles.reorderList}>
           {allProducts.map((p, idx) => (
@@ -336,12 +331,12 @@ export default function AdminProductsPage() {
               onDragOver={(e) => handleDragOver(e, idx)}
               onDragEnd={handleDragEnd}
             >
-              <span className={styles.reorderHandle} aria-label="Перетащить">⋮⋮</span>
+              <span className={styles.reorderHandle} aria-label="РџРµСЂРµС‚Р°С‰РёС‚СЊ">в‹®в‹®</span>
               <span className={styles.reorderNum}>{idx + 1}</span>
               {p.image && <img src={p.image} alt="" className={styles.reorderThumb} />}
               <span className={styles.reorderName}>{p.name}</span>
               <span className={styles.reorderPrice}>{formatPrice(p.price)}</span>
-              <span className={styles.reorderBadge}>{catName(p.category)}</span>
+              <span className={styles.reorderBadge}>{getCategoryName(p.category)}</span>
             </div>
           ))}
         </div>
@@ -351,20 +346,20 @@ export default function AdminProductsPage() {
 
   return (
     <div className={styles.page}>
-      {/* ─── Header ─── */}
+      {/* в”Ђв”Ђв”Ђ Header в”Ђв”Ђв”Ђ */}
       <AdminPageHeader
-        title="Товары"
-        subtitle={`${pagination.total} товаров${selectedIds.size > 0 ? ` · выбрано ${selectedIds.size}` : ""}`}
+        title="РўРѕРІР°СЂС‹"
+        subtitle={`${pagination.total} С‚РѕРІР°СЂРѕРІ${selectedIds.size > 0 ? ` В· РІС‹Р±СЂР°РЅРѕ ${selectedIds.size}` : ""}`}
       >
         <AdminButton variant="secondary" onClick={enterReorderMode}>
-          ≡ Управление порядком
+          в‰Ў РЈРїСЂР°РІР»РµРЅРёРµ РїРѕСЂСЏРґРєРѕРј
         </AdminButton>
         <AdminButton variant="primary" href="/admin/products/new">
-          + Добавить товар
+          + Р”РѕР±Р°РІРёС‚СЊ С‚РѕРІР°СЂ
         </AdminButton>
       </AdminPageHeader>
 
-      {/* ─── Status tabs ─── */}
+      {/* в”Ђв”Ђв”Ђ Status tabs в”Ђв”Ђв”Ђ */}
       <div className={styles.filters}>
         <div className={styles.statusTabs}>
           {(["active", "all", "archived"] as const).map((tab) => (
@@ -373,16 +368,16 @@ export default function AdminProductsPage() {
               className={`${styles.statusTab} ${statusTab === tab ? styles.statusTabActive : ""}`}
               onClick={() => { setStatusTab(tab); setSelectedIds(new Set()); }}
             >
-              {tab === "active" ? "Активные" : tab === "archived" ? "Архивные" : "Все"}
+              {tab === "active" ? "РђРєС‚РёРІРЅС‹Рµ" : tab === "archived" ? "РђСЂС…РёРІРЅС‹Рµ" : "Р’СЃРµ"}
             </button>
           ))}
         </div>
         <div className={styles.mpPills}>
           {[
-            { value: "", label: "Любой МП" },
+            { value: "", label: "Р›СЋР±РѕР№ РњРџ" },
             { value: "wb", label: "WB" },
             { value: "ozon", label: "Ozon" },
-            { value: "both", label: "Оба" },
+            { value: "both", label: "РћР±Р°" },
           ].map((mp) => (
             <button
               key={mp.value}
@@ -396,7 +391,7 @@ export default function AdminProductsPage() {
         <input
           type="text"
           className={styles.searchInput}
-          placeholder="Поиск по названию или ID..."
+          placeholder="РџРѕРёСЃРє РїРѕ РЅР°Р·РІР°РЅРёСЋ РёР»Рё ID..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -405,43 +400,43 @@ export default function AdminProductsPage() {
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
-          <option value="">Все категории</option>
+          <option value="">Р’СЃРµ РєР°С‚РµРіРѕСЂРёРё</option>
           {CATEGORIES.map((c) => (
             <option key={c.slug} value={c.slug}>{c.name}</option>
           ))}
         </select>
       </div>
 
-      {/* ─── Bulk toolbar ─── */}
+      {/* в”Ђв”Ђв”Ђ Bulk toolbar в”Ђв”Ђв”Ђ */}
       {selectedIds.size > 0 && (
         <div className={styles.bulkToolbar}>
           <span className={styles.bulkCount}>
-            Выбрано: {selectedIds.size}
+            Р’С‹Р±СЂР°РЅРѕ: {selectedIds.size}
           </span>
           <span className={styles.bulkSeparator} />
           <div className={styles.bulkActions}>
             {statusTab !== "archived" && (
               <AdminButton variant="secondary" size="sm" onClick={() => setConfirmAction("archive")} disabled={bulkProcessing}>
-                Архивировать
+                РђСЂС…РёРІРёСЂРѕРІР°С‚СЊ
               </AdminButton>
             )}
             {statusTab === "archived" && (
               <AdminButton variant="secondary" size="sm" onClick={() => setConfirmAction("unarchive")} disabled={bulkProcessing}>
-                Разархивировать
+                Р Р°Р·Р°СЂС…РёРІРёСЂРѕРІР°С‚СЊ
               </AdminButton>
             )}
             <AdminButton variant="secondary" size="sm" onClick={() => { fetchModelsOnce(); setShowAssignModal(true); }} disabled={bulkProcessing}>
-              Назначить модель
+              РќР°Р·РЅР°С‡РёС‚СЊ РјРѕРґРµР»СЊ
             </AdminButton>
             <AdminButton variant="danger" size="sm" onClick={() => setConfirmAction("delete")} disabled={bulkProcessing}>
-              Удалить
+              РЈРґР°Р»РёС‚СЊ
             </AdminButton>
-            {bulkProcessing && <span className={styles.bulkProgress}>Обработка...</span>}
+            {bulkProcessing && <span className={styles.bulkProgress}>РћР±СЂР°Р±РѕС‚РєР°...</span>}
           </div>
         </div>
       )}
 
-      {/* ─── Table ─── */}
+      {/* в”Ђв”Ђв”Ђ Table в”Ђв”Ђв”Ђ */}
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
@@ -456,26 +451,26 @@ export default function AdminProductsPage() {
               </th>
               <th></th>
               <th className={styles.sortable} onClick={() => toggleSort("name")}>
-                Название{sortBy === "name" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
+                РќР°Р·РІР°РЅРёРµ{sortBy === "name" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " в–І" : " в–ј"}</span>}
               </th>
-              <th>Модель</th>
+              <th>РњРѕРґРµР»СЊ</th>
               <th className={styles.sortable} onClick={() => toggleSort("price")}>
-                Цена{sortBy === "price" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
+                Р¦РµРЅР°{sortBy === "price" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " в–І" : " в–ј"}</span>}
               </th>
-              <th>Категория</th>
+              <th>РљР°С‚РµРіРѕСЂРёСЏ</th>
               <th>SKU</th>
               <th>
                 <span className={styles.sortable} onClick={() => toggleSort("wbStock")}>
-                  WB{sortBy === "wbStock" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
+                  WB{sortBy === "wbStock" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " в–І" : " в–ј"}</span>}
                 </span>
                 {" / "}
                 <span className={styles.sortable} onClick={() => toggleSort("ozonStock")}>
-                  Ozon{sortBy === "ozonStock" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
+                  Ozon{sortBy === "ozonStock" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " в–І" : " в–ј"}</span>}
                 </span>
               </th>
-              <th>Рейтинг</th>
+              <th>Р РµР№С‚РёРЅРі</th>
               <th className={styles.sortable} onClick={() => toggleSort("updatedAt")}>
-                Обновлён{sortBy === "updatedAt" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
+                РћР±РЅРѕРІР»С‘РЅ{sortBy === "updatedAt" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " в–І" : " в–ј"}</span>}
               </th>
               <th></th>
             </tr>
@@ -499,7 +494,7 @@ export default function AdminProductsPage() {
               ))
             ) : products.length === 0 ? (
               <tr><td colSpan={11} className={styles.empty}>
-                {statusTab === "archived" ? "Нет архивных товаров" : "Нет товаров"}
+                {statusTab === "archived" ? "РќРµС‚ Р°СЂС…РёРІРЅС‹С… С‚РѕРІР°СЂРѕРІ" : "РќРµС‚ С‚РѕРІР°СЂРѕРІ"}
               </td></tr>
             ) : (
               products.map((p) => {
@@ -540,7 +535,7 @@ export default function AdminProductsPage() {
                       <Link href={`/admin/products/${p.slug}`} className={styles.productName}>
                         {p.name}
                       </Link>
-                      {isArchived && <span className={styles.archivedBadge}>Архив</span>}
+                      {isArchived && <span className={styles.archivedBadge}>РђСЂС…РёРІ</span>}
                     </td>
                     <td>
                       {p.model ? (
@@ -548,12 +543,12 @@ export default function AdminProductsPage() {
                           {p.model.name}
                         </Link>
                       ) : (
-                        <span className={styles.noModel}>—</span>
+                        <span className={styles.noModel}>вЂ”</span>
                       )}
                     </td>
                     <td className={styles.price}>{formatPrice(p.price)}</td>
-                    <td><span className={styles.categoryBadge}>{catName(p.category)}</span></td>
-                    <td className={styles.sku}>{p.sku || <span className={styles.muted}>—</span>}</td>
+                    <td><span className={styles.categoryBadge}>{getCategoryName(p.category)}</span></td>
+                    <td className={styles.sku}>{p.sku || <span className={styles.muted}>вЂ”</span>}</td>
                     <td className={styles.mpCell}>
                       {p.wbArticle ? (
                         <div className={styles.mpRow}>
@@ -563,10 +558,10 @@ export default function AdminProductsPage() {
                             rel="noopener noreferrer"
                             className={styles.articleLink}
                           >
-                            WB: {p.wbArticle} ↗
+                            WB: {p.wbArticle} в†—
                           </a>
                           {p.wbStock != null && p.wbStock > 0 && (
-                            <span className={styles.stockBadge}>{p.wbStock} шт</span>
+                            <span className={styles.stockBadge}>{p.wbStock} С€С‚</span>
                           )}
                         </div>
                       ) : null}
@@ -578,16 +573,16 @@ export default function AdminProductsPage() {
                             rel="noopener noreferrer"
                             className={styles.articleLink}
                           >
-                            OZ: {p.ozonArticle} ↗
+                            OZ: {p.ozonArticle} в†—
                           </a>
                           {p.ozonStock != null && p.ozonStock > 0 && (
-                            <span className={styles.stockBadge}>{p.ozonStock} шт</span>
+                            <span className={styles.stockBadge}>{p.ozonStock} С€С‚</span>
                           )}
                         </div>
                       ) : null}
-                      {!p.wbArticle && !p.ozonArticle && <span className={styles.muted}>—</span>}
+                      {!p.wbArticle && !p.ozonArticle && <span className={styles.muted}>вЂ”</span>}
                     </td>
-                    <td>{p.rating ? `${p.rating.toFixed(1)} ★` : "—"}</td>
+                    <td>{p.rating ? `${p.rating.toFixed(1)} в…` : "вЂ”"}</td>
                     <td>
                       <UpdatedBadge iso={p.updatedAt} />
                     </td>
@@ -595,9 +590,9 @@ export default function AdminProductsPage() {
                       <button
                         className={styles.deleteBtn}
                         onClick={() => handleDelete(p.id)}
-                        title="Удалить"
+                        title="РЈРґР°Р»РёС‚СЊ"
                       >
-                        ✕
+                        вњ•
                       </button>
                     </td>
                   </tr>
@@ -608,7 +603,7 @@ export default function AdminProductsPage() {
         </table>
       </div>
 
-      {/* ─── Pagination ─── */}
+      {/* в”Ђв”Ђв”Ђ Pagination в”Ђв”Ђв”Ђ */}
       {pagination.totalPages > 1 && (
         <div className={styles.pagination}>
           {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
@@ -623,22 +618,22 @@ export default function AdminProductsPage() {
         </div>
       )}
 
-      {/* ─── Confirmation modal ─── */}
+      {/* в”Ђв”Ђв”Ђ Confirmation modal в”Ђв”Ђв”Ђ */}
       <AdminModal
         open={confirmAction !== null}
         onClose={() => !bulkProcessing && setConfirmAction(null)}
         title={
-          confirmAction === "archive" ? "Архивировать товары" :
-          confirmAction === "unarchive" ? "Разархивировать товары" :
-          "Удалить товары"
+          confirmAction === "archive" ? "РђСЂС…РёРІРёСЂРѕРІР°С‚СЊ С‚РѕРІР°СЂС‹" :
+          confirmAction === "unarchive" ? "Р Р°Р·Р°СЂС…РёРІРёСЂРѕРІР°С‚СЊ С‚РѕРІР°СЂС‹" :
+          "РЈРґР°Р»РёС‚СЊ С‚РѕРІР°СЂС‹"
         }
         actions={[
-          { label: "Отмена", onClick: () => setConfirmAction(null), disabled: bulkProcessing },
+          { label: "РћС‚РјРµРЅР°", onClick: () => setConfirmAction(null), disabled: bulkProcessing },
           {
             label:
-              confirmAction === "archive" ? "Архивировать" :
-              confirmAction === "unarchive" ? "Разархивировать" :
-              "Удалить",
+              confirmAction === "archive" ? "РђСЂС…РёРІРёСЂРѕРІР°С‚СЊ" :
+              confirmAction === "unarchive" ? "Р Р°Р·Р°СЂС…РёРІРёСЂРѕРІР°С‚СЊ" :
+              "РЈРґР°Р»РёС‚СЊ",
             onClick: () => executeBulk(confirmAction!),
             variant: confirmAction === "delete" ? "danger" : "primary",
             disabled: bulkProcessing,
@@ -647,22 +642,22 @@ export default function AdminProductsPage() {
       >
         <p>
           {confirmAction === "archive"
-            ? `Вы уверены, что хотите архивировать ${selectedIds.size} товаров? Они исчезнут из каталога, но данные сохранятся.`
+            ? `Р’С‹ СѓРІРµСЂРµРЅС‹, С‡С‚Рѕ С…РѕС‚РёС‚Рµ Р°СЂС…РёРІРёСЂРѕРІР°С‚СЊ ${selectedIds.size} С‚РѕРІР°СЂРѕРІ? РћРЅРё РёСЃС‡РµР·РЅСѓС‚ РёР· РєР°С‚Р°Р»РѕРіР°, РЅРѕ РґР°РЅРЅС‹Рµ СЃРѕС…СЂР°РЅСЏС‚СЃСЏ.`
             : confirmAction === "unarchive"
-              ? `Разархивировать ${selectedIds.size} товаров? Они снова появятся в каталоге.`
-              : `Вы уверены, что хотите удалить ${selectedIds.size} товаров? Это действие необратимо.`}
+              ? `Р Р°Р·Р°СЂС…РёРІРёСЂРѕРІР°С‚СЊ ${selectedIds.size} С‚РѕРІР°СЂРѕРІ? РћРЅРё СЃРЅРѕРІР° РїРѕСЏРІСЏС‚СЃСЏ РІ РєР°С‚Р°Р»РѕРіРµ.`
+              : `Р’С‹ СѓРІРµСЂРµРЅС‹, С‡С‚Рѕ С…РѕС‚РёС‚Рµ СѓРґР°Р»РёС‚СЊ ${selectedIds.size} С‚РѕРІР°СЂРѕРІ? Р­С‚Рѕ РґРµР№СЃС‚РІРёРµ РЅРµРѕР±СЂР°С‚РёРјРѕ.`}
         </p>
       </AdminModal>
 
-      {/* ─── Assign model modal ─── */}
+      {/* в”Ђв”Ђв”Ђ Assign model modal в”Ђв”Ђв”Ђ */}
       <AdminModal
         open={showAssignModal}
         onClose={() => setShowAssignModal(false)}
-        title="Назначить модель"
+        title="РќР°Р·РЅР°С‡РёС‚СЊ РјРѕРґРµР»СЊ"
         actions={[
-          { label: "Отмена", onClick: () => setShowAssignModal(false) },
+          { label: "РћС‚РјРµРЅР°", onClick: () => setShowAssignModal(false) },
           {
-            label: "Назначить",
+            label: "РќР°Р·РЅР°С‡РёС‚СЊ",
             onClick: () => executeBulk("assign-model", { modelId: assignModelId }),
             variant: "primary",
             disabled: !assignModelId || bulkProcessing,
@@ -670,14 +665,14 @@ export default function AdminProductsPage() {
         ]}
       >
         <p style={{ marginBottom: 12 }}>
-          Выберите модель для {selectedIds.size} товаров:
+          Р’С‹Р±РµСЂРёС‚Рµ РјРѕРґРµР»СЊ РґР»СЏ {selectedIds.size} С‚РѕРІР°СЂРѕРІ:
         </p>
         <select
           className={styles.assignSelect}
           value={assignModelId}
           onChange={(e) => setAssignModelId(e.target.value)}
         >
-          <option value="">— выберите модель —</option>
+          <option value="">вЂ” РІС‹Р±РµСЂРёС‚Рµ РјРѕРґРµР»СЊ вЂ”</option>
           {models.map((m) => (
             <option key={m.id} value={m.id}>
               {m.name} ({m.category})
@@ -686,7 +681,7 @@ export default function AdminProductsPage() {
         </select>
       </AdminModal>
 
-      {/* ─── Lightbox ─── */}
+      {/* в”Ђв”Ђв”Ђ Lightbox в”Ђв”Ђв”Ђ */}
       {lightboxImage && (
         <div
           className={styles.lightboxOverlay}
@@ -696,9 +691,9 @@ export default function AdminProductsPage() {
           <button
             className={styles.lightboxClose}
             onClick={() => setLightboxImage(null)}
-            aria-label="Закрыть"
+            aria-label="Р—Р°РєСЂС‹С‚СЊ"
           >
-            ✕
+            вњ•
           </button>
         </div>
       )}
@@ -706,7 +701,7 @@ export default function AdminProductsPage() {
   );
 }
 
-/* ─── Фото товара с обработкой ошибок загрузки ─── */
+/* в”Ђв”Ђв”Ђ Р¤РѕС‚Рѕ С‚РѕРІР°СЂР° СЃ РѕР±СЂР°Р±РѕС‚РєРѕР№ РѕС€РёР±РѕРє Р·Р°РіСЂСѓР·РєРё в”Ђв”Ђв”Ђ */
 
 function AdminProductPhoto({
   src,
@@ -741,11 +736,11 @@ function AdminProductPhoto({
             onClick={onLightbox}
             onLoad={() => setLoaded(true)}
             onError={() => { setFailed(true); setLoaded(true); }}
-            title="Увеличить"
+            title="РЈРІРµР»РёС‡РёС‚СЊ"
           />
-          {isArchived && <div className={styles.archiveCorner} title="В архиве" />}
+          {isArchived && <div className={styles.archiveCorner} title="Р’ Р°СЂС…РёРІРµ" />}
           <img src={favicon} alt="" className={styles.photoMpBadge} />
-          {isOutOfStock && <div className={styles.photoOosOverlay}>ЗАКОНЧИЛОСЬ</div>}
+          {isOutOfStock && <div className={styles.photoOosOverlay}>Р—РђРљРћРќР§РР›РћРЎР¬</div>}
         </div>
       ) : isPlaceholder ? (
         <div className={styles.photoPlaceholder}>
@@ -754,11 +749,11 @@ function AdminProductPhoto({
             <circle cx="7" cy="7" r="2" />
             <path d="M2 14l4-4 3 3 3-4 6 6" />
           </svg>
-          <span>{isArchived ? "архив" : "нет фото"}</span>
+          <span>{isArchived ? "Р°СЂС…РёРІ" : "РЅРµС‚ С„РѕС‚Рѕ"}</span>
         </div>
       ) : (
         <div className={styles.photoPlaceholder}>
-          <span className={styles.photoMutedLabel}>—</span>
+          <span className={styles.photoMutedLabel}>вЂ”</span>
         </div>
       )}
     </div>

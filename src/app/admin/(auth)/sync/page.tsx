@@ -63,20 +63,21 @@ interface LogEvent {
 
 /* ─── Парсинг сырого лога в структурированные события ─── */
 
-const PHASE_NAMES: Record<string, string> = {
+/** Единый словарь фаз синхронизации (логи + прогресс-бар) */
+const PHASE_LABELS: Record<string, string> = {
   "wb-cards": "Карточки WB",
   "wb-trash": "Корзина WB",
   "wb-prices": "Цены WB",
-  "wb-process": "Обработка WB",
-  "ozon-list": "Список Ozon",
+  "wb-process": "Обработка товаров WB",
+  "ozon-list": "Список товаров Ozon",
   "ozon-info": "Информация Ozon",
   "ozon-attrs": "Атрибуты Ozon",
   "ozon-ratings": "Рейтинги Ozon",
-  "ozon-process": "Обработка Ozon",
+  "ozon-process": "Обработка товаров Ozon",
   "ozon-models": "Модели Ozon",
   "wb-models": "Модели WB",
-  "archive": "Архивация",
-  "done": "Готово",
+  archive: "Архивация",
+  done: "Завершение",
 };
 
 const CHANGE_LABELS: Record<string, string> = {
@@ -129,7 +130,7 @@ function parseLogToEvents(log: string): LogEvent[] {
           phaseAdded = true;
           events.push({
             type: "phase",
-            text: PHASE_NAMES[data.phase] || data.phase,
+            text: PHASE_LABELS[data.phase] || data.phase,
             phase: data.phase,
             current: data.current ?? 0,
             total: data.total ?? 0,
@@ -221,23 +222,6 @@ function parseLogToEvents(log: string): LogEvent[] {
 
   return events;
 }
-
-/* ─── Phase labels ─── */
-
-const PHASE_LABELS: Record<string, string> = {
-  "wb-prices": "Цены WB",
-  "wb-cards": "Карточки WB",
-  "wb-process": "Обработка товаров WB",
-  "ozon-list": "Список товаров Ozon",
-  "ozon-info": "Информация Ozon",
-  "ozon-attrs": "Атрибуты Ozon",
-  "ozon-ratings": "Рейтинги Ozon",
-  "ozon-process": "Обработка товаров Ozon",
-  "ozon-models": "Модели Ozon",
-  "wb-models": "Модели WB",
-  archive: "Архивация",
-  done: "Завершение",
-};
 
 /* ─── Platform config ─── */
 
@@ -640,7 +624,7 @@ function PlatformCard({
                         <td>{item.name}</td>
                         <td className={styles.cellChanges}>
                           {item.changes?.map((ch) => (
-                            <span key={ch} className={styles.changeTag}>{ch}</span>
+                            <span key={ch} className={styles.changeTag}>{formatChangeLabel(ch)}</span>
                           ))}
                         </td>
                       </tr>

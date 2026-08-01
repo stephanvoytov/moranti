@@ -2,11 +2,14 @@
 
 import { useState, useEffect, FormEvent, useRef, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import ProductCard from "@/components/ui/product-card";
 import AdminButton from "@/components/admin/admin-button";
 import UpdatedBadge from "@/components/admin/updated-badge";
 import { useToast } from "@/lib/toast-context";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
+import { CATEGORIES } from "@/lib/categories";
+import formCss from "@/components/admin/editor-form.module.css";
 import styles from "./editor.module.css";
 
 interface ProductForm {
@@ -33,15 +36,6 @@ interface ModelOption {
   name: string;
   category: string;
 }
-
-const CATEGORIES = [
-  { slug: "crossbody", name: "Кросс-боди" },
-  { slug: "na-plecho", name: "На плечо" },
-  { slug: "baguette", name: "Багет" },
-  { slug: "tote", name: "Тоут" },
-  { slug: "saddle", name: "Седло" },
-  { slug: "backpack", name: "Рюкзаки" },
-];
 
 const emptyForm: ProductForm = {
   name: "",
@@ -391,7 +385,7 @@ export default function ProductEditorPage() {
 
   if (loading) {
     return (
-      <div className={`${styles.loading} ${styles.page}`}>
+      <div className={`${formCss.loading} ${formCss.page}`}>
         <div className={`${styles.skeleton} ${styles.loadingHeader}`} />
         <div className={styles.loadingGrid}>
           <div className={styles.loadingColumn}>
@@ -422,14 +416,14 @@ export default function ProductEditorPage() {
   }
 
   if (error && !form.name && !isNew) {
-    return <div className={styles.error}>{error}</div>;
+    return <div className={formCss.error}>{error}</div>;
   }
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
+    <div className={formCss.page}>
+      <header className={formCss.header}>
         <div className={styles.headerRow}>
-          <h1 className={styles.title}>
+          <h1 className={formCss.title}>
             {isNew ? "Новый товар" : "Редактировать товар"}
           </h1>
           {!isNew && productData?.updatedAt ? (
@@ -466,20 +460,30 @@ export default function ProductEditorPage() {
               })()}
             </div>
           )}
+          {!isNew && (
+            <Link
+              href={`/catalog/${params.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.viewLink}
+            >
+              Просмотр на сайте ↗
+            </Link>
+          )}
         </div>
       </header>
 
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.grid}>
+      <form className={formCss.form} onSubmit={handleSubmit}>
+        <div className={`${formCss.grid} ${styles.grid}`}>
           {/* Left column — fields */}
-          <div className={styles.mainFields}>
+          <div className={formCss.mainFields}>
             <h3 className={styles.sectionTitle}>Основное</h3>
 
-            <label className={styles.label}>
+            <label className={formCss.label}>
               Название *
               <input
                 type="text"
-                className={`${styles.input}${fieldErrors.name ? " " + styles.inputError : ""}`}
+                className={`${formCss.input}${fieldErrors.name ? " " + styles.inputError : ""}`}
                 value={form.name}
                 onChange={(e) => updateField("name", e.target.value)}
                 onBlur={(e) => handleBlur("name", e.target.value)}
@@ -488,12 +492,12 @@ export default function ProductEditorPage() {
               {fieldErrors.name && <p className={styles.fieldError}>{fieldErrors.name}</p>}
             </label>
 
-            <div className={styles.row}>
-              <label className={styles.label}>
+            <div className={formCss.row}>
+              <label className={formCss.label}>
                 Цена *
                 <input
                   type="number"
-                  className={`${styles.input}${fieldErrors.price ? " " + styles.inputError : ""}`}
+                  className={`${formCss.input}${fieldErrors.price ? " " + styles.inputError : ""}`}
                   value={form.price}
                   onChange={(e) => updateField("price", e.target.value)}
                   onBlur={(e) => handleBlur("price", e.target.value)}
@@ -502,11 +506,11 @@ export default function ProductEditorPage() {
                 />
                 {fieldErrors.price && <p className={styles.fieldError}>{fieldErrors.price}</p>}
               </label>
-              <label className={styles.label}>
+              <label className={formCss.label}>
                 Оригинал
                 <input
                   type="number"
-                  className={`${styles.input}${fieldErrors.originalPrice ? " " + styles.inputError : ""}`}
+                  className={`${formCss.input}${fieldErrors.originalPrice ? " " + styles.inputError : ""}`}
                   value={form.originalPrice}
                   onChange={(e) => updateField("originalPrice", e.target.value)}
                   onBlur={(e) => handleBlur("originalPrice", e.target.value)}
@@ -516,10 +520,10 @@ export default function ProductEditorPage() {
               </label>
             </div>
 
-            <label className={styles.label}>
+            <label className={formCss.label}>
               Категория
               <select
-                className={styles.select}
+                className={formCss.select}
                 value={form.category}
                 onChange={(e) => updateField("category", e.target.value)}
               >
@@ -532,10 +536,10 @@ export default function ProductEditorPage() {
             </label>
 
             {models.length > 0 && (
-              <label className={styles.label}>
+              <label className={formCss.label}>
                 Модель (семейство)
                 <select
-                  className={styles.select}
+                  className={formCss.select}
                   value={form.modelId}
                   onChange={(e) => updateField("modelId", e.target.value)}
                 >
@@ -553,7 +557,7 @@ export default function ProductEditorPage() {
 
             <h3 className={styles.sectionTitle}>Наличие</h3>
 
-            <div className={styles.row}>
+            <div className={formCss.row}>
               <label className={styles.checkLabel}>
                 <input
                   type="checkbox"
@@ -598,32 +602,32 @@ export default function ProductEditorPage() {
 
             <h3 className={styles.sectionTitle}>Описание и внешний вид</h3>
 
-            <label className={styles.label}>
+            <label className={formCss.label}>
               Описание
               <textarea
-                className={styles.textarea}
+                className={formCss.textarea}
                 value={form.description}
                 onChange={(e) => updateField("description", e.target.value)}
                 rows={4}
               />
             </label>
 
-            <div className={styles.row}>
-              <label className={styles.label}>
+            <div className={formCss.row}>
+              <label className={formCss.label}>
                 Цвет
                 <input
                   type="text"
-                  className={styles.input}
+                  className={formCss.input}
                   value={form.colorName}
                   onChange={(e) => updateField("colorName", e.target.value)}
                   placeholder="Бежевый"
                 />
               </label>
-              <label className={styles.label}>
+              <label className={formCss.label}>
                 Материал
                 <input
                   type="text"
-                  className={styles.input}
+                  className={formCss.input}
                   value={form.composition}
                   onChange={(e) => updateField("composition", e.target.value)}
                   placeholder="Натуральная кожа"
@@ -633,8 +637,8 @@ export default function ProductEditorPage() {
 
             <h3 className={styles.sectionTitle}>Маркетплейсы</h3>
 
-            <div className={styles.row}>
-              <label className={styles.label}>
+            <div className={formCss.row}>
+              <label className={formCss.label}>
                 <div className={styles.mpFieldHeader}>
                   Артикул WB
                   {productData?.wbArticle ? (
@@ -645,7 +649,7 @@ export default function ProductEditorPage() {
                 </div>
                 <input
                   type="number"
-                  className={`${styles.input}${fieldErrors.wbArticle ? " " + styles.inputError : ""}`}
+                  className={`${formCss.input}${fieldErrors.wbArticle ? " " + styles.inputError : ""}`}
                   value={form.wbArticle}
                   onChange={(e) => updateField("wbArticle", e.target.value)}
                   onBlur={(e) => handleBlur("wbArticle", e.target.value)}
@@ -658,7 +662,7 @@ export default function ProductEditorPage() {
                   </p>
                 )}
               </label>
-              <label className={styles.label}>
+              <label className={formCss.label}>
                 <div className={styles.mpFieldHeader}>
                   Артикул Ozon
                   {productData?.ozonArticle ? (
@@ -669,7 +673,7 @@ export default function ProductEditorPage() {
                 </div>
                 <input
                   type="number"
-                  className={`${styles.input}${fieldErrors.ozonArticle ? " " + styles.inputError : ""}`}
+                  className={`${formCss.input}${fieldErrors.ozonArticle ? " " + styles.inputError : ""}`}
                   value={form.ozonArticle}
                   onChange={(e) => updateField("ozonArticle", e.target.value)}
                   onBlur={(e) => handleBlur("ozonArticle", e.target.value)}
@@ -684,11 +688,11 @@ export default function ProductEditorPage() {
               </label>
             </div>
 
-            <label className={styles.label}>
+            <label className={formCss.label}>
               SKU (vendorCode / offer_id)
               <input
                 type="text"
-                className={styles.input}
+                className={formCss.input}
                 value={form.sku}
                 onChange={(e) => updateField("sku", e.target.value)}
                 placeholder="BalensaTaup"
@@ -697,12 +701,12 @@ export default function ProductEditorPage() {
 
             <h3 className={styles.sectionTitle}>Характеристики</h3>
 
-            <div className={styles.row}>
-              <label className={styles.label}>
+            <div className={formCss.row}>
+              <label className={formCss.label}>
                 Рейтинг
                 <input
                   type="number"
-                  className={`${styles.input}${fieldErrors.rating ? " " + styles.inputError : ""}`}
+                  className={`${formCss.input}${fieldErrors.rating ? " " + styles.inputError : ""}`}
                   value={form.rating}
                   onChange={(e) => updateField("rating", e.target.value)}
                   onBlur={(e) => handleBlur("rating", e.target.value)}
@@ -712,11 +716,11 @@ export default function ProductEditorPage() {
                 />
                 {fieldErrors.rating && <p className={styles.fieldError}>{fieldErrors.rating}</p>}
               </label>
-              <label className={styles.label}>
+              <label className={formCss.label}>
                 Отзывов
                 <input
                   type="number"
-                  className={styles.input}
+                  className={formCss.input}
                   value={form.reviewsCount}
                   onChange={(e) => updateField("reviewsCount", e.target.value)}
                   min="0"
@@ -733,13 +737,13 @@ export default function ProductEditorPage() {
           <div className={styles.imageCol}>
             {/* ——— Превью карточки (как на витрине) ——— */}
             <div className={styles.previewSection}>
-              <label className={styles.label}>Превью</label>
+              <label className={formCss.label}>Превью</label>
               <div className={styles.previewWrap}>
                 <ProductCard product={previewProduct} priority />
               </div>
             </div>
 
-            <label className={styles.label}>Фотографии</label>
+            <label className={formCss.label}>Фотографии</label>
 
             {/* Image grid — marketplace style */}
             {form.images.length === 0 && (
@@ -855,7 +859,7 @@ export default function ProductEditorPage() {
               <div className={styles.urlInputRow}>
                 <input
                   type="url"
-                  className={styles.input}
+                  className={`${formCss.input} ${styles.urlInput}`}
                   value={urlInputValue}
                   onChange={(e) => setUrlInputValue(e.target.value)}
                   placeholder="https://..."
@@ -878,9 +882,9 @@ export default function ProductEditorPage() {
           </div>
         </div>
 
-        {error && <p className={styles.errorMsg}>{error}</p>}
+        {error && <p className={formCss.errorMsg}>{error}</p>}
 
-        <div className={styles.actions}>
+        <div className={formCss.actions}>
           <AdminButton variant="ghost" onClick={() => {
             const from = document.referrer && document.referrer.includes(window.location.origin + "/admin")
               ? document.referrer

@@ -40,3 +40,16 @@ export function getCategoryDescription(slug: string): string {
 export function isCategorySlug(slug: string): slug is CategorySlug {
   return CATEGORY_SLUGS.includes(slug as CategorySlug);
 }
+
+/** Акцентный цвет категории (канбан, бейджи админки) */
+export function getCategoryColor(slug: string): string {
+  const map: Record<CategorySlug, string> = {
+    crossbody: "#8B6F5C",
+    "na-plecho": "#5B7B6F",
+    baguette: "#7B5B8B",
+    tote: "#8B7B5B",
+    saddle: "#8B5B5B",
+    backpack: "#5B6F8B",
+  };
+  return map[slug as CategorySlug] || "#999";
+}

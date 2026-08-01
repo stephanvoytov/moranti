@@ -6,6 +6,8 @@ import Link from "next/link";
 import AdminButton from "@/components/admin/admin-button";
 import UpdatedBadge from "@/components/admin/updated-badge";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
+import { CATEGORIES } from "@/lib/categories";
+import form from "@/components/admin/editor-form.module.css";
 import styles from "./editor.module.css";
 
 interface Variant {
@@ -35,15 +37,6 @@ interface ModelData {
   image: string;
   variants: Variant[];
 }
-
-const CATEGORIES = [
-  { slug: "crossbody", name: "Кросс-боди" },
-  { slug: "na-plecho", name: "На плечо" },
-  { slug: "baguette", name: "Багет" },
-  { slug: "tote", name: "Тоут" },
-  { slug: "saddle", name: "Седло" },
-  { slug: "backpack", name: "Рюкзак" },
-];
 
 export default function ModelEditorPage() {
   const router = useRouter();
@@ -205,30 +198,30 @@ export default function ModelEditorPage() {
   }
 
   if (loading) {
-    return <div className={styles.page}><p className={styles.loading}>Загрузка...</p></div>;
+    return <div className={form.page}><p className={form.loading}>Загрузка...</p></div>;
   }
 
   if (error && !isNew && !model) {
-    return <div className={styles.page}><p className={styles.error}>{error}</p></div>;
+    return <div className={form.page}><p className={form.error}>{error}</p></div>;
   }
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>
+    <div className={form.page}>
+      <header className={form.header}>
+        <h1 className={form.title}>
           {isNew ? "Новая модель" : `Редактировать: ${model?.name}`}
         </h1>
       </header>
 
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.grid}>
+      <form className={form.form} onSubmit={handleSubmit}>
+        <div className={form.grid}>
           {/* Left — fields */}
-          <div className={styles.mainFields}>
-            <label className={styles.label}>
+          <div className={form.mainFields}>
+            <label className={form.label}>
               Название модели *
               <input
                 type="text"
-                className={styles.input}
+                className={form.input}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Birkin 13×20×8"
@@ -236,21 +229,21 @@ export default function ModelEditorPage() {
               />
             </label>
 
-            <label className={styles.label}>
+            <label className={form.label}>
               Slug
               <input
                 type="text"
-                className={styles.input}
+                className={form.input}
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
                 placeholder="birkin-13x20"
               />
             </label>
 
-            <label className={styles.label}>
+            <label className={form.label}>
               Категория
               <select
-                className={styles.select}
+                className={form.select}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
@@ -260,10 +253,10 @@ export default function ModelEditorPage() {
               </select>
             </label>
 
-            <label className={styles.label}>
+            <label className={form.label}>
               Описание
               <textarea
-                className={styles.textarea}
+                className={form.textarea}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
@@ -271,22 +264,22 @@ export default function ModelEditorPage() {
               />
             </label>
 
-            <div className={styles.row}>
-              <label className={styles.label}>
+            <div className={form.row}>
+              <label className={form.label}>
                 Материал
                 <input
                   type="text"
-                  className={styles.input}
+                  className={form.input}
                   value={composition}
                   onChange={(e) => setComposition(e.target.value)}
                   placeholder="Натуральная кожа"
                 />
               </label>
-              <label className={styles.label}>
+              <label className={form.label}>
                 Размеры
                 <input
                   type="text"
-                  className={styles.input}
+                  className={form.input}
                   value={dimensions}
                   onChange={(e) => setDimensions(e.target.value)}
                   placeholder="13×20×8 см"
@@ -297,7 +290,7 @@ export default function ModelEditorPage() {
 
           {/* Right — preview placeholder */}
           <div className={styles.previewCol}>
-            <label className={styles.label}>Превью</label>
+            <label className={form.label}>Превью</label>
             <div className={styles.previewBox}>
               <span className={styles.previewName}>{name || "Название модели"}</span>
               {dimensions && <span className={styles.previewDims}>{dimensions}</span>}
@@ -311,9 +304,9 @@ export default function ModelEditorPage() {
           </div>
         </div>
 
-        {error && <p className={styles.errorMsg}>{error}</p>}
+        {error && <p className={form.errorMsg}>{error}</p>}
 
-        <div className={styles.actions}>
+        <div className={form.actions}>
           <AdminButton variant="ghost" onClick={() => router.push("/admin/models")}>
             Отмена
           </AdminButton>
@@ -429,9 +422,7 @@ export default function ModelEditorPage() {
                 </div>
 
                 <div className={styles.linkerList}>
-                  {allProducts
-                    .filter((p) => !p.wbArticle || true) // all products
-                    .map((p) => {
+                  {allProducts.map((p) => {
                       const isSelected = selectedVariantIds.has(p.id);
                       return (
                         <label

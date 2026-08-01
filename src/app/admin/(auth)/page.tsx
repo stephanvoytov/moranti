@@ -4,12 +4,15 @@ import { getOzonSyncStatus } from "@/lib/ozon-sync";
 import Link from "next/link";
 import prisma, { prismaQuery } from "@/lib/prisma";
 import { cacheGet } from "@/lib/data-cache";
+import { pluralRu } from "@/lib/plural";
 import type { SyncRunRecord } from "@/lib/sync-history";
 import UpdatedBadge from "@/components/admin/updated-badge";
+import MarketplaceStats from "@/components/admin/marketplace-stats";
 import styles from "./dashboard.module.css";
 
 interface Issue {
   productId: string;
+  slug: string;
   productName: string;
   updatedAt?: string;
   tags: { text: string; warn?: boolean }[];
@@ -17,6 +20,17 @@ interface Issue {
 
 function formatDate(ts: string) {
   try { return new Date(ts).toLocaleString("ru-RU"); } catch { return ts; }
+}
+
+const STALE_SYNC_DAYS = 3;
+
+/** Человекочитаемая давность последнего синка + флаг «устарел». */
+function syncAgo(ts: string): { label: string; stale: boolean } {
+  const days = (Date.now() - new Date(ts).getTime()) / 86_400_000;
+  if (days < 1) return { label: "сегодня", stale: false };
+  if (days < 2) return { label: "вчера", stale: false };
+  const n = Math.floor(days);
+  return { label: `${n} ${pluralRu(n, "день", "дня", "дней")} назад`, stale: n > STALE_SYNC_DAYS };
 }
 
 function SyncSection({ label, sync, href }: { label: string; sync: SyncRunRecord | null; href: string }) {
@@ -27,6 +41,9 @@ function SyncSection({ label, sync, href }: { label: string; sync: SyncRunRecord
           <span className={styles.syncLabel}>{label}</span>
           <span className={styles.syncTime}>{formatDate(sync.timestamp)}</span>
           <span className={styles.syncMeta}>+{sync.stats.added} / ~{sync.stats.updated} / -{sync.stats.archived}</span>
+          <span className={syncAgo(sync.timestamp).stale ? styles.syncStale : styles.syncAgo}>
+            {syncAgo(sync.timestamp).label}
+          </span>
         </div>
       ) : (
         <div className={styles.syncStatus}>
@@ -89,7 +106,7 @@ export default async function AdminDashboard() {
     if (!p.colorName) tags.push({ text: "Нет цвета" });
     if (!p.images?.length) tags.push({ text: "Нет фото", warn: true });
     if (!p.wbArticle && !p.ozonArticle) tags.push({ text: "Нет в продаже", warn: true });
-    if (tags.length) issues.push({ productId: p.id, productName: p.name, updatedAt: p.updatedAt?.toISOString(), tags });
+    if (tags.length) issues.push({ productId: p.id, slug: p.slug, productName: p.name, updatedAt: p.updatedAt?.toISOString(), tags });
   }
   issues.sort((a, b) => b.tags.length - a.tags.length);
 
@@ -101,57 +118,27 @@ export default async function AdminDashboard() {
       <header className={styles.header}>
         <h1 className={styles.title}>Дашборд</h1>
         <p className={styles.subtitle}>
-          {totalProducts} варианта(ов) · {inStock.length} в наличии · {archived.length} в архиве · средняя {avgPrice.toLocaleString("ru-RU")} ₽
+          {totalProducts} {pluralRu(totalProducts, "товар", "товара", "товаров")} ·{" "}
+          {inStock.length} в наличии · {archived.length} в архиве · средняя{" "}
+          {avgPrice.toLocaleString("ru-RU")} ₽
         </p>
       </header>
 
       {/* ——— Marketplace comparison ——— */}
       <section className={styles.marketplaceSection}>
         <div className={styles.mpRow}>
-          <div className={styles.mpCard}>
-            <div className={styles.mpHeader}>
-              <span className={styles.mpIcon}>WB</span>
-              <span className={styles.mpTitle}>Wildberries</span>
-            </div>
-            <div className={styles.mpStats}>
-              <div className={styles.mpStat}>
-                <span className={styles.mpStatValue}>{wbInStock.length}</span>
-                <span className={styles.mpStatLabel}>в наличии</span>
-              </div>
-              <div className={styles.mpDivider} />
-              <div className={styles.mpStat}>
-                <span className={styles.mpStatValue}>{wbNoStock.length}</span>
-                <span className={styles.mpStatLabel}>без остатка</span>
-              </div>
-              <div className={styles.mpDivider} />
-              <div className={styles.mpStat}>
-                <span className={styles.mpStatValue}>{onWb.length}</span>
-                <span className={styles.mpStatLabel}>всего на площадке</span>
-              </div>
-            </div>
-          </div>
-          <div className={styles.mpCard}>
-            <div className={styles.mpHeader}>
-              <span className={`${styles.mpIcon} ${styles.mpIconOzon}`}>O</span>
-              <span className={styles.mpTitle}>Ozon</span>
-            </div>
-            <div className={styles.mpStats}>
-              <div className={styles.mpStat}>
-                <span className={styles.mpStatValue}>{ozonInStock.length}</span>
-                <span className={styles.mpStatLabel}>в наличии</span>
-              </div>
-              <div className={styles.mpDivider} />
-              <div className={styles.mpStat}>
-                <span className={styles.mpStatValue}>{ozonNoStock.length}</span>
-                <span className={styles.mpStatLabel}>без остатка</span>
-              </div>
-              <div className={styles.mpDivider} />
-              <div className={styles.mpStat}>
-                <span className={styles.mpStatValue}>{onOzon.length}</span>
-                <span className={styles.mpStatLabel}>всего на площадке</span>
-              </div>
-            </div>
-          </div>
+          <MarketplaceStats
+            platform="wb"
+            inStock={wbInStock.length}
+            noStock={wbNoStock.length}
+            total={onWb.length}
+          />
+          <MarketplaceStats
+            platform="ozon"
+            inStock={ozonInStock.length}
+            noStock={ozonNoStock.length}
+            total={onOzon.length}
+          />
         </div>
       </section>
 
@@ -178,6 +165,10 @@ export default async function AdminDashboard() {
         <span className={styles.summaryItem}>
           <span className={`${styles.summaryDot} ${styles.summaryDotInfo}`} />
           {totalModels} моделей
+        </span>
+        <span className={styles.summaryItem}>
+          <span className={`${styles.summaryDot} ${styles.summaryDotWarn}`} />
+          {inStock.length - linkedToModel} без модели
         </span>
         <span className={styles.summaryItem}>
           <span className={`${styles.summaryDot} ${styles.summaryDotWarn}`} />
@@ -208,7 +199,7 @@ export default async function AdminDashboard() {
                     ))}
                   </span>
                 </div>
-                <Link href={`/admin/products/${issue.productId}`} className={styles.issueLink}>Редактировать →</Link>
+                <Link href={`/admin/products/${issue.slug}`} className={styles.issueLink}>Редактировать →</Link>
               </div>
             ))}
           </div>
