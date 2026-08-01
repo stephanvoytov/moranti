@@ -41,8 +41,6 @@ jobs:
         run: node scripts/sync-all.mjs
         env:
           WB_API_KEY: ${{ secrets.WB_API_KEY }}
-          WB_ANALYTICS_API_KEY: ${{ secrets.WB_ANALYTICS_API_KEY }}
-          WB_PRICES_API_KEY: ${{ secrets.WB_PRICES_API_KEY }}
           OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
           OZON_API_KEY: ${{ secrets.OZON_API_KEY }}
           OZON_PROXY_SERVER: ${{ secrets.OZON_PROXY_SERVER }}
