@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./smart-image.module.css";
 
 interface SmartImageProps {
@@ -50,6 +50,19 @@ function SmartImageInner({
 }: SmartImageProps) {
   const [loaded, setLoaded] = useState(() => (src ? loadedCache.has(src) : false));
   const [failed, setFailed] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // Картинка может быть уже в HTTP-кэше браузера и отрисоваться мгновенно —
+  // событие load тогда не сработает (React ещё не навесил обработчик),
+  // и placeholder останется поверх фото навсегда. Проверяем complete при монтировании.
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth > 0) {
+      if (src) loadedCache.add(src);
+      setLoaded(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]);
 
   const handleLoad = () => {
     if (src) loadedCache.add(src);
@@ -71,6 +84,7 @@ function SmartImageInner({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         key={src}
+        ref={imgRef}
         src={src}
         alt={alt}
         width={width}

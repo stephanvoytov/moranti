@@ -13,7 +13,11 @@
   color: var(--text-muted);
   pointer-events: none;
   overflow: hidden;
-  /* Без z-index: всё, что в DOM после (overlay, бейджи, стрелки), рисуется поверх */
+  /* z-index: -1 — картинка ВСЕГДА рисуется поверх плейсхолдера.
+     Иначе при быстром кэше браузера load «улетает» до подписки React,
+     placeholder остаётся в DOM навсегда и закрывает уже загруженное фото.
+     Стрелки/оверлеи (z-index >= 2) по-прежнему поверх. */
+  z-index: -1;
 }
 
 .placeholder svg {
@@ -34,9 +38,13 @@
   animation: smartImageShimmer 1.4s ease-in-out infinite;
 }
 
-/* Битое фото — без анимации, просто иконка */
+/* Битое фото — без анимации, просто иконка ПОВЕРХ (перекрывает битую картинку браузера) */
 .placeholderFailed::after {
   display: none;
+}
+
+.placeholderFailed {
+  z-index: 2;
 }
 
 @keyframes smartImageShimmer {
