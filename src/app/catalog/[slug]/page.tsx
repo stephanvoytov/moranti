@@ -290,6 +290,7 @@ export default async function ProductPage({ params }: Props) {
             <div className={styles.outOfStock}>
               <span className={styles.priceMuted}>
                 {product.price.toLocaleString("ru-RU")} {product.currency}
+                <span className={styles.priceAsterisk}>*</span>
               </span>
               <span className={styles.archivedLabel}>Архивирован</span>
             </div>
@@ -297,6 +298,7 @@ export default async function ProductPage({ params }: Props) {
             <div className={styles.outOfStock}>
               <span className={styles.priceMuted}>
                 {product.price.toLocaleString("ru-RU")} {product.currency}
+                <span className={styles.priceAsterisk}>*</span>
               </span>
               <span className={styles.outOfStockLabel}>Нет в наличии</span>
             </div>
@@ -396,6 +398,13 @@ export default async function ProductPage({ params }: Props) {
                 : []),
             ]}
           />
+
+          {/* Примечание к цене — синхронизируется с маркетплейсов и может измениться */}
+          <p className={styles.priceFootnote}>
+            <span className={styles.priceFootnoteMark}>*</span>
+            Цена ориентировочная и может отличаться от актуальной на
+            маркетплейсе
+          </p>
         </div>
       </div>
 

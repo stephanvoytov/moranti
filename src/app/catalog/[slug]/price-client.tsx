@@ -23,6 +23,7 @@ export default function PriceClient({
     <div className={styles.priceRow}>
       <span className={styles.price}>
         {displayPrice.toLocaleString("ru-RU")} {currency}
+        <span className={styles.priceAsterisk}>*</span>
       </span>
       {displayOriginal > displayPrice && (
         <>

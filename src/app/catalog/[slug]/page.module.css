@@ -525,6 +525,25 @@
   color: var(--text-muted);
 }
 
+/* «*» у цены — отсылка к примечанию в конце колонки */
+.priceAsterisk {
+  font-size: 0.7em;
+  vertical-align: super;
+  margin-left: 1px;
+  color: var(--text-muted);
+}
+
+.priceFootnote {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: var(--space-lg) 0 0;
+}
+
+.priceFootnoteMark {
+  margin-right: 4px;
+}
+
 /* ——— Dimensions grid (in tab) ——— */
 .dimensionsGrid {
   display: flex;
@@ -706,19 +725,19 @@
 .rating {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: var(--space-sm);
 }
 
 .stars {
-  font-size: 14px;
+  font-size: 18px;
   color: var(--camel);
   letter-spacing: 2px;
 }
 
 .ratingText {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-muted);
   font-weight: 400;
 }
