@@ -1544,7 +1544,7 @@ async function wbFetchCardsV4(_apiKey, log3 = noopLog, nmIds = []) {
             price: null,
             discountedPrice: null,
             stock: 0,
-            rating: p.rating || null,
+            rating: (p.reviewRating ?? p.rating) || null,
             feedbacks: p.feedbacks || null
           });
           continue;
@@ -1556,8 +1556,8 @@ async function wbFetchCardsV4(_apiKey, log3 = noopLog, nmIds = []) {
           // оригинал без скидки
           stock: p.totalQuantity ?? 0,
           // остаток (0 если нет)
-          rating: p.rating,
-          // звёздный рейтинг
+          rating: (p.reviewRating ?? p.rating) || null,
+          // дробный рейтинг (reviewRating) — тот, что на витрине; fallback на целый rating
           feedbacks: p.feedbacks ?? 0
           // количество отзывов
         });

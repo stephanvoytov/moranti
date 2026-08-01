@@ -1,0 +1,582 @@
+/* =============================================
+   Список товаров — лента карточек (ProductCard).
+   Карточка целиком — в product-card.module.css.
+   ============================================= */
+
+.page {
+  max-width: 1100px;
+}
+
+/* ─── Filters ─── */
+
+.filters {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 180px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  outline: none;
+  background: var(--white);
+}
+
+.searchInput:focus {
+  border-color: var(--dark);
+}
+
+.categorySelect,
+.sortSelect {
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  outline: none;
+  background: var(--white);
+}
+
+.categorySelect {
+  min-width: 150px;
+}
+
+.sortGroup {
+  display: flex;
+  align-items: stretch;
+}
+
+.sortSelect {
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  min-width: 130px;
+}
+
+.sortDirBtn {
+  width: 38px;
+  border: 1px solid var(--border-light-gray);
+  border-left: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--white);
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 12px;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.sortDirBtn:hover {
+  background: var(--card-bg);
+  color: var(--dark);
+}
+
+/* ─── Status tabs ─── */
+
+.statusTabs {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.statusTab {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 7px 14px;
+  background: var(--white);
+  border: none;
+  border-right: 1px solid var(--border-light-gray);
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.statusTab:last-child {
+  border-right: none;
+}
+
+.statusTab:hover {
+  background: var(--card-bg);
+  color: var(--dark);
+}
+
+.statusTabActive {
+  background: var(--dark);
+  color: var(--white);
+}
+
+.statusTabActive:hover {
+  background: var(--dark);
+  color: var(--white);
+  opacity: 0.9;
+}
+
+/* ─── Marketplace pills ─── */
+
+.mpPills {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.mpPill {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 7px 10px;
+  background: var(--white);
+  border: none;
+  border-right: 1px solid var(--border-light-gray);
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.mpPill:last-child {
+  border-right: none;
+}
+
+.mpPill:hover {
+  background: var(--card-bg);
+  color: var(--dark);
+}
+
+.mpPillActive {
+  background: var(--camel);
+  color: #fff;
+}
+
+.mpPillActive:hover {
+  background: var(--camel);
+  opacity: 0.9;
+}
+
+/* ─── Лента карточек ─── */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-soft);
+  padding: 6px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.row:hover {
+  border-color: var(--camel);
+}
+
+.rowSelected {
+  border-color: var(--dark);
+  box-shadow: 0 0 0 2px rgba(51, 51, 51, 0.08);
+}
+
+.rowCheckWrap {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--dark);
+  margin: 0;
+}
+
+.rowCard {
+  flex: 1;
+  min-width: 0;
+}
+
+.rowModel {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--camel);
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.rowModel:hover {
+  background: var(--filter-bg);
+  color: var(--dark);
+}
+
+/* ─── Блок наличия / рейтинга ─── */
+
+.rowAside {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 120px;
+  padding: 4px 8px 4px 0;
+}
+
+.stockLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.stockDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stockDotIn {
+  background: #2e7d32;
+}
+
+.stockDotOut {
+  background: #dc2626;
+}
+
+.stockDotNone {
+  background: var(--border-light-gray);
+}
+
+.stockMp {
+  font-weight: 600;
+  color: #7B6F9C;
+}
+
+.stockMpOzon {
+  color: #005BFF;
+}
+
+.stockValue {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.stockValueOut {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.stockValueNone {
+  color: var(--text-muted);
+}
+
+.rowRating {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: #b8860b;
+  font-variant-numeric: tabular-nums;
+}
+
+.rowDelete {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--error);
+  cursor: pointer;
+  font-size: 15px;
+  padding: 8px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.row:hover .rowDelete,
+.rowSelected .rowDelete {
+  opacity: 0.6;
+}
+
+.rowDelete:hover {
+  opacity: 1;
+}
+
+/* ─── Bulk toolbar ─── */
+
+.bulkToolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-bottom: var(--space-md);
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  flex-wrap: wrap;
+}
+
+.bulkCount {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.bulkActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bulkSeparator {
+  width: 1px;
+  height: 24px;
+  background: var(--border-light-gray);
+  flex-shrink: 0;
+}
+
+.bulkProgress {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ─── Skeleton / empty ─── */
+
+.skeletonRow {
+  display: flex;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+}
+
+.skeleton {
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+  background: linear-gradient(90deg, var(--card-bg) 25%, #e8e6e2 50%, var(--card-bg) 75%);
+  background-size: 200% 100%;
+  border-radius: var(--radius-md);
+}
+
+@keyframes skeletonPulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeletonPhoto {
+  width: 130px;
+  height: 173px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.skeletonInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 0;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-family: var(--font-body);
+}
+
+/* ─── Pagination ─── */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: var(--space-md);
+}
+
+.pageBtn {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.pageBtn:hover {
+  border-color: var(--dark);
+  color: var(--dark);
+}
+
+.pageActive {
+  background: var(--dark);
+  color: var(--white);
+  border-color: var(--dark);
+}
+
+/* ─── Assign model select ─── */
+
+.assignSelect {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-light-gray);
+  border-radius: var(--radius-md);
+  outline: none;
+  background: var(--white);
+}
+
+.assignSelect:focus {
+  border-color: var(--dark);
+}
+
+/* ─── Reorder mode ─── */
+
+.savedBadge {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--success);
+  background: #e8f5e9;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.reorderHint {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-md);
+}
+
+.reorderList {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.reorderItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-light-gray);
+  cursor: grab;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+  user-select: none;
+}
+
+.reorderItem:last-child {
+  border-bottom: none;
+}
+
+.reorderItem:hover {
+  background: var(--card-bg);
+}
+
+.reorderItemActive {
+  opacity: 0.5;
+  background: var(--card-bg);
+}
+
+.dragging {
+  opacity: 0.4;
+}
+
+.reorderHandle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  cursor: grab;
+  padding: 0 4px;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.reorderHandle:active {
+  cursor: grabbing;
+}
+
+.reorderNum {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 24px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.reorderThumb {
+  width: 64px;
+  height: 86px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.reorderName {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reorderPrice {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  min-width: 80px;
+  text-align: right;
+}
+
+.reorderBadge {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--filter-bg);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  min-width: 56px;
+  text-align: center;
+}

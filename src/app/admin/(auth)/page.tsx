@@ -210,7 +210,7 @@ export default async function AdminDashboard() {
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Последние модели</h2>
-          <Link href="/admin/models" className={styles.issueLink}>Все модели →</Link>
+          <Link href="/admin/products?view=kanban" className={styles.issueLink}>Все модели →</Link>
         </div>
         <table className={styles.table}>
           <thead>
@@ -233,7 +233,7 @@ export default async function AdminDashboard() {
                   {m.variants.some((v) => v.ozonArticle) ? <span className={styles.badgeOzon}>Ozon</span> : ""}
                 </td>
                 <td>
-                  <Link href={`/admin/models/${m.id}`} className={styles.issueLink}>Редактировать →</Link>
+                  <Link href={`/admin/products/models/${m.id}`} className={styles.issueLink}>Открыть →</Link>
                 </td>
               </tr>
             ))}
