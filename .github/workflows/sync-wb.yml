@@ -32,13 +32,18 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx patchright install chromium
 
+      # xvfb нужен для headful-режима Chromium (Variti блокирует headless)
+      - name: Install xvfb
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb
+
       - run: npx prisma generate
 
       # sync-all.mjs использует официальные WB API (Content + Pricing + Stocks + Analytics)
       # и Ozon Seller API. Ozon-prices фаза ходит через headless Chromium:
-      # IP GitHub runners блокируется Variti → трафик идёт через прокси на свой VPS
+      # IP GitHub runners блокируется Variti → трафик идёт через прокси на свой VPS;
+      # headless тоже детектится → headful-режим через xvfb (OZON_HEADLESS=0)
       - name: Sync catalog with WB & Ozon
-        run: node scripts/sync-all.mjs
+        run: xvfb-run -a node scripts/sync-all.mjs
         env:
           WB_API_KEY: ${{ secrets.WB_API_KEY }}
           OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
@@ -46,3 +51,4 @@ jobs:
           OZON_PROXY_SERVER: ${{ secrets.OZON_PROXY_SERVER }}
           OZON_PROXY_USER: ${{ secrets.OZON_PROXY_USER }}
           OZON_PROXY_PASS: ${{ secrets.OZON_PROXY_PASS }}
+          OZON_HEADLESS: "0"

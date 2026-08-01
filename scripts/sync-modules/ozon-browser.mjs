@@ -43,6 +43,13 @@ const LAUNCH_ARGS = [
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
+// Headless-режим по умолчанию. В CI (GitHub Actions) Variti блокирует headless —
+// включается headful через xvfb: OZON_HEADLESS=0 + xvfb-run.
+// UA тоже можно переопределить (OZON_UA), иначе — родной для Chromium.
+function isHeadless() {
+  return process.env.OZON_HEADLESS !== "0" && process.env.OZON_HEADLESS !== "false";
+}
+
 // Прокси (например, свой VPS с tinyproxy) — IP дата-центра GitHub Actions
 // Variti блокирует, домашний/VPS IP проходит. Задаётся env-переменными:
 //   OZON_PROXY_SERVER=http://host:port  (обязательный для прокси)
@@ -98,7 +105,7 @@ async function launch() {
   const { chromium } = await import("patchright");
 
   browser = await chromium.launch({
-    headless: true,
+    headless: isHeadless(),
     args: LAUNCH_ARGS,
   });
 
@@ -116,7 +123,7 @@ async function launch() {
   const proxyCfg = getProxyConfig();
   context = await browser.newContext({
     viewport: { width: 1920, height: 1080 },
-    userAgent: USER_AGENT,
+    ...(process.env.OZON_UA ? { userAgent: process.env.OZON_UA } : { userAgent: USER_AGENT }),
     locale: "ru-RU",
     ...(proxyCfg ? { proxy: proxyCfg } : {}),
   });
