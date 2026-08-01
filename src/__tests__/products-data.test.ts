@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getProducts, getProduct, getProductsByCategory, getCategories } from "@/data/products";
+import { getProducts, getProduct, getCategories } from "@/data/products";
 
 describe("products data", () => {
   it("getProducts returns array of products", async () => {
@@ -38,8 +38,10 @@ describe("products data", () => {
     expect(found).toBeNull();
   });
 
-  it("getProductsByCategory filters correctly", async () => {
-    const crossbody = await getProductsByCategory("crossbody");
+  it("products of a single category have matching category field", async () => {
+    const products = await getProducts();
+    const crossbody = products.filter((p) => p.category === "crossbody");
+    expect(crossbody.length).toBeGreaterThan(0);
     for (const p of crossbody) {
       expect(p.category).toBe("crossbody");
     }

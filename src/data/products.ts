@@ -241,27 +241,6 @@ export async function getProduct(slug: string): Promise<Product | null> {
   }, 60_000, 600_000);
 }
 
-export async function getProductsByCategory(
-  category: string,
-): Promise<Product[]> {
-  const rows = await prismaQuery(() =>
-    prisma.product.findMany({
-      where: { category, archivedAt: null, inStock: true },
-      orderBy: { createdAt: "asc" },
-    }),
-  );
-  return rows.map(mapProduct);
-}
-
-export async function getProductsByWbArticle(
-  article: number,
-): Promise<Product | null> {
-  const row = await prismaQuery(() =>
-    prisma.product.findUnique({ where: { wbArticle: article } }),
-  );
-  return row ? mapProduct(row) : null;
-}
-
 export async function getCategories(): Promise<ProductCategory[]> {
   return cacheGet("all-categories", async () => {
     try {
@@ -294,25 +273,4 @@ export async function getCategories(): Promise<ProductCategory[]> {
     }
     // Счётчики категорий меняются только на мутациях — 5 мин свежести
   }, 300_000, 600_000);
-}
-
-export async function getAllSlugs(): Promise<string[]> {
-  try {
-    const rows = await prismaQuery(() =>
-      prisma.product.findMany({
-        where: { archivedAt: null, inStock: true },
-        select: { slug: true },
-      }),
-    );
-    return rows.map((r) => r.slug);
-  } catch (err) {
-    logger.warn("DB unavailable, fallback to products.json for slugs", {
-      error: (err as Error)?.message,
-    });
-    const fallback = loadJsonFallback<{ products: { slug: string }[] }>(
-      "products.json",
-    );
-    if (!fallback?.products) throw err;
-    return fallback.products.map((p) => p.slug);
-  }
 }

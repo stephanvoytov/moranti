@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Сгенерированный esbuild-бандл синхронизации (219 КБ, не исходник)
+    "scripts/sync-all.bundle.mjs",
   ]),
 ]);
 

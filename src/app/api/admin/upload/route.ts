@@ -40,7 +40,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    // Расширение из имени файла, санитайзим: только [a-z0-9] до 5 символов
+    // (исключаем path-сегменты/спецсимволы в ключе blob)
+    const rawExt = file.name.split(".").pop()?.toLowerCase() || "";
+    const ext = /^[a-z0-9]{1,5}$/.test(rawExt) ? rawExt : "jpg";
     const timestamp = Date.now();
     const random = Math.random().toString(36).slice(2, 6);
     const filename = `images/products/${timestamp}-${random}.${ext}`;
