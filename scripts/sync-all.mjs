@@ -27,6 +27,8 @@ try {
  */
 
 import { fileURLToPath } from "url";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import path from "path";
 
 // --- Imports из модулей ---
 import {
@@ -202,6 +204,145 @@ const log = {
     this.lines.push(msg + "\n");
   },
 };
+
+// ============================================================
+// History (SyncRun) — пишется только при прямом CLI-запуске;
+// из админки историю пишет sync-runner.ts (addSyncRun).
+// ============================================================
+
+const HISTORY_MAX_RUNS = 20;
+
+async function ensureSyncRunTable(prisma) {
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "SyncRun" (
+      "id" TEXT NOT NULL,
+      "platform" TEXT NOT NULL,
+      "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "duration" INTEGER NOT NULL,
+      "success" BOOLEAN NOT NULL,
+      "error" TEXT,
+      "added" INTEGER NOT NULL DEFAULT 0,
+      "updated" INTEGER NOT NULL DEFAULT 0,
+      "archived" INTEGER NOT NULL DEFAULT 0,
+      "skipped" INTEGER NOT NULL DEFAULT 0,
+      "errors" INTEGER NOT NULL DEFAULT 0,
+      "log" TEXT NOT NULL DEFAULT '',
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "SyncRun_pkey" PRIMARY KEY ("id")
+    )
+  `);
+}
+
+function historyJsonFile() {
+  if (process.env.VERCEL === "1") return "/tmp/moranti-data/sync-history.json";
+  return path.join(process.cwd(), "data", "sync-history.json");
+}
+
+function loadHistoryJson() {
+  const file = historyJsonFile();
+  if (!existsSync(file)) return [];
+  try {
+    return JSON.parse(readFileSync(file, "utf-8")).runs || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistoryJson(runs) {
+  mkdirSync(path.dirname(historyJsonFile()), { recursive: true });
+  writeFileSync(
+    historyJsonFile(),
+    JSON.stringify({ runs: runs.slice(0, HISTORY_MAX_RUNS) }, null, 2),
+    "utf-8",
+  );
+}
+
+/**
+ * Записывает результат прогона в историю (таблица SyncRun + JSON fallback).
+ * Вызывается ТОЛЬКО при прямом CLI-запуске (node scripts/sync-all.mjs):
+ * при запуске через админку (sync-runner) история уже пишется runner'ом.
+ * Полный прогон (обе платформы) пишет две записи — по одной на платформу.
+ */
+async function writeCliHistory({ stats, durationMs, error, prisma }) {
+  try {
+    const isCli = process.argv[1] === fileURLToPath(import.meta.url);
+    if (!isCli) return; // из админки пишет sync-runner — не дублируем
+    if (flags.dry) return; // dry-прогон ничего не меняет — в историю не пишем
+
+    const entries = [];
+    if (!flags.ozonOnly) {
+      entries.push({
+        platform: "wb",
+        added: stats.wbCreated,
+        updated: stats.wbUpdated,
+        skipped: stats.wbSkipped,
+        archived: stats.archived,
+        errors: stats.errors,
+      });
+    }
+    if (!flags.wbOnly) {
+      entries.push({
+        platform: "ozon",
+        added: stats.ozonCreated,
+        updated: stats.ozonUpdated,
+        skipped: stats.ozonSkipped,
+        archived: stats.archived,
+        errors: stats.errors,
+      });
+    }
+
+    for (const e of entries) {
+      const record = {
+        platform: e.platform,
+        timestamp: new Date().toISOString(),
+        duration: durationMs,
+        success: !error,
+        error: error || undefined,
+        stats: {
+          added: e.added,
+          updated: e.updated,
+          archived: e.archived,
+          skipped: e.skipped,
+          errors: e.errors,
+          total: e.added + e.updated + e.archived + e.skipped,
+        },
+        log: log.lines.join(""),
+      };
+
+      // Модель SyncRun хранит статистику плоскими полями (как addToDb в sync-history.ts)
+      const flat = {
+        platform: record.platform,
+        timestamp: new Date(record.timestamp),
+        duration: record.duration,
+        success: record.success,
+        error: record.error || null,
+        added: record.stats.added,
+        updated: record.stats.updated,
+        archived: record.stats.archived,
+        skipped: record.stats.skipped,
+        errors: record.stats.errors,
+        log: record.log,
+      };
+
+      try {
+        await prisma.syncRun.create({ data: flat });
+      } catch (createErr) {
+        // Таблицы может не быть в свежей БД — создаём и повторяем
+        try {
+          await ensureSyncRunTable(prisma);
+          await prisma.syncRun.create({ data: flat });
+        } catch {
+          // Полный фолбэк — JSON-файл
+          const runs = loadHistoryJson();
+          runs.unshift(record);
+          saveHistoryJson(runs);
+        }
+      }
+    }
+  } catch {
+    // Запись истории не должна ронять синк
+  }
+}
 
 // ============================================================
 // Generic fetch with auth
@@ -982,8 +1123,26 @@ async function main() {
     };
     console.log(JSON.stringify(summary));
 
+    // История синхронизации (только для прямого CLI-запуска)
+    await writeCliHistory({
+      stats,
+      durationMs: Date.now() - startTime,
+      prisma,
+    });
+
   } catch (err) {
     console.error("\nFATAL:", err);
+    // Пишем неуспешный прогон в историю (CLI), затем выходим
+    await writeCliHistory({
+      stats: {
+        wbCreated: 0, wbUpdated: 0, wbSkipped: 0,
+        ozonCreated: 0, ozonUpdated: 0, ozonSkipped: 0,
+        archived: 0, outOfStock: 0, errors: 1,
+      },
+      durationMs: Date.now() - startTime,
+      error: err instanceof Error ? err.message : String(err),
+      prisma,
+    });
     process.exit(1);
   } finally {
     await prisma.$disconnect();

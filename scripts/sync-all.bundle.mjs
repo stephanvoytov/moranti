@@ -144,7 +144,7 @@ var require_name_generator = __commonJS({
 var require_main = __commonJS({
   "node_modules/dotenv/lib/main.js"(exports, module) {
     var fs = __require("fs");
-    var path = __require("path");
+    var path2 = __require("path");
     var os = __require("os");
     var crypto = __require("crypto");
     var TIPS = [
@@ -283,7 +283,7 @@ var require_main = __commonJS({
           possibleVaultPath = options.path.endsWith(".vault") ? options.path : `${options.path}.vault`;
         }
       } else {
-        possibleVaultPath = path.resolve(process.cwd(), ".env.vault");
+        possibleVaultPath = path2.resolve(process.cwd(), ".env.vault");
       }
       if (fs.existsSync(possibleVaultPath)) {
         return possibleVaultPath;
@@ -291,7 +291,7 @@ var require_main = __commonJS({
       return null;
     }
     function _resolveHome(envPath) {
-      return envPath[0] === "~" ? path.join(os.homedir(), envPath.slice(1)) : envPath;
+      return envPath[0] === "~" ? path2.join(os.homedir(), envPath.slice(1)) : envPath;
     }
     function _configVault(options) {
       const debug = parseBoolean(process.env.DOTENV_CONFIG_DEBUG || options && options.debug);
@@ -308,7 +308,7 @@ var require_main = __commonJS({
       return { parsed };
     }
     function configDotenv(options) {
-      const dotenvPath = path.resolve(process.cwd(), ".env");
+      const dotenvPath = path2.resolve(process.cwd(), ".env");
       let encoding = "utf8";
       let processEnv = process.env;
       if (options && options.processEnv != null) {
@@ -336,13 +336,13 @@ var require_main = __commonJS({
       }
       let lastError;
       const parsedAll = {};
-      for (const path2 of optionPaths) {
+      for (const path3 of optionPaths) {
         try {
-          const parsed = DotenvModule.parse(fs.readFileSync(path2, { encoding }));
+          const parsed = DotenvModule.parse(fs.readFileSync(path3, { encoding }));
           DotenvModule.populate(parsedAll, parsed, options);
         } catch (e) {
           if (debug) {
-            _debug(`failed to load ${path2} ${e.message}`);
+            _debug(`failed to load ${path3} ${e.message}`);
           }
           lastError = e;
         }
@@ -355,7 +355,7 @@ var require_main = __commonJS({
         const shortPaths = [];
         for (const filePath of optionPaths) {
           try {
-            const relative = path.relative(process.cwd(), filePath);
+            const relative = path2.relative(process.cwd(), filePath);
             shortPaths.push(relative);
           } catch (e) {
             if (debug) {
@@ -558,7 +558,7 @@ async function ensureContext() {
   }
   return context;
 }
-async function fetchJson(path, { retries = 1 } = {}) {
+async function fetchJson(path2, { retries = 1 } = {}) {
   for (let attempt = 0; ; attempt++) {
     try {
       await ensureContext();
@@ -569,7 +569,7 @@ async function fetchJson(path, { retries = 1 } = {}) {
           });
           return { status: r.status, text: await r.text() };
         },
-        API + encodeURIComponent(path)
+        API + encodeURIComponent(path2)
       );
       if (body.status !== 200) {
         if ((body.status === 403 || body.status === 307) && attempt < retries) {
@@ -577,7 +577,7 @@ async function fetchJson(path, { retries = 1 } = {}) {
           await shutdown();
           continue;
         }
-        throw new Error(`Ozon \u0432\u0435\u0440\u043D\u0443\u043B HTTP ${body.status} \u0434\u043B\u044F ${path}`);
+        throw new Error(`Ozon \u0432\u0435\u0440\u043D\u0443\u043B HTTP ${body.status} \u0434\u043B\u044F ${path2}`);
       }
       return JSON.parse(body.text);
     } catch (err) {
@@ -689,8 +689,8 @@ function parsePrices(page) {
   return { cardPrice, price, oldPrice };
 }
 async function getProductPrice(sku) {
-  const path = `/product/${sku}/`;
-  const basePage = await fetchJson(path);
+  const path2 = `/product/${sku}/`;
+  const basePage = await fetchJson(path2);
   const pageData = parseProductPage(basePage);
   return { sku: String(sku), ...pageData };
 }
@@ -741,6 +741,8 @@ var init_ozon_price = __esm({
 
 // scripts/sync-all.mjs
 import { fileURLToPath } from "url";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import path from "path";
 
 // scripts/sync-modules/transform.mjs
 var import_wb_categories = __toESM(require_wb_categories(), 1);
@@ -1755,9 +1757,9 @@ var HttpClient = class {
   /**
    * Make an HTTP request with automatic retry logic
    */
-  async request(method, path, data, options = {}) {
+  async request(method, path2, data, options = {}) {
     const requestId = createRequestId();
-    const url = new URL(path, this.config.baseUrl).toString();
+    const url = new URL(path2, this.config.baseUrl).toString();
     const requestOptions = {
       timeout: options.timeout ?? this.config.timeout,
       retries: options.retries ?? this.config.retries,
@@ -1768,26 +1770,26 @@ var HttpClient = class {
   /**
    * GET request
    */
-  async get(path, options) {
-    return this.request("GET", path, void 0, options);
+  async get(path2, options) {
+    return this.request("GET", path2, void 0, options);
   }
   /**
    * POST request
    */
-  async post(path, data, options) {
-    return this.request("POST", path, data, options);
+  async post(path2, data, options) {
+    return this.request("POST", path2, data, options);
   }
   /**
    * PUT request
    */
-  async put(path, data, options) {
-    return this.request("PUT", path, data, options);
+  async put(path2, data, options) {
+    return this.request("PUT", path2, data, options);
   }
   /**
    * DELETE request
    */
-  async delete(path, options) {
-    return this.request("DELETE", path, void 0, options);
+  async delete(path2, options) {
+    return this.request("DELETE", path2, void 0, options);
   }
   /**
    * Execute a single HTTP request
@@ -4310,16 +4312,16 @@ var OzonSellerApiClient = class _OzonSellerApiClient {
   /**
    * Make a raw API request (for advanced usage)
    */
-  async rawRequest(method, path, data, options) {
+  async rawRequest(method, path2, data, options) {
     switch (method) {
       case "GET":
-        return this.httpClient.get(path, options);
+        return this.httpClient.get(path2, options);
       case "POST":
-        return this.httpClient.post(path, data ?? {}, options);
+        return this.httpClient.post(path2, data ?? {}, options);
       case "PUT":
-        return this.httpClient.put(path, data ?? {}, options);
+        return this.httpClient.put(path2, data ?? {}, options);
       case "DELETE":
-        return this.httpClient.delete(path, options);
+        return this.httpClient.delete(path2, options);
       default:
         throw new ConfigurationError(`Unsupported HTTP method: ${method}`);
     }
@@ -4632,13 +4634,127 @@ var log2 = {
     this.lines.push(msg + "\n");
   }
 };
-async function wbFetch(baseUrl, path, options = {}, attempt = 1) {
+var HISTORY_MAX_RUNS = 20;
+async function ensureSyncRunTable(prisma) {
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "SyncRun" (
+      "id" TEXT NOT NULL,
+      "platform" TEXT NOT NULL,
+      "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "duration" INTEGER NOT NULL,
+      "success" BOOLEAN NOT NULL,
+      "error" TEXT,
+      "added" INTEGER NOT NULL DEFAULT 0,
+      "updated" INTEGER NOT NULL DEFAULT 0,
+      "archived" INTEGER NOT NULL DEFAULT 0,
+      "skipped" INTEGER NOT NULL DEFAULT 0,
+      "errors" INTEGER NOT NULL DEFAULT 0,
+      "log" TEXT NOT NULL DEFAULT '',
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "SyncRun_pkey" PRIMARY KEY ("id")
+    )
+  `);
+}
+function historyJsonFile() {
+  if (process.env.VERCEL === "1") return "/tmp/moranti-data/sync-history.json";
+  return path.join(process.cwd(), "data", "sync-history.json");
+}
+function loadHistoryJson() {
+  const file = historyJsonFile();
+  if (!existsSync(file)) return [];
+  try {
+    return JSON.parse(readFileSync(file, "utf-8")).runs || [];
+  } catch {
+    return [];
+  }
+}
+function saveHistoryJson(runs) {
+  mkdirSync(path.dirname(historyJsonFile()), { recursive: true });
+  writeFileSync(
+    historyJsonFile(),
+    JSON.stringify({ runs: runs.slice(0, HISTORY_MAX_RUNS) }, null, 2),
+    "utf-8"
+  );
+}
+async function writeCliHistory({ stats, durationMs, error, prisma }) {
+  try {
+    const isCli = process.argv[1] === fileURLToPath(import.meta.url);
+    if (!isCli) return;
+    if (flags.dry) return;
+    const entries = [];
+    if (!flags.ozonOnly) {
+      entries.push({
+        platform: "wb",
+        added: stats.wbCreated,
+        updated: stats.wbUpdated,
+        skipped: stats.wbSkipped,
+        archived: stats.archived,
+        errors: stats.errors
+      });
+    }
+    if (!flags.wbOnly) {
+      entries.push({
+        platform: "ozon",
+        added: stats.ozonCreated,
+        updated: stats.ozonUpdated,
+        skipped: stats.ozonSkipped,
+        archived: stats.archived,
+        errors: stats.errors
+      });
+    }
+    for (const e of entries) {
+      const record = {
+        platform: e.platform,
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        duration: durationMs,
+        success: !error,
+        error: error || void 0,
+        stats: {
+          added: e.added,
+          updated: e.updated,
+          archived: e.archived,
+          skipped: e.skipped,
+          errors: e.errors,
+          total: e.added + e.updated + e.archived + e.skipped
+        },
+        log: log2.lines.join("")
+      };
+      const flat = {
+        platform: record.platform,
+        timestamp: new Date(record.timestamp),
+        duration: record.duration,
+        success: record.success,
+        error: record.error || null,
+        added: record.stats.added,
+        updated: record.stats.updated,
+        archived: record.stats.archived,
+        skipped: record.stats.skipped,
+        errors: record.stats.errors,
+        log: record.log
+      };
+      try {
+        await prisma.syncRun.create({ data: flat });
+      } catch (createErr) {
+        try {
+          await ensureSyncRunTable(prisma);
+          await prisma.syncRun.create({ data: flat });
+        } catch {
+          const runs = loadHistoryJson();
+          runs.unshift(record);
+          saveHistoryJson(runs);
+        }
+      }
+    }
+  } catch {
+  }
+}
+async function wbFetch(baseUrl, path2, options = {}, attempt = 1) {
   const headers = {
     Authorization: options.apiKey,
     "Content-Type": "application/json",
     ...options.headers || {}
   };
-  const url = baseUrl + path;
+  const url = baseUrl + path2;
   const resp = await fetch(url, {
     method: options.method || "GET",
     headers,
@@ -4650,7 +4766,7 @@ async function wbFetch(baseUrl, path, options = {}, attempt = 1) {
     const delay = Math.min(retryAfter * 1e3, 3e4);
     log2.line(`  429 (\u043F\u043E\u043F\u044B\u0442\u043A\u0430 ${attempt}): \u043F\u043E\u0432\u0442\u043E\u0440 \u0447\u0435\u0440\u0435\u0437 ${delay}\u043C\u0441`);
     await new Promise((r) => setTimeout(r, delay));
-    return wbFetch(baseUrl, path, options, attempt + 1);
+    return wbFetch(baseUrl, path2, options, attempt + 1);
   }
   if (!resp.ok) {
     const text = await resp.text().catch(() => "");
@@ -5280,8 +5396,29 @@ async function main() {
       duration: parseFloat(duration)
     };
     console.log(JSON.stringify(summary));
+    await writeCliHistory({
+      stats,
+      durationMs: Date.now() - startTime,
+      prisma
+    });
   } catch (err) {
     console.error("\nFATAL:", err);
+    await writeCliHistory({
+      stats: {
+        wbCreated: 0,
+        wbUpdated: 0,
+        wbSkipped: 0,
+        ozonCreated: 0,
+        ozonUpdated: 0,
+        ozonSkipped: 0,
+        archived: 0,
+        outOfStock: 0,
+        errors: 1
+      },
+      durationMs: Date.now() - startTime,
+      error: err instanceof Error ? err.message : String(err),
+      prisma
+    });
     process.exit(1);
   } finally {
     await prisma.$disconnect();
