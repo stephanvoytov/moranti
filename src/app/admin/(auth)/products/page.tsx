@@ -8,8 +8,8 @@ import AdminModal from "@/components/admin/admin-modal";
 import AdminButton from "@/components/admin/admin-button";
 import AdminPageHeader from "@/components/admin/admin-page-header";
 import UpdatedBadge from "@/components/admin/updated-badge";
-import { useToast } from "@/lib/toast-context";
 import { formatPrice } from "@/lib/format";
+import { useToast } from "@/lib/toast-context";
 import { MARKETPLACE_URLS, MARKETPLACE_FAVICONS } from "@/lib/marketplaces";
 import styles from "./products.module.css";
 
@@ -74,7 +74,7 @@ export default function AdminProductsPage() {
   const [models, setModels] = useState<ModelBrief[]>([]);
   const modelsFetchedRef = useRef(false);
 
-  // Sorting вЂ” РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ СЃРѕСЂС‚РёСЂСѓРµРј РїРѕ РЅР°Р»РёС‡РёСЋ РЅР° WB
+  // Sorting — по умолчанию сортируем по наличию на WB
   const [sortBy, setSortBy] = useState("wbStock");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
@@ -115,13 +115,13 @@ export default function AdminProductsPage() {
     [search, category, archivedParam, marketplaceParam, sortBy, sortOrder, router],
   );
 
-  // Fetch on mount вЂ” Р»РµРіРёС‚РёРјРЅС‹Р№ РїР°С‚С‚РµСЂРЅ: Р·Р°РіСЂСѓР·РєР° СЃРїРёСЃРєР° РїСЂРё РјРѕРЅС‚РёСЂРѕРІР°РЅРёРё.
-  // РџРµСЂРІС‹Р№ setState (setLoading) Р·РґРµСЃСЊ СЃРёРЅС…СЂРѕРЅРЅС‹Р№ РїРѕ РѕРїСЂРµРґРµР»РµРЅРёСЋ; React 19
-  // Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё Р±Р°С‚С‡РёС‚ РїРѕРІС‚РѕСЂРЅС‹Рµ СЂРµРЅРґРµСЂС‹, РєР°СЃРєР°РґР° РЅРµС‚.
+  // Fetch on mount — легитимный паттерн: загрузка списка при монтировании.
+  // Первый setState (setLoading) здесь синхронный по определению; React 19
+  // автоматически батчит повторные рендеры, каскада нет.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchProducts(1); }, [fetchProducts]);
 
-  // в”Ђв”Ђв”Ђ Lightbox keyboard в”Ђв”Ђв”Ђ
+  // ─── Lightbox keyboard ───
   useEffect(() => {
     if (!lightboxImage) return;
     const handler = (e: KeyboardEvent) => {
@@ -131,7 +131,7 @@ export default function AdminProductsPage() {
     return () => document.removeEventListener("keydown", handler);
   }, [lightboxImage]);
 
-  // в”Ђв”Ђв”Ђ Bulk actions в”Ђв”Ђв”Ђ
+  // ─── Bulk actions ───
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) => {
@@ -162,19 +162,19 @@ export default function AdminProductsPage() {
       if (res.ok) {
         setSelectedIds(new Set());
         fetchProducts(pagination.page);
-        const labels = { archive: "РђСЂС…РёРІРёСЂРѕРІР°РЅРѕ", unarchive: "Р Р°Р·Р°СЂС…РёРІРёСЂРѕРІР°РЅРѕ", delete: "РЈРґР°Р»РµРЅРѕ", "assign-model": "РњРѕРґРµР»СЊ РЅР°Р·РЅР°С‡РµРЅР°" };
-        toast.success(`${labels[action]} ${selectedIds.size} С‚РѕРІР°СЂРѕРІ`);
+        const labels = { archive: "Архивировано", unarchive: "Разархивировано", delete: "Удалено", "assign-model": "Модель назначена" };
+        toast.success(`${labels[action]} ${selectedIds.size} товаров`);
       } else {
-        toast.error("РћС€РёР±РєР° РїСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РѕРїРµСЂР°С†РёРё");
+        toast.error("Ошибка при выполнении операции");
       }
     } catch {
-      toast.error("РћС€РёР±РєР° СЃРѕРµРґРёРЅРµРЅРёСЏ");
+      toast.error("Ошибка соединения");
     } finally {
       setBulkProcessing(false);
     }
   }
 
-  // в”Ђв”Ђв”Ђ Assign model в”Ђв”Ђв”Ђ
+  // ─── Assign model ───
 
   async function fetchModelsOnce() {
     if (modelsFetchedRef.current && models.length > 0) return;
@@ -190,20 +190,20 @@ export default function AdminProductsPage() {
     } catch { /* ignore */ }
   }
 
-  // в”Ђв”Ђв”Ђ Single delete в”Ђв”Ђв”Ђ
+  // ─── Single delete ───
 
   async function handleDelete(id: string) {
-    if (!confirm("РЈРґР°Р»РёС‚СЊ С‚РѕРІР°СЂ?")) return;
+    if (!confirm("Удалить товар?")) return;
     const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
     if (res.ok) {
       fetchProducts(pagination.page);
-      toast.success("РўРѕРІР°СЂ СѓРґР°Р»С‘РЅ");
+      toast.success("Товар удалён");
     } else {
-      toast.error("РћС€РёР±РєР° РїСЂРё СѓРґР°Р»РµРЅРёРё");
+      toast.error("Ошибка при удалении");
     }
   }
 
-  // в”Ђв”Ђв”Ђ Reorder mode в”Ђв”Ђв”Ђ
+  // ─── Reorder mode ───
 
   async function enterReorderMode() {
     setLoading(true);
@@ -290,7 +290,7 @@ export default function AdminProductsPage() {
     }
   }
 
-  // в”Ђв”Ђв”Ђ Helpers в”Ђв”Ђв”Ђ
+  // ─── Helpers ───
 
   function toggleSort(field: string) {
     if (sortBy === field) {
@@ -301,25 +301,25 @@ export default function AdminProductsPage() {
     }
   }
 
-  // в”Ђв”Ђв”Ђ Render в”Ђв”Ђв”Ђ
+  // ─── Render ───
 
   if (reorderMode) {
     return (
       <div className={styles.page}>
         <AdminPageHeader
-          title="РџРѕСЂСЏРґРѕРє С‚РѕРІР°СЂРѕРІ"
-          subtitle={`${allProducts.length} Р°РєС‚РёРІРЅС‹С… С‚РѕРІР°СЂРѕРІ`}
+          title="Порядок товаров"
+          subtitle={`${allProducts.length} активных товаров`}
         >
-          {orderSaved && <span className={styles.savedBadge}>РЎРѕС…СЂР°РЅРµРЅРѕ</span>}
+          {orderSaved && <span className={styles.savedBadge}>Сохранено</span>}
           <AdminButton variant="primary" onClick={saveOrder} disabled={savingOrder} loading={savingOrder}>
-            РЎРѕС…СЂР°РЅРёС‚СЊ РїРѕСЂСЏРґРѕРє
+            Сохранить порядок
           </AdminButton>
           <AdminButton variant="ghost" onClick={exitReorderMode}>
-            Р—Р°РєСЂС‹С‚СЊ
+            Закрыть
           </AdminButton>
         </AdminPageHeader>
         <p className={styles.reorderHint}>
-          РџРµСЂРµС‚Р°С‰РёС‚Рµ С‚РѕРІР°СЂС‹ РІ РЅСѓР¶РЅРѕРј РїРѕСЂСЏРґРєРµ Рё РЅР°Р¶РјРёС‚Рµ В«РЎРѕС…СЂР°РЅРёС‚СЊ РїРѕСЂСЏРґРѕРєВ»
+          Перетащите товары в нужном порядке и нажмите «Сохранить порядок»
         </p>
         <div className={styles.reorderList}>
           {allProducts.map((p, idx) => (
@@ -331,7 +331,7 @@ export default function AdminProductsPage() {
               onDragOver={(e) => handleDragOver(e, idx)}
               onDragEnd={handleDragEnd}
             >
-              <span className={styles.reorderHandle} aria-label="РџРµСЂРµС‚Р°С‰РёС‚СЊ">в‹®в‹®</span>
+              <span className={styles.reorderHandle} aria-label="Перетащить">⋮⋮</span>
               <span className={styles.reorderNum}>{idx + 1}</span>
               {p.image && <img src={p.image} alt="" className={styles.reorderThumb} />}
               <span className={styles.reorderName}>{p.name}</span>
@@ -346,20 +346,20 @@ export default function AdminProductsPage() {
 
   return (
     <div className={styles.page}>
-      {/* в”Ђв”Ђв”Ђ Header в”Ђв”Ђв”Ђ */}
+      {/* ─── Header ─── */}
       <AdminPageHeader
-        title="РўРѕРІР°СЂС‹"
-        subtitle={`${pagination.total} С‚РѕРІР°СЂРѕРІ${selectedIds.size > 0 ? ` В· РІС‹Р±СЂР°РЅРѕ ${selectedIds.size}` : ""}`}
+        title="Товары"
+        subtitle={`${pagination.total} товаров${selectedIds.size > 0 ? ` · выбрано ${selectedIds.size}` : ""}`}
       >
         <AdminButton variant="secondary" onClick={enterReorderMode}>
-          в‰Ў РЈРїСЂР°РІР»РµРЅРёРµ РїРѕСЂСЏРґРєРѕРј
+          ≡ Управление порядком
         </AdminButton>
         <AdminButton variant="primary" href="/admin/products/new">
-          + Р”РѕР±Р°РІРёС‚СЊ С‚РѕРІР°СЂ
+          + Добавить товар
         </AdminButton>
       </AdminPageHeader>
 
-      {/* в”Ђв”Ђв”Ђ Status tabs в”Ђв”Ђв”Ђ */}
+      {/* ─── Status tabs ─── */}
       <div className={styles.filters}>
         <div className={styles.statusTabs}>
           {(["active", "all", "archived"] as const).map((tab) => (
@@ -368,16 +368,16 @@ export default function AdminProductsPage() {
               className={`${styles.statusTab} ${statusTab === tab ? styles.statusTabActive : ""}`}
               onClick={() => { setStatusTab(tab); setSelectedIds(new Set()); }}
             >
-              {tab === "active" ? "РђРєС‚РёРІРЅС‹Рµ" : tab === "archived" ? "РђСЂС…РёРІРЅС‹Рµ" : "Р’СЃРµ"}
+              {tab === "active" ? "Активные" : tab === "archived" ? "Архивные" : "Все"}
             </button>
           ))}
         </div>
         <div className={styles.mpPills}>
           {[
-            { value: "", label: "Р›СЋР±РѕР№ РњРџ" },
+            { value: "", label: "Любой МП" },
             { value: "wb", label: "WB" },
             { value: "ozon", label: "Ozon" },
-            { value: "both", label: "РћР±Р°" },
+            { value: "both", label: "Оба" },
           ].map((mp) => (
             <button
               key={mp.value}
@@ -391,7 +391,7 @@ export default function AdminProductsPage() {
         <input
           type="text"
           className={styles.searchInput}
-          placeholder="РџРѕРёСЃРє РїРѕ РЅР°Р·РІР°РЅРёСЋ РёР»Рё ID..."
+          placeholder="Поиск по названию или ID..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -400,43 +400,43 @@ export default function AdminProductsPage() {
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
-          <option value="">Р’СЃРµ РєР°С‚РµРіРѕСЂРёРё</option>
+          <option value="">Все категории</option>
           {CATEGORIES.map((c) => (
             <option key={c.slug} value={c.slug}>{c.name}</option>
           ))}
         </select>
       </div>
 
-      {/* в”Ђв”Ђв”Ђ Bulk toolbar в”Ђв”Ђв”Ђ */}
+      {/* ─── Bulk toolbar ─── */}
       {selectedIds.size > 0 && (
         <div className={styles.bulkToolbar}>
           <span className={styles.bulkCount}>
-            Р’С‹Р±СЂР°РЅРѕ: {selectedIds.size}
+            Выбрано: {selectedIds.size}
           </span>
           <span className={styles.bulkSeparator} />
           <div className={styles.bulkActions}>
             {statusTab !== "archived" && (
               <AdminButton variant="secondary" size="sm" onClick={() => setConfirmAction("archive")} disabled={bulkProcessing}>
-                РђСЂС…РёРІРёСЂРѕРІР°С‚СЊ
+                Архивировать
               </AdminButton>
             )}
             {statusTab === "archived" && (
               <AdminButton variant="secondary" size="sm" onClick={() => setConfirmAction("unarchive")} disabled={bulkProcessing}>
-                Р Р°Р·Р°СЂС…РёРІРёСЂРѕРІР°С‚СЊ
+                Разархивировать
               </AdminButton>
             )}
             <AdminButton variant="secondary" size="sm" onClick={() => { fetchModelsOnce(); setShowAssignModal(true); }} disabled={bulkProcessing}>
-              РќР°Р·РЅР°С‡РёС‚СЊ РјРѕРґРµР»СЊ
+              Назначить модель
             </AdminButton>
             <AdminButton variant="danger" size="sm" onClick={() => setConfirmAction("delete")} disabled={bulkProcessing}>
-              РЈРґР°Р»РёС‚СЊ
+              Удалить
             </AdminButton>
-            {bulkProcessing && <span className={styles.bulkProgress}>РћР±СЂР°Р±РѕС‚РєР°...</span>}
+            {bulkProcessing && <span className={styles.bulkProgress}>Обработка...</span>}
           </div>
         </div>
       )}
 
-      {/* в”Ђв”Ђв”Ђ Table в”Ђв”Ђв”Ђ */}
+      {/* ─── Table ─── */}
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
@@ -451,26 +451,26 @@ export default function AdminProductsPage() {
               </th>
               <th></th>
               <th className={styles.sortable} onClick={() => toggleSort("name")}>
-                РќР°Р·РІР°РЅРёРµ{sortBy === "name" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " в–І" : " в–ј"}</span>}
+                Название{sortBy === "name" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
               </th>
-              <th>РњРѕРґРµР»СЊ</th>
+              <th>Модель</th>
               <th className={styles.sortable} onClick={() => toggleSort("price")}>
-                Р¦РµРЅР°{sortBy === "price" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " в–І" : " в–ј"}</span>}
+                Цена{sortBy === "price" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
               </th>
-              <th>РљР°С‚РµРіРѕСЂРёСЏ</th>
+              <th>Категория</th>
               <th>SKU</th>
               <th>
                 <span className={styles.sortable} onClick={() => toggleSort("wbStock")}>
-                  WB{sortBy === "wbStock" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " в–І" : " в–ј"}</span>}
+                  WB{sortBy === "wbStock" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
                 </span>
                 {" / "}
                 <span className={styles.sortable} onClick={() => toggleSort("ozonStock")}>
-                  Ozon{sortBy === "ozonStock" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " в–І" : " в–ј"}</span>}
+                  Ozon{sortBy === "ozonStock" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
                 </span>
               </th>
-              <th>Р РµР№С‚РёРЅРі</th>
+              <th>Рейтинг</th>
               <th className={styles.sortable} onClick={() => toggleSort("updatedAt")}>
-                РћР±РЅРѕРІР»С‘РЅ{sortBy === "updatedAt" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " в–І" : " в–ј"}</span>}
+                Обновлён{sortBy === "updatedAt" && <span className={styles.sortArrow}>{sortOrder === "asc" ? " ▲" : " ▼"}</span>}
               </th>
               <th></th>
             </tr>
@@ -494,7 +494,7 @@ export default function AdminProductsPage() {
               ))
             ) : products.length === 0 ? (
               <tr><td colSpan={11} className={styles.empty}>
-                {statusTab === "archived" ? "РќРµС‚ Р°СЂС…РёРІРЅС‹С… С‚РѕРІР°СЂРѕРІ" : "РќРµС‚ С‚РѕРІР°СЂРѕРІ"}
+                {statusTab === "archived" ? "Нет архивных товаров" : "Нет товаров"}
               </td></tr>
             ) : (
               products.map((p) => {
@@ -535,7 +535,7 @@ export default function AdminProductsPage() {
                       <Link href={`/admin/products/${p.slug}`} className={styles.productName}>
                         {p.name}
                       </Link>
-                      {isArchived && <span className={styles.archivedBadge}>РђСЂС…РёРІ</span>}
+                      {isArchived && <span className={styles.archivedBadge}>Архив</span>}
                     </td>
                     <td>
                       {p.model ? (
@@ -543,12 +543,12 @@ export default function AdminProductsPage() {
                           {p.model.name}
                         </Link>
                       ) : (
-                        <span className={styles.noModel}>вЂ”</span>
+                        <span className={styles.noModel}>—</span>
                       )}
                     </td>
                     <td className={styles.price}>{formatPrice(p.price)}</td>
                     <td><span className={styles.categoryBadge}>{getCategoryName(p.category)}</span></td>
-                    <td className={styles.sku}>{p.sku || <span className={styles.muted}>вЂ”</span>}</td>
+                    <td className={styles.sku}>{p.sku || <span className={styles.muted}>—</span>}</td>
                     <td className={styles.mpCell}>
                       {p.wbArticle ? (
                         <div className={styles.mpRow}>
@@ -558,10 +558,10 @@ export default function AdminProductsPage() {
                             rel="noopener noreferrer"
                             className={styles.articleLink}
                           >
-                            WB: {p.wbArticle} в†—
+                            WB: {p.wbArticle} ↗
                           </a>
                           {p.wbStock != null && p.wbStock > 0 && (
-                            <span className={styles.stockBadge}>{p.wbStock} С€С‚</span>
+                            <span className={styles.stockBadge}>{p.wbStock} шт</span>
                           )}
                         </div>
                       ) : null}
@@ -573,16 +573,16 @@ export default function AdminProductsPage() {
                             rel="noopener noreferrer"
                             className={styles.articleLink}
                           >
-                            OZ: {p.ozonArticle} в†—
+                            OZ: {p.ozonArticle} ↗
                           </a>
                           {p.ozonStock != null && p.ozonStock > 0 && (
-                            <span className={styles.stockBadge}>{p.ozonStock} С€С‚</span>
+                            <span className={styles.stockBadge}>{p.ozonStock} шт</span>
                           )}
                         </div>
                       ) : null}
-                      {!p.wbArticle && !p.ozonArticle && <span className={styles.muted}>вЂ”</span>}
+                      {!p.wbArticle && !p.ozonArticle && <span className={styles.muted}>—</span>}
                     </td>
-                    <td>{p.rating ? `${p.rating.toFixed(1)} в…` : "вЂ”"}</td>
+                    <td>{p.rating ? `${p.rating.toFixed(1)} ★` : "—"}</td>
                     <td>
                       <UpdatedBadge iso={p.updatedAt} />
                     </td>
@@ -590,9 +590,9 @@ export default function AdminProductsPage() {
                       <button
                         className={styles.deleteBtn}
                         onClick={() => handleDelete(p.id)}
-                        title="РЈРґР°Р»РёС‚СЊ"
+                        title="Удалить"
                       >
-                        вњ•
+                        ✕
                       </button>
                     </td>
                   </tr>
@@ -603,7 +603,7 @@ export default function AdminProductsPage() {
         </table>
       </div>
 
-      {/* в”Ђв”Ђв”Ђ Pagination в”Ђв”Ђв”Ђ */}
+      {/* ─── Pagination ─── */}
       {pagination.totalPages > 1 && (
         <div className={styles.pagination}>
           {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
@@ -618,22 +618,22 @@ export default function AdminProductsPage() {
         </div>
       )}
 
-      {/* в”Ђв”Ђв”Ђ Confirmation modal в”Ђв”Ђв”Ђ */}
+      {/* ─── Confirmation modal ─── */}
       <AdminModal
         open={confirmAction !== null}
         onClose={() => !bulkProcessing && setConfirmAction(null)}
         title={
-          confirmAction === "archive" ? "РђСЂС…РёРІРёСЂРѕРІР°С‚СЊ С‚РѕРІР°СЂС‹" :
-          confirmAction === "unarchive" ? "Р Р°Р·Р°СЂС…РёРІРёСЂРѕРІР°С‚СЊ С‚РѕРІР°СЂС‹" :
-          "РЈРґР°Р»РёС‚СЊ С‚РѕРІР°СЂС‹"
+          confirmAction === "archive" ? "Архивировать товары" :
+          confirmAction === "unarchive" ? "Разархивировать товары" :
+          "Удалить товары"
         }
         actions={[
-          { label: "РћС‚РјРµРЅР°", onClick: () => setConfirmAction(null), disabled: bulkProcessing },
+          { label: "Отмена", onClick: () => setConfirmAction(null), disabled: bulkProcessing },
           {
             label:
-              confirmAction === "archive" ? "РђСЂС…РёРІРёСЂРѕРІР°С‚СЊ" :
-              confirmAction === "unarchive" ? "Р Р°Р·Р°СЂС…РёРІРёСЂРѕРІР°С‚СЊ" :
-              "РЈРґР°Р»РёС‚СЊ",
+              confirmAction === "archive" ? "Архивировать" :
+              confirmAction === "unarchive" ? "Разархивировать" :
+              "Удалить",
             onClick: () => executeBulk(confirmAction!),
             variant: confirmAction === "delete" ? "danger" : "primary",
             disabled: bulkProcessing,
@@ -642,22 +642,22 @@ export default function AdminProductsPage() {
       >
         <p>
           {confirmAction === "archive"
-            ? `Р’С‹ СѓРІРµСЂРµРЅС‹, С‡С‚Рѕ С…РѕС‚РёС‚Рµ Р°СЂС…РёРІРёСЂРѕРІР°С‚СЊ ${selectedIds.size} С‚РѕРІР°СЂРѕРІ? РћРЅРё РёСЃС‡РµР·РЅСѓС‚ РёР· РєР°С‚Р°Р»РѕРіР°, РЅРѕ РґР°РЅРЅС‹Рµ СЃРѕС…СЂР°РЅСЏС‚СЃСЏ.`
+            ? `Вы уверены, что хотите архивировать ${selectedIds.size} товаров? Они исчезнут из каталога, но данные сохранятся.`
             : confirmAction === "unarchive"
-              ? `Р Р°Р·Р°СЂС…РёРІРёСЂРѕРІР°С‚СЊ ${selectedIds.size} С‚РѕРІР°СЂРѕРІ? РћРЅРё СЃРЅРѕРІР° РїРѕСЏРІСЏС‚СЃСЏ РІ РєР°С‚Р°Р»РѕРіРµ.`
-              : `Р’С‹ СѓРІРµСЂРµРЅС‹, С‡С‚Рѕ С…РѕС‚РёС‚Рµ СѓРґР°Р»РёС‚СЊ ${selectedIds.size} С‚РѕРІР°СЂРѕРІ? Р­С‚Рѕ РґРµР№СЃС‚РІРёРµ РЅРµРѕР±СЂР°С‚РёРјРѕ.`}
+              ? `Разархивировать ${selectedIds.size} товаров? Они снова появятся в каталоге.`
+              : `Вы уверены, что хотите удалить ${selectedIds.size} товаров? Это действие необратимо.`}
         </p>
       </AdminModal>
 
-      {/* в”Ђв”Ђв”Ђ Assign model modal в”Ђв”Ђв”Ђ */}
+      {/* ─── Assign model modal ─── */}
       <AdminModal
         open={showAssignModal}
         onClose={() => setShowAssignModal(false)}
-        title="РќР°Р·РЅР°С‡РёС‚СЊ РјРѕРґРµР»СЊ"
+        title="Назначить модель"
         actions={[
-          { label: "РћС‚РјРµРЅР°", onClick: () => setShowAssignModal(false) },
+          { label: "Отмена", onClick: () => setShowAssignModal(false) },
           {
-            label: "РќР°Р·РЅР°С‡РёС‚СЊ",
+            label: "Назначить",
             onClick: () => executeBulk("assign-model", { modelId: assignModelId }),
             variant: "primary",
             disabled: !assignModelId || bulkProcessing,
@@ -665,14 +665,14 @@ export default function AdminProductsPage() {
         ]}
       >
         <p style={{ marginBottom: 12 }}>
-          Р’С‹Р±РµСЂРёС‚Рµ РјРѕРґРµР»СЊ РґР»СЏ {selectedIds.size} С‚РѕРІР°СЂРѕРІ:
+          Выберите модель для {selectedIds.size} товаров:
         </p>
         <select
           className={styles.assignSelect}
           value={assignModelId}
           onChange={(e) => setAssignModelId(e.target.value)}
         >
-          <option value="">вЂ” РІС‹Р±РµСЂРёС‚Рµ РјРѕРґРµР»СЊ вЂ”</option>
+          <option value="">— выберите модель —</option>
           {models.map((m) => (
             <option key={m.id} value={m.id}>
               {m.name} ({m.category})
@@ -681,7 +681,7 @@ export default function AdminProductsPage() {
         </select>
       </AdminModal>
 
-      {/* в”Ђв”Ђв”Ђ Lightbox в”Ђв”Ђв”Ђ */}
+      {/* ─── Lightbox ─── */}
       {lightboxImage && (
         <div
           className={styles.lightboxOverlay}
@@ -691,9 +691,9 @@ export default function AdminProductsPage() {
           <button
             className={styles.lightboxClose}
             onClick={() => setLightboxImage(null)}
-            aria-label="Р—Р°РєСЂС‹С‚СЊ"
+            aria-label="Закрыть"
           >
-            вњ•
+            ✕
           </button>
         </div>
       )}
@@ -701,7 +701,7 @@ export default function AdminProductsPage() {
   );
 }
 
-/* в”Ђв”Ђв”Ђ Р¤РѕС‚Рѕ С‚РѕРІР°СЂР° СЃ РѕР±СЂР°Р±РѕС‚РєРѕР№ РѕС€РёР±РѕРє Р·Р°РіСЂСѓР·РєРё в”Ђв”Ђв”Ђ */
+/* ─── Фото товара с обработкой ошибок загрузки ─── */
 
 function AdminProductPhoto({
   src,
@@ -736,11 +736,11 @@ function AdminProductPhoto({
             onClick={onLightbox}
             onLoad={() => setLoaded(true)}
             onError={() => { setFailed(true); setLoaded(true); }}
-            title="РЈРІРµР»РёС‡РёС‚СЊ"
+            title="Увеличить"
           />
-          {isArchived && <div className={styles.archiveCorner} title="Р’ Р°СЂС…РёРІРµ" />}
+          {isArchived && <div className={styles.archiveCorner} title="В архиве" />}
           <img src={favicon} alt="" className={styles.photoMpBadge} />
-          {isOutOfStock && <div className={styles.photoOosOverlay}>Р—РђРљРћРќР§РР›РћРЎР¬</div>}
+          {isOutOfStock && <div className={styles.photoOosOverlay}>ЗАКОНЧИЛОСЬ</div>}
         </div>
       ) : isPlaceholder ? (
         <div className={styles.photoPlaceholder}>
@@ -749,11 +749,11 @@ function AdminProductPhoto({
             <circle cx="7" cy="7" r="2" />
             <path d="M2 14l4-4 3 3 3-4 6 6" />
           </svg>
-          <span>{isArchived ? "Р°СЂС…РёРІ" : "РЅРµС‚ С„РѕС‚Рѕ"}</span>
+          <span>{isArchived ? "архив" : "нет фото"}</span>
         </div>
       ) : (
         <div className={styles.photoPlaceholder}>
-          <span className={styles.photoMutedLabel}>вЂ”</span>
+          <span className={styles.photoMutedLabel}>—</span>
         </div>
       )}
     </div>
