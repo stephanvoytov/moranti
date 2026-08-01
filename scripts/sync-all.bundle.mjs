@@ -460,6 +460,19 @@ var require_main = __commonJS({
 });
 
 // scripts/sync-modules/ozon-browser.mjs
+function isHeadless() {
+  return process.env.OZON_HEADLESS !== "0" && process.env.OZON_HEADLESS !== "false";
+}
+function getProxyConfig() {
+  const server = process.env.OZON_PROXY_SERVER;
+  if (!server) return null;
+  const cfg = { server };
+  if (process.env.OZON_PROXY_USER) {
+    cfg.username = process.env.OZON_PROXY_USER;
+    cfg.password = process.env.OZON_PROXY_PASS ?? "";
+  }
+  return cfg;
+}
 function log(...args) {
   console.error("[OzonBrowser]", ...args);
 }
@@ -476,9 +489,11 @@ function isBrowserAvailable() {
 }
 async function launch() {
   log("launching Chromium (patchright)\u2026");
+  const proxy = getProxyConfig();
+  if (proxy) log(`using proxy: ${proxy.server} (user: ${proxy.username ?? "\u2014"})`);
   const { chromium } = await import("patchright");
   browser = await chromium.launch({
-    headless: true,
+    headless: isHeadless(),
     args: LAUNCH_ARGS
   });
   browser.on("disconnected", () => {
@@ -491,10 +506,12 @@ async function launch() {
     dead?.close().catch(() => {
     });
   });
+  const proxyCfg = getProxyConfig();
   context = await browser.newContext({
     viewport: { width: 1920, height: 1080 },
-    userAgent: USER_AGENT,
-    locale: "ru-RU"
+    ...process.env.OZON_UA ? { userAgent: process.env.OZON_UA } : { userAgent: USER_AGENT },
+    locale: "ru-RU",
+    ...proxyCfg ? { proxy: proxyCfg } : {}
   });
   challenged = false;
 }
@@ -514,13 +531,20 @@ async function ensureContext() {
     if (!browser || !browser.isConnected()) await launch();
     mainPage = await context.newPage();
     log("passing Variti anti-bot challenge\u2026");
-    await mainPage.goto(HOME, {
-      waitUntil: "domcontentloaded",
-      timeout: NAV_TIMEOUT_MS
-    });
+    let navStatus = "\u2014";
+    try {
+      const resp = await mainPage.goto(HOME, {
+        waitUntil: "domcontentloaded",
+        timeout: NAV_TIMEOUT_MS
+      });
+      navStatus = resp?.status() ?? "no-response";
+    } catch (err) {
+      navStatus = `ERR: ${String(err?.message).slice(0, 80)}`;
+    }
+    log(`homepage status: ${navStatus}`);
     await mainPage.waitForTimeout(CHALLENGE_WAIT_MS);
     const title = await mainPage.title();
-    if (/antibot|ограничен|доступ/i.test(title)) {
+    if (/antibot|ограничен|доступ|соединени|no internet|offline/i.test(title)) {
       challengeBroken = true;
       throw new Error(`Variti challenge \u043D\u0435 \u043F\u0440\u043E\u0439\u0434\u0435\u043D (title: ${title})`);
     }
