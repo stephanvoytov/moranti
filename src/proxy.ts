@@ -38,10 +38,7 @@ function handleCorsPreflight(request: NextRequest): NextResponse | null {
   const { pathname } = request.nextUrl;
 
   // Только для публичных API
-  if (
-    !pathname.startsWith("/api/data/") &&
-    !pathname.startsWith("/api/prices")
-  ) {
+  if (!pathname.startsWith("/api/data/")) {
     return null;
   }
 
@@ -97,10 +94,7 @@ export function proxy(request: NextRequest) {
   }
 
   // ─── CORS for public API routes ───
-  if (
-    pathname.startsWith("/api/data/") ||
-    pathname.startsWith("/api/prices")
-  ) {
+  if (pathname.startsWith("/api/data/")) {
     if (isOriginAllowed(request)) {
       const origin = request.headers.get("origin") || "";
       response.headers.set("Access-Control-Allow-Origin", origin);

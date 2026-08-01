@@ -111,13 +111,6 @@ export const settingsSchema = z.object({
   updatedAt: z.string().optional(),
 }).passthrough(); // разрешаем дополнительные поля (совместимость)
 
-/* ─── Prices ─── */
-
-export const pricesQuerySchema = z.object({
-  articles: z.string().min(1, "articles parameter is required"),
-  refresh: z.string().optional(),
-});
-
 /* ─── Products list query ─── */
 
 export const productsQuerySchema = z.object({

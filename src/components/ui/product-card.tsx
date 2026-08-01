@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { Product } from "@/data/products";
 import { useFavorites } from "@/lib/favorites-context";
-import { useLivePrice } from "@/lib/use-live-price";
 import SmartImage from "./smart-image";
 import styles from "./product-card.module.css";
 
@@ -32,7 +31,6 @@ function HeartIcon({ filled }: { filled: boolean }) {
 
 export default function ProductCard({ product, priority = false }: ProductCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { livePrice, liveOriginal, loading } = useLivePrice(product.wbArticle);
   const slug = product.slug;
   const link = `/catalog/${slug}`;
   const fav = isFavorite(product.wbArticle);
@@ -40,10 +38,10 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const [hoverIndex, setHoverIndex] = useState(0);
   const hoverTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Use live price when available, fall back to static data
-  const displayPrice = livePrice ?? product.price;
-  const displayOriginal = liveOriginal ?? product.originalPrice;
-  const showOriginal = !loading && displayOriginal > displayPrice;
+  // Цены берутся из данных товара (БД через getProducts())
+  const displayPrice = product.price;
+  const displayOriginal = product.originalPrice;
+  const showOriginal = displayOriginal > displayPrice;
 
   const handleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -125,9 +123,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           </div>
         ) : (
           <div className={styles.priceRow}>
-            <span
-              className={`${styles.currentPrice} ${!loading && livePrice ? styles.livePrice : ""}`}
-            >
+            <span className={styles.currentPrice}>
               {displayPrice.toLocaleString("ru-RU")} ₽
             </span>
             {showOriginal && (

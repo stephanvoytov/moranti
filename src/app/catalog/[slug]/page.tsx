@@ -289,7 +289,6 @@ export default async function ProductPage({ params }: Props) {
             </div>
           ) : (
             <PriceClient
-              wbArticle={product.wbArticle}
               staticPrice={product.price}
               staticOriginal={product.originalPrice}
               currency={product.currency}
