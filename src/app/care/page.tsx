@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "./page.module.css";
+import { seoConfig } from "@/config/seo";
+
+const { title, description } = seoConfig.pages.care;
 
 export const metadata: Metadata = {
-  title: "Уход за сумками",
-  description:
-    "Рекомендации по уходу за сумками Moranti из натуральной итальянской кожи и замши. Как чистить, хранить и продлить срок службы.",
+  title,
+  description,
   alternates: {
     canonical: "/care",
   },
   openGraph: {
-    title: "Уход за сумками — Moranti",
-    description: "Как ухаживать за сумками из натуральной кожи и замши.",
+    title: `${title} — Moranti`,
+    description,
     url: "/care",
   },
 };

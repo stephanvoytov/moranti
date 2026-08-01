@@ -20,8 +20,6 @@ interface SettingsForm {
   whatsapp: string;
   wbUrl: string;
   ozonUrl: string;
-  seoTitle: string;
-  seoDescription: string;
   /** Фото категорий: { slug → URL } */
   catImages: Record<string, string>;
 }
@@ -40,8 +38,6 @@ const emptyForm: SettingsForm = {
   whatsapp: "",
   wbUrl: "",
   ozonUrl: "",
-  seoTitle: "",
-  seoDescription: "",
   catImages: {},
 };
 
@@ -85,9 +81,6 @@ export default function AdminSettingsPage() {
           whatsapp: data.social?.whatsapp || "",
           wbUrl: data.marketplaces?.wildberries || "",
           ozonUrl: data.marketplaces?.ozon || "",
-
-          seoTitle: data.seo?.defaultTitle || "",
-          seoDescription: data.seo?.defaultDescription || "",
         });
         setLoading(false);
       })
@@ -164,10 +157,6 @@ export default function AdminSettingsPage() {
         wildberries: form.wbUrl,
         ozon: form.ozonUrl,
       },
-      seo: {
-        defaultTitle: form.seoTitle,
-        defaultDescription: form.seoDescription,
-      },
     };
   }
 
@@ -239,8 +228,6 @@ export default function AdminSettingsPage() {
         whatsapp: parsed.social?.whatsapp || "",
         wbUrl: parsed.marketplaces?.wildberries || "",
         ozonUrl: parsed.marketplaces?.ozon || "",
-        seoTitle: parsed.seo?.defaultTitle || "",
-        seoDescription: parsed.seo?.defaultDescription || "",
         catImages: parsed.categoryImages || {},
       });
       setMode("form");
@@ -522,31 +509,6 @@ export default function AdminSettingsPage() {
                     value={form.ozonUrl}
                     onChange={(e) => updateField("ozonUrl", e.target.value)}
                     placeholder="https://ozon.ru/..."
-                  />
-                </label>
-              </div>
-            </section>
-
-            {/* SEO */}
-            <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>SEO</h2>
-              <div className={styles.fieldGrid}>
-                <label className={styles.label}>
-                  Default Title
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={form.seoTitle}
-                    onChange={(e) => updateField("seoTitle", e.target.value)}
-                  />
-                </label>
-                <label className={styles.label}>
-                  Default Description
-                  <textarea
-                    className={styles.textarea}
-                    value={form.seoDescription}
-                    onChange={(e) => updateField("seoDescription", e.target.value)}
-                    rows={3}
                   />
                 </label>
               </div>

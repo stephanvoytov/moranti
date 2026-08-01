@@ -86,12 +86,6 @@ export const heroSchema = z.object({
   image: z.string().default(""),
 });
 
-export const seoSchema = z.object({
-  defaultTitle: z.string().default(""),
-  defaultDescription: z.string().default(""),
-  defaultKeywords: z.string().default(""),
-});
-
 export const socialSchema = z.object({
   instagram: z.string().default(""),
   vk: z.string().default(""),
@@ -107,7 +101,6 @@ export const settingsSchema = z.object({
   wbArticles: z.array(z.number()).optional(),
   yandexMetrikaId: z.string().optional(),
   social: socialSchema.optional(),
-  seo: seoSchema.optional(),
   updatedAt: z.string().optional(),
 }).passthrough(); // разрешаем дополнительные поля (совместимость)
 

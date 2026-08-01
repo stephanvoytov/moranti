@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "./page.module.css";
+import { seoConfig } from "@/config/seo";
+
+const { title, description } = seoConfig.pages.delivery;
 
 export const metadata: Metadata = {
-  title: "Доставка",
-  description:
-    "Как заказать и получить сумку Moranti. Доставка через Wildberries и Ozon.",
+  title,
+  description,
   alternates: {
     canonical: "/delivery",
   },
   openGraph: {
-    title: "Доставка — Moranti",
-    description: "Заказ и доставка сумок Moranti.",
+    title: `${title} — Moranti`,
+    description,
     url: "/delivery",
   },
 };

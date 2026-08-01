@@ -2,8 +2,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { CharacteristicGroup } from "@/data/products";
-import { getProducts, getProduct, getAllProducts } from "@/data/products";
+import { getProducts, getProduct } from "@/data/products";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
+import { seoConfig, buildProductSeoMeta } from "@/config/seo";
 import PriceClient from "./price-client";
 import ColorSwatches from "./color-swatches";
 import GalleryClient from "./gallery-client";
@@ -27,56 +28,27 @@ export async function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
 }
 
-const CATEGORY_NAMES: Record<string, string> = {
-  crossbody: "кросс-боди", "na-plecho": "на плечо", baguette: "багет",
-  tote: "тоут", saddle: "седло", backpack: "рюкзак",
-};
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProduct(slug);
-  if (!product) return { title: "Товар не найден" };
+  if (!product) return { title: seoConfig.pages.notFound.title };
 
-  const catName = CATEGORY_NAMES[product.category] || product.category;
-  const composition = product.composition || "натуральной кожи";
-
-  // Цвет из colorName («песочный, бежевый» → «песочный») — для уникальности title
-  const color = (product.colorName ?? "").split(",")[0].trim();
-  const colorPart = color ? ` (${color})` : "";
-
-  // Если имя + цвет повторяются у другой модели — добавляем цену
-  // (анализ на 102 товарах: остаётся 2 группы дублей вместо 20 без дискриминатора)
-  const all = await getAllProducts();
-  const twins = all.filter(
-    (p) =>
-      p.name === product.name &&
-      ((p.colorName ?? "").split(",")[0].trim()) === color,
-  );
-  const pricePart =
-    twins.length > 1 ? `, ${product.price.toLocaleString("ru-RU")} ₽` : "";
-
-  const title = `${product.name}${colorPart}${pricePart} — купить | Moranti`;
+  const meta = buildProductSeoMeta(product);
+  const title = meta.title;
 
   // Архивные товары: страница доступна, но из индекса убираем (тупик для пользователя)
   const noindex = Boolean(product.archivedAt);
 
-  // Склонение для description: «Сумка-тоут…» → «сумку-тоут…» (все названия начинаются с «Сумка»)
-  const declineName = product.name.startsWith("Сумка")
-    ? `сумку${product.name.slice(5)}`
-    : product.name.toLowerCase();
-
-  const metaDesc = `Купить ${declineName}${colorPart} в Moranti. ${catName}, ${composition}. Цена: ${product.price.toLocaleString("ru-RU")} ₽. Доставка по России.`;
-
   return {
     title: { absolute: title },
-    description: metaDesc,
+    description: meta.description,
     robots: noindex ? { index: false, follow: true } : undefined,
     alternates: {
       canonical: `/catalog/${product.slug}`,
     },
     openGraph: {
-      title: `${product.name}${colorPart}${pricePart} — Moranti`,
-      description: metaDesc,
+      title: meta.ogTitle,
+      description: meta.description,
       url: `/catalog/${product.slug}`,
       type: "website",
       images: product.image
@@ -195,7 +167,7 @@ export default async function ProductPage({ params }: Props) {
         availability: "https://schema.org/InStock",
       };
 
-  const catName = CATEGORY_NAMES[product.category] || product.category;
+  const catName = seoConfig.categoryNames[product.category] || product.category;
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

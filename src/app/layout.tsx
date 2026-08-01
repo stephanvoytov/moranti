@@ -5,6 +5,7 @@ import { Playfair_Display, Montserrat, Inter } from "next/font/google";
 import { FavoritesProvider } from "@/lib/favorites-context";
 import { readSettings } from "@/lib/settings";
 import type { SiteSettings } from "@/lib/settings";
+import { seoConfig } from "@/config/seo";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import ScrollToTop from "@/components/ui/scroll-to-top";
@@ -55,48 +56,33 @@ async function readSettingsSafe(): Promise<SiteSettings | null> {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await readSettingsSafe();
-
-  // Defaults из админки (settings.seo), фолбэк на хардкод
-  const seoTitle = settings?.seo?.defaultTitle?.trim();
-  const seoDesc = settings?.seo?.defaultDescription?.trim();
-  const defaultTitle = seoTitle || "Moranti — премиальные кожаные сумки";
-  const defaultDescription =
-    seoDesc ||
-    "Moranti — женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов. Доставка по всей России.";
+  const { site } = seoConfig;
 
   return {
     metadataBase: new URL(siteUrl),
     title: {
-      default: defaultTitle,
-      template: "%s — Moranti",
+      default: site.defaultTitle,
+      template: site.titleTemplate,
     },
-    description: defaultDescription,
-    keywords: [
-      "сумки", "Moranti", "кожаные сумки", "натуральная итальянская кожа",
-      "женские сумки", "сумки через плечо", "сумки из замши", "классические сумки",
-      "кросс-боди", "тоут", "багет", "рюкзак кожаный",
-    ],
+    description: site.defaultDescription,
+    keywords: site.keywords,
     openGraph: {
-      title: defaultTitle,
-      description: defaultDescription,
+      title: site.defaultTitle,
+      description: site.defaultDescription,
       url: "/",
-      siteName: "Moranti",
+      siteName: site.siteName,
       type: "website",
-      locale: "ru_RU",
-      images: [{ url: "/opengraph-image.png", width: 1200, height: 630 }],
+      locale: site.locale,
+      images: [{ url: site.ogImage, width: 1200, height: 630, alt: site.ogImageAlt }],
     },
     twitter: {
       card: "summary_large_image",
-      title: defaultTitle,
-      description: defaultDescription,
-      images: ["/twitter-image.png"],
+      title: site.defaultTitle,
+      description: site.defaultDescription,
+      images: [site.twitterImage],
     },
     icons: {
-      icon: [
-        { url: "/favicon.ico", sizes: "any" },
-        { url: "/icon.svg", type: "image/svg+xml" },
-      ],
+      icon: [{ url: "/favicon.ico", sizes: "any" }],
       apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
     },
     manifest: "/manifest.json",

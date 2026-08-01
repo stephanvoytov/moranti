@@ -22,7 +22,6 @@ export interface SiteSettings {
   categoryImages: Record<string, string>;
   social: { instagram: string; vk: string; telegram: string; whatsapp: string };
   marketplaces: { wildberries: string; ozon: string };
-  seo: { defaultTitle: string; defaultDescription: string };
   updatedAt: string;
 }
 
@@ -42,7 +41,6 @@ const DEFAULTS: SiteSettings = {
   categoryImages: {},
   social: { instagram: "", vk: "", telegram: "", whatsapp: "" },
   marketplaces: { wildberries: MARKETPLACE_URLS.wbSeller, ozon: MARKETPLACE_URLS.ozonSeller },
-  seo: { defaultTitle: "Moranti", defaultDescription: "" },
   updatedAt: new Date().toISOString(),
 };
 

@@ -1,0 +1,219 @@
+/* Просмотр SEO: точная имитация Google SERP (замеры живого рендера, 2025) */
+
+.page {
+  padding: 8px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.pageTitle {
+  font-size: 22px;
+  margin: 0;
+}
+
+.note {
+  font-size: 13px;
+  color: var(--muted, #6b7280);
+  line-height: 1.5;
+  max-width: 720px;
+  margin: 0 0 20px;
+  padding: 10px 14px;
+  background: rgba(100, 116, 139, 0.08);
+  border-radius: 8px;
+}
+
+.deviceToggle {
+  display: flex;
+  gap: 4px;
+  background: rgba(100, 116, 139, 0.12);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.deviceBtn {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--muted, #6b7280);
+}
+
+.deviceBtnActive {
+  background: var(--bg, #fff);
+  color: var(--text, #111);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.group {
+  margin-bottom: 28px;
+}
+
+.groupTitle {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+.item {
+  margin-bottom: 24px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.path {
+  font-size: 12px;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  color: var(--muted, #6b7280);
+  background: rgba(100, 116, 139, 0.1);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.noindex {
+  font-size: 11px;
+  font-weight: 700;
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 6px;
+  padding: 1px 6px;
+}
+
+.counters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.counter {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 6px;
+}
+
+.ok {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.warn {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.over {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+/* ─── Сниппет (рендер как у Google) ─── */
+
+.serp {
+  background: #fff;
+  border: 1px solid #e3e6e8;
+  border-radius: 12px;
+  padding: 16px;
+  color: #1f1f1f;
+}
+
+.serpDesktop {
+  width: 600px;
+  max-width: 100%;
+}
+
+.serpMobile {
+  width: 380px; /* реальный мобильный сниппет: 3 строки desc ≈ 135 символов */
+  max-width: 100%;
+}
+
+.title {
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* десктоп: Google показывает title в ОДНУ строку */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  font-family: "Google Sans", Arial, sans-serif;
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 400;
+  color: #1a0dab;
+  text-decoration: none;
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+
+/* Мобильный: Google может перенести title на 2-ю строку (~920px контейнер) */
+.serpMobile .title {
+  -webkit-line-clamp: 2;
+}
+
+.title:hover {
+  text-decoration: underline;
+}
+
+.urlRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+
+.favicon {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.urlText {
+  min-width: 0;
+}
+
+.siteName {
+  font-size: 14px;
+  line-height: 18px;
+  color: #1f1f1f;
+}
+
+.cite {
+  font-size: 12px;
+  line-height: 18px;
+  color: #4d5156;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Google: description обрезается на 2-й строке */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  line-height: 22px;
+  color: #1f1f1f;
+  margin: 4px 0 0;
+}
+
+.descMobile {
+  -webkit-line-clamp: 3; /* мобильный сниппет ~136 символов = 3 строки по ~45 */
+}

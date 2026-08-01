@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
   const newSku = inputSku?.trim() || null;
 
   // slug из sku, или из mor-NNN
-  let slug = newSku
+  const slug = newSku
     ? newSku
         .replace(/([a-z])([A-Z])/g, "$1-$2")
         .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")

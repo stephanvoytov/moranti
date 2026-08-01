@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllProducts } from "@/data/products";
+import { seoConfig } from "@/config/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";
@@ -13,20 +14,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // Категории каталога (фильтры с query-параметром)
-  const categoryUrls: MetadataRoute.Sitemap = [
-    "crossbody",
-    "na-plecho",
-    "baguette",
-    "tote",
-    "saddle",
-    "backpack",
-  ].map((cat) => ({
-    url: `${siteUrl}/catalog?category=${cat}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-  }));
+  // Категории каталога (фильтры с query-параметром) — из SEO-конфига
+  const categoryUrls: MetadataRoute.Sitemap = Object.keys(seoConfig.categories).map(
+    (cat) => ({
+      url: `${siteUrl}/catalog?category=${cat}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }),
+  );
 
   return [
     {
