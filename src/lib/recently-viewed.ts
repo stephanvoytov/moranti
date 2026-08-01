@@ -10,6 +10,10 @@ const MAX_ITEMS = 10;
 let snapshotCache: number[] | null = null;
 const listeners = new Set<() => void>();
 
+/** Стабильная ссылка для getServerSnapshot (hydration-консистентность с SSR:
+    на сервере localStorage нет — всегда пустой список). */
+export const EMPTY_RECENTLY_VIEWED: number[] = [];
+
 function emit() {
   for (const cb of listeners) cb();
 }

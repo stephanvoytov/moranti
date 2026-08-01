@@ -14,6 +14,7 @@ import RecentlyViewedTracker from "./recently-viewed-tracker";
 import FavoriteButton from "./favorite-button";
 import ExpandableText from "@/components/ui/expandable-text";
 import ProductCard from "@/components/ui/product-card";
+import RatingStars from "@/components/ui/rating-stars";
 import ProductCharacteristics from "@/components/ui/product-characteristics";
 import ProductTabs from "@/components/ui/product-tabs";
 import RecentlyViewed from "./recently-viewed";
@@ -289,10 +290,7 @@ export default async function ProductPage({ params }: Props) {
 
           {product.rating && product.rating > 4 ? (
             <div className={styles.rating}>
-              <span className={styles.stars}>
-                {"★".repeat(Math.round(product.rating))}
-                {"☆".repeat(5 - Math.round(product.rating))}
-              </span>
+              <RatingStars rating={product.rating} />
               <span className={styles.ratingText}>
                 {product.rating.toFixed(1)} · {product.reviewsCount}{" "}
                 {product.reviewsCount === 1

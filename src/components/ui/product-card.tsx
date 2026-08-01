@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Product } from "@/data/products";
 import { useFavorites } from "@/lib/favorites-context";
 import SmartImage from "./smart-image";
+import RatingStars from "./rating-stars";
 import styles from "./product-card.module.css";
 
 interface ProductCardProps {
@@ -162,10 +163,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         )}
         {product.rating && product.rating > 4 ? (
           <div className={styles.rating}>
-            <span className={styles.stars}>
-              {"★".repeat(Math.round(product.rating))}
-              {"☆".repeat(5 - Math.round(product.rating))}
-            </span>
+            <RatingStars rating={product.rating} />
             <span className={styles.ratingText}>
               {product.rating.toFixed(1)}
             </span>

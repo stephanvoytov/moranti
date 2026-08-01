@@ -1,0 +1,27 @@
+/* ——— Rating stars (целые + полу-звезда) ——— */
+
+.stars {
+  position: relative;
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 1px;
+  line-height: 1;
+  color: var(--camel);
+}
+
+/* Подложка — пустые звёзды */
+.starsBg {
+  color: var(--muted);
+  opacity: 0.35;
+  white-space: nowrap;
+}
+
+/* Заполненные звёзды — обрезаются по ширине (поддержка 4.5★) */
+.starsFg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--camel);
+}

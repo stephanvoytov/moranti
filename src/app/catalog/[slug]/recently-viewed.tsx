@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import {
   subscribeRecentlyViewed,
   getRecentlyViewedSnapshot,
+  EMPTY_RECENTLY_VIEWED,
 } from "@/lib/recently-viewed";
 import { useAllProducts } from "@/lib/use-products";
 import { useDragScroll } from "@/lib/use-drag-scroll";
@@ -15,7 +16,7 @@ export default function RecentlyViewed() {
   const recentArticles = useSyncExternalStore(
     subscribeRecentlyViewed,
     getRecentlyViewedSnapshot,
-    getRecentlyViewedSnapshot,
+    () => EMPTY_RECENTLY_VIEWED,
   );
   const { ref: dragRef, onMouseDown, onMouseMove, onMouseUp, onDragStart } =
     useDragScroll<HTMLDivElement>();

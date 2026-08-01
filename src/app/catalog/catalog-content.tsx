@@ -8,6 +8,7 @@ import { useProducts } from "@/lib/use-products";
 import {
   subscribeRecentlyViewed,
   getRecentlyViewedSnapshot,
+  EMPTY_RECENTLY_VIEWED,
 } from "@/lib/recently-viewed";
 import { useDragScroll } from "@/lib/use-drag-scroll";
 import { resolveColor, getBasicColorName } from "@/lib/color-map";
@@ -172,7 +173,7 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
   const recentlyViewed = useSyncExternalStore(
     subscribeRecentlyViewed,
     getRecentlyViewedSnapshot,
-    getRecentlyViewedSnapshot,
+    () => EMPTY_RECENTLY_VIEWED,
   );
   const [allForRecent, setAllForRecent] = useState<Product[]>([]);
   const { ref: dragRef, onMouseDown, onMouseMove, onMouseUp, onDragStart } =
