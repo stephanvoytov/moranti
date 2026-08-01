@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CATEGORIES, getCategoryName } from "@/lib/categories";
+import { pickDisplayImage } from "@/lib/product-images";
 import AdminModal from "@/components/admin/admin-modal";
 import AdminButton from "@/components/admin/admin-button";
 import AdminPageHeader from "@/components/admin/admin-page-header";
@@ -308,7 +309,7 @@ export default function AdminProductList() {
             >
               <span className={styles.reorderHandle} aria-label="Перетащить">⋮⋮</span>
               <span className={styles.reorderNum}>{idx + 1}</span>
-              {p.image && <img src={p.image} alt="" className={styles.reorderThumb} />}
+              {pickDisplayImage(p) && <img src={pickDisplayImage(p)!} alt="" className={styles.reorderThumb} />}
               <span className={styles.reorderName}>{p.name}</span>
               <span className={styles.reorderPrice}>{formatPrice(p.price)}</span>
               <span className={styles.reorderBadge}>{getCategoryName(p.category)}</span>

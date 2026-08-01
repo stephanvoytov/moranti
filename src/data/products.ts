@@ -9,7 +9,7 @@ import type { Product as PrismaProduct } from "@prisma/client";
 import prisma, { prismaQuery } from "@/lib/prisma";
 import { cacheGet } from "@/lib/data-cache";
 import { logger } from "@/lib/logger";
-import { generateProductImages } from "@/lib/product-images";
+import { selectProductImages } from "@/lib/product-images";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 
 /** Загрузить JSON fallback при недоступности БД */
@@ -126,17 +126,19 @@ function mapProduct(p: PrismaProduct): Product {
   }
 
   // Приоритет: реальные URL из БД (от WB API). Fallback — генерация из article + photoCount.
+  // Если товар не в наличии на WB и есть фото с Ozon — берём Ozon-фото (selectProductImages).
   const photoCount = p.photoCount || p.images?.length || 1;
-  const hasRealImages = Array.isArray(p.images) && p.images.length > 0;
-  let image: string, images: string[];
-  if (hasRealImages) {
-    image = p.image || p.images[0] || "";
-    images = p.images;
-  } else {
-    const computed = generateProductImages(p.wbArticle ? Number(p.wbArticle) : null, photoCount);
-    image = computed?.image || "";
-    images = computed?.images || [];
-  }
+  const selected = selectProductImages({
+    wbStock: p.wbStock,
+    wbArticle: p.wbArticle ? Number(p.wbArticle) : null,
+    image: p.image,
+    images: p.images,
+    ozonImage: p.ozonImage,
+    ozonImages: p.ozonImages,
+    photoCount,
+  });
+  const image = selected.image;
+  const images = selected.images;
 
   return {
     id: p.id,

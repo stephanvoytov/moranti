@@ -24,40 +24,56 @@ interface ProductThumbProps {
 }
 
 /**
- * Превью товара: большая основная картинка (WB) + маленькая
- * дополнительная (Ozon) в углу; при наведении меняются местами.
- * Единый вид для канбана и списка.
+ * Превью товара: большая основная картинка + маленькая дополнительная
+ * в углу; при наведении меняются местами.
+ *
+ * Главная картинка: WB-фото, но если WB нет в наличии (или товар только
+ * на Ozon) и есть Ozon-фото — главной становится картинка с Ozon,
+ * а WB уходит в угол с оверлеем «НЕТ». Единый вид для канбана и списка.
  */
 export default function ProductThumb({ item, href, onClick }: ProductThumbProps) {
   const isArchived = !!item.archivedAt;
-  const mainImage = item.image || item.ozonImage;
-  const canSwap = !!(item.ozonImage && item.wbArticle);
-  const mainOos = item.wbStock != null && item.wbStock <= 0;
+  const hasWb = !!item.wbArticle;
+  // WB-слот только если товар реально на WB (для Ozon-only image == ozonImage)
+  const wbImg = hasWb ? item.image || null : null;
+  const ozonImg = item.ozonImage || null;
+  const both = !!(wbImg && ozonImg);
+  const wbOos = item.wbStock != null && item.wbStock <= 0;
   const ozonOos = item.ozonStock != null && item.ozonStock <= 0;
+  // WB нет в наличии — Ozon-фото главное (при двух слотах)
+  const ozonMain = both && (item.wbStock ?? 0) <= 0;
 
-  const badge = item.wbArticle
-    ? { src: MARKETPLACE_FAVICONS.wb, alt: "WB" }
-    : item.ozonArticle
-      ? { src: MARKETPLACE_FAVICONS.ozon, alt: "Ozon" }
-      : null;
+  const wrapper = both
+    ? ozonMain ? styles.ozonMain : styles.swap
+    : "";
 
   const inner = (
-    <div className={`${styles.thumbWrapper} ${canSwap ? styles.swap : ""}`}>
-      {mainImage ? (
+    <div className={`${styles.thumbWrapper} ${wrapper}`}>
+      {both ? (
         <>
-          <div className={`${styles.imgSlot} ${styles.imgSlotSingle} ${styles.imgSlotWb} ${mainOos ? styles.slotOos : ""}`}>
-            <SmartImage src={mainImage} alt="" className={styles.imgSlotInner} draggable={false} />
-            {badge && <img src={badge.src} alt={badge.alt} className={styles.slotBadge} />}
-            {mainOos && <div className={styles.slotOosOverlay}>НЕТ</div>}
+          <div className={`${styles.imgSlot} ${styles.imgSlotWb} ${wbOos ? styles.slotOos : ""}`}>
+            <SmartImage src={wbImg!} alt="" className={styles.imgSlotInner} draggable={false} />
+            <img src={MARKETPLACE_FAVICONS.wb} alt="WB" className={styles.slotBadge} />
+            {wbOos && <div className={styles.slotOosOverlay}>НЕТ</div>}
           </div>
-          {canSwap && (
-            <div className={`${styles.imgSlot} ${styles.imgSlotOzon} ${ozonOos ? styles.slotOos : ""}`}>
-              <SmartImage src={item.ozonImage!} alt="" className={styles.imgSlotInner} draggable={false} />
-              <img src={MARKETPLACE_FAVICONS.ozon} alt="Ozon" className={styles.slotBadge} />
-              {ozonOos && <div className={styles.slotOosOverlay}>НЕТ</div>}
-            </div>
-          )}
+          <div className={`${styles.imgSlot} ${styles.imgSlotOzon} ${ozonOos ? styles.slotOos : ""}`}>
+            <SmartImage src={ozonImg!} alt="" className={styles.imgSlotInner} draggable={false} />
+            <img src={MARKETPLACE_FAVICONS.ozon} alt="Ozon" className={styles.slotBadge} />
+            {ozonOos && <div className={styles.slotOosOverlay}>НЕТ</div>}
+          </div>
         </>
+      ) : wbImg ? (
+        <div className={`${styles.imgSlot} ${styles.imgSlotSingle} ${wbOos ? styles.slotOos : ""}`}>
+          <SmartImage src={wbImg} alt="" className={styles.imgSlotInner} draggable={false} />
+          <img src={MARKETPLACE_FAVICONS.wb} alt="WB" className={styles.slotBadge} />
+          {wbOos && <div className={styles.slotOosOverlay}>НЕТ</div>}
+        </div>
+      ) : ozonImg ? (
+        <div className={`${styles.imgSlot} ${styles.imgSlotSingle} ${ozonOos ? styles.slotOos : ""}`}>
+          <SmartImage src={ozonImg} alt="" className={styles.imgSlotInner} draggable={false} />
+          <img src={MARKETPLACE_FAVICONS.ozon} alt="Ozon" className={styles.slotBadge} />
+          {ozonOos && <div className={styles.slotOosOverlay}>НЕТ</div>}
+        </div>
       ) : (
         <div className={styles.placeholder} />
       )}

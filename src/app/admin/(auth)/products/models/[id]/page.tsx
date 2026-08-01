@@ -8,6 +8,7 @@ import UpdatedBadge from "@/components/admin/updated-badge";
 import ProductCard, { type ProductCardItem } from "@/components/admin/products/product-card";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import { CATEGORIES, getCategoryName } from "@/lib/categories";
+import { pickDisplayImage } from "@/lib/product-images";
 import form from "@/components/admin/editor-form.module.css";
 import styles from "./editor.module.css";
 
@@ -403,8 +404,8 @@ export default function ModelPage() {
               {model.variants.map((v) => (
                 <div key={v.id} className={styles.variantRow}>
                   <span className={styles.variantColor}>
-                    {v.image && (
-                      <img src={v.image} alt="" className={styles.variantThumb} />
+                    {pickDisplayImage(v) && (
+                      <img src={pickDisplayImage(v)!} alt="" className={styles.variantThumb} />
                     )}
                     {v.colorName || "—"}
                   </span>
@@ -493,8 +494,8 @@ export default function ModelPage() {
                             onChange={() => toggleVariant(p.id)}
                             className={styles.linkerCheckbox}
                           />
-                          {p.image && (
-                            <img src={p.image} alt="" className={styles.linkerThumb} />
+                          {pickDisplayImage(p) && (
+                            <img src={pickDisplayImage(p)!} alt="" className={styles.linkerThumb} />
                           )}
                           <span className={styles.linkerName}>
                             {p.name}

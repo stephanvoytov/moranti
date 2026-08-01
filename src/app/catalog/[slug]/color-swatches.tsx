@@ -16,6 +16,10 @@ interface SwatchProduct {
   originalPrice: number;
   currency: string;
   inStock?: boolean;
+  /** Главное фото (после mapProduct — Ozon-фото, если WB нет в наличии) */
+  image?: string;
+  /** Остаток на WB */
+  wbStock?: number;
 }
 
 interface ColorSwatchesProps {
@@ -40,11 +44,26 @@ function colorDisplay(p: SwatchProduct, siblings: SwatchProduct[]): string {
   return label(p, siblings);
 }
 
+/** Фото свотча: WB-миниатюра, если WB в наличии; иначе главное фото (Ozon) */
+function swatchSrc(p: SwatchProduct): string {
+  const wbInStock = (p.wbStock ?? 0) > 0;
+  if (wbInStock) return swatchUrl(p.wbArticle);
+  return p.image || swatchUrl(p.wbArticle);
+}
+
+/** Фото для ховер-превью: WB CDN, если WB в наличии; иначе главное фото (Ozon) */
+function previewSrc(p: SwatchProduct): string {
+  const wbInStock = (p.wbStock ?? 0) > 0;
+  if (wbInStock) return cdnImageUrl(p.wbArticle, 1, "c246x328");
+  return p.image || cdnImageUrl(p.wbArticle, 1, "c246x328");
+}
+
 export default function ColorSwatches({ current, siblings }: ColorSwatchesProps) {
   const all = useMemo(() => [current, ...siblings], [current, siblings]);
   const [preview, setPreview] = useState<{
     article: number;
     price: number;
+    src: string;
     x: number;
     y: number;
   } | null>(null);
@@ -62,6 +81,7 @@ export default function ColorSwatches({ current, siblings }: ColorSwatchesProps)
     setPreview({
       article,
       price: p.price,
+      src: previewSrc(p),
       x: clampedX,
       y: rect.top,
     });
@@ -93,7 +113,7 @@ export default function ColorSwatches({ current, siblings }: ColorSwatchesProps)
             title={label(current, siblings)}
           >
             <SmartImage
-              src={swatchUrl(current.wbArticle)}
+              src={swatchSrc(current)}
               alt={label(current, siblings)}
               className={styles.swatchImage}
             />
@@ -116,7 +136,7 @@ export default function ColorSwatches({ current, siblings }: ColorSwatchesProps)
                 title={label(s, siblings)}
               >
                 <SmartImage
-                  src={swatchUrl(s.wbArticle)}
+                  src={swatchSrc(s)}
                   alt={label(s, siblings)}
                   className={`${styles.swatchImage} ${isOutOfStock ? styles.swatchImageOos : ""}`}
                 />
@@ -143,7 +163,7 @@ export default function ColorSwatches({ current, siblings }: ColorSwatchesProps)
           {/* Превью с CDN — next/image не настроен на remotePatterns CDN, img осознанно */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={cdnImageUrl(preview.article, 1, "c246x328")}
+            src={preview.src}
             alt=""
             className={styles.swatchPreviewImage}
             loading="lazy"
