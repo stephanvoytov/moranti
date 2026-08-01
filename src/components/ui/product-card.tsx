@@ -161,7 +161,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             )}
           </div>
         )}
-        {product.rating && product.rating > 4 ? (
+        {product.rating && product.rating >= 4 ? (
           <div className={styles.rating}>
             <RatingStars rating={product.rating} />
             <span className={styles.ratingText}>
