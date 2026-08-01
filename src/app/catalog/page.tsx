@@ -3,6 +3,8 @@ import { getProducts, getCategories } from "@/data/products";
 import { readSettings } from "@/lib/settings";
 import CatalogPage from "./catalog-content";
 
+// Страница dynamic: searchParams в generateMetadata (SEO-мета по категориям).
+// Данные отдаются из TTL-кэша (30–600с), рендер дешёвый.
 export const revalidate = 0;
 
 const CATEGORY_META: Record<string, { name: string; title: string; desc: string }> = {
