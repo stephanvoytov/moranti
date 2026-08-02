@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { SEO_LIMITS, buildCiteUrl } from "@/config/seo";
+import { generateSerpPreview } from "@power-seo/preview";
+import { buildCiteUrl } from "@/config/seo";
 import type { SeoEntry } from "@/app/admin/(auth)/seo/page";
 import styles from "./seo-preview.module.css";
 
@@ -15,7 +16,7 @@ interface Props {
 }
 
 type Device = "desktop" | "mobile";
-type View = "serp" | "meta";
+type View = "serp" | "social";
 
 const GROUP_LABELS: Record<SeoEntry["group"], string> = {
   pages: "Страницы",
@@ -23,11 +24,24 @@ const GROUP_LABELS: Record<SeoEntry["group"], string> = {
   products: "Товары (примеры)",
 };
 
-/** Показать длину: ок / предупреждение / красный */
-function lengthClass(len: number, recommended: number, hardMax?: number) {
-  if (len <= recommended) return "ok";
-  if (hardMax === undefined || len <= hardMax) return "warn";
-  return "over";
+/** Достать цену и рейтинг из Product JSON-LD (для богатого сниппета) */
+function extractRichData(
+  jsonLd: Record<string, unknown>[],
+): { price?: number; rating?: number } | null {
+  const product = jsonLd.find((o) => o["@type"] === "Product");
+  if (!product) return null;
+  const offers = product.offers as
+    | Record<string, unknown>
+    | Record<string, unknown>[]
+    | undefined;
+  const first = Array.isArray(offers) ? offers[0] : offers;
+  const price = typeof first?.price === "number" ? first.price : undefined;
+  const agg = product.aggregateRating as
+    | { ratingValue?: unknown }
+    | undefined;
+  const rating =
+    typeof agg?.ratingValue === "number" ? agg.ratingValue : undefined;
+  return price !== undefined || rating !== undefined ? { price, rating } : null;
 }
 
 function JsonLdBlock({ jsonLd }: { jsonLd: Record<string, unknown>[] }) {
@@ -49,8 +63,8 @@ function JsonLdBlock({ jsonLd }: { jsonLd: Record<string, unknown>[] }) {
   );
 }
 
-/** Полный HTML-набор мета-тегов, который отдаёт страница */
-function MetaTagsView({
+/** Превью ссылки в соцсетях/мессенджерах (OG-карточка) */
+function SocialCard({
   entry,
   domain,
   siteName,
@@ -59,54 +73,63 @@ function MetaTagsView({
   domain: string;
   siteName: string;
 }) {
-  const url = `https://${domain}${entry.path}`;
-  const canonical = `https://${domain}${entry.canonical}`;
-  const robots = entry.noindex ? "noindex, follow" : "index, follow";
   const ogTitle = entry.og?.title || entry.title;
   const ogDesc = entry.og?.description || entry.description;
-
-  const lines = [
-    `<title>${entry.title}</title>`,
-    `<meta name="description" content="${entry.description}" />`,
-    `<link rel="canonical" href="${canonical}" />`,
-    `<meta name="robots" content="${robots}" />`,
-    `<meta property="og:title" content="${ogTitle}" />`,
-    `<meta property="og:description" content="${ogDesc}" />`,
-    `<meta property="og:url" content="${url}" />`,
-    `<meta property="og:type" content="website" />`,
-    `<meta property="og:site_name" content="${siteName}" />`,
-    `<meta property="og:locale" content="ru_RU" />`,
-  ];
-  if (entry.ogImage) {
-    lines.push(`<meta property="og:image" content="${entry.ogImage}" />`);
-  }
+  const url = `https://${domain}${entry.path}`;
 
   return (
-    <div className={styles.metaTags}>
-      <pre className={styles.metaTagsBlock}>{lines.join("\n")}</pre>
-      <JsonLdBlock jsonLd={entry.jsonLd} />
+    <div className={styles.socialCard}>
+      <div className={styles.socialImageWrap}>
+        {entry.ogImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className={styles.socialImage}
+            src={entry.ogImage}
+            alt=""
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
+        ) : (
+          <div className={styles.socialImagePlaceholder}>нет og:image</div>
+        )}
+      </div>
+      <div className={styles.socialBody}>
+        <div className={styles.socialSite}>{siteName}</div>
+        <div className={styles.socialTitle}>{ogTitle}</div>
+        <div className={styles.socialDesc}>{ogDesc}</div>
+        <div className={styles.socialUrl}>{url}</div>
+      </div>
     </div>
   );
 }
 
+/** Сниппет Google (десктоп/мобильный) с богатым сниппетом из JSON-LD */
 function SerpSnippet({
   entry,
   device,
   domain,
   siteName,
   faviconUrl,
-}: Props & { entry: SeoEntry; device: Device }) {
+}: {
+  entry: SeoEntry;
+  device: Device;
+  domain: string;
+  siteName: string;
+  faviconUrl: string;
+}) {
   const cite = buildCiteUrl(domain, entry.siteSegments);
+  const rich = extractRichData(entry.jsonLd);
+  const url = `https://${domain}${entry.path}`;
+  // Пиксельная обрезка по метрикам Google (title 580px, desc 920px)
+  const serp = generateSerpPreview({
+    title: entry.title,
+    description: entry.description,
+    url,
+  });
 
-  const titleState = lengthClass(
-    entry.title.length,
-    SEO_LIMITS.titleRecommended,
-    SEO_LIMITS.titleHardMax,
-  );
-  const descState = lengthClass(
-    entry.description.length,
-    SEO_LIMITS.descriptionRecommended,
-  );
+  const titleState = serp.titleValidation.valid ? "ok" : "over";
+  const descState = serp.descriptionValidation.valid ? "ok" : "over";
 
   return (
     <div className={styles.item}>
@@ -116,15 +139,14 @@ function SerpSnippet({
         <span className={styles.canonical}>canonical: {entry.canonical}</span>
         <div className={styles.counters}>
           <span className={`${styles.counter} ${styles[titleState]}`}>
-            title {entry.title.length}
-            {titleState === "ok" && " ✓"}
-            {titleState === "warn" && " — обрежется на десктопе"}
-            {titleState === "over" && " — Google обрежет"}
+            title {serp.titleValidation.charCount ?? 0} симв. ·{" "}
+            {Math.round(serp.titleValidation.pixelWidth ?? 0)}px
+            {serp.titleValidation.valid ? " ✓" : " — обрежется"}
           </span>
           <span className={`${styles.counter} ${styles[descState]}`}>
-            desc {entry.description.length}
-            {descState === "ok" && " ✓"}
-            {descState === "warn" && " — обрежется на мобильном"}
+            desc {serp.descriptionValidation.charCount ?? 0} симв. ·{" "}
+            {Math.round(serp.descriptionValidation.pixelWidth ?? 0)}px
+            {serp.descriptionValidation.valid ? " ✓" : " — обрежется"}
           </span>
         </div>
       </div>
@@ -134,11 +156,12 @@ function SerpSnippet({
           device === "mobile" ? styles.serpMobile : styles.serpDesktop
         }`}
       >
-        <a className={styles.title} href={`https://${domain}${entry.path}`} target="_blank" rel="noreferrer">
-          {entry.title || "—"}
+        <a className={styles.title} href={url} target="_blank" rel="noreferrer">
+          {serp.title || "—"}
         </a>
         <div className={styles.urlRow}>
           {/* Favicon домена, как в живом Google (26px). Не загрузился — просто скрываем */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className={styles.favicon}
             src={faviconUrl}
@@ -152,8 +175,26 @@ function SerpSnippet({
             <div className={styles.cite}>{cite}</div>
           </div>
         </div>
+        {/* Богатый сниппет: цена и рейтинг из Product JSON-LD */}
+        {rich && (
+          <div className={styles.richRow}>
+            {rich.price !== undefined && (
+              <span className={styles.richPrice}>
+                {rich.price.toLocaleString("ru-RU")} ₽
+              </span>
+            )}
+            {rich.rating !== undefined && (
+              <span className={styles.richRating}>
+                {"★".repeat(Math.round(rich.rating))}
+                <span className={styles.richRatingValue}>
+                  {rich.rating.toFixed(1)}
+                </span>
+              </span>
+            )}
+          </div>
+        )}
         <p className={`${styles.desc} ${device === "mobile" ? styles.descMobile : ""}`}>
-          {entry.description || "—"}
+          {serp.description || "—"}
         </p>
       </div>
 
@@ -181,32 +222,30 @@ export default function SeoPreview({
   const [view, setView] = useState<View>("serp");
   const groups = ["pages", "categories", "products"] as const;
 
+  const VIEW_LABELS: Record<View, string> = {
+    serp: "Сниппет",
+    social: "Соцсети",
+  };
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.pageTitle}>SEO — как сайт выглядит в Google</h1>
         <div className={styles.toggles}>
           <div className={styles.viewToggle} role="tablist">
-            <button
-              role="tab"
-              aria-selected={view === "serp"}
-              className={`${styles.deviceBtn} ${
-                view === "serp" ? styles.deviceBtnActive : ""
-              }`}
-              onClick={() => setView("serp")}
-            >
-              Сниппет
-            </button>
-            <button
-              role="tab"
-              aria-selected={view === "meta"}
-              className={`${styles.deviceBtn} ${
-                view === "meta" ? styles.deviceBtnActive : ""
-              }`}
-              onClick={() => setView("meta")}
-            >
-              Мета-теги
-            </button>
+            {(Object.keys(VIEW_LABELS) as View[]).map((v) => (
+              <button
+                key={v}
+                role="tab"
+                aria-selected={view === v}
+                className={`${styles.deviceBtn} ${
+                  view === v ? styles.deviceBtnActive : ""
+                }`}
+                onClick={() => setView(v)}
+              >
+                {VIEW_LABELS[v]}
+              </button>
+            ))}
           </div>
           {view === "serp" && (
             <div className={styles.deviceToggle} role="tablist">
@@ -265,7 +304,6 @@ export default function SeoPreview({
                   domain={domain}
                   siteName={siteName}
                   faviconUrl={faviconUrl}
-                  entries={entries}
                 />
               ) : (
                 <div key={entry.id} className={styles.item}>
@@ -275,7 +313,11 @@ export default function SeoPreview({
                       <span className={styles.noindex}>noindex</span>
                     )}
                   </div>
-                  <MetaTagsView entry={entry} domain={domain} siteName={siteName} />
+                  <SocialCard
+                    entry={entry}
+                    domain={domain}
+                    siteName={siteName}
+                  />
                 </div>
               ),
             )}
