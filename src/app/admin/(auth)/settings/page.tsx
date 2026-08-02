@@ -112,11 +112,14 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (res.ok) {
+        console.log("[settings] upload ok:", data.url);
         setForm((prev) => ({ ...prev, heroImage: data.url }));
       } else {
+        console.error("[settings] upload failed:", res.status, data);
         setError(data.error || "Ошибка загрузки");
       }
-    } catch {
+    } catch (err) {
+      console.error("[settings] upload network error:", err);
       setError("Ошибка соединения");
     } finally {
       setUploading(false);
@@ -332,7 +335,15 @@ export default function AdminSettingsPage() {
                   </div>
                   {form.heroImage && (
                     <div className={styles.imagePreview}>
-                      <img src={form.heroImage} alt="Hero preview" />
+                      <img
+                        src={form.heroImage}
+                        alt="Hero preview"
+                        onError={(e) => {
+                          console.error("[settings] hero preview failed to load:", form.heroImage);
+                          setError(`Не удалось загрузить изображение: ${form.heroImage}`);
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
                     </div>
                   )}
                 </label>
@@ -383,7 +394,15 @@ export default function AdminSettingsPage() {
                       />
                       {form.catImages[slug] && (
                         <div className={styles.catImagePreview}>
-                          <img src={form.catImages[slug]} alt={getCategoryName(slug)} />
+                          <img
+                            src={form.catImages[slug]}
+                            alt={getCategoryName(slug)}
+                            onError={(e) => {
+                              console.error("[settings] category image failed to load:", form.catImages[slug]);
+                              setError(`Не удалось загрузить фото категории: ${form.catImages[slug]}`);
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
                         </div>
                       )}
                     </div>

@@ -56,6 +56,7 @@ export async function POST(request: Request) {
       contentType: file.type,
     });
 
+    logger.info("Upload success", { url: blob.url, filename, size: file.size });
     return NextResponse.json({ url: blob.url, filename });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
