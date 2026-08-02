@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/lib/toast-context";
 import { CATEGORY_SLUGS, getCategoryName } from "@/lib/categories";
+import MediaPicker from "@/components/admin/media-picker";
 import styles from "./settings.module.css";
 
 interface SettingsForm {
@@ -53,6 +54,8 @@ export default function AdminSettingsPage() {
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  /** Куда вставить выбранное из медиа: "hero" | slug категории | null */
+  const [pickerFor, setPickerFor] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/settings")
@@ -320,6 +323,13 @@ export default function AdminSettingsPage() {
                     >
                       {uploading ? "Загрузка..." : "Выбрать файл"}
                     </button>
+                    <button
+                      type="button"
+                      className={styles.mediaBtn}
+                      onClick={() => setPickerFor("hero")}
+                    >
+                      Из медиа
+                    </button>
                     <input
                       ref={fileRef}
                       type="file"
@@ -392,6 +402,13 @@ export default function AdminSettingsPage() {
                         }
                         placeholder="URL изображения"
                       />
+                      <button
+                        type="button"
+                        className={styles.mediaBtn}
+                        onClick={() => setPickerFor(slug)}
+                      >
+                        Из медиа
+                      </button>
                       {form.catImages[slug] && (
                         <div className={styles.catImagePreview}>
                           <img
@@ -547,6 +564,22 @@ export default function AdminSettingsPage() {
           </button>
         </div>
       </form>
+
+      <MediaPicker
+        open={pickerFor !== null}
+        onClose={() => setPickerFor(null)}
+        onSelect={(url) => {
+          if (pickerFor === "hero") {
+            setForm((prev) => ({ ...prev, heroImage: url }));
+          } else if (pickerFor) {
+            setForm((prev) => ({
+              ...prev,
+              catImages: { ...prev.catImages, [pickerFor]: url },
+            }));
+          }
+          setPickerFor(null);
+        }}
+      />
     </div>
   );
 }

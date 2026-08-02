@@ -9,6 +9,7 @@ import UpdatedBadge from "@/components/admin/updated-badge";
 import { useToast } from "@/lib/toast-context";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import { CATEGORIES } from "@/lib/categories";
+import MediaPicker from "@/components/admin/media-picker";
 import formCss from "@/components/admin/editor-form.module.css";
 import styles from "./editor.module.css";
 
@@ -71,6 +72,7 @@ export default function ProductEditorPage() {
   const [urlInputValue, setUrlInputValue] = useState("");
   const [models, setModels] = useState<ModelOption[]>([]);
   const [imgDragIndex, setImgDragIndex] = useState<number | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imgDragNode = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
@@ -849,6 +851,19 @@ export default function ProductEditorPage() {
                 {showUrlInput ? "Закрыть" : "Вставить URL"}
               </button>
 
+              <button
+                type="button"
+                className={styles.imageActionBtn}
+                onClick={() => setPickerOpen(true)}
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <rect x="1.5" y="1.5" width="11" height="11" rx="1.5" />
+                  <circle cx="5" cy="5" r="1.2" />
+                  <path d="M1.5 9.5l3-3 3 3 2-2 3 3" />
+                </svg>
+                Из медиа
+              </button>
+
               {uploading && (
                 <span className={styles.uploadStatus}>Загрузка...</span>
               )}
@@ -898,6 +913,15 @@ export default function ProductEditorPage() {
           </AdminButton>
         </div>
       </form>
+
+      <MediaPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={(url) => {
+          addImageUrl(url);
+          setPickerOpen(false);
+        }}
+      />
     </div>
   );
 }

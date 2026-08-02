@@ -169,6 +169,22 @@
   cursor: not-allowed;
 }
 
+.mediaBtn {
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 6px 16px;
+  background: var(--white);
+  border: 1px solid var(--dark);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--dark);
+  transition: background var(--transition-fast);
+}
+
+.mediaBtn:hover {
+  background: var(--card-bg);
+}
+
 .imageName {
   font-family: var(--font-body);
   font-size: 12px;
