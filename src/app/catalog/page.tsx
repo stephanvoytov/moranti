@@ -29,7 +29,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       robots: count === 0 ? { index: false, follow: true } : undefined,
       alternates: { canonical: `/catalog?category=${catSlug}` },
       openGraph: {
-        title: cat.title.replace(" — купить | Moranti", " — Moranti"),
+        title: cat.title,
         description: desc,
         url: `/catalog?category=${catSlug}`,
         siteName: seoConfig.site.siteName,
@@ -44,7 +44,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     description: seoConfig.catalog.description,
     alternates: { canonical: "/catalog" },
     openGraph: {
-      title: seoConfig.catalog.title.replace(" — купить | Moranti", " — Moranti"),
+      title: seoConfig.catalog.title,
       description: seoConfig.catalog.description,
       url: "/catalog",
       siteName: seoConfig.site.siteName,

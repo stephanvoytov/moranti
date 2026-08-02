@@ -75,14 +75,14 @@ describe("buildProductSeoMeta", () => {
 
   it("uses first color as discriminator part in title", () => {
     const meta = buildProductSeoMeta(base);
-    expect(meta.title).toBe("Сумка тоут (песочный) — купить | Moranti");
-    expect(meta.ogTitle).toBe("Сумка тоут (песочный) — Moranti");
+    expect(meta.title).toBe("Moranti — Сумка тоут (песочный)");
+    expect(meta.ogTitle).toBe("Moranti — Сумка тоут (песочный)");
   });
 
   it("builds natural description without price/counters", () => {
     const meta = buildProductSeoMeta(base);
     expect(meta.description).toBe(
-      "Женская сумка тоут из натуральной итальянской кожи. Цвет: песочный. Доставка по России — Moranti.",
+      "Женская сумка тоут из натуральной итальянской кожи. Цвет: песочный. Минимализм без логотипов — сумка, которая дополнит любой образ.",
     );
   });
 
@@ -100,9 +100,9 @@ describe("buildProductSeoMeta", () => {
 
   it("handles missing colorName", () => {
     const meta = buildProductSeoMeta({ ...base, colorName: null });
-    expect(meta.title).toBe("Сумка тоут — купить | Moranti");
+    expect(meta.title).toBe("Moranti — Сумка тоут");
     expect(meta.description).toBe(
-      "Женская сумка тоут из натуральной итальянской кожи. Доставка по России — Moranti.",
+      "Женская сумка тоут из натуральной итальянской кожи. Минимализм без логотипов — сумка, которая дополнит любой образ.",
     );
   });
 
@@ -115,7 +115,7 @@ describe("buildProductSeoMeta", () => {
       colorName: "тауп, капучино",
     });
     expect(meta.description).toBe(
-      "Женская сумка тоут из замши. Цвет: тауп. Доставка по России — Moranti.",
+      "Женская сумка тоут из замши. Цвет: тауп. Минимализм без логотипов — сумка, которая дополнит любой образ.",
     );
     expect(meta.description).not.toContain("из замши из замши");
   });
@@ -127,7 +127,7 @@ describe("buildProductSeoMeta", () => {
       colorName: null,
     });
     expect(meta.description).toBe(
-      "Женская сумка кросс-боди из 100% натуральной кожи. Доставка по России — Moranti.",
+      "Женская сумка кросс-боди из 100% натуральной кожи. Минимализм без логотипов — сумка, которая дополнит любой образ.",
     );
   });
 });
@@ -168,9 +168,9 @@ describe("SEO_LIMITS and config sanity", () => {
       composition: "замша",
       colorName: "пыльная роза",
     });
-    // Продуктовые title с цветом-дискриминатором могут не влезть в 55 (рекоменд.),
-    // но обязаны влезть в 70 (мобильный лимит ~920px). Ключевое — в начале title.
-    expect(meta.title.length).toBeLessThanOrEqual(SEO_LIMITS.titleHardMax);
+    // Бренд в начале: даже при обрезке длинного title бренд не теряется.
+    // Продуктовые title с цветом-дискриминатором влезают в рекомендованные 55.
+    expect(meta.title.length).toBeLessThanOrEqual(SEO_LIMITS.titleRecommended);
     expect(meta.description.length).toBeLessThanOrEqual(
       SEO_LIMITS.descriptionRecommended, // без цены и счётчиков описание не разрастается
     );
