@@ -3,6 +3,9 @@ import { getAllProducts } from "@/data/products";
 import { seoConfig } from "@/config/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Dev/preview окружение — sitemap пустой (см. robots.ts: noindex)
+  if (process.env.APP_ENV !== "production") return [];
+
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";
   const products = await getAllProducts();
 

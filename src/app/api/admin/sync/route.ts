@@ -13,6 +13,7 @@ import { enforceRateLimit } from "@/lib/rate-limit";
 import { runWbSync } from "@/lib/wb-sync";
 import { getSyncHistory } from "@/lib/sync-history";
 import { invalidateCache } from "@/lib/data-cache";
+import { isSyncEnabled } from "@/lib/sync-enabled";
 
 export async function GET() {
   const session = await getSession();
@@ -35,6 +36,14 @@ export async function POST(request: NextRequest) {
 
   const rl = enforceRateLimit(request, { max: 5, windowMs: 60_000 });
   if (rl) return rl;
+
+  // Синк разрешён только в prod-окружении (общая БД — не даём dev писать)
+  if (!isSyncEnabled()) {
+    return NextResponse.json(
+      { error: "Синхронизация отключена в этом окружении" },
+      { status: 403 },
+    );
+  }
 
   try {
     const runId = runWbSync();

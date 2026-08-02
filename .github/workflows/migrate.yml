@@ -1,0 +1,25 @@
+name: Migrate DB
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - run: npm ci
+
+      # БД общая для dev и prod — миграции применяем один раз, из CI на master,
+      # а не из билдов Vercel (два деплоя не должны гонять миграции параллельно).
+      - name: Apply Prisma migrations
+        run: npx prisma migrate deploy
