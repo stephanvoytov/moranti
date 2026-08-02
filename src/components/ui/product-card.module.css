@@ -27,9 +27,18 @@
   height: 100%;
 }
 
-.image {
+.imageLayer {
   position: absolute;
   inset: 0;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.imageLayerActive {
+  opacity: 1;
+}
+
+.image {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -37,7 +46,7 @@
   transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-.card:hover .image {
+.card:hover .imageLayerActive .image {
   transform: scale(1.04);
 }
 

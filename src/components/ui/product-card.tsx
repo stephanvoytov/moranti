@@ -36,26 +36,30 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const link = `/catalog/${slug}`;
   const fav = isFavorite(product.wbArticle);
   const images = useMemo(
-    () => (product.images?.length ? product.images : [product.image]),
+    () => (product.images?.length ? product.images : [product.image]).filter(Boolean),
     [product.images, product.image]
   );
+  // Показываем до 4 фото (как WB): первое — статичное, остальные — hover-карусель.
+  // Стабильный список — слои не пересоздаются при смене активного фото.
+  const hoverImages = useMemo(() => images.slice(0, 4), [images]);
   const [hoverIndex, setHoverIndex] = useState(0);
   const hoverTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const touchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cardRef = useRef<HTMLElement>(null);
 
   // Предзагрузка hover-фото: когда карточка попадает во вьюпорт (чуть заранее),
   // скачиваем images[1..3] в HTTP-кэш браузера. К моменту наведения они уже
   // готовы — карусель сменяет фото мгновенно, без белого placeholder'а.
   useEffect(() => {
-    if (images.length < 2) return;
+    if (hoverImages.length < 2) return;
     if (typeof IntersectionObserver === "undefined") return;
     const el = cardRef.current;
     if (!el) return;
-    const hoverImages = images.slice(1, Math.min(images.length, 4));
+    const toPreload = hoverImages.slice(1);
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
-        for (const url of hoverImages) {
+        for (const url of toPreload) {
           if (url) new Image().src = url;
         }
         observer.disconnect();
@@ -64,7 +68,16 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [images]);
+  }, [hoverImages]);
+
+  // Очистка таймеров при размонтировании — интервал не должен жить после ухода
+  // карточки из DOM (иначе фото «крутятся» без наведения).
+  useEffect(() => {
+    return () => {
+      if (hoverTimer.current) clearInterval(hoverTimer.current);
+      if (touchTimer.current) clearTimeout(touchTimer.current);
+    };
+  }, []);
 
   // Цены берутся из данных товара (БД через getProducts())
   const displayPrice = product.price;
@@ -77,13 +90,14 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
     toggleFavorite(product.wbArticle);
   };
 
-  const touchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const startCycling = () => {
-    if (images.length < 2) return;
+    if (hoverImages.length < 2) return;
+    // Защита от повторного вызова: сначала гасим старый интервал, иначе он
+    // «утечёт» и карточка продолжит крутиться после mouseleave.
+    if (hoverTimer.current) clearInterval(hoverTimer.current);
     setHoverIndex(1);
     hoverTimer.current = setInterval(() => {
-      setHoverIndex((prev) => (prev + 1) % Math.min(images.length, 4));
+      setHoverIndex((prev) => (prev + 1) % hoverImages.length);
     }, 1200);
   };
 
@@ -97,7 +111,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const handleMouseLeave = stopCycling;
 
   const handleTouchStart = () => {
-    if (images.length < 2) return;
+    if (hoverImages.length < 2) return;
     // Short delay — если палец убрали быстро, это был тап, не запускаем
     touchTimer.current = setTimeout(() => {
       startCycling();
@@ -116,13 +130,23 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
     <article ref={cardRef} className={styles.card} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <div className={styles.imageWrap}>
         <Link href={link} aria-label={product.name} className={styles.imageLink}>
-          <SmartImage
-            src={images[hoverIndex]}
-            alt={product.name}
-            className={styles.image}
-            priority={priority}
-            draggable={false}
-          />
+          {/* Все фото рендерятся слоями сразу (как WB): активный слой получает
+              opacity: 1, остальные — 0. DOM-узлы не пересоздаются при смене
+              фото, поэтому нет мерцания и ложных mouseenter/mouseleave. */}
+          {hoverImages.map((url, i) => (
+            <div
+              key={url}
+              className={`${styles.imageLayer} ${i === hoverIndex ? styles.imageLayerActive : ""}`}
+            >
+              <SmartImage
+                src={url}
+                alt={product.name}
+                className={styles.image}
+                priority={priority && i === 0}
+                draggable={false}
+              />
+            </div>
+          ))}
         </Link>
         <button
           className={`${styles.favorite} ${fav ? styles.favoriteActive : ""}`}
