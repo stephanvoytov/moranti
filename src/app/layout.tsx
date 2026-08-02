@@ -127,8 +127,8 @@ export default async function RootLayout({
     `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
     // Styles: 'unsafe-inline' для dev-режима (Next.js Fast Refresh)
     "style-src 'self' 'unsafe-inline'",
-    // Images: WB CDN + Яндекс.Метрика + фавиконки маркетплейсов
-    "img-src 'self' https://*.wbbasket.ru https://*.geobasket.ru https://*.ozone.ru https://www.wildberries.ru https://www.ozon.ru https://mc.yandex.ru data:",
+    // Images: WB CDN + Яндекс.Метрика + фавиконки маркетплейсов + Vercel Blob (загрузки из админки)
+    "img-src 'self' https://*.wbbasket.ru https://*.geobasket.ru https://*.ozone.ru https://www.wildberries.ru https://www.ozon.ru https://mc.yandex.ru https://*.public.blob.vercel-storage.com data:",
     // Fonts: self-hosted via next/font
     "font-src 'self'",
     // Connections: same-origin + Яндекс.Метрика
