@@ -119,20 +119,24 @@ export default async function RootLayout({
   // Next.js inline-скрипты, а nonce — страховка для наших JSON-LD и Я.Метрики.
   // Остальные директивы (img-src, connect-src, etc.) строгие.
   const isDev = process.env.NODE_ENV === "development";
+  // Vercel инжектит виджет Live Feedback (vercel.live/_next-live/feedback/feedback.js)
+  // только в preview-деплои. В проде скрипта нет — домен не добавляем.
+  const isVercelPreview = process.env.VERCEL_ENV === "preview";
+  const vercelLive = isVercelPreview ? " https://vercel.live" : "";
   const csp = [
     "default-src 'self'",
     // Scripts: 'self' для Next.js чанков, 'unsafe-inline' для его inline-скриптов,
     // nonce для наших JSON-LD и Яндекс.Метрики.
     // 'unsafe-eval' — нужен React DevTools в dev-режиме (eval для callstack).
-    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}${vercelLive}`,
     // Styles: 'unsafe-inline' для dev-режима (Next.js Fast Refresh)
     "style-src 'self' 'unsafe-inline'",
     // Images: WB CDN + Яндекс.Метрика + фавиконки маркетплейсов + Vercel Blob (загрузки из админки)
     "img-src 'self' https://*.wbbasket.ru https://*.geobasket.ru https://*.ozone.ru https://www.wildberries.ru https://www.ozon.ru https://mc.yandex.ru https://*.public.blob.vercel-storage.com data:",
     // Fonts: self-hosted via next/font
     "font-src 'self'",
-    // Connections: same-origin + Яндекс.Метрика
-    "connect-src 'self' https://mc.yandex.ru",
+    // Connections: same-origin + Яндекс.Метрика (+ vercel.live для Live Feedback в превью)
+    `connect-src 'self' https://mc.yandex.ru${vercelLive}`,
     // Media: пока не используем
     "media-src 'none'",
     // Frame: block all
