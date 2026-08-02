@@ -10,6 +10,8 @@ interface Props {
   domain: string;
   siteName: string;
   faviconUrl: string;
+  /** JSON-LD из layout.tsx — присутствует на каждой странице */
+  globalJsonLd?: Record<string, unknown>[];
 }
 
 type Device = "desktop" | "mobile";
@@ -25,6 +27,25 @@ function lengthClass(len: number, recommended: number, hardMax?: number) {
   if (len <= recommended) return "ok";
   if (hardMax === undefined || len <= hardMax) return "warn";
   return "over";
+}
+
+function JsonLdBlock({ jsonLd }: { jsonLd: Record<string, unknown>[] }) {
+  if (jsonLd.length === 0) return null;
+  return (
+    <details className={styles.jsonld}>
+      <summary className={styles.jsonldSummary}>
+        JSON-LD · Schema.org ({jsonLd.length}{" "}
+        {jsonLd.length === 1 ? "блок" : "блока"})
+      </summary>
+      <div className={styles.jsonldBody}>
+        {jsonLd.map((obj, i) => (
+          <pre key={i} className={styles.jsonldBlock}>
+            {JSON.stringify(obj, null, 2)}
+          </pre>
+        ))}
+      </div>
+    </details>
+  );
 }
 
 function SerpSnippet({
@@ -51,6 +72,7 @@ function SerpSnippet({
       <div className={styles.meta}>
         <code className={styles.path}>{entry.path}</code>
         {entry.noindex && <span className={styles.noindex}>noindex</span>}
+        <span className={styles.canonical}>canonical: {entry.canonical}</span>
         <div className={styles.counters}>
           <span className={`${styles.counter} ${styles[titleState]}`}>
             title {entry.title.length}
@@ -93,11 +115,27 @@ function SerpSnippet({
           {entry.description || "—"}
         </p>
       </div>
+
+      {entry.og && (
+        <div className={styles.ogRow}>
+          <span className={styles.ogLabel}>OpenGraph</span>
+          <span className={styles.ogTitle}>{entry.og.title}</span>
+          <span className={styles.ogDesc}>{entry.og.description}</span>
+        </div>
+      )}
+
+      <JsonLdBlock jsonLd={entry.jsonLd} />
     </div>
   );
 }
 
-export default function SeoPreview({ entries, domain, siteName, faviconUrl }: Props) {
+export default function SeoPreview({
+  entries,
+  domain,
+  siteName,
+  faviconUrl,
+  globalJsonLd,
+}: Props) {
   const [device, setDevice] = useState<Device>("desktop");
   const groups = ["pages", "categories", "products"] as const;
 
@@ -128,6 +166,21 @@ export default function SeoPreview({ entries, domain, siteName, faviconUrl }: Pr
           </button>
         </div>
       </header>
+
+      {globalJsonLd && globalJsonLd.length > 0 && (
+        <details className={`${styles.jsonld} ${styles.globalJsonLd}`}>
+          <summary className={styles.jsonldSummary}>
+            Глобальная микроразметка (layout.tsx) — на каждой странице
+          </summary>
+          <div className={styles.jsonldBody}>
+            {globalJsonLd.map((obj, i) => (
+              <pre key={i} className={styles.jsonldBlock}>
+                {JSON.stringify(obj, null, 2)}
+              </pre>
+            ))}
+          </div>
+        </details>
+      )}
 
       {groups.map((group) => {
         const groupEntries = entries.filter((e) => e.group === group);

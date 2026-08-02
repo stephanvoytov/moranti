@@ -1,8 +1,13 @@
 import { seoConfig, buildProductSeoMeta } from "@/config/seo";
 import { getProducts } from "@/data/products";
+import {
+  buildProductJsonLd,
+  buildBreadcrumbJsonLd,
+  buildCollectionPageJsonLd,
+} from "@/lib/seo-jsonld";
 import SeoPreview from "@/components/admin/seo-preview";
 
-/** Запись для превью: что Google покажет для URL */
+/** Запись для превью: что Google покажет для URL + микроразметка */
 export interface SeoEntry {
   id: string;
   group: "pages" | "categories" | "products";
@@ -12,6 +17,12 @@ export interface SeoEntry {
   noindex: boolean;
   /** Сегменты breadcrumb в URL-строке: ["Каталог", "Кросс-боди"] */
   siteSegments: string[];
+  /** Канонический URL (относительный путь) */
+  canonical: string;
+  /** JSON-LD, который реально отдаёт страница */
+  jsonLd: Record<string, unknown>[];
+  /** OpenGraph-значения (могут отличаться от title/description) */
+  og?: { title: string; description: string };
 }
 
 export default async function SeoAdminPage() {
@@ -32,6 +43,8 @@ export default async function SeoAdminPage() {
       description: site.defaultDescription,
       noindex: false,
       siteSegments: [],
+      canonical: "/",
+      jsonLd: [],
     },
     {
       id: "catalog",
@@ -41,6 +54,15 @@ export default async function SeoAdminPage() {
       description: catalog.description,
       noindex: false,
       siteSegments: ["Каталог"],
+      canonical: "/catalog",
+      jsonLd: [
+        buildCollectionPageJsonLd(
+          "Каталог кожаных сумок Moranti",
+          "Женские сумки из натуральной итальянской кожи. Кросс-боди, тоуты, багеты, рюкзаки.",
+          "/catalog",
+          products.length,
+        ),
+      ],
     },
     {
       id: "care",
@@ -50,6 +72,8 @@ export default async function SeoAdminPage() {
       description: pages.care.description,
       noindex: false,
       siteSegments: ["Уход за сумками"],
+      canonical: "/care",
+      jsonLd: [],
     },
     {
       id: "delivery",
@@ -59,6 +83,8 @@ export default async function SeoAdminPage() {
       description: pages.delivery.description,
       noindex: false,
       siteSegments: ["Доставка"],
+      canonical: "/delivery",
+      jsonLd: [],
     },
     {
       id: "favorites",
@@ -68,6 +94,8 @@ export default async function SeoAdminPage() {
       description: pages.favorites.description,
       noindex: true,
       siteSegments: [],
+      canonical: "/favorites",
+      jsonLd: [],
     },
   );
 
@@ -84,6 +112,15 @@ export default async function SeoAdminPage() {
       // Пустая категория закрыта от индексации (см. generateMetadata каталога)
       noindex: count === 0,
       siteSegments: ["Каталог", cat.name],
+      canonical: `/catalog?category=${slug}`,
+      jsonLd: [
+        buildCollectionPageJsonLd(
+          cat.title.replace(" — Moranti", ""),
+          `${cat.description} Доставка по России.`,
+          `/catalog?category=${slug}`,
+          count,
+        ),
+      ],
     });
   }
 
@@ -106,8 +143,43 @@ export default async function SeoAdminPage() {
       description: meta.description,
       noindex: false,
       siteSegments: ["Каталог", p.name],
+      canonical: `/catalog/${p.slug}`,
+      jsonLd: [
+        buildProductJsonLd(p, siteUrl),
+        buildBreadcrumbJsonLd(
+          [
+            { name: "Главная", path: "/" },
+            { name: "Каталог", path: "/catalog" },
+            { name: p.name, path: `/catalog/${p.slug}` },
+          ],
+          siteUrl,
+        ),
+      ],
+      og: { title: meta.ogTitle, description: meta.description },
     });
   }
+
+  // Глобальная микроразметка из layout.tsx — присутствует на каждой странице
+  const globalJsonLd: Record<string, unknown>[] = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Moranti",
+      url: siteUrl,
+      logo: `${siteUrl}/images/moranti-logo.png`,
+      description:
+        "Женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов.",
+      contactPoint: { "@type": "ContactPoint", contactType: "sales" },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Moranti",
+      url: siteUrl,
+      description: "Премиальные кожаные сумки ручной работы",
+      inLanguage: "ru",
+    },
+  ];
 
   return (
     <SeoPreview
@@ -115,6 +187,7 @@ export default async function SeoAdminPage() {
       domain={domain}
       siteName={site.siteName}
       faviconUrl={`${siteUrl}/favicon.ico`}
+      globalJsonLd={globalJsonLd}
     />
   );
 }

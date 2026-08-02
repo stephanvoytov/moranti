@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getProducts, getCategories } from "@/data/products";
 import { readSettings } from "@/lib/settings";
 import { seoConfig } from "@/config/seo";
+import { buildCollectionPageJsonLd } from "@/lib/seo-jsonld";
 import CatalogPage from "./catalog-content";
 
 // Страница dynamic: searchParams в generateMetadata (SEO-мета по категориям).
@@ -54,12 +55,31 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   };
 }
 
-export default async function CatalogPageWrapper() {
+export default async function CatalogPageWrapper({ searchParams }: Props) {
+  const params = await searchParams;
   const [products, categories, settings] = await Promise.all([
     getProducts(),
     getCategories(),
     readSettings(),
   ]);
+
+  const catSlug = params.category;
+  const cat = catSlug ? seoConfig.categories[catSlug] : undefined;
+
+  // CollectionPage JSON-LD: для категории — своя, иначе — весь каталог
+  const collectionJsonLd = cat
+    ? buildCollectionPageJsonLd(
+        cat.title.replace(" — Moranti", ""),
+        `${cat.description} Доставка по России.`,
+        `/catalog?category=${catSlug}`,
+        products.filter((p) => p.category === catSlug).length,
+      )
+    : buildCollectionPageJsonLd(
+        "Каталог кожаных сумок Moranti",
+        "Женские сумки из натуральной итальянской кожи. Кросс-боди, тоуты, багеты, рюкзаки.",
+        "/catalog",
+        products.length,
+      );
 
   return (
     <>
@@ -67,15 +87,7 @@ export default async function CatalogPageWrapper() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "CollectionPage",
-            name: "Каталог кожаных сумок Moranti",
-            description:
-              "Женские сумки из натуральной итальянской кожи. Кросс-боди, тоуты, багеты, рюкзаки.",
-            url: "/catalog",
-            numberOfItems: products.length,
-          }),
+          __html: JSON.stringify(collectionJsonLd),
         }}
       />
       <CatalogPage

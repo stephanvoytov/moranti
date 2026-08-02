@@ -5,6 +5,7 @@ import type { CharacteristicGroup } from "@/data/products";
 import { getProducts, getProduct } from "@/data/products";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import { seoConfig, buildProductSeoMeta } from "@/config/seo";
+import { buildProductJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo-jsonld";
 import PriceClient from "./price-client";
 import ColorSwatches from "./color-swatches";
 import GalleryClient from "./gallery-client";
@@ -138,63 +139,16 @@ export default async function ProductPage({ params }: Props) {
     })
     .slice(0, 4);
 
-  // Маркетплейс в наличии, если остаток ненулевой
-  const mpInStock = (name: string): boolean =>
-    name === "Wildberries"
-      ? (product.wbStock ?? 0) > 0
-      : name === "Ozon"
-        ? (product.ozonStock ?? 0) > 0
-        : true;
-
-  const availableMarketplaces = (product.marketplaces ?? []).filter((mp) =>
-    mpInStock(mp.name)
-  );
-
-  // Product JSON-LD structured data
-  const offers = availableMarketplaces.length
-    ? availableMarketplaces.map((mp) => ({
-        "@type": "Offer",
-        name: `Купить на ${mp.name}`,
-        url: mp.url,
-        price: product.price,
-        priceCurrency: "RUB",
-        availability: "https://schema.org/InStock",
-      }))
-    : {
-        "@type": "Offer",
-        url: `${siteUrl}/catalog/${product.slug}`,
-        price: product.price,
-        priceCurrency: "RUB",
-        availability: "https://schema.org/InStock",
-      };
-
   const catName = seoConfig.categoryNames[product.category] || product.category;
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Главная", item: `${siteUrl}/` },
-      { "@type": "ListItem", position: 2, name: "Каталог", item: `${siteUrl}/catalog` },
-      { "@type": "ListItem", position: 3, name: product.name, item: `${siteUrl}/catalog/${product.slug}` },
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd(
+    [
+      { name: "Главная", path: "/" },
+      { name: "Каталог", path: "/catalog" },
+      { name: product.name, path: `/catalog/${product.slug}` },
     ],
-  };
-
-  const productJsonLd: Record<string, unknown> = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    description: product.description,
-    image: product.images?.length ? product.images : [product.image],
-    offers,
-  };
-
-  if (product.rating) {
-    productJsonLd.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: product.rating,
-      reviewCount: product.reviewsCount || 0,
-    };
-  }
+    siteUrl,
+  );
+  const productJsonLd = buildProductJsonLd(product, siteUrl);
 
   // Build subtitle & dimensions
   const subtitle = buildSubtitle(product.composition ?? null, product.characteristics ?? null);
