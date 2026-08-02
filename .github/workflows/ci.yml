@@ -9,6 +9,9 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      # prisma generate (postinstall) требует DATABASE_URL на этапе установки
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
 
