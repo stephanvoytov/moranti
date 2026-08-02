@@ -37,6 +37,21 @@
   padding: 3px;
 }
 
+.toggles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.viewToggle {
+  display: flex;
+  gap: 4px;
+  background: rgba(100, 116, 139, 0.12);
+  border-radius: 8px;
+  padding: 3px;
+}
+
 .deviceBtn {
   border: none;
   background: transparent;
@@ -258,6 +273,25 @@
 
 .ogDesc {
   color: #4d5156;
+}
+
+/* ─── Мета-теги (полный HTML <head>) ─── */
+
+.metaTags {
+  margin-top: 8px;
+}
+
+.metaTagsBlock {
+  margin: 0;
+  padding: 12px 14px;
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 8px;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre;
 }
 
 /* ─── JSON-LD ─── */

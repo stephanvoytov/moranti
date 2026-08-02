@@ -15,6 +15,7 @@ interface Props {
 }
 
 type Device = "desktop" | "mobile";
+type View = "serp" | "meta";
 
 const GROUP_LABELS: Record<SeoEntry["group"], string> = {
   pages: "Страницы",
@@ -45,6 +46,46 @@ function JsonLdBlock({ jsonLd }: { jsonLd: Record<string, unknown>[] }) {
         ))}
       </div>
     </details>
+  );
+}
+
+/** Полный HTML-набор мета-тегов, который отдаёт страница */
+function MetaTagsView({
+  entry,
+  domain,
+  siteName,
+}: {
+  entry: SeoEntry;
+  domain: string;
+  siteName: string;
+}) {
+  const url = `https://${domain}${entry.path}`;
+  const canonical = `https://${domain}${entry.canonical}`;
+  const robots = entry.noindex ? "noindex, follow" : "index, follow";
+  const ogTitle = entry.og?.title || entry.title;
+  const ogDesc = entry.og?.description || entry.description;
+
+  const lines = [
+    `<title>${entry.title}</title>`,
+    `<meta name="description" content="${entry.description}" />`,
+    `<link rel="canonical" href="${canonical}" />`,
+    `<meta name="robots" content="${robots}" />`,
+    `<meta property="og:title" content="${ogTitle}" />`,
+    `<meta property="og:description" content="${ogDesc}" />`,
+    `<meta property="og:url" content="${url}" />`,
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:site_name" content="${siteName}" />`,
+    `<meta property="og:locale" content="ru_RU" />`,
+  ];
+  if (entry.ogImage) {
+    lines.push(`<meta property="og:image" content="${entry.ogImage}" />`);
+  }
+
+  return (
+    <div className={styles.metaTags}>
+      <pre className={styles.metaTagsBlock}>{lines.join("\n")}</pre>
+      <JsonLdBlock jsonLd={entry.jsonLd} />
+    </div>
   );
 }
 
@@ -137,33 +178,60 @@ export default function SeoPreview({
   globalJsonLd,
 }: Props) {
   const [device, setDevice] = useState<Device>("desktop");
+  const [view, setView] = useState<View>("serp");
   const groups = ["pages", "categories", "products"] as const;
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.pageTitle}>SEO — как сайт выглядит в Google</h1>
-        <div className={styles.deviceToggle} role="tablist">
-          <button
-            role="tab"
-            aria-selected={device === "desktop"}
-            className={`${styles.deviceBtn} ${
-              device === "desktop" ? styles.deviceBtnActive : ""
-            }`}
-            onClick={() => setDevice("desktop")}
-          >
-            Десктоп
-          </button>
-          <button
-            role="tab"
-            aria-selected={device === "mobile"}
-            className={`${styles.deviceBtn} ${
-              device === "mobile" ? styles.deviceBtnActive : ""
-            }`}
-            onClick={() => setDevice("mobile")}
-          >
-            Мобильный
-          </button>
+        <div className={styles.toggles}>
+          <div className={styles.viewToggle} role="tablist">
+            <button
+              role="tab"
+              aria-selected={view === "serp"}
+              className={`${styles.deviceBtn} ${
+                view === "serp" ? styles.deviceBtnActive : ""
+              }`}
+              onClick={() => setView("serp")}
+            >
+              Сниппет
+            </button>
+            <button
+              role="tab"
+              aria-selected={view === "meta"}
+              className={`${styles.deviceBtn} ${
+                view === "meta" ? styles.deviceBtnActive : ""
+              }`}
+              onClick={() => setView("meta")}
+            >
+              Мета-теги
+            </button>
+          </div>
+          {view === "serp" && (
+            <div className={styles.deviceToggle} role="tablist">
+              <button
+                role="tab"
+                aria-selected={device === "desktop"}
+                className={`${styles.deviceBtn} ${
+                  device === "desktop" ? styles.deviceBtnActive : ""
+                }`}
+                onClick={() => setDevice("desktop")}
+              >
+                Десктоп
+              </button>
+              <button
+                role="tab"
+                aria-selected={device === "mobile"}
+                className={`${styles.deviceBtn} ${
+                  device === "mobile" ? styles.deviceBtnActive : ""
+                }`}
+                onClick={() => setDevice("mobile")}
+              >
+                Мобильный
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -188,17 +256,29 @@ export default function SeoPreview({
         return (
           <section key={group} className={styles.group}>
             <h2 className={styles.groupTitle}>{GROUP_LABELS[group]}</h2>
-            {groupEntries.map((entry) => (
-              <SerpSnippet
-                key={entry.id}
-                entry={entry}
-                device={device}
-                domain={domain}
-                siteName={siteName}
-                faviconUrl={faviconUrl}
-                entries={entries}
-              />
-            ))}
+            {groupEntries.map((entry) =>
+              view === "serp" ? (
+                <SerpSnippet
+                  key={entry.id}
+                  entry={entry}
+                  device={device}
+                  domain={domain}
+                  siteName={siteName}
+                  faviconUrl={faviconUrl}
+                  entries={entries}
+                />
+              ) : (
+                <div key={entry.id} className={styles.item}>
+                  <div className={styles.meta}>
+                    <code className={styles.path}>{entry.path}</code>
+                    {entry.noindex && (
+                      <span className={styles.noindex}>noindex</span>
+                    )}
+                  </div>
+                  <MetaTagsView entry={entry} domain={domain} siteName={siteName} />
+                </div>
+              ),
+            )}
           </section>
         );
       })}

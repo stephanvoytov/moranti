@@ -23,6 +23,8 @@ export interface SeoEntry {
   jsonLd: Record<string, unknown>[];
   /** OpenGraph-значения (могут отличаться от title/description) */
   og?: { title: string; description: string };
+  /** og:image (абсолютный URL) */
+  ogImage?: string;
 }
 
 export default async function SeoAdminPage() {
@@ -30,6 +32,8 @@ export default async function SeoAdminPage() {
   const domain = siteUrl.replace(/^https?:\/\//, "");
   const products = await getProducts();
   const { site, pages, categories, catalog } = seoConfig;
+  // og:image по умолчанию для страниц (из конфига)
+  const pageOgImage = `${siteUrl}${site.ogImage}`;
 
   const entries: SeoEntry[] = [];
 
@@ -45,6 +49,7 @@ export default async function SeoAdminPage() {
       siteSegments: [],
       canonical: "/",
       jsonLd: [],
+      ogImage: pageOgImage,
     },
     {
       id: "catalog",
@@ -63,6 +68,7 @@ export default async function SeoAdminPage() {
           products.length,
         ),
       ],
+      ogImage: pageOgImage,
     },
     {
       id: "care",
@@ -74,6 +80,7 @@ export default async function SeoAdminPage() {
       siteSegments: ["Уход за сумками"],
       canonical: "/care",
       jsonLd: [],
+      ogImage: pageOgImage,
     },
     {
       id: "delivery",
@@ -85,6 +92,7 @@ export default async function SeoAdminPage() {
       siteSegments: ["Доставка"],
       canonical: "/delivery",
       jsonLd: [],
+      ogImage: pageOgImage,
     },
     {
       id: "favorites",
@@ -96,6 +104,7 @@ export default async function SeoAdminPage() {
       siteSegments: [],
       canonical: "/favorites",
       jsonLd: [],
+      ogImage: pageOgImage,
     },
   );
 
@@ -121,6 +130,7 @@ export default async function SeoAdminPage() {
           count,
         ),
       ],
+      ogImage: pageOgImage,
     });
   }
 
@@ -156,6 +166,7 @@ export default async function SeoAdminPage() {
         ),
       ],
       og: { title: meta.ogTitle, description: meta.description },
+      ogImage: p.image,
     });
   }
 
