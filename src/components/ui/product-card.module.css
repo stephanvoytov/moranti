@@ -32,6 +32,9 @@
   inset: 0;
   opacity: 0;
   transition: opacity 0.35s ease;
+  /* Создаёт stacking context: placeholder SmartImage (z-index: -1) остаётся
+     внутри слоя и рисуется поверх фона .imageWrap, а не позади него. */
+  isolation: isolate;
 }
 
 .imageLayerActive {
