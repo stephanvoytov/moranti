@@ -14,12 +14,17 @@ export default function Hero({ settings }: { settings: HeroSettings }) {
   return (
     <section className={styles.hero}>
       {/* Фоновое изображение поверх градиента (если есть).
-          Desktop и mobile — разные картинки: показываем по media-query. */}
+          Desktop и mobile — разные картинки: показываем по media-query.
+          Если мобильной нет — фолбэк на desktop-картинку (иначе на
+          телефоне hero останется без фото). */}
       {settings.image && settings.image.length > 0 && (
         <HeroImage src={settings.image} variant="desktop" />
       )}
-      {settings.imageMobile && settings.imageMobile.length > 0 && (
-        <HeroImage src={settings.imageMobile} variant="mobile" />
+      {(settings.imageMobile || settings.image) && (
+        <HeroImage
+          src={settings.imageMobile || settings.image}
+          variant="mobile"
+        />
       )}
       <div className={styles.overlay} />
       <div className={styles.content}>
