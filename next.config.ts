@@ -27,6 +27,14 @@ const nextConfig: NextConfig = {
     root: process.cwd(),
   },
 
+  /* ─── Ограничение воркеров сборки ───
+     На Windows массовый спавн V8-воркеров (по числу ядер) падает в
+     "Committing semi space failed" — нехватка commit-чарджа, а не RAM.
+     cpus: 2 — стабильно и на локали, и на Vercel. */
+  experimental: {
+    cpus: 2,
+  },
+
   /* ─── Image optimization ─── */
   images: {
     formats: ["image/avif", "image/webp"],
