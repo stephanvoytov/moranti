@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { generateSerpPreview } from "@power-seo/preview";
+import { useEffect, useMemo, useState } from "react";
+import { generateSerpPreview, truncateAtPixelWidth } from "@power-seo/preview";
+import { PreviewPanel } from "@power-seo/preview/react";
 import { buildCiteUrl } from "@/config/seo";
 import { blobUrl } from "@/lib/blob";
 import type { SeoEntry } from "@/app/admin/(auth)/seo/page";
@@ -64,8 +65,40 @@ function JsonLdBlock({ jsonLd }: { jsonLd: Record<string, unknown>[] }) {
   );
 }
 
-/** Превью ссылки в соцсетях/мессенджерах (OG-карточка) */
-function SocialCard({
+/** Реальные размеры изображения — нужны библиотеке для валидации og:image / twitter:image */
+function useImageSize(
+  src: string | undefined,
+): { width?: number; height?: number } {
+  const [size, setSize] = useState<{ width?: number; height?: number }>({});
+  useEffect(() => {
+    if (!src) return;
+    let cancelled = false;
+    const img = new Image();
+    img.onload = () => {
+      if (!cancelled && img.naturalWidth && img.naturalHeight) {
+        setSize({ width: img.naturalWidth, height: img.naturalHeight });
+      }
+    };
+    img.onerror = () => {
+      if (!cancelled) setSize({});
+    };
+    img.src = src;
+    return () => {
+      cancelled = true;
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [src]);
+  return src ? size : {};
+}
+
+/**
+ * Превью в соцсетях через PreviewPanel из @power-seo/preview:
+ * вкладки Google / Facebook / Twitter со встроенной валидацией.
+ * Размеры картинки замеряем сами и передаём — библиотека проверит
+ * минимумы (og: 1200×630, twitter: 1200×675).
+ */
+function SocialPreviewPanel({
   entry,
   domain,
   siteName,
@@ -74,34 +107,27 @@ function SocialCard({
   domain: string;
   siteName: string;
 }) {
+  const url = `https://${domain}${entry.path}`;
   const ogTitle = entry.og?.title || entry.title;
   const ogDesc = entry.og?.description || entry.description;
-  const url = `https://${domain}${entry.path}`;
+  const imageUrl = entry.ogImage ? blobUrl(entry.ogImage) : undefined;
+  const { width, height } = useImageSize(imageUrl);
+  const image = useMemo(
+    () => (imageUrl ? { url: imageUrl, width, height } : undefined),
+    [imageUrl, width, height],
+  );
 
   return (
-    <div className={styles.socialCard}>
-      <div className={styles.socialImageWrap}>
-        {entry.ogImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            className={styles.socialImage}
-            src={blobUrl(entry.ogImage)}
-            alt=""
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
-          />
-        ) : (
-          <div className={styles.socialImagePlaceholder}>нет og:image</div>
-        )}
-      </div>
-      <div className={styles.socialBody}>
-        <div className={styles.socialSite}>{siteName}</div>
-        <div className={styles.socialTitle}>{ogTitle}</div>
-        <div className={styles.socialDesc}>{ogDesc}</div>
-        <div className={styles.socialUrl}>{url}</div>
-      </div>
-    </div>
+    <PreviewPanel
+      title={ogTitle}
+      description={ogDesc}
+      url={url}
+      image={image}
+      siteName={siteName}
+      siteTitle={siteName}
+      twitterSite={siteName}
+      twitterCardType="summary_large_image"
+    />
   );
 }
 
@@ -128,6 +154,9 @@ function SerpSnippet({
     description: entry.description,
     url,
   });
+  // Мобильный Google переносит title на 2 строки (~920px) — показываем, что влезет
+  const displayTitle =
+    device === "mobile" ? truncateAtPixelWidth(entry.title, 920).text : serp.title;
 
   const titleState = serp.titleValidation.valid ? "ok" : "over";
   const descState = serp.descriptionValidation.valid ? "ok" : "over";
@@ -158,7 +187,7 @@ function SerpSnippet({
         }`}
       >
         <a className={styles.title} href={url} target="_blank" rel="noreferrer">
-          {serp.title || "—"}
+          {displayTitle || "—"}
         </a>
         <div className={styles.urlRow}>
           {/* Favicon домена, как в живом Google (26px). Не загрузился — просто скрываем */}
@@ -314,7 +343,7 @@ export default function SeoPreview({
                       <span className={styles.noindex}>noindex</span>
                     )}
                   </div>
-                  <SocialCard
+                  <SocialPreviewPanel
                     entry={entry}
                     domain={domain}
                     siteName={siteName}
