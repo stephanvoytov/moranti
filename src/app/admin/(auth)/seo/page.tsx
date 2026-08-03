@@ -180,7 +180,6 @@ export default async function SeoAdminPage() {
       entries={entries}
       domain={domain}
       siteName={site.siteName}
-      faviconUrl={`${siteUrl}/favicon.ico`}
       globalJsonLd={globalJsonLd}
     />
   );
