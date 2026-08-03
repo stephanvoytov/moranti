@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { Product } from "@/data/products";
 import { useFavorites } from "@/lib/favorites-context";
@@ -47,10 +47,22 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const hoverTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cardRef = useRef<HTMLElement>(null);
+  // Фактический статус загрузки hover-фото (ключ — проксированный blobUrl):
+  // "loaded" — слой полностью отрисовался, "failed" — фото битое (пропускаем).
+  // Служит гейтом для карусели: кадр не показывается, пока не загружен.
+  const imageStatus = useRef<Map<string, "loaded" | "failed">>(new Map());
+  const markLoaded = useCallback((src: string) => {
+    imageStatus.current.set(src, "loaded");
+  }, []);
+  const markFailed = useCallback((src: string) => {
+    imageStatus.current.set(src, "failed");
+  }, []);
 
   // Предзагрузка hover-фото: когда карточка попадает во вьюпорт (чуть заранее),
   // скачиваем images[1..3] в HTTP-кэш браузера. К моменту наведения они уже
   // готовы — карусель сменяет фото мгновенно, без белого placeholder'а.
+  // Качаем тот же проксированный URL, что рендерят слои (blobUrl), — иначе
+  // для Vercel Blob прелоад не прогревает кэш /api/blob и бесполезен.
   useEffect(() => {
     if (hoverImages.length < 2) return;
     if (typeof IntersectionObserver === "undefined") return;
@@ -61,7 +73,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
         for (const url of toPreload) {
-          if (url) new Image().src = url;
+          if (url) new Image().src = blobUrl(url);
         }
         observer.disconnect();
       },
@@ -91,14 +103,31 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
     toggleFavorite(product.wbArticle);
   };
 
+  // Статус кадра: "loaded" | "failed" | undefined (ещё грузится)
+  const statusOf = (index: number) => {
+    const url = hoverImages[index] ? blobUrl(hoverImages[index]) : "";
+    return url ? imageStatus.current.get(url) : undefined;
+  };
+
   const startCycling = () => {
     if (hoverImages.length < 2) return;
     // Защита от повторного вызова: сначала гасим старый интервал, иначе он
     // «утечёт» и карточка продолжит крутиться после mouseleave.
     if (hoverTimer.current) clearInterval(hoverTimer.current);
-    setHoverIndex(1);
+    // Первый кадр — только если он уже загружен; иначе остаёмся на базовом
+    // фото: интервал подхватит следующий кадр, как только тот будет готов.
+    setHoverIndex(statusOf(1) === "loaded" ? 1 : 0);
     hoverTimer.current = setInterval(() => {
-      setHoverIndex((prev) => (prev + 1) % hoverImages.length);
+      setHoverIndex((prev) => {
+        // Пропускаем битые кадры (они не загрузятся никогда); на недогруженном
+        // остаёмся — кадр меняется только когда следующая картинка полностью
+        // загрузилась (требование: без placeholder'а при hover).
+        let next = (prev + 1) % hoverImages.length;
+        while (next !== 0 && statusOf(next) === "failed") {
+          next = (next + 1) % hoverImages.length;
+        }
+        return next === 0 || statusOf(next) === "loaded" ? next : prev;
+      });
     }, 1200);
   };
 
@@ -145,6 +174,8 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
                 className={styles.image}
                 priority={priority && i === 0}
                 draggable={false}
+                onLoad={markLoaded}
+                onError={() => markFailed(blobUrl(url))}
               />
             </div>
           ))}

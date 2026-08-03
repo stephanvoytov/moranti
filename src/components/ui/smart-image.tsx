@@ -15,6 +15,8 @@ interface SmartImageProps {
   onMouseDown?: (e: React.MouseEvent) => void;
   /** Доп. обработчик ошибки — для fallback-цепочек (напр. big → c516x688) */
   onError?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
+  /** Вызывается при фактической загрузке src (включая кэш-хиты) — src проксированный */
+  onLoad?: (src: string) => void;
   /** Кастомный класс placeholder (родитель должен быть position: relative) */
   placeholderClassName?: string;
 }
@@ -50,6 +52,7 @@ function SmartImageInner({
   draggable,
   onMouseDown,
   onError,
+  onLoad,
   placeholderClassName,
 }: SmartImageProps) {
   // src, который сейчас показан, и загружен ли он (управляет placeholder'ом)
@@ -88,13 +91,19 @@ function SmartImageInner({
   useEffect(() => {
     const img = imgRef.current;
     if (img && img.complete && img.naturalWidth > 0) {
-      if (src) loadedCache.add(src);
+      if (src) {
+        loadedCache.add(src);
+        onLoad?.(src);
+      }
       setDisplayLoaded(true);
     }
-  }, [src]);
+  }, [src, onLoad]);
 
   const handleLoad = () => {
-    if (src) loadedCache.add(src);
+    if (src) {
+      loadedCache.add(src);
+      onLoad?.(src);
+    }
     setDisplayLoaded(true);
   };
 
@@ -110,6 +119,7 @@ function SmartImageInner({
     setDisplaySrc(loadingSrc);
     setDisplayLoaded(true);
     setLoadingSrc(null);
+    onLoad?.(loadingSrc);
   };
 
   const handlePendingError = (e: React.SyntheticEvent<HTMLImageElement>) => {
