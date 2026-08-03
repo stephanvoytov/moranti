@@ -56,12 +56,12 @@ describe("pluralRu", () => {
 
 describe("buildCiteUrl", () => {
   it("builds cite without segments", () => {
-    expect(buildCiteUrl("moranti.ru", [])).toBe("https://moranti.ru");
+    expect(buildCiteUrl("morantibags.ru", [])).toBe("https://morantibags.ru");
   });
 
   it("builds cite with breadcrumb segments", () => {
-    expect(buildCiteUrl("moranti.ru", ["Каталог", "Кросс-боди"])).toBe(
-      "https://moranti.ru › Каталог › Кросс-боди",
+    expect(buildCiteUrl("morantibags.ru", ["Каталог", "Кросс-боди"])).toBe(
+      "https://morantibags.ru › Каталог › Кросс-боди",
     );
   });
 });

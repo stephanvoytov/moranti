@@ -8,7 +8,7 @@ import {
   buildItemListJsonLd,
 } from "@/lib/seo-jsonld";
 
-const SITE_URL = "https://moranti.ru";
+const SITE_URL = "https://morantibags.ru";
 
 /** Минимальный товар для тестов микроразметки */
 function makeProduct(overrides: Partial<Product> = {}): Product {
@@ -101,9 +101,9 @@ describe("buildBreadcrumbJsonLd", () => {
       "@type": "ListItem",
       position: 1,
       name: "Главная",
-      item: "https://moranti.ru/",
+      item: "https://morantibags.ru/",
     });
-    expect(items[2].item).toBe("https://moranti.ru/catalog?category=crossbody");
+    expect(items[2].item).toBe("https://morantibags.ru/catalog?category=crossbody");
   });
 });
 
@@ -149,7 +149,7 @@ describe("buildItemListJsonLd", () => {
     expect(items[0]).toEqual({
       "@type": "ListItem",
       position: 1,
-      url: "https://moranti.ru/catalog/a",
+      url: "https://morantibags.ru/catalog/a",
       name: "Сумка A",
       image: "https://cdn.example.com/a.jpg",
     });
