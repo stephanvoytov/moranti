@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "./page.module.css";
 import { seoConfig } from "@/config/seo";
+import { buildBreadcrumbJsonLd } from "@/lib/seo-jsonld";
 
 const { title, description } = seoConfig.pages.delivery;
+
+const siteUrl = process.env.SITE_URL || "http://localhost:3001";
 
 export const metadata: Metadata = {
   title,
@@ -21,6 +24,21 @@ export const metadata: Metadata = {
 export default function DeliveryPage() {
   return (
     <>
+      {/* BreadcrumbList JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbJsonLd(
+              [
+                { name: "Главная", path: "/" },
+                { name: "Доставка", path: "/delivery" },
+              ],
+              siteUrl,
+            ),
+          ),
+        }}
+      />
       <div className={styles.page}>
         <nav className={styles.breadcrumb}>
           <Link href="/" className={styles.breadcrumbLink}>

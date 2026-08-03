@@ -4,6 +4,7 @@ import {
   buildProductJsonLd,
   buildBreadcrumbJsonLd,
   buildCollectionPageJsonLd,
+  buildGlobalJsonLd,
 } from "@/lib/seo-jsonld";
 import SeoPreview from "@/components/admin/seo-preview";
 
@@ -170,27 +171,9 @@ export default async function SeoAdminPage() {
     });
   }
 
-  // Глобальная микроразметка из layout.tsx — присутствует на каждой странице
-  const globalJsonLd: Record<string, unknown>[] = [
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      name: "Moranti",
-      url: siteUrl,
-      logo: `${siteUrl}/images/moranti-logo.png`,
-      description:
-        "Женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов.",
-      contactPoint: { "@type": "ContactPoint", contactType: "sales" },
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      name: "Moranti",
-      url: siteUrl,
-      description: "Премиальные кожаные сумки ручной работы",
-      inLanguage: "ru",
-    },
-  ];
+  // Глобальная микроразметка из layout.tsx — присутствует на каждой странице.
+  // Единый источник: seo-jsonld.ts (layout и превью не могут разойтись)
+  const globalJsonLd = buildGlobalJsonLd(siteUrl);
 
   return (
     <SeoPreview

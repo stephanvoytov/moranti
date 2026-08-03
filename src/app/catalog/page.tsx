@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { getProducts, getCategories } from "@/data/products";
 import { readSettings } from "@/lib/settings";
 import { seoConfig } from "@/config/seo";
-import { buildCollectionPageJsonLd } from "@/lib/seo-jsonld";
+import {
+  buildCollectionPageJsonLd,
+  buildBreadcrumbJsonLd,
+} from "@/lib/seo-jsonld";
 import CatalogPage from "./catalog-content";
 
 // Страница dynamic: searchParams в generateMetadata (SEO-мета по категориям).
@@ -57,6 +60,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
 export default async function CatalogPageWrapper({ searchParams }: Props) {
   const params = await searchParams;
+  const siteUrl = process.env.SITE_URL || "http://localhost:3001";
   const [products, categories, settings] = await Promise.all([
     getProducts(),
     getCategories(),
@@ -65,6 +69,21 @@ export default async function CatalogPageWrapper({ searchParams }: Props) {
 
   const catSlug = params.category;
   const cat = catSlug ? seoConfig.categories[catSlug] : undefined;
+
+  // BreadcrumbList JSON-LD: Главная › Каталог (› Категория)
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd(
+    cat
+      ? [
+          { name: "Главная", path: "/" },
+          { name: "Каталог", path: "/catalog" },
+          { name: cat.name, path: `/catalog?category=${catSlug}` },
+        ]
+      : [
+          { name: "Главная", path: "/" },
+          { name: "Каталог", path: "/catalog" },
+        ],
+    siteUrl,
+  );
 
   // CollectionPage JSON-LD: для категории — своя, иначе — весь каталог
   const collectionJsonLd = cat
@@ -83,6 +102,13 @@ export default async function CatalogPageWrapper({ searchParams }: Props) {
 
   return (
     <>
+      {/* BreadcrumbList JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd),
+        }}
+      />
       {/* CollectionPage JSON-LD */}
       <script
         type="application/ld+json"

@@ -104,3 +104,48 @@ export function buildCollectionPageJsonLd(
     numberOfItems,
   };
 }
+
+/**
+ * Глобальная микроразметка для layout.tsx: Organization + WebSite.
+ * Единственный источник — админ-превью (/admin/seo) показывает то же самое.
+ */
+export function buildGlobalJsonLd(siteUrl: string): Record<string, unknown>[] {
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Moranti",
+      url: siteUrl,
+      logo: `${siteUrl}/images/moranti-logo.png`,
+      description:
+        "Женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов.",
+      contactPoint: { "@type": "ContactPoint", contactType: "sales" },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Moranti",
+      url: siteUrl,
+      description: "Премиальные кожаные сумки ручной работы",
+      inLanguage: "ru",
+    },
+  ];
+}
+
+/** ItemList: сетка товаров (популярные модели на главной) */
+export function buildItemListJsonLd(
+  products: Pick<Product, "slug" | "name" | "image">[],
+  siteUrl: string,
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: products.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${siteUrl}/catalog/${p.slug}`,
+      name: p.name,
+      image: p.image,
+    })),
+  };
+}

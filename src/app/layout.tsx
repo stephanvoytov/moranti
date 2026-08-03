@@ -6,6 +6,7 @@ import { FavoritesProvider } from "@/lib/favorites-context";
 import { readSettings } from "@/lib/settings";
 import type { SiteSettings } from "@/lib/settings";
 import { seoConfig } from "@/config/seo";
+import { buildGlobalJsonLd } from "@/lib/seo-jsonld";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import ScrollToTop from "@/components/ui/scroll-to-top";
@@ -168,34 +169,12 @@ export default async function RootLayout({
         {/* Favicon for legacy browsers */}
         <link rel="shortcut icon" href="/favicon.ico" />
 
-        {/* Structured data: Organization + WebSite */}
+        {/* Structured data: Organization + WebSite (единый источник — seo-jsonld.ts) */}
         <script
           nonce={nonce}
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify([
-              {
-                "@context": "https://schema.org",
-                "@type": "Organization",
-                name: "Moranti",
-                url: siteUrl,
-                logo: `${siteUrl}/images/moranti-logo.png`,
-                description:
-                  "Женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов.",
-                contactPoint: {
-                  "@type": "ContactPoint",
-                  contactType: "sales",
-                },
-              },
-              {
-                "@context": "https://schema.org",
-                "@type": "WebSite",
-                name: "Moranti",
-                url: siteUrl,
-                description: "Премиальные кожаные сумки ручной работы",
-                inLanguage: "ru",
-              },
-            ]),
+            __html: JSON.stringify(buildGlobalJsonLd(siteUrl)),
           }}
         />
       </head>

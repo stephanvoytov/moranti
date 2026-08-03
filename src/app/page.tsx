@@ -1,6 +1,7 @@
 import { readSettings } from "@/lib/settings";
 import { getProducts, getCategories } from "@/data/products";
 import { blobUrl } from "@/lib/blob";
+import { buildItemListJsonLd } from "@/lib/seo-jsonld";
 import Link from "next/link";
 import Hero from "@/components/sections/hero";
 import ProductCard from "@/components/ui/product-card";
@@ -41,8 +42,20 @@ export default async function Home() {
       ? products.filter((p) => featuredIds.includes(p.id))
       : products.slice(0, 4);
 
+  const siteUrl = process.env.SITE_URL || "http://localhost:3001";
+
   return (
     <>
+      {/* ItemList JSON-LD: популярные модели (если есть) */}
+      {featured.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(buildItemListJsonLd(featured, siteUrl)),
+          }}
+        />
+      )}
+
       {/* ——— Hero (серверный, с реальной картинкой сразу) ——— */}
       <Hero settings={hero} />
 
