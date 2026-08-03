@@ -177,11 +177,16 @@ function SmartImageInner({
           className={`${placeholderClass} ${failed ? styles.placeholderFailed : ""}`}
           aria-hidden="true"
         >
-          <svg width="24" height="24" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.2">
-            <rect x="2" y="2" width="16" height="16" rx="2" />
-            <circle cx="7" cy="7" r="2" />
-            <path d="M2 14l4-4 3 3 3-4 6 6" />
-          </svg>
+          {/* Иконка «нет фото» — ТОЛЬКО при ошибке. При загрузке показываем
+              чистый слой + shimmer: битая иконка в момент загрузки читалась
+              как «фото недоступно», хотя картинка просто грузилась. */}
+          {failed && (
+            <svg width="24" height="24" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.2">
+              <rect x="2" y="2" width="16" height="16" rx="2" />
+              <circle cx="7" cy="7" r="2" />
+              <path d="M2 14l4-4 3 3 3-4 6 6" />
+            </svg>
+          )}
         </span>
       )}
     </>
