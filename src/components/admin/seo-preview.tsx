@@ -84,6 +84,9 @@ function EntryPreview({
   const url = `https://${domain}${entry.path}`;
   const ogTitle = entry.og?.title || entry.title;
   const ogDesc = entry.og?.description || entry.description;
+  // Библиотека добавляет " - {siteTitle}" к title. Наши title уже содержат бренд
+  // («Moranti — …») — суффикс добавляем только если бренда ещё нет.
+  const siteTitle = ogTitle.includes(siteName) ? undefined : siteName;
   const imageUrl = entry.ogImage ? blobUrl(entry.ogImage) : undefined;
   const { width, height } = useImageSize(imageUrl);
   const image = useMemo(
@@ -98,7 +101,7 @@ function EntryPreview({
       url={url}
       image={image}
       siteName={siteName}
-      siteTitle={siteName}
+      siteTitle={siteTitle}
       twitterSite={siteName}
       twitterCardType="summary_large_image"
     />
