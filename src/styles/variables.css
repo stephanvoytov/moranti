@@ -34,6 +34,8 @@
   --border: #E2DDD6;
   --border-light: #EDE9E2;
   --border-gray: #EAEAEA;
+  /* Используется во всей админке (рамки карточек/инпутов) */
+  --border-light-gray: #E8E4DE;
   --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.06);
 
   /* ——— Typography ——— */

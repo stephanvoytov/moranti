@@ -46,6 +46,70 @@ const emptyForm: SettingsForm = {
   catImages: {},
 };
 
+/** Карточка hero-изображения (desktop / mobile): превью + кнопки загрузки */
+function HeroImageCard({
+  label,
+  hint,
+  src,
+  uploading,
+  onUpload,
+  onMedia,
+  onRemove,
+  mobile,
+}: {
+  label: string;
+  hint: string;
+  src: string;
+  uploading: boolean;
+  onUpload: () => void;
+  onMedia: () => void;
+  onRemove: () => void;
+  mobile?: boolean;
+}) {
+  return (
+    <div className={styles.heroCard}>
+      <div className={styles.heroCardHead}>
+        <span className={styles.heroCardLabel}>{label}</span>
+        <span className={styles.heroCardHint}>{hint}</span>
+      </div>
+      <div
+        className={`${styles.heroPreview}${mobile ? ` ${styles.heroPreviewMobile}` : ""}`}
+      >
+        {src ? (
+          <img
+            src={blobUrl(src)}
+            alt={`${label} preview`}
+            onError={(e) => {
+              console.error(`[settings] ${label} preview failed to load:`, src);
+              e.currentTarget.style.display = "none";
+            }}
+          />
+        ) : (
+          <span className={styles.heroPreviewEmpty}>Нет изображения</span>
+        )}
+      </div>
+      <div className={styles.heroCardActions}>
+        <button
+          type="button"
+          className={styles.uploadBtn}
+          onClick={onUpload}
+          disabled={uploading}
+        >
+          {uploading ? "Загрузка..." : "Загрузить"}
+        </button>
+        <button type="button" className={styles.mediaBtn} onClick={onMedia}>
+          Из медиа
+        </button>
+        {src && (
+          <button type="button" className={styles.removeBtn} onClick={onRemove}>
+            Удалить
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminSettingsPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -267,23 +331,37 @@ export default function AdminSettingsPage() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Настройки сайта</h1>
+        <div className={styles.headerText}>
+          <h1 className={styles.title}>Настройки сайта</h1>
+          <p className={styles.subtitle}>
+            Главный экран, категории, каталог, соцсети и аналитика
+          </p>
+        </div>
         <div className={styles.headerRight}>
-          {saved && <span className={styles.savedBadge}>Сохранено</span>}
           <button
             type="button"
             className={styles.modeToggle}
             onClick={mode === "form" ? switchToJson : switchToForm}
           >
-            {mode === "form" ? "JSON" : "Форма"}
+            {mode === "form" ? "Редактор JSON" : "Форма"}
           </button>
         </div>
       </header>
 
+      {error && <div className={styles.errorBanner}>{error}</div>}
+
       <form className={styles.form} onSubmit={handleSubmit}>
         {mode === "json" ? (
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Редактор JSON</h2>
+            <div className={styles.sectionHead}>
+              <span className={styles.sectionNum}>JSON</span>
+              <div>
+                <h2 className={styles.sectionTitle}>Редактор JSON</h2>
+                <p className={styles.sectionDesc}>
+                  Прямое редактирование настроек. Будьте аккуратны с форматом.
+                </p>
+              </div>
+            </div>
             <textarea
               className={styles.jsonEditor}
               value={jsonText}
@@ -293,12 +371,21 @@ export default function AdminSettingsPage() {
           </section>
         ) : (
           <>
-            {/* Hero */}
+            {/* 01 — Главный экран */}
             <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Главный экран</h2>
+              <div className={styles.sectionHead}>
+                <span className={styles.sectionNum}>01</span>
+                <div>
+                  <h2 className={styles.sectionTitle}>Главный экран</h2>
+                  <p className={styles.sectionDesc}>
+                    Заголовки и фоновые изображения hero-блока
+                  </p>
+                </div>
+              </div>
+
               <div className={styles.fieldGrid}>
-                <label className={styles.label}>
-                  Заголовок
+                <label className={styles.field}>
+                  <span className={styles.fieldLabel}>Заголовок</span>
                   <input
                     type="text"
                     className={styles.input}
@@ -306,8 +393,8 @@ export default function AdminSettingsPage() {
                     onChange={(e) => updateField("heroTitle", e.target.value)}
                   />
                 </label>
-                <label className={styles.label}>
-                  Теглайн
+                <label className={styles.field}>
+                  <span className={styles.fieldLabel}>Теглайн</span>
                   <input
                     type="text"
                     className={styles.input}
@@ -315,123 +402,67 @@ export default function AdminSettingsPage() {
                     onChange={(e) => updateField("heroTagline", e.target.value)}
                   />
                 </label>
-                <label className={styles.label}>
-                  Подзаголовок
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={form.heroSubtitle}
-                    onChange={(e) => updateField("heroSubtitle", e.target.value)}
-                  />
-                </label>
-                <label className={styles.label}>
-                  Изображение
-                  <div className={styles.imageRow}>
-                    <input
-                      type="hidden"
-                      value={form.heroImage}
-                      onChange={(e) => updateField("heroImage", e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className={styles.uploadBtn}
-                      onClick={() => fileRef.current?.click()}
-                      disabled={uploading}
-                    >
-                      {uploading ? "Загрузка..." : "Выбрать файл"}
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.mediaBtn}
-                      onClick={() => setPickerFor("hero")}
-                    >
-                      Из медиа
-                    </button>
-                    <input
-                      ref={fileRef}
-                      type="file"
-                      accept="image/*"
-                      style={{ display: "none" }}
-                      onChange={handleImageUpload}
-                    />
-                    {form.heroImage && (
-                      <span className={styles.imageName}>
-                        {form.heroImage.split("/").pop()}
-                      </span>
-                    )}
-                  </div>
-                  {form.heroImage && (
-                    <div className={styles.imagePreview}>
-                      <img
-                        src={blobUrl(form.heroImage)}
-                        alt="Hero preview"
-                        onError={(e) => {
-                          console.error("[settings] hero preview failed to load:", form.heroImage);
-                          setError(`Не удалось загрузить изображение: ${form.heroImage}`);
-                          e.currentTarget.style.display = "none";
-                        }}
-                      />
-                    </div>
-                  )}
-                </label>
-                <label className={styles.label}>
-                  Изображение (мобильное)
-                  <div className={styles.imageRow}>
-                    <input
-                      type="hidden"
-                      value={form.heroImageMobile}
-                      onChange={(e) => updateField("heroImageMobile", e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className={styles.uploadBtn}
-                      onClick={() => mobileFileRef.current?.click()}
-                      disabled={uploading}
-                    >
-                      {uploading ? "Загрузка..." : "Выбрать файл"}
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.mediaBtn}
-                      onClick={() => setPickerFor("heroMobile")}
-                    >
-                      Из медиа
-                    </button>
-                    <input
-                      ref={mobileFileRef}
-                      type="file"
-                      accept="image/*"
-                      style={{ display: "none" }}
-                      onChange={(e) => handleImageUpload(e, "heroMobile")}
-                    />
-                    {form.heroImageMobile && (
-                      <span className={styles.imageName}>
-                        {form.heroImageMobile.split("/").pop()}
-                      </span>
-                    )}
-                  </div>
-                  {form.heroImageMobile && (
-                    <div className={styles.imagePreview}>
-                      <img
-                        src={blobUrl(form.heroImageMobile)}
-                        alt="Hero mobile preview"
-                        onError={(e) => {
-                          console.error("[settings] hero mobile preview failed to load:", form.heroImageMobile);
-                          setError(`Не удалось загрузить изображение: ${form.heroImageMobile}`);
-                          e.currentTarget.style.display = "none";
-                        }}
-                      />
-                    </div>
-                  )}
-                </label>
               </div>
+
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>Подзаголовок</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={form.heroSubtitle}
+                  onChange={(e) => updateField("heroSubtitle", e.target.value)}
+                />
+              </label>
+
+              <div className={styles.heroImages}>
+                <HeroImageCard
+                  label="Desktop"
+                  hint="Широкий формат"
+                  src={form.heroImage}
+                  uploading={uploading}
+                  onUpload={() => fileRef.current?.click()}
+                  onMedia={() => setPickerFor("hero")}
+                  onRemove={() => updateField("heroImage", "")}
+                />
+                <HeroImageCard
+                  label="Mobile"
+                  hint="Вертикальный формат"
+                  src={form.heroImageMobile}
+                  uploading={uploading}
+                  onUpload={() => mobileFileRef.current?.click()}
+                  onMedia={() => setPickerFor("heroMobile")}
+                  onRemove={() => updateField("heroImageMobile", "")}
+                  mobile
+                />
+              </div>
+
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handleImageUpload}
+              />
+              <input
+                ref={mobileFileRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={(e) => handleImageUpload(e, "heroMobile")}
+              />
             </section>
 
-            {/* Featured Products */}
+            {/* 02 — Популярные модели */}
             <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Популярные модели</h2>
-              <label className={styles.label}>
-                ID товаров (через запятую)
+              <div className={styles.sectionHead}>
+                <span className={styles.sectionNum}>02</span>
+                <div>
+                  <h2 className={styles.sectionTitle}>Популярные модели</h2>
+                  <p className={styles.sectionDesc}>Товары на главной странице</p>
+                </div>
+              </div>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>ID товаров (через запятую)</span>
                 <input
                   type="text"
                   className={styles.input}
@@ -445,61 +476,75 @@ export default function AdminSettingsPage() {
               </label>
             </section>
 
-            {/* Category Images */}
+            {/* 03 — Фото категорий */}
             <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Фото категорий</h2>
-              <p className={styles.hint}>
-                Изображения для плиток категорий на главной странице. Оставьте
-                пустым — подберётся из первого товара в категории.
-              </p>
-              <div className={styles.catImageGrid}>
+              <div className={styles.sectionHead}>
+                <span className={styles.sectionNum}>03</span>
+                <div>
+                  <h2 className={styles.sectionTitle}>Фото категорий</h2>
+                  <p className={styles.sectionDesc}>Плитки категорий на главной странице</p>
+                </div>
+              </div>
+              <div className={styles.catGrid}>
                 {CATEGORY_SLUGS.map((slug) => (
-                  <label key={slug} className={styles.catImageLabel}>
-                    <span className={styles.catImageName}>{getCategoryName(slug)}</span>
-                    <div className={styles.catImageRow}>
-                      <input
-                        type="text"
-                        className={styles.input}
-                        value={form.catImages[slug] || ""}
-                        onChange={(e) =>
-                          setForm((prev) => ({
-                            ...prev,
-                            catImages: { ...prev.catImages, [slug]: e.target.value },
-                          }))
-                        }
-                        placeholder="URL изображения"
-                      />
-                      <button
-                        type="button"
-                        className={styles.mediaBtn}
-                        onClick={() => setPickerFor(slug)}
-                      >
-                        Из медиа
-                      </button>
-                      {form.catImages[slug] && (
-                        <div className={styles.catImagePreview}>
-                          <img
-                            src={blobUrl(form.catImages[slug])}
-                            alt={getCategoryName(slug)}
-                            onError={(e) => {
-                              console.error("[settings] category image failed to load:", form.catImages[slug]);
-                              setError(`Не удалось загрузить фото категории: ${form.catImages[slug]}`);
-                              e.currentTarget.style.display = "none";
-                            }}
-                          />
-                        </div>
+                  <div key={slug} className={styles.catCard}>
+                    <div className={styles.catPreview}>
+                      {form.catImages[slug] ? (
+                        <img
+                          src={blobUrl(form.catImages[slug])}
+                          alt={getCategoryName(slug)}
+                          onError={(e) => {
+                            console.error("[settings] category image failed to load:", form.catImages[slug]);
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <span className={styles.catPreviewEmpty}>—</span>
                       )}
                     </div>
-                  </label>
+                    <div className={styles.catBody}>
+                      <span className={styles.catName}>{getCategoryName(slug)}</span>
+                      <div className={styles.catRow}>
+                        <input
+                          type="text"
+                          className={styles.input}
+                          value={form.catImages[slug] || ""}
+                          onChange={(e) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              catImages: { ...prev.catImages, [slug]: e.target.value },
+                            }))
+                          }
+                          placeholder="URL изображения"
+                        />
+                        <button
+                          type="button"
+                          className={styles.mediaBtn}
+                          onClick={() => setPickerFor(slug)}
+                        >
+                          Из медиа
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
+              <p className={styles.hint}>
+                Оставьте пустым — подберётся из первого товара в категории.
+              </p>
             </section>
 
-            {/* Catalog Order */}
+            {/* 04 — Порядок в каталоге */}
             <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Порядок в каталоге</h2>
-              <label className={styles.label}>
-                ID товаров (через запятую)
+              <div className={styles.sectionHead}>
+                <span className={styles.sectionNum}>04</span>
+                <div>
+                  <h2 className={styles.sectionTitle}>Порядок в каталоге</h2>
+                  <p className={styles.sectionDesc}>Очерёдность товаров в каталоге</p>
+                </div>
+              </div>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>ID товаров (через запятую)</span>
                 <input
                   type="text"
                   className={styles.input}
@@ -513,42 +558,40 @@ export default function AdminSettingsPage() {
               </label>
             </section>
 
-            {/* API Keys — хранятся в переменных окружения (Vercel), не в настройках */}
+            {/* 05 — Аналитика */}
             <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>API ключи</h2>
-              <p className={styles.hint}>
-                Ключи Wildberries и Ozon задаются переменными окружения (WB_API_KEY,
-                OZON_CLIENT_ID, OZON_API_KEY) — на Vercel это Settings → Environment
-                Variables. Здесь они не хранятся.
-              </p>
-            </section>
-
-            {/* Analytics */}
-            <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Аналитика</h2>
-              <div className={styles.fieldGrid}>
-                <label className={styles.label}>
-                  Яндекс.Метрика ID
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={form.yandexMetrikaId}
-                    onChange={(e) => updateField("yandexMetrikaId", e.target.value)}
-                    placeholder="оставьте пустым, если не используется"
-                  />
-                  <span className={styles.hint}>
-                    ID счётчика Яндекс.Метрики
-                  </span>
-                </label>
+              <div className={styles.sectionHead}>
+                <span className={styles.sectionNum}>05</span>
+                <div>
+                  <h2 className={styles.sectionTitle}>Аналитика</h2>
+                  <p className={styles.sectionDesc}>Счётчики и метрики</p>
+                </div>
               </div>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>Яндекс.Метрика ID</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  value={form.yandexMetrikaId}
+                  onChange={(e) => updateField("yandexMetrikaId", e.target.value)}
+                  placeholder="оставьте пустым, если не используется"
+                />
+                <span className={styles.hint}>ID счётчика Яндекс.Метрики</span>
+              </label>
             </section>
 
-            {/* Social */}
+            {/* 06 — Социальные сети */}
             <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Социальные сети</h2>
+              <div className={styles.sectionHead}>
+                <span className={styles.sectionNum}>06</span>
+                <div>
+                  <h2 className={styles.sectionTitle}>Социальные сети</h2>
+                  <p className={styles.sectionDesc}>Ссылки в шапке и футере</p>
+                </div>
+              </div>
               <div className={styles.fieldGrid}>
-                <label className={styles.label}>
-                  Instagram
+                <label className={styles.field}>
+                  <span className={styles.fieldLabel}>Instagram</span>
                   <input
                     type="url"
                     className={styles.input}
@@ -557,8 +600,8 @@ export default function AdminSettingsPage() {
                     placeholder="https://instagram.com/..."
                   />
                 </label>
-                <label className={styles.label}>
-                  VK
+                <label className={styles.field}>
+                  <span className={styles.fieldLabel}>VK</span>
                   <input
                     type="url"
                     className={styles.input}
@@ -567,8 +610,8 @@ export default function AdminSettingsPage() {
                     placeholder="https://vk.com/..."
                   />
                 </label>
-                <label className={styles.label}>
-                  Telegram
+                <label className={styles.field}>
+                  <span className={styles.fieldLabel}>Telegram</span>
                   <input
                     type="url"
                     className={styles.input}
@@ -577,8 +620,8 @@ export default function AdminSettingsPage() {
                     placeholder="https://t.me/..."
                   />
                 </label>
-                <label className={styles.label}>
-                  WhatsApp
+                <label className={styles.field}>
+                  <span className={styles.fieldLabel}>WhatsApp</span>
                   <input
                     type="url"
                     className={styles.input}
@@ -590,12 +633,18 @@ export default function AdminSettingsPage() {
               </div>
             </section>
 
-            {/* Marketplaces */}
+            {/* 07 — Маркетплейсы */}
             <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Маркетплейсы</h2>
+              <div className={styles.sectionHead}>
+                <span className={styles.sectionNum}>07</span>
+                <div>
+                  <h2 className={styles.sectionTitle}>Маркетплейсы</h2>
+                  <p className={styles.sectionDesc}>Ссылки на карточки товаров</p>
+                </div>
+              </div>
               <div className={styles.fieldGrid}>
-                <label className={styles.label}>
-                  Wildberries
+                <label className={styles.field}>
+                  <span className={styles.fieldLabel}>Wildberries</span>
                   <input
                     type="url"
                     className={styles.input}
@@ -604,8 +653,8 @@ export default function AdminSettingsPage() {
                     placeholder="https://wildberries.ru/..."
                   />
                 </label>
-                <label className={styles.label}>
-                  Ozon
+                <label className={styles.field}>
+                  <span className={styles.fieldLabel}>Ozon</span>
                   <input
                     type="url"
                     className={styles.input}
@@ -616,17 +665,28 @@ export default function AdminSettingsPage() {
                 </label>
               </div>
             </section>
+
+            {/* 08 — API ключи */}
+            <section className={styles.section}>
+              <div className={styles.sectionHead}>
+                <span className={styles.sectionNum}>08</span>
+                <div>
+                  <h2 className={styles.sectionTitle}>API ключи</h2>
+                  <p className={styles.sectionDesc}>Доступы к маркетплейсам</p>
+                </div>
+              </div>
+              <p className={styles.hint}>
+                Ключи Wildberries и Ozon задаются переменными окружения (WB_API_KEY,
+                OZON_CLIENT_ID, OZON_API_KEY) — на Vercel это Settings → Environment
+                Variables. Здесь они не хранятся.
+              </p>
+            </section>
           </>
         )}
 
-        {error && <p className={styles.errorMsg}>{error}</p>}
-
-        <div className={styles.actions}>
-          <button
-            type="submit"
-            className={styles.saveBtn}
-            disabled={saving}
-          >
+        <div className={styles.saveBar}>
+          {saved && <span className={styles.savedBadge}>Сохранено</span>}
+          <button type="submit" className={styles.saveBtn} disabled={saving}>
             {saving ? "Сохранение..." : "Сохранить настройки"}
           </button>
         </div>
