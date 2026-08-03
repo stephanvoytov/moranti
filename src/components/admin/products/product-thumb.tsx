@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import SmartImage from "@/components/ui/smart-image";
+import { blobUrl } from "@/lib/blob";
 import { MARKETPLACE_FAVICONS } from "@/lib/marketplaces";
 import styles from "./product-thumb.module.css";
 
@@ -52,25 +53,25 @@ export default function ProductThumb({ item, href, onClick }: ProductThumbProps)
       {both ? (
         <>
           <div className={`${styles.imgSlot} ${styles.imgSlotWb} ${wbOos ? styles.slotOos : ""}`}>
-            <SmartImage src={wbImg!} alt="" className={styles.imgSlotInner} draggable={false} />
+            <SmartImage src={blobUrl(wbImg!)} alt="" className={styles.imgSlotInner} draggable={false} />
             <img src={MARKETPLACE_FAVICONS.wb} alt="WB" className={styles.slotBadge} />
             {wbOos && <div className={styles.slotOosOverlay}>НЕТ</div>}
           </div>
           <div className={`${styles.imgSlot} ${styles.imgSlotOzon} ${ozonOos ? styles.slotOos : ""}`}>
-            <SmartImage src={ozonImg!} alt="" className={styles.imgSlotInner} draggable={false} />
+            <SmartImage src={blobUrl(ozonImg!)} alt="" className={styles.imgSlotInner} draggable={false} />
             <img src={MARKETPLACE_FAVICONS.ozon} alt="Ozon" className={styles.slotBadge} />
             {ozonOos && <div className={styles.slotOosOverlay}>НЕТ</div>}
           </div>
         </>
       ) : wbImg ? (
         <div className={`${styles.imgSlot} ${styles.imgSlotSingle} ${wbOos ? styles.slotOos : ""}`}>
-          <SmartImage src={wbImg} alt="" className={styles.imgSlotInner} draggable={false} />
+          <SmartImage src={blobUrl(wbImg)} alt="" className={styles.imgSlotInner} draggable={false} />
           <img src={MARKETPLACE_FAVICONS.wb} alt="WB" className={styles.slotBadge} />
           {wbOos && <div className={styles.slotOosOverlay}>НЕТ</div>}
         </div>
       ) : ozonImg ? (
         <div className={`${styles.imgSlot} ${styles.imgSlotSingle} ${ozonOos ? styles.slotOos : ""}`}>
-          <SmartImage src={ozonImg} alt="" className={styles.imgSlotInner} draggable={false} />
+          <SmartImage src={blobUrl(ozonImg)} alt="" className={styles.imgSlotInner} draggable={false} />
           <img src={MARKETPLACE_FAVICONS.ozon} alt="Ozon" className={styles.slotBadge} />
           {ozonOos && <div className={styles.slotOosOverlay}>НЕТ</div>}
         </div>

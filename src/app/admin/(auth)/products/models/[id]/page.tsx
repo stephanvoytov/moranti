@@ -9,6 +9,7 @@ import ProductCard, { type ProductCardItem } from "@/components/admin/products/p
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import { CATEGORIES, getCategoryName } from "@/lib/categories";
 import { pickDisplayImage } from "@/lib/product-images";
+import { blobUrl } from "@/lib/blob";
 import form from "@/components/admin/editor-form.module.css";
 import styles from "./editor.module.css";
 
@@ -405,7 +406,7 @@ export default function ModelPage() {
                 <div key={v.id} className={styles.variantRow}>
                   <span className={styles.variantColor}>
                     {pickDisplayImage(v) && (
-                      <img src={pickDisplayImage(v)!} alt="" className={styles.variantThumb} />
+                      <img src={blobUrl(pickDisplayImage(v)!)} alt="" className={styles.variantThumb} />
                     )}
                     {v.colorName || "—"}
                   </span>
@@ -495,7 +496,7 @@ export default function ModelPage() {
                             className={styles.linkerCheckbox}
                           />
                           {pickDisplayImage(p) && (
-                            <img src={pickDisplayImage(p)!} alt="" className={styles.linkerThumb} />
+                            <img src={blobUrl(pickDisplayImage(p)!)} alt="" className={styles.linkerThumb} />
                           )}
                           <span className={styles.linkerName}>
                             {p.name}

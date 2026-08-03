@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { generateSerpPreview } from "@power-seo/preview";
 import { buildCiteUrl } from "@/config/seo";
+import { blobUrl } from "@/lib/blob";
 import type { SeoEntry } from "@/app/admin/(auth)/seo/page";
 import styles from "./seo-preview.module.css";
 
@@ -84,7 +85,7 @@ function SocialCard({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             className={styles.socialImage}
-            src={entry.ogImage}
+            src={blobUrl(entry.ogImage)}
             alt=""
             onError={(e) => {
               e.currentTarget.style.display = "none";

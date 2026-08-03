@@ -84,6 +84,7 @@ export const heroSchema = z.object({
   tagline: z.string().default(""),
   subtitle: z.string().default(""),
   image: z.string().default(""),
+  imageMobile: z.string().default(""),
 });
 
 export const socialSchema = z.object({

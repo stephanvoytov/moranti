@@ -1,11 +1,18 @@
 import { readSettings } from "@/lib/settings";
 import { getProducts, getCategories } from "@/data/products";
+import { blobUrl } from "@/lib/blob";
 import Link from "next/link";
 import Hero from "@/components/sections/hero";
 import ProductCard from "@/components/ui/product-card";
 import SmartImage from "@/components/ui/smart-image";
 import HomeClient from "./home-client";
 import styles from "./page.module.css";
+
+/* ——— ISR: главная пересобирается каждые 60с ——— 
+   Настройки (hero, категории) меняются из админки; без ISR страница
+   статична и не видит изменений до следующего деплоя. revalidatePath("/")
+   из API-роутов даёт мгновенную инвалидацию, а 60с — страховка. */
+export const revalidate = 60;
 
 /* ——— Фото категории: приоритет у настроек, fallback на первый товар ——— */
 function getCategoryImage(
@@ -58,7 +65,7 @@ export default async function Home() {
                 >
                   {img ? (
                     <SmartImage
-                      src={img}
+                      src={blobUrl(img)}
                       alt={cat.name}
                       className={styles.collectionImg}
                     />

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Product } from "@/data/products";
 import { useFavorites } from "@/lib/favorites-context";
+import { blobUrl } from "@/lib/blob";
 import SmartImage from "./smart-image";
 import RatingStars from "./rating-stars";
 import styles from "./product-card.module.css";
@@ -139,7 +140,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
               className={`${styles.imageLayer} ${i === hoverIndex ? styles.imageLayerActive : ""}`}
             >
               <SmartImage
-                src={url}
+                src={blobUrl(url)}
                 alt={product.name}
                 className={styles.image}
                 priority={priority && i === 0}

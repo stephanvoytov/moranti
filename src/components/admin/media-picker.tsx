@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { blobUrl } from "@/lib/blob";
 import styles from "./media-picker.module.css";
 
 interface MediaItem {
@@ -125,7 +126,7 @@ export default function MediaPicker({ open, onClose, onSelect }: MediaPickerProp
                   onClick={() => onSelect(item.url)}
                   title={item.pathname}
                 >
-                  <img src={item.url} alt={item.pathname} loading="lazy" />
+                  <img src={blobUrl(item.url)} alt={item.pathname} loading="lazy" />
                 </button>
               ))}
             </div>

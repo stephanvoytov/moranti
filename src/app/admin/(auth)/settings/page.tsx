@@ -4,6 +4,8 @@ import { useState, useEffect, FormEvent, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/lib/toast-context";
 import { CATEGORY_SLUGS, getCategoryName } from "@/lib/categories";
+import { compressImage } from "@/lib/image-compress";
+import { blobUrl } from "@/lib/blob";
 import MediaPicker from "@/components/admin/media-picker";
 import styles from "./settings.module.css";
 
@@ -12,6 +14,7 @@ interface SettingsForm {
   heroTagline: string;
   heroSubtitle: string;
   heroImage: string;
+  heroImageMobile: string;
   featuredIds: string;
   catalogOrder: string;
   yandexMetrikaId: string;
@@ -30,6 +33,7 @@ const emptyForm: SettingsForm = {
   heroTagline: "",
   heroSubtitle: "",
   heroImage: "",
+  heroImageMobile: "",
   featuredIds: "",
   catalogOrder: "",
   yandexMetrikaId: "",
@@ -54,6 +58,7 @@ export default function AdminSettingsPage() {
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const mobileFileRef = useRef<HTMLInputElement>(null);
   /** Куда вставить выбранное из медиа: "hero" | slug категории | null */
   const [pickerFor, setPickerFor] = useState<string | null>(null);
 
@@ -74,6 +79,7 @@ export default function AdminSettingsPage() {
           heroTagline: data.hero?.tagline || "",
           heroSubtitle: data.hero?.subtitle || "",
           heroImage: data.hero?.image || "",
+          heroImageMobile: data.hero?.imageMobile || "",
           featuredIds: Array.isArray(data.featuredIds) ? data.featuredIds.join(", ") : "",
           catalogOrder: Array.isArray(data.catalogOrder) ? data.catalogOrder.join(", ") : "",
           yandexMetrikaId: data.yandexMetrikaId || "",
@@ -93,7 +99,10 @@ export default function AdminSettingsPage() {
       });
   }, [router]);
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImageUpload(
+    e: React.ChangeEvent<HTMLInputElement>,
+    target: "hero" | "heroMobile" = "hero",
+  ) {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -109,14 +118,20 @@ export default function AdminSettingsPage() {
     setError("");
 
     const fd = new FormData();
-    fd.append("file", file);
+    // Сжимаем в браузере (WebP, max 1600px) — hero-фото грузятся быстрее
+    const compressed = await compressImage(file);
+    fd.append("file", compressed);
 
     try {
       const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (res.ok) {
         console.log("[settings] upload ok:", data.url);
-        setForm((prev) => ({ ...prev, heroImage: data.url }));
+        if (target === "heroMobile") {
+          setForm((prev) => ({ ...prev, heroImageMobile: data.url }));
+        } else {
+          setForm((prev) => ({ ...prev, heroImage: data.url }));
+        }
       } else {
         console.error("[settings] upload failed:", res.status, data);
         setError(data.error || "Ошибка загрузки");
@@ -148,6 +163,7 @@ export default function AdminSettingsPage() {
         tagline: form.heroTagline,
         subtitle: form.heroSubtitle,
         image: form.heroImage,
+        imageMobile: form.heroImageMobile,
       },
       featuredIds: featuredIdsArray,
       catalogOrder: form.catalogOrder.split(",").map((s) => s.trim()).filter(Boolean),
@@ -225,6 +241,7 @@ export default function AdminSettingsPage() {
         heroTagline: parsed.hero?.tagline || "",
         heroSubtitle: parsed.hero?.subtitle || "",
         heroImage: parsed.hero?.image || "",
+        heroImageMobile: parsed.hero?.imageMobile || "",
         featuredIds: Array.isArray(parsed.featuredIds) ? parsed.featuredIds.join(", ") : "",
         catalogOrder: Array.isArray(parsed.catalogOrder) ? parsed.catalogOrder.join(", ") : "",
         yandexMetrikaId: parsed.yandexMetrikaId || "",
@@ -346,11 +363,61 @@ export default function AdminSettingsPage() {
                   {form.heroImage && (
                     <div className={styles.imagePreview}>
                       <img
-                        src={form.heroImage}
+                        src={blobUrl(form.heroImage)}
                         alt="Hero preview"
                         onError={(e) => {
                           console.error("[settings] hero preview failed to load:", form.heroImage);
                           setError(`Не удалось загрузить изображение: ${form.heroImage}`);
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    </div>
+                  )}
+                </label>
+                <label className={styles.label}>
+                  Изображение (мобильное)
+                  <div className={styles.imageRow}>
+                    <input
+                      type="hidden"
+                      value={form.heroImageMobile}
+                      onChange={(e) => updateField("heroImageMobile", e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className={styles.uploadBtn}
+                      onClick={() => mobileFileRef.current?.click()}
+                      disabled={uploading}
+                    >
+                      {uploading ? "Загрузка..." : "Выбрать файл"}
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.mediaBtn}
+                      onClick={() => setPickerFor("heroMobile")}
+                    >
+                      Из медиа
+                    </button>
+                    <input
+                      ref={mobileFileRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: "none" }}
+                      onChange={(e) => handleImageUpload(e, "heroMobile")}
+                    />
+                    {form.heroImageMobile && (
+                      <span className={styles.imageName}>
+                        {form.heroImageMobile.split("/").pop()}
+                      </span>
+                    )}
+                  </div>
+                  {form.heroImageMobile && (
+                    <div className={styles.imagePreview}>
+                      <img
+                        src={blobUrl(form.heroImageMobile)}
+                        alt="Hero mobile preview"
+                        onError={(e) => {
+                          console.error("[settings] hero mobile preview failed to load:", form.heroImageMobile);
+                          setError(`Не удалось загрузить изображение: ${form.heroImageMobile}`);
                           e.currentTarget.style.display = "none";
                         }}
                       />
@@ -412,7 +479,7 @@ export default function AdminSettingsPage() {
                       {form.catImages[slug] && (
                         <div className={styles.catImagePreview}>
                           <img
-                            src={form.catImages[slug]}
+                            src={blobUrl(form.catImages[slug])}
                             alt={getCategoryName(slug)}
                             onError={(e) => {
                               console.error("[settings] category image failed to load:", form.catImages[slug]);
@@ -571,6 +638,8 @@ export default function AdminSettingsPage() {
         onSelect={(url) => {
           if (pickerFor === "hero") {
             setForm((prev) => ({ ...prev, heroImage: url }));
+          } else if (pickerFor === "heroMobile") {
+            setForm((prev) => ({ ...prev, heroImageMobile: url }));
           } else if (pickerFor) {
             setForm((prev) => ({
               ...prev,

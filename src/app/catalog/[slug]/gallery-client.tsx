@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import GalleryImage from "@/components/ui/gallery-image";
 import SmartImage from "@/components/ui/smart-image";
+import { blobUrl } from "@/lib/blob";
 import styles from "./page.module.css";
 
 interface GalleryClientProps {
@@ -323,7 +324,7 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
                 onClick={() => goTo(i)}
                 aria-label={`${alt} — фото ${i + 1}`}
               >
-                <SmartImage src={thumbUrl(src)} alt="" className={styles.thumbImage} draggable={false} />
+                <SmartImage src={blobUrl(thumbUrl(src))} alt="" className={styles.thumbImage} draggable={false} />
               </button>
             ))}
           </div>
@@ -347,7 +348,7 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
             {images.map((src, i) => (
               <div key={i} className={styles.slide}>
                 <GalleryImage
-                  src={src}
+                  src={blobUrl(src)}
                   alt={`${alt} — фото ${i + 1}`}
                   width={600}
                   height={800}
@@ -406,7 +407,7 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
             onTouchEnd={onLightboxTouchEnd}
           >
             <GalleryImage
-              src={activeImage}
+              src={blobUrl(activeImage)}
               alt={`${alt} — фото ${activeIndex + 1}`}
               width={600}
               height={800}

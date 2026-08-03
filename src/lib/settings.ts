@@ -12,7 +12,7 @@ import { logger } from "@/lib/logger";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 
 export interface SiteSettings {
-  hero: { title: string; tagline: string; subtitle: string; image: string };
+  hero: { title: string; tagline: string; subtitle: string; image: string; imageMobile: string };
   featuredIds: string[];
   catalogOrder: string[];
   wbApiKey: string;
@@ -31,6 +31,7 @@ const DEFAULTS: SiteSettings = {
     tagline: "Сумки из натуральной итальянской кожи. Минимум пафоса — максимум качества. Из Италии.",
     subtitle: "Кожаные сумки на каждый день",
     image: "",
+    imageMobile: "",
   },
   featuredIds: [],
   catalogOrder: [],
@@ -76,8 +77,10 @@ export async function readSettings(): Promise<SiteSettings> {
       if (fallback) return fallback;
       return defaultSettings();
     }
-    // Настройки меняются редко; writeSettings инвалидирует ключ после записи
-  }, 300_000, 600_000);
+    // Настройки меняются из админки; TTL 30с — чтобы изменения (hero, категории)
+    // распространялись быстро между serverless-инстансами. writeSettings
+    // инвалидирует ключ после записи.
+  }, 30_000, 600_000);
 }
 
 export async function writeSettings(

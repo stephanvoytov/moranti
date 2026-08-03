@@ -9,6 +9,8 @@ import UpdatedBadge from "@/components/admin/updated-badge";
 import { useToast } from "@/lib/toast-context";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import { CATEGORIES } from "@/lib/categories";
+import { compressImage } from "@/lib/image-compress";
+import { blobUrl } from "@/lib/blob";
 import MediaPicker from "@/components/admin/media-picker";
 import formCss from "@/components/admin/editor-form.module.css";
 import styles from "./editor.module.css";
@@ -307,7 +309,9 @@ export default function ProductEditorPage() {
         }
 
         const body = new FormData();
-        body.append("file", files[i]);
+        // Сжимаем в браузере (WebP, max 1600px) — фото товаров грузятся быстрее
+        const compressed = await compressImage(files[i]);
+        body.append("file", compressed);
 
         const res = await fetch("/api/admin/upload", { method: "POST", body });
 
@@ -803,7 +807,7 @@ export default function ProductEditorPage() {
                     )}
 
                     <img
-                      src={url}
+                      src={blobUrl(url)}
                       alt={`Фото ${index + 1}`}
                       className={styles.imgThumbImg}
                       onError={(e) => {

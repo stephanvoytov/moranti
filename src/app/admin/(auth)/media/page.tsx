@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { compressImage } from "@/lib/image-compress";
+import { blobUrl } from "@/lib/blob";
 import styles from "./media.module.css";
 
 interface MediaItem {
@@ -71,8 +73,10 @@ export default function MediaPage() {
     setUploading(true);
     setError("");
     try {
+      // Сжимаем в браузере (WebP, max 1600px) — фото с камеры грузятся в разы быстрее
+      const compressed = await compressImage(file);
       const body = new FormData();
-      body.append("file", file);
+      body.append("file", compressed);
       const res = await fetch("/api/admin/media", { method: "POST", body });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Загрузка не удалась");
@@ -165,7 +169,7 @@ export default function MediaPage() {
           {items.map((item) => (
             <div key={item.url} className={styles.card}>
               <img
-                src={item.url}
+                src={blobUrl(item.url)}
                 alt={item.pathname}
                 className={styles.thumb}
                 loading="lazy"

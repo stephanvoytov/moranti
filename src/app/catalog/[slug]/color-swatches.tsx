@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { swatchUrl, cdnImageUrl } from "@/lib/product-images";
+import { blobUrl } from "@/lib/blob";
 import SmartImage from "@/components/ui/smart-image";
 import styles from "./page.module.css";
 
@@ -113,7 +114,7 @@ export default function ColorSwatches({ current, siblings }: ColorSwatchesProps)
             title={label(current, siblings)}
           >
             <SmartImage
-              src={swatchSrc(current)}
+              src={blobUrl(swatchSrc(current))}
               alt={label(current, siblings)}
               className={styles.swatchImage}
             />
@@ -136,7 +137,7 @@ export default function ColorSwatches({ current, siblings }: ColorSwatchesProps)
                 title={label(s, siblings)}
               >
                 <SmartImage
-                  src={swatchSrc(s)}
+                  src={blobUrl(swatchSrc(s))}
                   alt={label(s, siblings)}
                   className={`${styles.swatchImage} ${isOutOfStock ? styles.swatchImageOos : ""}`}
                 />
@@ -163,7 +164,7 @@ export default function ColorSwatches({ current, siblings }: ColorSwatchesProps)
           {/* Превью с CDN — next/image не настроен на remotePatterns CDN, img осознанно */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={preview.src}
+            src={blobUrl(preview.src)}
             alt=""
             className={styles.swatchPreviewImage}
             loading="lazy"
