@@ -111,7 +111,9 @@
   cursor: pointer;
   transition: opacity 0.3s ease, transform 0.2s ease;
   opacity: 0;
-  z-index: 2;
+  /* Выше hover-видео (z-index: 3): сердце должно оставаться
+     видимым и кликабельным поверх видео WB */
+  z-index: 4;
 }
 
 .card:hover .favorite {
@@ -165,6 +167,8 @@
   border-radius: 2px;
   pointer-events: none;
   backdrop-filter: blur(2px);
+  /* Поверх hover-видео (z-index: 3) — бейдж виден при наведении */
+  z-index: 4;
 }
 
 /* ——— Info ——— */
