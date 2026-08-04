@@ -37,10 +37,14 @@ export default async function Home() {
   const featuredIds = settings.featuredIds ?? [];
   const categoryImages = settings.categoryImages ?? {};
 
+  // «Популярные модели»: ручной выбор из админки (featuredIds) — приоритет;
+  // если он пуст — топ по количеству отзывов (как сортировка «По популярности» в каталоге).
   const featured =
     featuredIds.length > 0
       ? products.filter((p) => featuredIds.includes(p.id))
-      : products.slice(0, 4);
+      : [...products]
+          .sort((a, b) => (b.reviewsCount || 0) - (a.reviewsCount || 0))
+          .slice(0, 4);
 
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";
 
