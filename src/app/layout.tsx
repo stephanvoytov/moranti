@@ -114,25 +114,28 @@ export default async function RootLayout({
   // ─── CSP nonce (per-request, prevents XSS via inline scripts) ───
   const nonce = randomUUID();
 
-  // ─── Content-Security-Policy via <meta> tag ───
-  // Важно: Next.js injects свои inline-скрипты (chunks, bootstrap) без nonce.
-  // 'strict-dynamic' НЕ используется — он запрещает 'self' и ломает Next.js.
-  // Вместо этого: 'self' разрешает Next.js чанки, 'unsafe-inline' разрешает
-  // Next.js inline-скрипты, а nonce — страховка для наших JSON-LD и Я.Метрики.
-  // Остальные директивы (img-src, connect-src, etc.) строгие.
-  const isDev = process.env.NODE_ENV === "development";
-  // Vercel инжектит виджет Live Feedback (vercel.live/_next-live/feedback/feedback.js)
-  // только в preview-деплои. В проде скрипта нет — домен не добавляем.
-  const isVercelPreview = process.env.VERCEL_ENV === "preview";
-  const vercelLive = isVercelPreview ? " https://vercel.live" : "";
-  const csp = [
-    "default-src 'self'",
-    // Scripts: 'self' для Next.js чанков, 'unsafe-inline' для его inline-скриптов,
-    // nonce для наших JSON-LD и Яндекс.Метрики.
-    // 'unsafe-eval' — нужен React DevTools в dev-режиме (eval для callstack).
-    // va.vercel-scripts.com — только в dev (debug-скрипт Vercel Analytics;
-    // в проде скрипт first-party, same-origin).
-    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval' https://va.vercel-scripts.com" : ""}${vercelLive}`,
+    // ─── Content-Security-Policy via <meta> tag ───
+    // Важно: Next.js injects свои inline-скрипты (chunks, bootstrap) без nonce.
+    // 'strict-dynamic' НЕ используется — он запрещает 'self' и ломает Next.js.
+    // Вместо этого: 'self' разрешает Next.js чанки, 'unsafe-inline' разрешает
+    // Next.js inline-скрипты, а nonce — страховка для наших JSON-LD и инлайн-сниппета
+    // Я.Метрики. Сам tag.js Метрика загружает динамически (createElement без nonce),
+    // поэтому нужен явный https://mc.yandex.ru в script-src.
+    // Остальные директивы (img-src, connect-src, etc.) строгие.
+    const isDev = process.env.NODE_ENV === "development";
+    // Vercel инжектит виджет Live Feedback (vercel.live/_next-live/feedback/feedback.js)
+    // только в preview-деплои. В проде скрипта нет — домен не добавляем.
+    const isVercelPreview = process.env.VERCEL_ENV === "preview";
+    const vercelLive = isVercelPreview ? " https://vercel.live" : "";
+    const csp = [
+      "default-src 'self'",
+      // Scripts: 'self' для Next.js чанков, 'unsafe-inline' для его inline-скриптов,
+      // nonce для наших JSON-LD и инлайн-сниппета Я.Метрики, https://mc.yandex.ru —
+      // для tag.js (Метрика вставляет его динамически, без nonce).
+      // 'unsafe-eval' — нужен React DevTools в dev-режиме (eval для callstack).
+      // va.vercel-scripts.com — только в dev (debug-скрипт Vercel Analytics;
+      // в проде скрипт first-party, same-origin).
+      `script-src 'self' 'unsafe-inline' https://mc.yandex.ru${isDev ? " 'unsafe-eval' https://va.vercel-scripts.com" : ""}${vercelLive}`,
     // Styles: 'unsafe-inline' для dev-режима (Next.js Fast Refresh)
     "style-src 'self' 'unsafe-inline'",
     // Images: WB CDN + Яндекс.Метрика + фавиконки маркетплейсов + Vercel Blob (загрузки из админки)
