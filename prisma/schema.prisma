@@ -81,6 +81,10 @@ model Product {
   ozonImage         String?
   /// Все фото с Ozon для админки.
   ozonImages        String[]
+  /// HLS-видео товара с WB Content API (поле `video` карточки):
+  /// "https://videonme-basket-XX.wbbasket.ru/vol.../hls/1440p/index.m3u8".
+  /// Заполняется только из WB-карточки; Ozon видео не отдаёт. null — видео нет.
+  video             String?
   /// Ссылки на маркетплейсы для отображения на карточке товара.
   /// JSON-массив: [{ name: "Wildberries"|"Ozon", url: string, icon: string }].
   /// В БД хранится как есть (заполняется через админку или пустой массив).
