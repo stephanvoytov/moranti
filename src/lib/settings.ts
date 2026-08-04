@@ -20,7 +20,7 @@ export interface SiteSettings {
   ozonApiKey: string;
   yandexMetrikaId: string;
   categoryImages: Record<string, string>;
-  social: { instagram: string; vk: string; telegram: string; whatsapp: string };
+  social: { vk: string; telegram: string; whatsapp: string };
   marketplaces: { wildberries: string; ozon: string };
   updatedAt: string;
 }
@@ -40,7 +40,7 @@ const DEFAULTS: SiteSettings = {
   ozonApiKey: "",
   yandexMetrikaId: "",
   categoryImages: {},
-  social: { instagram: "", vk: "", telegram: "", whatsapp: "" },
+  social: { vk: "", telegram: "", whatsapp: "" },
   marketplaces: { wildberries: MARKETPLACE_URLS.wbSeller, ozon: MARKETPLACE_URLS.ozonSeller },
   updatedAt: new Date().toISOString(),
 };

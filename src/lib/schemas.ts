@@ -88,7 +88,6 @@ export const heroSchema = z.object({
 });
 
 export const socialSchema = z.object({
-  instagram: z.string().default(""),
   vk: z.string().default(""),
   telegram: z.string().default(""),
   whatsapp: z.string().default(""),

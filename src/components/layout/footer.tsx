@@ -33,14 +33,12 @@ export default function Footer() {
             <h3>Магазины</h3>
             <a href={MARKETPLACE_URLS.wbSeller} target="_blank" rel="noopener noreferrer">Wildberries</a>
             <a href={MARKETPLACE_URLS.ozonSeller} target="_blank" rel="noopener noreferrer">Ozon</a>
-            <a href="https://www.instagram.com/_utrends/" target="_blank" rel="noopener noreferrer">Instagram</a>
             <a href="https://vk.com/moranti_bags" target="_blank" rel="noopener noreferrer">VK</a>
           </div>
         </div>
         <div className={styles.bottom}>
           <span>&copy; {new Date().getFullYear()} Moranti. Все права защищены.</span>
           <div className={styles.social}>
-            <a href="https://www.instagram.com/_utrends/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">Instagram</a>
             <a href="https://vk.com/moranti_bags" target="_blank" rel="noopener noreferrer" aria-label="VK">VK</a>
           </div>
         </div>

@@ -91,6 +91,7 @@ export async function generateMetadata(): Promise<Metadata> {
     verification: {
       // Можно задать через YANDEX_VERIFICATION в .env.local
       yandex: process.env.YANDEX_VERIFICATION || undefined,
+      google: process.env.GOOGLE_SITE_VERIFICATION || "_EUyD3GosfZHJoRCZvoCME7CJt7eCxUr7lgT-lXQVLM",
     },
   };
 }

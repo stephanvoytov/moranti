@@ -18,7 +18,6 @@ interface SettingsForm {
   featuredIds: string;
   catalogOrder: string;
   yandexMetrikaId: string;
-  instagram: string;
   vk: string;
   telegram: string;
   whatsapp: string;
@@ -37,7 +36,6 @@ const emptyForm: SettingsForm = {
   featuredIds: "",
   catalogOrder: "",
   yandexMetrikaId: "",
-  instagram: "",
   vk: "",
   telegram: "",
   whatsapp: "",
@@ -148,7 +146,6 @@ export default function AdminSettingsPage() {
           catalogOrder: Array.isArray(data.catalogOrder) ? data.catalogOrder.join(", ") : "",
           yandexMetrikaId: data.yandexMetrikaId || "",
           catImages: data.categoryImages || {},
-          instagram: data.social?.instagram || "",
           vk: data.social?.vk || "",
           telegram: data.social?.telegram || "",
           whatsapp: data.social?.whatsapp || "",
@@ -234,7 +231,6 @@ export default function AdminSettingsPage() {
       categoryImages: catImages,
       yandexMetrikaId: form.yandexMetrikaId,
       social: {
-        instagram: form.instagram,
         vk: form.vk,
         telegram: form.telegram,
         whatsapp: form.whatsapp,
@@ -309,7 +305,6 @@ export default function AdminSettingsPage() {
         featuredIds: Array.isArray(parsed.featuredIds) ? parsed.featuredIds.join(", ") : "",
         catalogOrder: Array.isArray(parsed.catalogOrder) ? parsed.catalogOrder.join(", ") : "",
         yandexMetrikaId: parsed.yandexMetrikaId || "",
-        instagram: parsed.social?.instagram || "",
         vk: parsed.social?.vk || "",
         telegram: parsed.social?.telegram || "",
         whatsapp: parsed.social?.whatsapp || "",
@@ -590,16 +585,6 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
               <div className={styles.fieldGrid}>
-                <label className={styles.field}>
-                  <span className={styles.fieldLabel}>Instagram</span>
-                  <input
-                    type="url"
-                    className={styles.input}
-                    value={form.instagram}
-                    onChange={(e) => updateField("instagram", e.target.value)}
-                    placeholder="https://instagram.com/..."
-                  />
-                </label>
                 <label className={styles.field}>
                   <span className={styles.fieldLabel}>VK</span>
                   <input
