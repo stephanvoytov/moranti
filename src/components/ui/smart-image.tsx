@@ -146,7 +146,14 @@ function SmartImageInner({
         width={width}
         height={height}
         className={className}
-        style={style}
+        style={{
+          ...style,
+          // До фактической загрузки держим img невидимым: иначе браузер
+          // рисует alt-текст (название товара) поверх плейсхолдера. Alt
+          // остаётся в разметке и доступен скринридерам (opacity не убирает
+          // элемент из a11y-дерева).
+          opacity: displayLoaded ? undefined : 0,
+        }}
         loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : undefined}
         draggable={draggable}
