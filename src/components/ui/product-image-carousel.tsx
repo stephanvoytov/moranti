@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Product } from "@/data/products";
 import { useHoverCarousel } from "./use-hover-carousel";
@@ -44,6 +44,14 @@ export default function ProductImageCarousel({
   const hasVideo = Boolean(product.video);
   // Видео монтируем только после первого наведения (ленивая загрузка hls.js)
   const [videoActive, setVideoActive] = useState(false);
+
+  // Предзагружаем модуль hls.js заранее (один раз на страницу, кеш на всех
+  // карточках): при наведении остаётся только загрузка m3u8 + сегментов,
+  // а не сетевой запрос ~60KB — видео стартует почти сразу.
+  useEffect(() => {
+    if (!hasVideo) return;
+    void import("hls.js").catch(() => {});
+  }, [hasVideo]);
 
   const {
     hoverIndex,
