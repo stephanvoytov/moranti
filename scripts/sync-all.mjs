@@ -37,7 +37,7 @@ import {
   extractPhotoCount,
   extractDescription,
   resolveCategory,
-  makeSlug,
+  buildUrlSlug,
   toBigInt,
   ozonExtractCategory,
   ozonExtractComposition,
@@ -490,6 +490,29 @@ async function generateId(prisma) {
   return "mor-" + String(num).padStart(3, "0");
 }
 
+/**
+ * Гарантирует уникальность slug: если base занят другим товаром, добавляет
+ * суффикс -2, -3... (стандартная практика для URL).
+ * @param {import("@prisma/client").PrismaClient} prisma
+ * @param {string} base
+ * @param {string|null} excludeId — ID текущего товара (не считаем его занятым)
+ * @returns {Promise<string>}
+ */
+async function ensureUniqueSlug(prisma, base, excludeId) {
+  if (!base) return base;
+  let candidate = base;
+  let n = 2;
+  for (;;) {
+    const existing = await prisma.product.findUnique({
+      where: { slug: candidate },
+      select: { id: true },
+    });
+    if (!existing || existing.id === excludeId) return candidate;
+    candidate = `${base}-${n}`;
+    n++;
+  }
+}
+
 async function createProduct(prisma, data) {
   // Dry-run: не пишем в БД, но возвращаем ID (для читаемых логов)
   if (flags.dry) return `mor-000`;
@@ -499,7 +522,13 @@ async function createProduct(prisma, data) {
   for (let attempt = 0; attempt < 3; attempt++) {
     const id = await generateId(prisma);
     const sku = data.sku || null;
-    const slug = sku ? makeSlug(sku) : id;
+    // URL-слаг из названия + цвета (не из внутреннего артикула)
+    const slug =
+      (await ensureUniqueSlug(
+        prisma,
+        buildUrlSlug(data.name || "", data.colorName || ""),
+        null
+      )) || id;
 
     try {
       await prisma.product.create({
@@ -550,7 +579,7 @@ async function updateProduct(prisma, id, data) {
   const fields = [
     "name", "price", "originalPrice", "wbPrice", "wbOriginalPrice",
     "ozonPrice", "ozonOriginalPrice", "ozonRating", "ozonReviewsCount",
-    "category", "description",
+    "category", "description", "slug",
     "image", "images", "rating", "reviewsCount", "colorName", "composition",
     "inStock", "photoCount", "wbStock", "ozonStock",
     "ozonImage", "ozonImages", "video", "characteristics",
@@ -563,6 +592,11 @@ async function updateProduct(prisma, id, data) {
   }
 
   if (Object.keys(updateData).length === 0) return false;
+
+  // slug считается из названия/цвета в merge.mjs; здесь гарантируем уникальность
+  if (updateData.slug) {
+    updateData.slug = await ensureUniqueSlug(prisma, updateData.slug, id);
+  }
 
   if (!flags.dry) {
     await prisma.product.update({ where: { id }, data: updateData });

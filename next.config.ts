@@ -54,6 +54,27 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  /* ─── 301-редиректы старых slug (из внутреннего артикула) на новые SEO-слаги.
+     Карта генерируется скриптом scripts/migrate-slugs.mjs --apply. ─── */
+  async redirects() {
+    const fs = await import("node:fs");
+    const path = await import("node:path");
+    const file = path.join(process.cwd(), "data", "slug-redirects.json");
+
+    let map: Record<string, string> = {};
+    try {
+      map = JSON.parse(fs.readFileSync(file, "utf8"));
+    } catch {
+      map = {};
+    }
+
+    return Object.entries(map).map(([from, to]) => ({
+      source: `/catalog/${from}`,
+      destination: `/catalog/${to}`,
+      permanent: true,
+    }));
+  },
+
   /* ─── Static security headers ─── */
   async headers() {
     return [

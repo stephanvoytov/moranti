@@ -443,3 +443,54 @@ export function makeSlug(s) {
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
 }
+
+/**
+ * Транслитерация кириллицы в латиницу (побуквенная, по ГОСТ-подобной таблице).
+ * Латиница и цифры остаются как есть. Не-буквенные символы не трогаем —
+ * их убирает buildUrlSlug.
+ * @param {string} s
+ * @returns {string}
+ */
+const RU_TO_LAT = {
+  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "e",
+  ж: "zh", з: "z", и: "i", й: "j", к: "k", л: "l", м: "m",
+  н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u",
+  ф: "f", х: "kh", ц: "ts", ч: "ch", ш: "sh", щ: "sch",
+  ы: "y", ь: "", э: "e", ю: "yu", я: "ya",
+};
+
+export function translitRu(s) {
+  if (!s) return "";
+  return String(s)
+    .toLowerCase()
+    .split("")
+    .map((ch) => RU_TO_LAT[ch] ?? ch)
+    .join("");
+}
+
+/**
+ * Человекочитаемый URL-slug товара: транслитерация названия + цвета.
+ *
+ * Пример: "Сумка тоут из замши" + "серый, графит" →
+ *   "sumka-tout-iz-zamshi-seryj-grafit".
+ *
+ * Внутренний артикул (sku/vendorCode) в URL НЕ используется.
+ * @param {string} name — отображаемое название товара (русское)
+ * @param {string} [colorName] — цвет ("серый, графит")
+ * @returns {string|null}
+ */
+export function buildUrlSlug(name, colorName) {
+  const parts = [name, colorName]
+    .map((p) => (p || "").trim())
+    .filter(Boolean);
+  if (parts.length === 0) return null;
+
+  const slug = translitRu(parts.join(" "))
+    .replace(/[^a-z0-9\s-]+/g, " ") // спецсимволы (запятые, скобки, точки) → пробел
+    .replace(/[\s_-]+/g, "-")        // слияние разделителей
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80)
+    .replace(/-+$/g, "");
+
+  return slug || null;
+}
