@@ -205,6 +205,7 @@ export default async function ProductPage({ params }: Props) {
           />
           <GalleryClient
             images={product.images?.length ? product.images : [product.image]}
+            video={product.video}
             alt={product.name}
           />
         </div>

@@ -1,24 +1,37 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import GalleryImage from "@/components/ui/gallery-image";
 import SmartImage from "@/components/ui/smart-image";
+import HlsVideo from "@/components/ui/hls-video";
 import { blobUrl } from "@/lib/blob";
 import styles from "./page.module.css";
 
 interface GalleryClientProps {
   images: string[];
+  /** HLS-видео (WB) — вставляется в галерею вторым слайдом */
+  video?: string;
   alt: string;
 }
 
+type Slide =
+  | { kind: "image"; src: string }
+  | { kind: "video"; src: string };
+
 const SWIPE_THRESHOLD = 80;
 
-export default function GalleryClient({ images, alt }: GalleryClientProps) {
+export default function GalleryClient({ images, video, alt }: GalleryClientProps) {
+  const slides = useMemo<Slide[]>(() => {
+    const list: Slide[] = images.map((src) => ({ kind: "image", src }));
+    if (video) list.splice(1, 0, { kind: "video", src: video });
+    return list;
+  }, [images, video]);
+
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [zoomPos, setZoomPos] = useState<{ x: number; y: number } | null>(null);
   const [pinchTransform, setPinchTransform] = useState("");
-  const hasMultiple = images.length > 1;
+  const hasMultiple = slides.length > 1;
   const wrapperRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const isDesktop = useRef(false);
@@ -60,7 +73,7 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
     };
     nextRef.current = () => {
       const idx = activeIndexRef.current;
-      goTo(Math.min(images.length - 1, idx + 1));
+      goTo(Math.min(slides.length - 1, idx + 1));
     };
   });
 
@@ -137,7 +150,7 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
         e.preventDefault();
         let offset = dx;
         if (idx === 0 && dx > 0) offset = dx * 0.3;
-        else if (idx === images.length - 1 && dx < 0) offset = dx * 0.3;
+        else if (idx === slides.length - 1 && dx < 0) offset = dx * 0.3;
         trackRef.current.style.transform = `translateX(${-idx * w + offset}px)`;
       }
     },
@@ -165,7 +178,7 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
               trackRef.current.style.transform = `translateX(${-newIdx * w}px)`;
               setActiveIndex(newIdx);
             } else {
-              const newIdx = Math.min(images.length - 1, idx + 1);
+              const newIdx = Math.min(slides.length - 1, idx + 1);
               trackRef.current.style.transform = `translateX(${-newIdx * w}px)`;
               setActiveIndex(newIdx);
             }
@@ -301,9 +314,11 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
   const thumbUrl = (url: string) =>
     url.replace(/\/images\/[^/]+\//, "/images/c246x328/");
 
-  const activeImage = images[activeIndex] || images[0] || "";
+  const activeSlide = slides[activeIndex] || slides[0] || null;
+  const activeImage =
+    activeSlide?.kind === "image" ? activeSlide.src : images[0] || "";
 
-  if (!activeImage) {
+  if (!activeSlide) {
     return (
       <div className={styles.imageWrapper}>
         <div className={styles.imagePlaceholder}>Нет фото</div>
@@ -316,15 +331,40 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
       <div className={styles.gallery}>
         {hasMultiple && (
           <div className={styles.thumbs}>
-            {images.map((src, i) => (
+            {slides.map((slide, i) => (
               <button
                 key={i}
                 type="button"
                 className={`${styles.thumb} ${i === activeIndex ? styles.thumbActive : ""}`}
                 onClick={() => goTo(i)}
-                aria-label={`${alt} — фото ${i + 1}`}
+                aria-label={
+                  slide.kind === "video"
+                    ? `${alt} — видео`
+                    : `${alt} — фото ${i + 1}`
+                }
               >
-                <SmartImage src={blobUrl(thumbUrl(src))} alt="" className={styles.thumbImage} draggable={false} />
+                {slide.kind === "video" ? (
+                  <span className={styles.thumbVideo}>
+                    <span className={styles.thumbVideoIcon}>
+                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                        <path d="M6 4L16 10L6 16V4Z" fill="currentColor" />
+                      </svg>
+                    </span>
+                    <SmartImage
+                      src={blobUrl(thumbUrl(images[0]))}
+                      alt=""
+                      className={styles.thumbImage}
+                      draggable={false}
+                    />
+                  </span>
+                ) : (
+                  <SmartImage
+                    src={blobUrl(thumbUrl(slide.src))}
+                    alt=""
+                    className={styles.thumbImage}
+                    draggable={false}
+                  />
+                )}
               </button>
             ))}
           </div>
@@ -343,21 +383,34 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
           <div
             ref={trackRef}
             className={styles.track}
-            style={{ "--i": activeIndex, "--n": images.length } as React.CSSProperties}
+            style={{ "--i": activeIndex, "--n": slides.length } as React.CSSProperties}
           >
-            {images.map((src, i) => (
-              <div key={i} className={styles.slide}>
-                <GalleryImage
-                  src={blobUrl(src)}
-                  alt={`${alt} — фото ${i + 1}`}
-                  width={600}
-                  height={800}
-                  className={`${styles.image} ${i === activeIndex && zoomPos ? styles.imageZoomed : ""}`}
-                  style={i === activeIndex && zoomPos ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
-                  priority={i === activeIndex}
-                  draggable={false}
-                  onMouseDown={(e) => e.preventDefault()}
-                />
+            {slides.map((slide, i) => (
+              <div key={slide.kind === "video" ? `video:${slide.src}` : slide.src} className={styles.slide}>
+                {slide.kind === "image" ? (
+                  <GalleryImage
+                    src={blobUrl(slide.src)}
+                    alt={`${alt} — фото ${i + 1}`}
+                    width={600}
+                    height={800}
+                    className={`${styles.image} ${i === activeIndex && zoomPos ? styles.imageZoomed : ""}`}
+                    style={i === activeIndex && zoomPos ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
+                    priority={i === activeIndex}
+                    draggable={false}
+                    onMouseDown={(e) => e.preventDefault()}
+                  />
+                ) : i === activeIndex ? (
+                  <HlsVideo
+                    src={slide.src}
+                    poster={images[0] ? blobUrl(images[0]) : undefined}
+                    autoPlay
+                    muted
+                    loop
+                    className={styles.videoSlide}
+                  />
+                ) : (
+                  <div className={styles.videoSlidePlaceholder} />
+                )}
               </div>
             ))}
           </div>
@@ -370,7 +423,7 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
               <button type="button" className={`${styles.arrow} ${styles.arrowRight}`} onClick={(e) => { e.stopPropagation(); nextRef.current(); }} aria-label="Следующее фото">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
-              <span className={styles.counter}>{activeIndex + 1} / {images.length}</span>
+              <span className={styles.counter}>{activeIndex + 1} / {slides.length}</span>
             </>
           )}
         </div>
@@ -378,8 +431,8 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
         {hasMultiple && (
           <div className={styles.navPill}>
             <button type="button" className={styles.navPillBtn} onClick={(e) => { e.stopPropagation(); prevRef.current(); }} aria-label="Предыдущее фото" disabled={activeIndex === 0}>‹</button>
-            <span className={styles.navPillCounter}>{activeIndex + 1} / {images.length}</span>
-            <button type="button" className={styles.navPillBtn} onClick={(e) => { e.stopPropagation(); nextRef.current(); }} aria-label="Следующее фото" disabled={activeIndex === images.length - 1}>›</button>
+            <span className={styles.navPillCounter}>{activeIndex + 1} / {slides.length}</span>
+            <button type="button" className={styles.navPillBtn} onClick={(e) => { e.stopPropagation(); nextRef.current(); }} aria-label="Следующее фото" disabled={activeIndex === slides.length - 1}>›</button>
           </div>
         )}
       </div>
@@ -406,18 +459,30 @@ export default function GalleryClient({ images, alt }: GalleryClientProps) {
             onTouchMove={onLightboxTouchMove}
             onTouchEnd={onLightboxTouchEnd}
           >
-            <GalleryImage
-              src={blobUrl(activeImage)}
-              alt={`${alt} — фото ${activeIndex + 1}`}
-              width={600}
-              height={800}
-              className={`${styles.lightboxImage} ${pinchTransform ? styles.lightboxImagePinched : ""}`}
-              style={pinchTransform ? { transform: pinchTransform } : undefined}
-              priority
-              draggable={false}
-            />
+            {activeSlide.kind === "video" ? (
+              <HlsVideo
+                src={activeSlide.src}
+                poster={activeImage ? blobUrl(activeImage) : undefined}
+                autoPlay
+                muted
+                loop
+                controls
+                className={styles.lightboxVideo}
+              />
+            ) : (
+              <GalleryImage
+                src={blobUrl(activeImage)}
+                alt={`${alt} — фото ${activeIndex + 1}`}
+                width={600}
+                height={800}
+                className={`${styles.lightboxImage} ${pinchTransform ? styles.lightboxImagePinched : ""}`}
+                style={pinchTransform ? { transform: pinchTransform } : undefined}
+                priority
+                draggable={false}
+              />
+            )}
           </div>
-          <span className={styles.lightboxCounter}>{activeIndex + 1} / {images.length}</span>
+          <span className={styles.lightboxCounter}>{activeIndex + 1} / {slides.length}</span>
         </div>
       )}
     </>

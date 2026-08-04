@@ -159,6 +159,42 @@ export function extractPhotoCount(card) {
 }
 
 /**
+ * Извлекает URL HLS-видео из WB card (content/v2/get/cards/list).
+ *
+ * Content API отдаёт поле `video` в разных форматах:
+ *   - строка: "https://videonme-basket-XX.wbbasket.ru/vol.../hls/1440p/index.m3u8"
+ *   - массив строк (несколько разрешений)
+ *   - объект { big, c516x688, ... } (как media.photo)
+ *
+ * Приоритет при массиве/объекте: "big" → "url" → "video" → первый элемент.
+ *
+ * @param {object} card — карточка из WB Content API
+ * @returns {string|null} — HLS-плейлист (m3u8) или null
+ */
+export function extractVideo(card) {
+  if (!card) return null;
+  const v = card.video;
+  if (!v) return null;
+
+  if (typeof v === "string") return v.trim() || null;
+
+  if (Array.isArray(v)) {
+    const first = v[0];
+    if (typeof first === "string") return first || null;
+    if (first && typeof first === "object") {
+      return first.big || first.url || first.video || null;
+    }
+    return null;
+  }
+
+  if (typeof v === "object") {
+    return v.big || v.url || v.video || null;
+  }
+
+  return null;
+}
+
+/**
  * Извлекает реальные URL фото из WB card (media.photo[]).
  * WB Content API возвращает готовые URL — они 100% рабочие.
  *

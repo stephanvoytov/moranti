@@ -47,6 +47,8 @@ export interface Product {
   description: string;
   image: string;
   images: string[];
+  /** HLS-видео товара (WB Content API). Показывается в галерее/карточке. */
+  video?: string;
   marketplaces: MarketplaceLink[];
   wbArticle: number;
   ozonArticle?: number;
@@ -158,6 +160,7 @@ function mapProduct(p: PrismaProduct): Product {
     description: p.description,
     image,
     images,
+    video: p.video ?? undefined,
     marketplaces,
     wbArticle: p.wbArticle ? Number(p.wbArticle) : 0,
     ozonArticle: p.ozonArticle ? Number(p.ozonArticle) : undefined,

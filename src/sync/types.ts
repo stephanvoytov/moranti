@@ -28,6 +28,7 @@ export interface WBCard {
   }>;
   photos?: Array<unknown>;
   media?: { photo_count?: number };
+  video?: string | string[] | { big?: string; url?: string; video?: string };
   rating?: number;
   feedbacks?: number;
   createdAt?: string;
@@ -106,6 +107,7 @@ export interface DBProduct {
   images: string[];
   ozonImage: string | null;
   ozonImages: string[];
+  video: string | null;
   wbArticle: bigint | null;
   ozonArticle: bigint | null;
   imtId?: bigint | null;
@@ -143,6 +145,7 @@ export interface CreateProductData {
   images: string[];
   wbArticle?: number | bigint | null;
   ozonArticle?: number | bigint | null;
+  video?: string | null;
   rating?: number | null;
   reviewsCount?: number | null;
   colorName?: string | null;
@@ -172,6 +175,7 @@ export interface UpdateProductData {
   images?: string[];
   ozonImage?: string | null;
   ozonImages?: string[];
+  video?: string | null;
   rating?: number | null;
   reviewsCount?: number | null;
   colorName?: string | null;
@@ -205,6 +209,7 @@ export interface MergedProductData {
   images?: string[];
   ozonImage?: string | null;
   ozonImages?: string[];
+  video?: string | null;
   category?: string;
   composition?: string | null;
   colorName?: string | null;

@@ -23,6 +23,7 @@
     "daytona-wildberries-typescript-sdk": "^4.1.0",
     "dotenv": "^17.4.2",
     "got-scraping": "^4.2.1",
+    "hls.js": "^1.6.16",
     "next": "16.2.12",
     "ozon-seller-sdk": "^1.0.3",
     "patchright": "^1.61.1",

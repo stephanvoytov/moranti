@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Product } from "@/data/products";
 import { useHoverCarousel } from "./use-hover-carousel";
 import SmartImage from "./smart-image";
+import HlsVideo from "./hls-video";
 import styles from "./product-card.module.css";
 
 interface ProductImageCarouselProps {
@@ -21,6 +22,10 @@ interface ProductImageCarouselProps {
  * Фото-зона карточки: до 4 слоёв (как WB), первое — главное, остальные —
  * hover-карусель (useHoverCarousel). Ховер-слои монтируются только после
  * загрузки главного фото, чтобы не конкурировать с ним за канал.
+ *
+ * Если у товара есть HLS-видео (WB) — при наведении вместо фото-карусели
+ * проигрывается видео (muted autoplay loop). Видео монтируется только после
+ * первого наведения (не грузим трафик для всего каталога), в углу — бейдж.
  */
 export default function ProductImageCarousel({
   product,
@@ -36,6 +41,10 @@ export default function ProductImageCarousel({
     [product.images, product.image]
   );
 
+  const hasVideo = Boolean(product.video);
+  // Видео монтируем только после первого наведения (ленивая загрузка hls.js)
+  const [videoActive, setVideoActive] = useState(false);
+
   const {
     hoverIndex,
     isBaseReady,
@@ -48,11 +57,24 @@ export default function ProductImageCarousel({
     registerFailed,
   } = useHoverCarousel(rawImages);
 
+  const handleEnter = () => {
+    if (hasVideo) {
+      setVideoActive(true);
+      return;
+    }
+    handleMouseEnter();
+  };
+
+  const handleLeave = () => {
+    setVideoActive(false);
+    handleMouseLeave();
+  };
+
   return (
     <div
       className={styles.imageWrap}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -75,7 +97,18 @@ export default function ProductImageCarousel({
             </div>
           ) : null
         )}
+        {hasVideo && videoActive && (
+          <HlsVideo
+            src={product.video!}
+            poster={product.image}
+            autoPlay
+            muted
+            loop
+            className={styles.videoHover}
+          />
+        )}
       </Link>
+      {hasVideo && <span className={styles.videoBadge}>Видео</span>}
       {children}
       {isOutOfStock && !isArchived && (
         <span className={styles.outBadge}>Нет в наличии</span>

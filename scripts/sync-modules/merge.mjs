@@ -7,6 +7,7 @@
 import {
   extractPhotoCount,
   extractImageUrls,
+  extractVideo,
   toGeoUrl,
   cdnImageUrl,
   cdnImageUrls,
@@ -117,6 +118,14 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
     if (ozonInfo.images.length !== db?.photoCount) data.photoCount = ozonInfo.images.length;
     if (ozonInfo.images[0] !== db?.image) data.image = ozonInfo.images[0];
     if (JSON.stringify(ozonInfo.images) !== JSON.stringify(db?.images || [])) data.images = ozonInfo.images;
+  }
+
+  // ─── Видео (HLS с WB Content API) ───
+  // Обновляется только из WB-карточки; Ozon-фаза (wbCard = null) не трогает.
+  // Если в карточке видео больше нет — обнуляем (товар убрал видео на WB).
+  if (wbCard) {
+    const video = extractVideo(wbCard);
+    if (video !== (db?.video ?? null)) data.video = video;
   }
 
   // ─── Ozon-фото (для админки, отдельно) ───

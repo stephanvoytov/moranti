@@ -144,9 +144,10 @@ export default async function RootLayout({
     "font-src 'self'",
     // Connections: same-origin + Яндекс.Метрика + Vercel Analytics
     // (beacon Web Vitals) (+ vercel.live для Live Feedback в превью)
-    `connect-src 'self' https://mc.yandex.ru https://vitals.vercel-insights.com${vercelLive}`,
-    // Media: пока не используем
-    "media-src 'none'",
+    // https://*.wbbasket.ru — hls.js тянет m3u8-плейлист и сегменты через fetch.
+    `connect-src 'self' https://mc.yandex.ru https://vitals.vercel-insights.com https://*.wbbasket.ru${vercelLive}`,
+    // Media: HLS-видео WB (wbbasket) + blob: (hls.js играет через MSE/blob URL)
+    "media-src 'self' blob: https://*.wbbasket.ru",
     // Frame: block all
     "frame-src 'none'",
     // Objects: block plugins (Flash, PDF viewers)
