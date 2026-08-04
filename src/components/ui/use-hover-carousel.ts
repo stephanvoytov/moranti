@@ -56,6 +56,10 @@ export function useHoverCarousel(rawImages: string[]): HoverCarousel {
   const hoverTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hoveringRef = useRef(false);
+  // Зеркало hoverIndex для замыканий (таймер/эффекты видят актуальный кадр).
+  const hoverIndexRef = useRef(0);
+  // Когда начался показ текущего кадра — чтобы кадры не «проскакивали».
+  const frameStartedAt = useRef(0);
 
   const registerLoaded = useCallback(
     (src: string) => {
@@ -98,6 +102,19 @@ export function useHoverCarousel(rawImages: string[]): HoverCarousel {
     [layers]
   );
 
+  // Единая точка переключения кадра: обновляет state + зеркало + таймстамп показа.
+  const goTo = useCallback((next: number) => {
+    if (next === hoverIndexRef.current) return;
+    hoverIndexRef.current = next;
+    frameStartedAt.current = performance.now();
+    setHoverIndex(next);
+  }, []);
+
+  // Один шаг вперёд (штатный тик таймера или мгновенный переход по загрузке).
+  const advanceOnce = useCallback(() => {
+    goTo(nextReadyFrame(hoverIndexRef.current));
+  }, [goTo, nextReadyFrame]);
+
   const startCycling = useCallback(() => {
     if (layers.length < 2) return;
     if (hoverTimer.current) clearInterval(hoverTimer.current);
@@ -105,11 +122,9 @@ export function useHoverCarousel(rawImages: string[]): HoverCarousel {
     // Первый кадр — сразу, если уже загружен; иначе остаёмся на главном
     // (эффект ниже подхватит кадр мгновенно, как только он загрузится).
     const first = layers[1];
-    setHoverIndex(first && loadedRef.current.has(first) ? 1 : 0);
-    hoverTimer.current = setInterval(() => {
-      setHoverIndex((prev) => nextReadyFrame(prev));
-    }, HOVER_INTERVAL_MS);
-  }, [layers, nextReadyFrame]);
+    goTo(first && loadedRef.current.has(first) ? 1 : 0);
+    hoverTimer.current = setInterval(advanceOnce, HOVER_INTERVAL_MS);
+  }, [layers, goTo, advanceOnce]);
 
   const stopCycling = useCallback(() => {
     hoveringRef.current = false;
@@ -117,8 +132,8 @@ export function useHoverCarousel(rawImages: string[]): HoverCarousel {
       clearInterval(hoverTimer.current);
       hoverTimer.current = null;
     }
-    setHoverIndex(0);
-  }, []);
+    goTo(0);
+  }, [goTo]);
 
   const handleTouchStart = useCallback(() => {
     if (layers.length < 2) return;
@@ -134,12 +149,16 @@ export function useHoverCarousel(rawImages: string[]): HoverCarousel {
     stopCycling();
   }, [stopCycling]);
 
-  // Кадр, загрузившийся во время hover, показываем сразу — без ожидания тика
-  // таймера (кадры не «подвисают» на медленном канале).
+  // Кадр, загрузившийся во время hover, показываем сразу — но только если
+  // текущий кадр уже показан не меньше интервала. Иначе переключение обрежет
+  // его показ («кадры проскакивают» на прогрессивной загрузке); штатный тик
+  // таймера всё равно переключит на готовый кадр в свой момент.
   useEffect(() => {
     if (!hoveringRef.current) return;
-    setHoverIndex((prev) => nextReadyFrame(prev));
-  }, [loadedUrls, failedUrls, nextReadyFrame]);
+    if (performance.now() - frameStartedAt.current >= HOVER_INTERVAL_MS) {
+      advanceOnce();
+    }
+  }, [loadedUrls, failedUrls, advanceOnce]);
 
   // Очистка таймеров при размонтировании (идемпотентно — StrictMode-safe).
   // Загрузки изображений отменять не нужно: удаление <img> из DOM прерывает
