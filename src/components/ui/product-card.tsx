@@ -36,20 +36,24 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   const slug = product.slug;
   const link = `/catalog/${slug}`;
   const fav = isFavorite(product.wbArticle);
-  const images = useMemo(
-    () => (product.images?.length ? product.images : [product.image]).filter(Boolean),
-    [product.images, product.image]
-  );
-  // Показываем до 4 фото (как WB): первое — статичное, остальные — hover-карусель.
-  // Стабильный список — слои не пересоздаются при смене активного фото.
-  const hoverImages = useMemo(() => images.slice(0, 4), [images]);
+
+  // До 4 фото (как WB): первое — главное, остальные — hover-карусель.
+  const hoverImages = useMemo(() => {
+    const images = (product.images?.length ? product.images : [product.image]).filter(Boolean);
+    return images.slice(0, 4);
+  }, [product.images, product.image]);
+
   const [hoverIndex, setHoverIndex] = useState(0);
+  // Главное фото загрузилось (или битое) — только после этого монтируются
+  // hover-слои. Приоритет: сначала качается главное фото (LCP-ряд — eager),
+  // hover-фото стартуют позже и не конкурируют с ним за канал.
+  const [baseReady, setBaseReady] = useState(false);
   const hoverTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const cardRef = useRef<HTMLElement>(null);
-  // Фактический статус загрузки hover-фото (ключ — проксированный blobUrl):
-  // "loaded" — слой полностью отрисовался, "failed" — фото битое (пропускаем).
-  // Служит гейтом для карусели: кадр не показывается, пока не загружен.
+
+  // Фактический статус фото (ключ — проксированный blobUrl):
+  // "loaded" — слой отрисовался, "failed" — битое (пропускаем в карусели).
+  // Гейт: кадр не показывается, пока не загружен.
   const imageStatus = useRef<Map<string, "loaded" | "failed">>(new Map());
   const markLoaded = useCallback((src: string) => {
     imageStatus.current.set(src, "loaded");
@@ -58,33 +62,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
     imageStatus.current.set(src, "failed");
   }, []);
 
-  // Предзагрузка hover-фото: когда карточка попадает во вьюпорт (чуть заранее),
-  // скачиваем images[1..3] в HTTP-кэш браузера. К моменту наведения они уже
-  // готовы — карусель сменяет фото мгновенно, без белого placeholder'а.
-  // Качаем тот же проксированный URL, что рендерят слои (blobUrl), — иначе
-  // для Vercel Blob прелоад не прогревает кэш /api/blob и бесполезен.
-  useEffect(() => {
-    if (hoverImages.length < 2) return;
-    if (typeof IntersectionObserver === "undefined") return;
-    const el = cardRef.current;
-    if (!el) return;
-    const toPreload = hoverImages.slice(1);
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((e) => e.isIntersecting)) return;
-        for (const url of toPreload) {
-          if (url) new Image().src = blobUrl(url);
-        }
-        observer.disconnect();
-      },
-      { rootMargin: "300px 0px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [hoverImages]);
-
-  // Очистка таймеров при размонтировании — интервал не должен жить после ухода
-  // карточки из DOM (иначе фото «крутятся» без наведения).
+  // Очистка таймеров при размонтировании
   useEffect(() => {
     return () => {
       if (hoverTimer.current) clearInterval(hoverTimer.current);
@@ -92,7 +70,6 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
     };
   }, []);
 
-  // Цены берутся из данных товара (БД через getProducts())
   const displayPrice = product.price;
   const displayOriginal = product.originalPrice;
   const showOriginal = displayOriginal > displayPrice;
@@ -111,20 +88,19 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
   const startCycling = () => {
     if (hoverImages.length < 2) return;
-    // Защита от повторного вызова: сначала гасим старый интервал, иначе он
-    // «утечёт» и карточка продолжит крутиться после mouseleave.
     if (hoverTimer.current) clearInterval(hoverTimer.current);
-    // Первый кадр — только если он уже загружен; иначе остаёмся на базовом
-    // фото: интервал подхватит следующий кадр, как только тот будет готов.
+    // Первый кадр — только если уже загружен; иначе остаёмся на главном:
+    // интервал подхватит кадр, как только он будет готов.
     setHoverIndex(statusOf(1) === "loaded" ? 1 : 0);
     hoverTimer.current = setInterval(() => {
       setHoverIndex((prev) => {
-        // Пропускаем битые кадры (они не загрузятся никогда); на недогруженном
-        // остаёмся — кадр меняется только когда следующая картинка полностью
-        // загрузилась (требование: без placeholder'а при hover).
+        // Пропускаем битые кадры (не загрузятся никогда); на недогруженном
+        // остаёмся — кадр меняется только когда фото загрузилось полностью.
         let next = (prev + 1) % hoverImages.length;
-        while (next !== 0 && statusOf(next) === "failed") {
+        let guard = 0;
+        while (statusOf(next) === "failed" && guard < hoverImages.length) {
           next = (next + 1) % hoverImages.length;
+          guard++;
         }
         return next === 0 || statusOf(next) === "loaded" ? next : prev;
       });
@@ -142,10 +118,8 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
   const handleTouchStart = () => {
     if (hoverImages.length < 2) return;
-    // Short delay — если палец убрали быстро, это был тап, не запускаем
-    touchTimer.current = setTimeout(() => {
-      startCycling();
-    }, 200);
+    // Задержка: быстрый тап не запускает карусель
+    touchTimer.current = setTimeout(startCycling, 200);
   };
 
   const handleTouchEnd = () => {
@@ -157,28 +131,42 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   };
 
   return (
-    <article ref={cardRef} className={styles.card} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <article
+      className={styles.card}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <div className={styles.imageWrap}>
         <Link href={link} aria-label={product.name} className={styles.imageLink}>
-          {/* Все фото рендерятся слоями сразу (как WB): активный слой получает
-              opacity: 1, остальные — 0. DOM-узлы не пересоздаются при смене
-              фото, поэтому нет мерцания и ложных mouseenter/mouseleave. */}
-          {hoverImages.map((url, i) => (
-            <div
-              key={url}
-              className={`${styles.imageLayer} ${i === hoverIndex ? styles.imageLayerActive : ""}`}
-            >
-              <SmartImage
-                src={blobUrl(url)}
-                alt={product.name}
-                className={styles.image}
-                priority={priority && i === 0}
-                draggable={false}
-                onLoad={markLoaded}
-                onError={() => markFailed(blobUrl(url))}
-              />
-            </div>
-          ))}
+          {/* Фото рендерятся слоями (как WB): активный — opacity 1, остальные — 0.
+              Hover-слои монтируются только после загрузки главного фото: оно
+              качается первым, hover-фото не отбирают канал у соседних карточек. */}
+          {hoverImages.map((url, i) =>
+            i === 0 || baseReady ? (
+              <div
+                key={url}
+                className={`${styles.imageLayer} ${i === hoverIndex ? styles.imageLayerActive : ""}`}
+              >
+                <SmartImage
+                  src={blobUrl(url)}
+                  alt={product.name}
+                  className={styles.image}
+                  priority={priority && i === 0}
+                  draggable={false}
+                  onLoad={(src) => {
+                    markLoaded(src);
+                    if (i === 0) setBaseReady(true);
+                  }}
+                  onError={() => {
+                    markFailed(blobUrl(url));
+                    if (i === 0) setBaseReady(true);
+                  }}
+                />
+              </div>
+            ) : null
+          )}
         </Link>
         <button
           className={`${styles.favorite} ${fav ? styles.favoriteActive : ""}`}
@@ -220,9 +208,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         {product.rating && product.rating >= 4 ? (
           <div className={styles.rating}>
             <RatingStars rating={product.rating} />
-            <span className={styles.ratingText}>
-              {product.rating.toFixed(1)}
-            </span>
+            <span className={styles.ratingText}>{product.rating.toFixed(1)}</span>
           </div>
         ) : null}
       </div>
