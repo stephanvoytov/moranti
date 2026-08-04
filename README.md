@@ -40,6 +40,7 @@ OZON_CLIENT_ID=...                 # Ozon Seller API
 OZON_API_KEY=...
 YANDEX_METRIKA_ID=12345678         # Яндекс.Метрика
 YANDEX_VERIFICATION=...            # Яндекс.Вебмастер
+GOOGLE_SITE_VERIFICATION=...       # Google Search Console (fallback — код из layout.tsx)
 BLOB_READ_WRITE_TOKEN=...          # Vercel Blob (загрузка медиа)
 AUTH_SALT=...                      # соль для PBKDF2 (fallback "moranti-admin-salt-v1")
 SYNC_ENABLED=...                   # включить синхронизацию
@@ -163,12 +164,16 @@ https://morantibags.ru/admin
 ### SEO
 
 - `src/config/seo.ts` — центральный SEO-конфиг (страницы, категории, шаблоны title/description)
+- **URL-слаги товаров** — транслитерация названия + цвета (`buildUrlSlug` в `scripts/sync-modules/transform.mjs`):
+  «Сумка тоут из замши» + «серый, графит» → `/catalog/sumka-tout-iz-zamshi-seryj-grafit`.
+  Старые слаги из внутреннего артикула переезжают через 301-редиректы
+  (`data/slug-redirects.json` → `next.config.ts`, генератор `scripts/migrate-slugs.mjs`).
 - Динамические `generateMetadata` для каждого товара
 - `/sitemap.xml` — главная + категории + care + delivery + все товары (только при `APP_ENV=production`)
 - `/robots.txt` — `/admin/` и `/api/` скрыты; dev/preview — полный noindex
 - JSON-LD (`src/lib/seo-jsonld.ts`): Organization + WebSite + Product (цена, рейтинг) + BreadcrumbList
 - OpenGraph + Twitter Card (1200×630)
-- Яндекс.Метрика + Вебмастер (через админку / env)
+- Верификация: Яндекс.Вебмастер (`YANDEX_VERIFICATION`) + Google Search Console (`GOOGLE_SITE_VERIFICATION`), Яндекс.Метрика через админку
 - SEO-превью в админке: `@power-seo/preview` (Google/Facebook/Twitter)
 
 ### Цены
@@ -198,6 +203,8 @@ https://morantibags.ru/admin
 ```
 moranti/
 ├── data/                      # JSON-фолбэки и бэкапы (НЕ source of truth)
+│   ├── products.json, settings.json
+│   └── slug-redirects.json    # карта старый slug → новый (для 301, генерит migrate-slugs)
 ├── prisma/
 │   └── schema.prisma          # Product, Settings, SyncRun, Media…
 ├── public/images/
@@ -205,9 +212,10 @@ moranti/
 │   └── products/              # Загруженные фото товаров
 ├── scripts/
 │   ├── sync-all.mjs           # Синхронизация WB/Ozon (фазы)
-│   ├── sync-modules/          # ozon-browser, ozon-price, merge, models…
+│   ├── sync-modules/          # transform (buildUrlSlug), ozon-browser, ozon-price, merge, models…
+│   ├── migrate-slugs.mjs      # Пересчёт URL-слагов + генерация slug-redirects.json
 │   ├── build-sync-bundle.mjs  # esbuild → sync-all.bundle.mjs
-│   └── backup.mjs, update-json-fallback.mjs, wb-categories.js…
+│   └── backup.mjs, backup-fallback.mjs, update-json-fallback.mjs, wb-categories.js…
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx         # Root layout + шрифты + SEO + метрика
@@ -249,6 +257,9 @@ moranti/
 | `npm test` | Vitest (jsdom, 30s timeout) |
 | `npm run lint` | ESLint |
 | `npx vitest run --pool=threads --maxWorkers=1` | Тесты на Windows (воркер-fork падает) |
+| `node scripts/migrate-slugs.mjs` | Preview пересчёта URL-слагов (после переименования товаров) |
+| `node scripts/migrate-slugs.mjs --apply` | Применить новые слаги в БД + записать `data/slug-redirects.json` |
+| `node scripts/backup-fallback.mjs` | Перегенерировать `data/products.json` из БД |
 
 > На Windows дефолтный fork-пул vitest может падать с «Worker exited unexpectedly» —
 > используйте threads-пул. В CI (ubuntu) всё работает и так.
