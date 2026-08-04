@@ -10,6 +10,7 @@ import { buildGlobalJsonLd } from "@/lib/seo-jsonld";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import ScrollToTop from "@/components/ui/scroll-to-top";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 /* ——— Google Fonts (next/font — self-hosted, optimized) ——— */
@@ -129,15 +130,18 @@ export default async function RootLayout({
     // Scripts: 'self' для Next.js чанков, 'unsafe-inline' для его inline-скриптов,
     // nonce для наших JSON-LD и Яндекс.Метрики.
     // 'unsafe-eval' — нужен React DevTools в dev-режиме (eval для callstack).
-    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}${vercelLive}`,
+    // va.vercel-scripts.com — только в dev (debug-скрипт Vercel Analytics;
+    // в проде скрипт first-party, same-origin).
+    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval' https://va.vercel-scripts.com" : ""}${vercelLive}`,
     // Styles: 'unsafe-inline' для dev-режима (Next.js Fast Refresh)
     "style-src 'self' 'unsafe-inline'",
     // Images: WB CDN + Яндекс.Метрика + фавиконки маркетплейсов + Vercel Blob (загрузки из админки)
     "img-src 'self' https://*.wbbasket.ru https://*.geobasket.ru https://*.ozone.ru https://www.wildberries.ru https://www.ozon.ru https://mc.yandex.ru https://*.public.blob.vercel-storage.com data:",
     // Fonts: self-hosted via next/font
     "font-src 'self'",
-    // Connections: same-origin + Яндекс.Метрика (+ vercel.live для Live Feedback в превью)
-    `connect-src 'self' https://mc.yandex.ru${vercelLive}`,
+    // Connections: same-origin + Яндекс.Метрика + Vercel Analytics
+    // (beacon Web Vitals) (+ vercel.live для Live Feedback в превью)
+    `connect-src 'self' https://mc.yandex.ru https://vitals.vercel-insights.com${vercelLive}`,
     // Media: пока не используем
     "media-src 'none'",
     // Frame: block all
@@ -226,6 +230,9 @@ export default async function RootLayout({
           <Footer />
           <ScrollToTop />
         </FavoritesProvider>
+
+        {/* Vercel Analytics — Web Vitals + page views (first-party, ~2KB) */}
+        <Analytics />
       </body>
     </html>
   );

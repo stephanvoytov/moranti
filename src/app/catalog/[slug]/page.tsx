@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import type { CharacteristicGroup } from "@/data/products";
 import { getProducts, getProduct } from "@/data/products";
-import { MARKETPLACE_URLS } from "@/lib/marketplaces";
+import { readSettings } from "@/lib/settings";
 import { seoConfig, buildProductSeoMeta } from "@/config/seo";
 import { buildProductJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo-jsonld";
 import PriceClient from "./price-client";
@@ -13,6 +13,7 @@ import ShareButton from "./share-button";
 import GalleryOverlay from "./gallery-overlay";
 import RecentlyViewedTracker from "./recently-viewed-tracker";
 import FavoriteButton from "./favorite-button";
+import MarketplaceCtas from "./marketplace-cta";
 import ExpandableText from "@/components/ui/expandable-text";
 import ProductCard from "@/components/ui/product-card";
 import RatingStars from "@/components/ui/rating-stars";
@@ -109,6 +110,9 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
 
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";
+  // ID Яндекс.Метрики для целей на кнопках «Купить» (как в layout: настройки → env)
+  const settings = await readSettings();
+  const ymId = settings.yandexMetrikaId || process.env.YANDEX_METRIKA_ID || null;
   const allProducts = await getProducts();
 
   // Color variants (same modelId) — show if not archived, even if out of stock
@@ -256,30 +260,16 @@ export default async function ProductPage({ params }: Props) {
             </div>
           ) : null}
 
-          {/* Marketplace CTAs — только маркетплейсы с ненулевым остатком */}
+          {/* Marketplace CTAs — только маркетплейсы с ненулевым остатком.
+              Клиентский компонент: цели Яндекс.Метрики (buy-wb / buy-ozon) */}
           {!product.archivedAt && (
-            <div className={styles.ctas}>
-              {product.wbArticle && (product.wbStock ?? 0) > 0 && (
-                <a
-                  href={MARKETPLACE_URLS.wbProduct(product.wbArticle)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.cta}
-                >
-                  Купить на Wildberries
-                </a>
-              )}
-              {product.ozonArticle && (product.ozonStock ?? 0) > 0 && (
-                <a
-                  href={MARKETPLACE_URLS.ozonProduct(product.ozonArticle)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.cta}
-                >
-                  Купить на Ozon
-                </a>
-              )}
-            </div>
+            <MarketplaceCtas
+              ymId={ymId}
+              wbArticle={product.wbArticle}
+              wbStock={product.wbStock}
+              ozonArticle={product.ozonArticle}
+              ozonStock={product.ozonStock}
+            />
           )}
 
           {/* SEO H2 */}
