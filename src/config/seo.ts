@@ -33,7 +33,8 @@ export interface SeoConfig {
     titleTemplate: string;
   };
   pages: Record<
-    "home" | "catalog" | "care" | "delivery" | "favorites" | "admin" | "notFound",
+    | "home" | "catalog" | "care" | "delivery" | "favorites" | "admin" | "notFound"
+    | "privacy" | "contacts",
     SeoPageMeta
   >;
   categories: Record<string, SeoCategoryMeta>;
@@ -94,6 +95,16 @@ export const seoConfig: SeoConfig = {
     delivery: {
       title: "Доставка",
       description: "Как заказать и получить сумку Moranti. Доставка через Wildberries и Ozon.",
+    },
+    privacy: {
+      title: "Политика конфиденциальности",
+      description:
+        "Политика обработки персональных данных Moranti: какие данные собирает сайт, зачем и какие права есть у посетителей.",
+    },
+    contacts: {
+      title: "Контакты",
+      description:
+        "Контакты и реквизиты Moranti: ИП Аугустан И.В., ОГРНИП 312392620100191, ИНН 390610008609. Связь через VK, покупка на Wildberries и Ozon.",
     },
     favorites: {
       title: "Избранное",

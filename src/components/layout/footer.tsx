@@ -1,4 +1,5 @@
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
+import { legalInfo } from "@/config/legal";
 import Link from "next/link";
 import styles from "./footer.module.css";
 
@@ -27,7 +28,8 @@ export default function Footer() {
             <h3>Помощь</h3>
             <Link href="/delivery">Доставка и оплата</Link>
             <Link href="/care">Уход за сумками</Link>
-
+            <Link href="/privacy">Политика конфиденциальности</Link>
+            <Link href="/contacts">Контакты</Link>
           </div>
           <div className={styles.col}>
             <h3>Магазины</h3>
@@ -37,7 +39,12 @@ export default function Footer() {
           </div>
         </div>
         <div className={styles.bottom}>
-          <span>&copy; {new Date().getFullYear()} Moranti. Все права защищены.</span>
+          <div className={styles.legal}>
+            <span>&copy; {new Date().getFullYear()} Moranti. Все права защищены.</span>
+            <span>
+              {legalInfo.shortName} · ОГРНИП {legalInfo.ogrnip} · ИНН {legalInfo.inn}
+            </span>
+          </div>
           <div className={styles.social}>
             <a href="https://vk.com/moranti_bags" target="_blank" rel="noopener noreferrer" aria-label="VK">VK</a>
           </div>

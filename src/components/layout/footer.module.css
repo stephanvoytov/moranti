@@ -69,6 +69,14 @@
   color: rgba(255, 255, 255, 0.55);
 }
 
+.legal {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
 .social {
   display: flex;
   gap: 20px;
