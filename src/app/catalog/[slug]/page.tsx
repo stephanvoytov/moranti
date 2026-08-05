@@ -31,6 +31,10 @@ export async function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
 }
 
+// ISR 60с: цена, наличие и кнопки покупки должны пересобираться из свежих
+// данных, а не висеть до следующего деплоя (синк меняет остатки/inStock в БД)
+export const revalidate = 60;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProduct(slug);

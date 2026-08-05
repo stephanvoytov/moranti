@@ -332,6 +332,7 @@ async function runSync(runId: string, platform: "wb" | "ozon") {
     invalidateCache();
     try {
       revalidatePath("/catalog");
+      revalidatePath("/catalog/[slug]");
       revalidatePath("/");
     } catch {
       // revalidatePath может упасть вне request-контекста

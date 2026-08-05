@@ -140,6 +140,7 @@ export async function PUT(
   invalidateCache(`product:${slug}`);
   revalidatePath("/");
   revalidatePath("/catalog");
+  revalidatePath("/catalog/[slug]");
   return NextResponse.json(serializeProduct(updated as Record<string, unknown>));
 }
 
@@ -169,5 +170,8 @@ export async function DELETE(
   invalidateCache("all-products-all");
   invalidateCache("all-categories");
   invalidateCache(`product:${slug}`);
+  revalidatePath("/");
+  revalidatePath("/catalog");
+  revalidatePath("/catalog/[slug]");
   return NextResponse.json({ ok: true });
 }
