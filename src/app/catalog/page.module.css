@@ -102,6 +102,7 @@
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  text-decoration: none;
 }
 
 .filterPill:hover {
@@ -294,6 +295,7 @@
   align-items: center;
   justify-content: center;
   transition: all var(--transition-fast);
+  text-decoration: none;
 }
 
 .pageBtn:hover {

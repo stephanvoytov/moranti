@@ -7,13 +7,24 @@ import {
   buildBreadcrumbJsonLd,
 } from "@/lib/seo-jsonld";
 import CatalogPage from "./catalog-content";
+import CatalogSeo from "@/components/sections/catalog-seo";
 
 // Страница dynamic: searchParams в generateMetadata (SEO-мета по категориям).
 // Данные отдаются из TTL-кэша (30–600с), рендер дешёвый.
 export const revalidate = 0;
 
 interface Props {
-  searchParams: Promise<{ category?: string; sort?: string }>;
+  searchParams: Promise<{
+    category?: string;
+    sort?: string;
+    color?: string;
+    material?: string;
+    q?: string;
+    priceMin?: string;
+    priceMax?: string;
+    marketplace?: string;
+    page?: string;
+  }>;
 }
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
@@ -21,7 +32,32 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const catSlug = params.category;
   const products = await getProducts();
 
+  const page = parseInt(params.page ?? "1", 10) || 1;
+  const hasOtherFilters = [
+    params.sort,
+    params.color,
+    params.material,
+    params.q,
+    params.priceMin,
+    params.priceMax,
+    params.marketplace,
+  ].some((v) => v !== undefined && v !== "");
+
   const cat = catSlug ? seoConfig.categories[catSlug] : undefined;
+
+  // Пагинация (page>1) и фильтры — закрываем от индексации: дубли каталога.
+  // canonical указывает на первую страницу/базовый URL.
+  if (page > 1 || (catSlug && !cat)) {
+    return {
+      title: { absolute: seoConfig.catalog.title },
+      description: seoConfig.catalog.description,
+      robots: { index: false, follow: true },
+      alternates: {
+        canonical: catSlug ? `/catalog?category=${catSlug}` : "/catalog",
+      },
+    };
+  }
+
   if (catSlug && cat) {
     const count = products.filter((p) => p.category === catSlug).length;
     const desc = `${cat.description} Доставка по России.`;
@@ -40,6 +76,16 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
         type: "website",
         locale: seoConfig.site.locale,
       },
+    };
+  }
+
+  // Фильтры без категории (?sort=, ?color=, ?q= и т.д.) — дубли каталога
+  if (hasOtherFilters) {
+    return {
+      title: { absolute: seoConfig.catalog.title },
+      description: seoConfig.catalog.description,
+      robots: { index: false, follow: true },
+      alternates: { canonical: "/catalog" },
     };
   }
 
@@ -121,6 +167,8 @@ export default async function CatalogPageWrapper({ searchParams }: Props) {
         initialCategories={categories}
         initialCatalogOrder={settings.catalogOrder ?? []}
       />
+      {/* SEO-текст с ссылками на категории — после сетки товаров */}
+      <CatalogSeo />
     </>
   );
 }

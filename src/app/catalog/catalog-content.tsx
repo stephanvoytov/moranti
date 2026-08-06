@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef, Suspense, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import ProductCard from "@/components/ui/product-card";
 import type { Product, ProductCategory } from "@/data/products";
@@ -202,6 +203,31 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
     setPage(1);
   }
 
+  // Page: тот же паттерн для ссылок пагинации (URL → state)
+  const [prevUrlPage, setPrevUrlPage] = useState(urlPage);
+  if (urlPage !== prevUrlPage) {
+    setPrevUrlPage(urlPage);
+    setPage(urlPage);
+  }
+
+  // Ссылки для категорий/пагинации: сохраняем остальные фильтры из URL
+  const categoryHref = (cat: string | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (cat) params.set("category", cat);
+    else params.delete("category");
+    params.delete("page");
+    const qs = params.toString();
+    return qs ? `${pathname}?${qs}` : pathname;
+  };
+
+  const pageHref = (p: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (p > 1) params.set("page", String(p));
+    else params.delete("page");
+    const qs = params.toString();
+    return qs ? `${pathname}?${qs}` : pathname;
+  };
+
   // ― Extract unique colors (normalized) and materials from products ―
   const colorOptions = useMemo(() => {
     const set = new Set<string>();
@@ -297,11 +323,6 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
     (safePage - 1) * ITEMS_PER_PAGE,
     safePage * ITEMS_PER_PAGE,
   );
-
-  const handleFilter = (cat: string | null) => {
-    setSelectedCategory(cat);
-    setPage(1);
-  };
 
   const hasActiveFilter = selectedMarketplace || selectedCategory || selectedColor || selectedMaterial;
   const clearFilters = () => {
@@ -480,23 +501,23 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
           </div>
         </div>
 
-        {/* Category pills — always visible */}
+        {/* Category pills — ссылки для краулеров */}
         <div className={styles.filterSection}>
           <div className={styles.filterRow}>
-            <button
+            <Link
+              href={categoryHref(null)}
               className={`${styles.filterPill} ${selectedCategory === null ? styles.pillActive : ""}`}
-              onClick={() => { setSelectedCategory(null); setPage(1); }}
             >
               Все
-            </button>
+            </Link>
             {categories.map((cat) => (
-              <button
+              <Link
                 key={cat.slug}
+                href={categoryHref(cat.slug)}
                 className={`${styles.filterPill} ${selectedCategory === cat.slug ? styles.pillActive : ""}`}
-                onClick={() => handleFilter(cat.slug)}
               >
                 {cat.name}
-              </button>
+              </Link>
             ))}
           </div>
         </div>
@@ -573,16 +594,20 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
           <p className={styles.noResults}>Ничего не найдено</p>
         )}
 
-        {/* Pagination */}
+        {/* Pagination — ссылки для краулеров */}
         {totalPages > 1 && (
           <div className={styles.pagination}>
-            <button
-              className={`${styles.pageBtn} ${safePage <= 1 ? styles.pageBtnDisabled : ""}`}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={safePage <= 1}
-            >
-              ←
-            </button>
+            {safePage <= 1 ? (
+              <span className={`${styles.pageBtn} ${styles.pageBtnDisabled}`}>←</span>
+            ) : (
+              <Link
+                href={pageHref(safePage - 1)}
+                className={styles.pageBtn}
+                aria-label="Предыдущая страница"
+              >
+                ←
+              </Link>
+            )}
 
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter((p) => {
@@ -595,22 +620,27 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
                   {idx > 0 && arr[idx - 1] !== p - 1 && (
                     <span className={styles.pageEllipsis}>…</span>
                   )}
-                  <button
-                    className={`${styles.pageBtn} ${p === safePage ? styles.pageBtnActive : ""}`}
-                    onClick={() => setPage(p)}
-                  >
-                    {p}
-                  </button>
+                  {p === safePage ? (
+                    <span className={`${styles.pageBtn} ${styles.pageBtnActive}`}>{p}</span>
+                  ) : (
+                    <Link href={pageHref(p)} className={styles.pageBtn}>
+                      {p}
+                    </Link>
+                  )}
                 </span>
               ))}
 
-            <button
-              className={`${styles.pageBtn} ${safePage >= totalPages ? styles.pageBtnDisabled : ""}`}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={safePage >= totalPages}
-            >
-              →
-            </button>
+            {safePage >= totalPages ? (
+              <span className={`${styles.pageBtn} ${styles.pageBtnDisabled}`}>→</span>
+            ) : (
+              <Link
+                href={pageHref(safePage + 1)}
+                className={styles.pageBtn}
+                aria-label="Следующая страница"
+              >
+                →
+              </Link>
+            )}
           </div>
         )}
       </section>

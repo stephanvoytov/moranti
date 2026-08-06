@@ -144,10 +144,14 @@ export default async function ProductPage({ params }: Props) {
     .slice(0, 4);
 
   const catName = seoConfig.categoryNames[product.category] || product.category;
+  const catDisplayName =
+    seoConfig.categories[product.category]?.name || product.category;
+  const catPath = `/catalog?category=${product.category}`;
   const breadcrumbJsonLd = buildBreadcrumbJsonLd(
     [
       { name: "Главная", path: "/" },
       { name: "Каталог", path: "/catalog" },
+      { name: catDisplayName, path: catPath },
       { name: product.name, path: `/catalog/${product.slug}` },
     ],
     siteUrl,
@@ -180,8 +184,16 @@ export default async function ProductPage({ params }: Props) {
       {/* Top row: breadcrumb + actions */}
       <div className={styles.topRow}>
         <nav className={styles.breadcrumb}>
+          <Link href="/" className={styles.breadcrumbLink}>
+            Главная
+          </Link>
+          <span className={styles.breadcrumbSep}>/</span>
           <Link href="/catalog" className={styles.breadcrumbLink}>
             Каталог
+          </Link>
+          <span className={styles.breadcrumbSep}>/</span>
+          <Link href={catPath} className={styles.breadcrumbLink}>
+            {catDisplayName}
           </Link>
           <span className={styles.breadcrumbSep}>/</span>
           <span className={styles.breadcrumbCurrent}>{product.name}</span>

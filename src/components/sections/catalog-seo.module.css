@@ -1,0 +1,79 @@
+/* =============================================
+   Catalog SEO Text — текстовый блок каталога
+   (после сетки товаров, перед футером).
+   ============================================= */
+
+.section {
+  background: var(--bg);
+  padding: 40px 0 64px;
+  border-top: 1px solid var(--border-light);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--dark);
+  margin: 0 0 28px;
+  text-align: center;
+}
+
+.grid {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.grid p {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin: 0;
+  text-align: justify;
+  text-align-last: left;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 16px;
+  padding-top: 8px;
+}
+
+.links a {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--border);
+  transition: text-decoration-color var(--transition-fast);
+}
+
+.links a:hover {
+  text-decoration-color: var(--dark);
+}
+
+/* ——— Responsive ——— */
+
+@media (max-width: 768px) {
+  .section {
+    padding: 32px 0 48px;
+  }
+  .grid {
+    gap: var(--space-4);
+  }
+  .grid p {
+    font-size: 15px;
+    text-align: left;
+  }
+}
