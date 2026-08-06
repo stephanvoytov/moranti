@@ -1,0 +1,56 @@
+/* =============================================
+   Brand SEO Text — компактный текстовый блок
+   (главная, перед футером). Не мешает editorial-дизайну.
+   ============================================= */
+
+.section {
+  background: var(--bg);
+  padding: 40px 0 64px;
+  border-top: 1px solid var(--border-light);
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--dark);
+  margin: 0 0 28px;
+  text-align: center;
+}
+
+.grid {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.grid p {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin: 0;
+  text-align: justify;
+  text-align-last: left;
+}
+
+/* ——— Responsive ——— */
+
+@media (max-width: 768px) {
+  .section {
+    padding: 32px 0 48px;
+  }
+  .grid {
+    gap: var(--space-4);
+  }
+  .grid p {
+    font-size: 15px;
+    text-align: left;
+  }
+}

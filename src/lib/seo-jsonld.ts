@@ -36,6 +36,7 @@ function buildOffers(
         price: product.price,
         priceCurrency: "RUB",
         availability: "https://schema.org/InStock",
+        ...merchantFields(),
       }))
     : {
         "@type": "Offer",
@@ -43,7 +44,46 @@ function buildOffers(
         price: product.price,
         priceCurrency: "RUB",
         availability: "https://schema.org/InStock",
+        ...merchantFields(),
       };
+}
+
+/**
+ * Поля, которые Google требует для Merchant listings:
+ * доставка (shippingDetails) и политика возврата (hasMerchantReturnPolicy).
+ * Доставка по России, бесплатно, 1–2 дня на обработку, 1–5 дней в пути.
+ * Возврат — 14 дней (по правилам Wildberries/Ozon).
+ */
+function merchantFields(): Record<string, unknown> {
+  return {
+    shippingDetails: {
+      "@type": "OfferShippingDetails",
+      shippingRate: { "@type": "MonetaryAmount", value: 0, currency: "RUB" },
+      shippingDestination: { "@type": "DefinedRegion", addressCountry: "RU" },
+      deliveryTime: {
+        "@type": "ShippingDeliveryTime",
+        handlingTime: {
+          "@type": "QuantitativeValue",
+          minValue: 1,
+          maxValue: 2,
+          unitCode: "DAY",
+        },
+        transitTime: {
+          "@type": "QuantitativeValue",
+          minValue: 1,
+          maxValue: 5,
+          unitCode: "DAY",
+        },
+      },
+    },
+    hasMerchantReturnPolicy: {
+      "@type": "MerchantReturnPolicy",
+      applicableCountry: "RU",
+      returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+      merchantReturnDays: 14,
+      returnMethod: "https://schema.org/ReturnByMail",
+    },
+  };
 }
 
 /** Product JSON-LD: название, описание, фото, офферы (цена + наличие), рейтинг */
@@ -56,11 +96,14 @@ export function buildProductJsonLd(
     "@type": "Product",
     name: product.name,
     description: product.description,
+    brand: { "@type": "Brand", name: "Moranti" },
     image: product.images?.length ? product.images : [product.image],
     offers: buildOffers(product, siteUrl),
   };
 
-  if (product.rating) {
+  // Google показывает звёзды рейтинга в сниппете только для рейтинга >= 3.5;
+  // ниже порога разметку не добавляем, чтобы не путать Google.
+  if (product.rating && product.rating >= 3.5) {
     jsonLd.aggregateRating = {
       "@type": "AggregateRating",
       ratingValue: product.rating,
@@ -115,6 +158,7 @@ export function buildGlobalJsonLd(siteUrl: string): Record<string, unknown>[] {
       "@context": "https://schema.org",
       "@type": "Organization",
       name: "Moranti",
+      alternateName: "Моранти",
       url: siteUrl,
       logo: `${siteUrl}/images/moranti-logo.png`,
       description:
@@ -125,6 +169,7 @@ export function buildGlobalJsonLd(siteUrl: string): Record<string, unknown>[] {
       "@context": "https://schema.org",
       "@type": "WebSite",
       name: "Moranti",
+      alternateName: "Моранти",
       url: siteUrl,
       description: "Премиальные кожаные сумки ручной работы",
       inLanguage: "ru",

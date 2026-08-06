@@ -4,6 +4,7 @@ import { blobUrl } from "@/lib/blob";
 import { buildItemListJsonLd } from "@/lib/seo-jsonld";
 import Link from "next/link";
 import Hero from "@/components/sections/hero";
+import BrandSeo from "@/components/sections/brand-seo";
 import ProductCard from "@/components/ui/product-card";
 import SmartImage from "@/components/ui/smart-image";
 import HomeClient from "./home-client";
@@ -133,6 +134,9 @@ export default async function Home() {
           </Link>
         </div>
       </section>
+
+      {/* ——— SEO-текст (компактный, перед футером) ——— */}
+      <BrandSeo />
 
       {/* ——— Кнопка на админку (клиентский компонент) ——— */}
       <HomeClient />

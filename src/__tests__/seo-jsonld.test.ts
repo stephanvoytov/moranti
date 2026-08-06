@@ -71,7 +71,7 @@ describe("buildProductJsonLd", () => {
     expect(offers.url).toBe(`${SITE_URL}/catalog/sumka-tout`);
   });
 
-  it("includes aggregateRating only when rating exists", () => {
+  it("includes aggregateRating only when rating >= 3.5 (Google star threshold)", () => {
     const ld = buildProductJsonLd(makeProduct({ rating: 4.8, reviewsCount: 23 }), SITE_URL);
     expect(ld.aggregateRating).toEqual({
       "@type": "AggregateRating",
@@ -79,8 +79,32 @@ describe("buildProductJsonLd", () => {
       reviewCount: 23,
     });
 
+    // Ровно 3.5 — порог входит
+    const threshold = buildProductJsonLd(makeProduct({ rating: 3.5, reviewsCount: 2 }), SITE_URL);
+    expect(threshold.aggregateRating).toBeDefined();
+
+    // Ниже 3.5 — звёзды в разметке не показываем
+    const low = buildProductJsonLd(makeProduct({ rating: 3.2, reviewsCount: 10 }), SITE_URL);
+    expect(low.aggregateRating).toBeUndefined();
+
     const noRating = buildProductJsonLd(makeProduct(), SITE_URL);
     expect(noRating.aggregateRating).toBeUndefined();
+  });
+
+  it("includes brand (Merchant listings global identifier)", () => {
+    const ld = buildProductJsonLd(makeProduct(), SITE_URL);
+    expect(ld.brand).toEqual({ "@type": "Brand", name: "Moranti" });
+  });
+
+  it("includes shippingDetails + return policy in every offer (Merchant listings)", () => {
+    const ld = buildProductJsonLd(makeProduct(), SITE_URL);
+    const raw = ld.offers as Record<string, unknown>[] | Record<string, unknown>;
+    const offer = (Array.isArray(raw) ? raw[0] : raw) as Record<string, Record<string, unknown>>;
+    expect(offer.shippingDetails["@type"]).toBe("OfferShippingDetails");
+    const dest = offer.shippingDetails["shippingDestination"] as Record<string, unknown>;
+    expect(dest.addressCountry).toBe("RU");
+    expect(offer.hasMerchantReturnPolicy["@type"]).toBe("MerchantReturnPolicy");
+    expect(offer.hasMerchantReturnPolicy["merchantReturnDays"]).toBe(14);
   });
 });
 
