@@ -38,7 +38,6 @@ SITE_URL=https://dev.morantibags.ru # канонический URL для dev; �
 WB_API_KEY=...                     # живые цены Wildberries (официальный API)
 OZON_CLIENT_ID=...                 # Ozon Seller API
 OZON_API_KEY=...
-YANDEX_METRIKA_ID=12345678         # Яндекс.Метрика
 YANDEX_VERIFICATION=...            # Яндекс.Вебмастер
 GOOGLE_SITE_VERIFICATION=...       # Google Search Console (fallback — код из layout.tsx)
 BLOB_READ_WRITE_TOKEN=...          # Vercel Blob (загрузка медиа)
@@ -173,7 +172,7 @@ https://morantibags.ru/admin
 - `/robots.txt` — `/admin/` и `/api/` скрыты; dev/preview — полный noindex
 - JSON-LD (`src/lib/seo-jsonld.ts`): Organization + WebSite + Product (цена, рейтинг) + BreadcrumbList
 - OpenGraph + Twitter Card (1200×630)
-- Верификация: Яндекс.Вебмастер (`YANDEX_VERIFICATION`) + Google Search Console (`GOOGLE_SITE_VERIFICATION`), Яндекс.Метрика через админку
+- Верификация: Яндекс.Вебмастер (`YANDEX_VERIFICATION`) + Google Search Console (`GOOGLE_SITE_VERIFICATION`); Яндекс.Метрика — константа `YANDEX_METRIKA_ID` в `src/config/analytics.ts`
 - SEO-превью в админке: `@power-seo/preview` (Google/Facebook/Twitter)
 
 ### Цены

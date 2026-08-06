@@ -1,11 +1,10 @@
 "use client";
 
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
+import { YANDEX_METRIKA_ID } from "@/config/analytics";
 import styles from "./page.module.css";
 
 interface MarketplaceCtasProps {
-  /** ID счётчика Яндекс.Метрики (из настроек или env) — пусто = без трекинга */
-  ymId?: string | null;
   wbArticle?: number;
   wbStock?: number;
   ozonArticle?: number;
@@ -14,23 +13,23 @@ interface MarketplaceCtasProps {
 
 /** Кнопки «Купить на Wildberries/Ozon» + цели Яндекс.Метрики.
  *  Клик отправляет ym(id, "reachGoal", "buy-wb" | "buy-ozon").
+ *  ID счётчика — константа YANDEX_METRIKA_ID из src/config/analytics.ts.
  *  В кабинете Метрики нужно создать цели типа «JavaScript-событие»
  *  с идентификаторами buy-wb и buy-ozon. */
 export default function MarketplaceCtas({
-  ymId,
   wbArticle,
   wbStock,
   ozonArticle,
   ozonStock,
 }: MarketplaceCtasProps) {
   const reachGoal = (goal: "buy-wb" | "buy-ozon") => {
-    if (!ymId || typeof window === "undefined") return;
+    if (typeof window === "undefined") return;
     // window.ym — глобальная функция, определённая сниппетом Метрики в layout
     (
       window as unknown as {
-        ym?: (id: string, action: string, goal: string) => void;
+        ym?: (id: number, action: string, goal: string) => void;
       }
-    ).ym?.(ymId, "reachGoal", goal);
+    ).ym?.(YANDEX_METRIKA_ID, "reachGoal", goal);
   };
 
   return (

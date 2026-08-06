@@ -3,7 +3,6 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import type { CharacteristicGroup } from "@/data/products";
 import { getProducts, getProduct } from "@/data/products";
-import { readSettings } from "@/lib/settings";
 import { seoConfig, buildProductSeoMeta } from "@/config/seo";
 import { buildProductJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo-jsonld";
 import PriceClient from "./price-client";
@@ -114,9 +113,6 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
 
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";
-  // ID Яндекс.Метрики для целей на кнопках «Купить» (как в layout: настройки → env)
-  const settings = await readSettings();
-  const ymId = settings.yandexMetrikaId || process.env.YANDEX_METRIKA_ID || null;
   const allProducts = await getProducts();
 
   // Color variants (same modelId) — show if not archived, even if out of stock
@@ -269,7 +265,6 @@ export default async function ProductPage({ params }: Props) {
               Клиентский компонент: цели Яндекс.Метрики (buy-wb / buy-ozon) */}
           {!product.archivedAt && (
             <MarketplaceCtas
-              ymId={ymId}
               wbArticle={product.wbArticle}
               wbStock={product.wbStock}
               ozonArticle={product.ozonArticle}

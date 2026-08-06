@@ -17,7 +17,6 @@ interface SettingsForm {
   heroImageMobile: string;
   featuredIds: string;
   catalogOrder: string;
-  yandexMetrikaId: string;
   vk: string;
   telegram: string;
   whatsapp: string;
@@ -35,7 +34,6 @@ const emptyForm: SettingsForm = {
   heroImageMobile: "",
   featuredIds: "",
   catalogOrder: "",
-  yandexMetrikaId: "",
   vk: "",
   telegram: "",
   whatsapp: "",
@@ -144,7 +142,6 @@ export default function AdminSettingsPage() {
           heroImageMobile: data.hero?.imageMobile || "",
           featuredIds: Array.isArray(data.featuredIds) ? data.featuredIds.join(", ") : "",
           catalogOrder: Array.isArray(data.catalogOrder) ? data.catalogOrder.join(", ") : "",
-          yandexMetrikaId: data.yandexMetrikaId || "",
           catImages: data.categoryImages || {},
           vk: data.social?.vk || "",
           telegram: data.social?.telegram || "",
@@ -229,7 +226,6 @@ export default function AdminSettingsPage() {
       featuredIds: featuredIdsArray,
       catalogOrder: form.catalogOrder.split(",").map((s) => s.trim()).filter(Boolean),
       categoryImages: catImages,
-      yandexMetrikaId: form.yandexMetrikaId,
       social: {
         vk: form.vk,
         telegram: form.telegram,
@@ -304,7 +300,6 @@ export default function AdminSettingsPage() {
         heroImageMobile: parsed.hero?.imageMobile || "",
         featuredIds: Array.isArray(parsed.featuredIds) ? parsed.featuredIds.join(", ") : "",
         catalogOrder: Array.isArray(parsed.catalogOrder) ? parsed.catalogOrder.join(", ") : "",
-        yandexMetrikaId: parsed.yandexMetrikaId || "",
         vk: parsed.social?.vk || "",
         telegram: parsed.social?.telegram || "",
         whatsapp: parsed.social?.whatsapp || "",
@@ -553,32 +548,10 @@ export default function AdminSettingsPage() {
               </label>
             </section>
 
-            {/* 05 — Аналитика */}
+              {/* 05 — Социальные сети */}
             <section className={styles.section}>
               <div className={styles.sectionHead}>
                 <span className={styles.sectionNum}>05</span>
-                <div>
-                  <h2 className={styles.sectionTitle}>Аналитика</h2>
-                  <p className={styles.sectionDesc}>Счётчики и метрики</p>
-                </div>
-              </div>
-              <label className={styles.field}>
-                <span className={styles.fieldLabel}>Яндекс.Метрика ID</span>
-                <input
-                  type="text"
-                  className={styles.input}
-                  value={form.yandexMetrikaId}
-                  onChange={(e) => updateField("yandexMetrikaId", e.target.value)}
-                  placeholder="оставьте пустым, если не используется"
-                />
-                <span className={styles.hint}>ID счётчика Яндекс.Метрики</span>
-              </label>
-            </section>
-
-            {/* 06 — Социальные сети */}
-            <section className={styles.section}>
-              <div className={styles.sectionHead}>
-                <span className={styles.sectionNum}>06</span>
                 <div>
                   <h2 className={styles.sectionTitle}>Социальные сети</h2>
                   <p className={styles.sectionDesc}>Ссылки в шапке и футере</p>
@@ -618,10 +591,10 @@ export default function AdminSettingsPage() {
               </div>
             </section>
 
-            {/* 07 — Маркетплейсы */}
+            {/* 06 — Маркетплейсы */}
             <section className={styles.section}>
               <div className={styles.sectionHead}>
-                <span className={styles.sectionNum}>07</span>
+                <span className={styles.sectionNum}>06</span>
                 <div>
                   <h2 className={styles.sectionTitle}>Маркетплейсы</h2>
                   <p className={styles.sectionDesc}>Ссылки на карточки товаров</p>
@@ -651,10 +624,10 @@ export default function AdminSettingsPage() {
               </div>
             </section>
 
-            {/* 08 — API ключи */}
+            {/* 07 — API ключи */}
             <section className={styles.section}>
               <div className={styles.sectionHead}>
-                <span className={styles.sectionNum}>08</span>
+                <span className={styles.sectionNum}>07</span>
                 <div>
                   <h2 className={styles.sectionTitle}>API ключи</h2>
                   <p className={styles.sectionDesc}>Доступы к маркетплейсам</p>

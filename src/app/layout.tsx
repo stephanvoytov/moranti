@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import { randomUUID } from "crypto";
 import { Playfair_Display, Montserrat, Inter } from "next/font/google";
 import { FavoritesProvider } from "@/lib/favorites-context";
-import { readSettings } from "@/lib/settings";
-import type { SiteSettings } from "@/lib/settings";
 import { seoConfig } from "@/config/seo";
+import { YANDEX_METRIKA_ID } from "@/config/analytics";
 import { buildGlobalJsonLd } from "@/lib/seo-jsonld";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -42,20 +41,6 @@ const inter = Inter({
 const siteUrl = process.env.SITE_URL || "http://localhost:3001";
 
 /* ——— Metadata ——— */
-
-/** Настройки с таймаутом 2с — если БД не отвечает, не блокируем рендер */
-async function readSettingsSafe(): Promise<SiteSettings | null> {
-  try {
-    return await Promise.race([
-      readSettings(),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("settings timeout")), 2000),
-      ),
-    ]);
-  } catch {
-    return null;
-  }
-}
 
 export async function generateMetadata(): Promise<Metadata> {
   const { site } = seoConfig;
@@ -107,11 +92,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Yandex Metrika ID: из админки или .env.local
-  // Таймаут 2 секунды — если БД не отвечает, не блокируем рендер
-  const settings = await readSettingsSafe();
-  const ymId = settings?.yandexMetrikaId || process.env.YANDEX_METRIKA_ID;
-  const ymNumber = Number(ymId) || 0;
+  // ID Яндекс.Метрики — константа в src/config/analytics.ts (без env и админки)
+  const ymNumber = YANDEX_METRIKA_ID;
 
   // ─── CSP nonce (per-request, prevents XSS via inline scripts) ───
   const nonce = randomUUID();
