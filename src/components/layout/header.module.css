@@ -60,6 +60,65 @@
   background: var(--text-primary);
 }
 
+/* ——— Dropdown «Каталог» ——— */
+
+.catalogItem {
+  position: relative;
+}
+
+.catalogLinkOpen {
+  color: var(--text-primary);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: -16px;
+  min-width: 220px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 32px rgba(44, 36, 32, 0.12);
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity var(--transition-base), transform var(--transition-base), visibility var(--transition-base);
+  z-index: 110;
+}
+
+.dropdownOpen {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.dropdown a {
+  display: block;
+  padding: 10px 20px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dropdown a:hover {
+  color: var(--text-primary);
+  background: var(--card-bg);
+}
+
+.dropdown a::after {
+  content: none;
+}
+
 .actions {
   display: flex;
   gap: 12px;
@@ -168,6 +227,29 @@
     transform: translateY(0);
     pointer-events: auto;
     visibility: visible;
+  }
+
+  /* Dropdown на мобиле: статичный вложенный список, hover недоступен */
+  .dropdown {
+    position: static;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    visibility: visible;
+    box-shadow: none;
+    border: none;
+    border-left: 1px solid var(--border);
+    margin: 4px 0 0 8px;
+    padding: 0 0 0 16px;
+    gap: 10px;
+  }
+
+  .dropdown a {
+    padding: 4px 0;
+  }
+
+  .dropdown a:hover {
+    background: none;
   }
 
   .menuToggle {

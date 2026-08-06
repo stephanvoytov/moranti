@@ -114,7 +114,7 @@ describe("buildBreadcrumbJsonLd", () => {
       [
         { name: "Главная", path: "/" },
         { name: "Каталог", path: "/catalog" },
-        { name: "Кросс-боди", path: "/catalog?category=crossbody" },
+        { name: "Кросс-боди", path: "/catalog/crossbody" },
       ],
       SITE_URL,
     );
@@ -127,7 +127,7 @@ describe("buildBreadcrumbJsonLd", () => {
       name: "Главная",
       item: "https://morantibags.ru/",
     });
-    expect(items[2].item).toBe("https://morantibags.ru/catalog?category=crossbody");
+    expect(items[2].item).toBe("https://morantibags.ru/catalog/crossbody");
   });
 });
 
@@ -136,12 +136,12 @@ describe("buildCollectionPageJsonLd", () => {
     const ld = buildCollectionPageJsonLd(
       "Кросс-боди",
       "Сумки через плечо.",
-      "/catalog?category=crossbody",
+      "/catalog/crossbody",
       12,
     );
     expect(ld["@type"]).toBe("CollectionPage");
     expect(ld.name).toBe("Кросс-боди");
-    expect(ld.url).toBe("/catalog?category=crossbody");
+    expect(ld.url).toBe("/catalog/crossbody");
     expect(ld.numberOfItems).toBe(12);
   });
 });

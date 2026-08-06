@@ -2,13 +2,53 @@ import Link from "next/link";
 import { seoConfig } from "@/config/seo";
 import styles from "./catalog-seo.module.css";
 
+interface CatalogSeoProps {
+  /** Слаг категории — уникальный текст под категорию; без слага — общий текст */
+  category?: string;
+}
+
 /**
  * SEO-текст каталога: видимый блок после сетки товаров.
- * Описывает ассортимент, материалы и категории — с прямыми ссылками
- * на категории (перелинковка + якоря для поисковиков).
+ * Без категории — общий текст; с категорией — текст из seoConfig.categories
+ * и ссылки на остальные категории (перелинковка + якоря для поисковиков).
  */
-export default function CatalogSeo() {
-  const cats = Object.entries(seoConfig.categories);
+export default function CatalogSeo({ category }: CatalogSeoProps) {
+  const cat = category ? seoConfig.categories[category] : undefined;
+  const cats = Object.entries(seoConfig.categories).filter(
+    ([slug]) => slug !== category,
+  );
+
+  if (cat) {
+    return (
+      <section className={styles.section} aria-label={`О категории ${cat.name}`}>
+        <div className="container">
+          <h2 className={styles.title}>{cat.title.replace(" — Moranti", "")}</h2>
+          <div className={styles.grid}>
+            <p>{cat.description}</p>
+            <p>
+              Все модели категории доступны на Wildberries и Ozon — цена и
+              наличие на страницах актуальные, доставка по всей России, возврат
+              по правилам маркетплейса. Посмотрите также другие коллекции
+              Moranti:
+            </p>
+            <div className={styles.links}>
+              {cats.map(([slug, c]) => (
+                <Link key={slug} href={`/catalog/${slug}`}>
+                  {c.name}
+                </Link>
+              ))}
+            </div>
+            <p>
+              Все сумки Moranti изготавливаются в Италии из натуральной кожи и
+              замши с ручным контролем качества — поэтому они не теряют форму и
+              со временем приобретают благородную патину. Если сомневаетесь в
+              выборе — почитайте наши рекомендации по уходу за кожей и замшей.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className={styles.section} aria-label="О каталоге Moranti">
@@ -28,9 +68,9 @@ export default function CatalogSeo() {
             выход. Ниже — категории, в которых удобно выбрать сумку под себя:
           </p>
           <div className={styles.links}>
-            {cats.map(([slug, cat]) => (
-              <Link key={slug} href={`/catalog?category=${slug}`}>
-                {cat.name}
+            {cats.map(([slug, c]) => (
+              <Link key={slug} href={`/catalog/${slug}`}>
+                {c.name}
               </Link>
             ))}
           </div>

@@ -5,15 +5,19 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useFavorites } from "@/lib/favorites-context";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
+import { seoConfig } from "@/config/seo";
 import styles from "./header.module.css";
 
 export default function Header() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
   const { count } = useFavorites();
 
   // Не показывать хедер на страницах админки
   if (pathname?.startsWith("/admin")) return null;
+
+  const categories = Object.entries(seoConfig.categories);
 
   return (
     <>
@@ -29,9 +33,36 @@ export default function Header() {
           <Link href="/catalog?sort=new" onClick={() => setMenuOpen(false)}>
             Новинки
           </Link>
-          <Link href="/catalog" onClick={() => setMenuOpen(false)}>
-            Каталог
-          </Link>
+          <div
+            className={styles.catalogItem}
+            onMouseEnter={() => setCatalogOpen(true)}
+            onMouseLeave={() => setCatalogOpen(false)}
+          >
+            <Link
+              href="/catalog"
+              className={catalogOpen ? styles.catalogLinkOpen : undefined}
+              onClick={() => setMenuOpen(false)}
+              aria-expanded={catalogOpen}
+            >
+              Каталог
+            </Link>
+            <div
+              className={`${styles.dropdown}${catalogOpen ? " " + styles.dropdownOpen : ""}`}
+            >
+              {categories.map(([slug, cat]) => (
+                <Link
+                  key={slug}
+                  href={`/catalog/${slug}`}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setCatalogOpen(false);
+                  }}
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
+          </div>
           <a href={MARKETPLACE_URLS.wbSeller} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
             Wildberries
           </a>

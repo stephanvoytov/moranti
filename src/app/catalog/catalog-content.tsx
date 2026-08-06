@@ -19,6 +19,11 @@ interface CatalogContentProps {
   initialProducts?: Product[];
   initialCategories?: ProductCategory[];
   initialCatalogOrder?: string[];
+  /** Категория из URL-пути (страница /catalog/:slug) — не пишется в query */
+  initialCategory?: string | null;
+  categoryFromPath?: boolean;
+  /** Видимый H1 (для страницы категории) */
+  categoryTitle?: string;
 }
 
 const ITEMS_PER_PAGE = 24;
@@ -54,7 +59,14 @@ function normalizeMaterial(composition: string | undefined): string | null {
   return null;
 }
 
-function CatalogContent({ initialProducts, initialCategories, initialCatalogOrder }: CatalogContentProps) {
+function CatalogContent({
+  initialProducts,
+  initialCategories,
+  initialCatalogOrder,
+  initialCategory = null,
+  categoryFromPath = false,
+  categoryTitle,
+}: CatalogContentProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -104,7 +116,9 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
   const urlPage = parseInt(searchParams.get("page") ?? "1", 10) || 1;
 
   const [selectedMarketplace, setSelectedMarketplace] = useState<string | null>(urlMarketplace);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(urlCategory);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    categoryFromPath ? (initialCategory ?? null) : urlCategory,
+  );
   const [selectedColor, setSelectedColor] = useState<string | null>(urlColor);
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(urlMaterial);
   const [page, setPage] = useState(urlPage);
@@ -155,7 +169,8 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
     syncTimeoutRef.current = setTimeout(() => {
       const params = new URLSearchParams();
       if (selectedMarketplace) params.set("marketplace", selectedMarketplace);
-      if (selectedCategory) params.set("category", selectedCategory);
+      // На странице категории категория в пути — в query не дублируем
+      if (!categoryFromPath && selectedCategory) params.set("category", selectedCategory);
       if (selectedColor) params.set("color", selectedColor);
       if (selectedMaterial) params.set("material", selectedMaterial);
       if (sortOption && sortOption !== "default") params.set("sort", sortOption);
@@ -168,7 +183,7 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
       router.replace(newUrl, { scroll: false });
     }, 50);
     return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
-  }, [selectedMarketplace, selectedCategory, selectedColor, selectedMaterial, sortOption, searchInput, priceMin, priceMax, page, pathname, router]);
+  }, [selectedMarketplace, selectedCategory, selectedColor, selectedMaterial, sortOption, searchInput, priceMin, priceMax, page, pathname, router, categoryFromPath]);
 
   // ― Recently viewed (все товары, включая нет в наличии) ―
   const recentlyViewed = useSyncExternalStore(
@@ -210,14 +225,15 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
     setPage(urlPage);
   }
 
-  // Ссылки для категорий/пагинации: сохраняем остальные фильтры из URL
+  // Ссылки категорий: чистый URL /catalog/:slug (сохраняем остальные фильтры).
+  // «Все» — базовый /catalog.
   const categoryHref = (cat: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (cat) params.set("category", cat);
-    else params.delete("category");
+    params.delete("category");
     params.delete("page");
     const qs = params.toString();
-    return qs ? `${pathname}?${qs}` : pathname;
+    const suffix = qs ? `?${qs}` : "";
+    return cat ? `/catalog/${cat}${suffix}` : `/catalog${suffix}`;
   };
 
   const pageHref = (p: number) => {
@@ -359,7 +375,7 @@ function CatalogContent({ initialProducts, initialCategories, initialCatalogOrde
       <section className={styles.catalog}>
         <div className={styles.header}>
           <span className={styles.label}>Каталог</span>
-          <h1 className={styles.title}>Наши сумки</h1>
+          <h1 className={styles.title}>{categoryTitle ?? "Наши сумки"}</h1>
         </div>
 
         {/* Toolbar: search + toggle button + filter panel */}

@@ -17,10 +17,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // Категории каталога (фильтры с query-параметром) — из SEO-конфига
+  // Категории каталога — чистые URL /catalog/:slug
   const categoryUrls: MetadataRoute.Sitemap = Object.keys(seoConfig.categories).map(
     (cat) => ({
-      url: `${siteUrl}/catalog?category=${cat}`,
+      url: `${siteUrl}/catalog/${cat}`,
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.8,

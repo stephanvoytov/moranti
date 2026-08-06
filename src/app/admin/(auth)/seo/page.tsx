@@ -115,19 +115,19 @@ export default async function SeoAdminPage() {
     entries.push({
       id: `cat-${slug}`,
       group: "categories",
-      path: `/catalog?category=${slug}`,
+      path: `/catalog/${slug}`,
       title: cat.title,
       // Без счётчика: «12 моделей» кешируется Google и устаревает
       description: `${cat.description} Доставка по России.`,
       // Пустая категория закрыта от индексации (см. generateMetadata каталога)
       noindex: count === 0,
       siteSegments: ["Каталог", cat.name],
-      canonical: `/catalog?category=${slug}`,
+      canonical: `/catalog/${slug}`,
       jsonLd: [
         buildCollectionPageJsonLd(
           cat.title.replace(" — Moranti", ""),
           `${cat.description} Доставка по России.`,
-          `/catalog?category=${slug}`,
+          `/catalog/${slug}`,
           count,
         ),
       ],

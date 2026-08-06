@@ -17,12 +17,12 @@ export default function Footer() {
           </div>
           <div className={styles.col}>
             <h3>Коллекции</h3>
-            <Link href="/catalog?category=crossbody">Кросс-боди</Link>
-            <Link href="/catalog?category=na-plecho">На плечо</Link>
-            <Link href="/catalog?category=baguette">Багет</Link>
-            <Link href="/catalog?category=tote">Тоут</Link>
-            <Link href="/catalog?category=saddle">Седло</Link>
-            <Link href="/catalog?category=backpack">Рюкзаки</Link>
+            <Link href="/catalog/crossbody">Кросс-боди</Link>
+            <Link href="/catalog/na-plecho">На плечо</Link>
+            <Link href="/catalog/baguette">Багет</Link>
+            <Link href="/catalog/tote">Тоут</Link>
+            <Link href="/catalog/saddle">Седло</Link>
+            <Link href="/catalog/backpack">Рюкзаки</Link>
           </div>
           <div className={styles.col}>
             <h3>Помощь</h3>

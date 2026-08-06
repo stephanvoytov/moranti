@@ -1,2 +1,10 @@
 {
+  "redirects": [
+    {
+      "source": "/catalog",
+      "has": [{ "type": "query", "key": "category", "value": "(?<cat>[^&]+)" }],
+      "destination": "/catalog/:cat",
+      "permanent": true
+    }
+  ]
 }

@@ -5,6 +5,7 @@ import type { CharacteristicGroup } from "@/data/products";
 import { getProducts, getProduct } from "@/data/products";
 import { seoConfig, buildProductSeoMeta } from "@/config/seo";
 import { buildProductJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo-jsonld";
+import CategoryView from "./category-view";
 import PriceClient from "./price-client";
 import ColorSwatches from "./color-swatches";
 import GalleryClient from "./gallery-client";
@@ -23,19 +24,66 @@ import styles from "./page.module.css";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateStaticParams() {
   const products = await getProducts();
-  return products.map((p) => ({ slug: p.slug }));
+  // Товары + категории живут на одном уровне /catalog/:slug
+  return [
+    ...products.map((p) => ({ slug: p.slug })),
+    ...Object.keys(seoConfig.categories).map((slug) => ({ slug })),
+  ];
 }
 
 // ISR 60с: цена, наличие и кнопки покупки должны пересобираться из свежих
 // данных, а не висеть до следующего деплоя (синк меняет остатки/inStock в БД)
 export const revalidate = 60;
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params;
+
+  // ─── Категория (/catalog/crossbody) ───
+  const cat = seoConfig.categories[slug];
+  if (cat) {
+    const sp = await searchParams;
+    const page = Number(sp?.page ?? "1") || 1;
+    const hasFilters = [
+      sp?.sort,
+      sp?.color,
+      sp?.material,
+      sp?.q,
+      sp?.priceMin,
+      sp?.priceMax,
+      sp?.marketplace,
+    ].some((v) => v !== undefined && v !== "");
+
+    // Пагинация и фильтры — дубли категории: noindex + canonical на базу
+    if (page > 1 || hasFilters) {
+      return {
+        title: { absolute: cat.title },
+        description: cat.description,
+        robots: { index: false, follow: true },
+        alternates: { canonical: `/catalog/${slug}` },
+      };
+    }
+
+    return {
+      title: { absolute: cat.title },
+      description: cat.description,
+      alternates: { canonical: `/catalog/${slug}` },
+      openGraph: {
+        title: cat.title,
+        description: cat.description,
+        url: `/catalog/${slug}`,
+        siteName: seoConfig.site.siteName,
+        type: "website",
+        locale: seoConfig.site.locale,
+      },
+    };
+  }
+
+  // ─── Товар ───
   const product = await getProduct(slug);
   if (!product) return { title: seoConfig.pages.notFound.title };
 
@@ -106,8 +154,15 @@ function extractDimensions(chars: CharacteristicGroup[] | null) {
   return result.length > 0 ? result : null;
 }
 
-export default async function ProductPage({ params }: Props) {
+export default async function CatalogSlugPage({ params }: Props) {
   const { slug } = await params;
+
+  // Категория? → категорийная страница
+  if (seoConfig.categories[slug]) {
+    return <CategoryView slug={slug} />;
+  }
+
+  // Иначе — товар
   const product = await getProduct(slug);
 
   if (!product) notFound();
@@ -146,7 +201,7 @@ export default async function ProductPage({ params }: Props) {
   const catName = seoConfig.categoryNames[product.category] || product.category;
   const catDisplayName =
     seoConfig.categories[product.category]?.name || product.category;
-  const catPath = `/catalog?category=${product.category}`;
+  const catPath = `/catalog/${product.category}`;
   const breadcrumbJsonLd = buildBreadcrumbJsonLd(
     [
       { name: "Главная", path: "/" },

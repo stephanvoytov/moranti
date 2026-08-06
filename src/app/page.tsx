@@ -78,7 +78,7 @@ export default async function Home() {
               return (
                 <Link
                   key={cat.slug}
-                  href={`/catalog?category=${cat.slug}`}
+                  href={`/catalog/${cat.slug}`}
                   className={styles.collectionCard}
                 >
                   {img ? (
