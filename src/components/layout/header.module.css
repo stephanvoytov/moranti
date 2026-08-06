@@ -68,6 +68,17 @@
   align-items: center;
 }
 
+/* Невидимый «мост» в зазоре между ссылкой и дропдауном —
+   иначе курсор при спуске вниз выходит из hover-зоны и меню закрывается */
+.catalogItem::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 8px;
+}
+
 .catalogLinkOpen {
   color: var(--text-primary);
 }
