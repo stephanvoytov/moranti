@@ -351,27 +351,6 @@ function CatalogContent({
 
   return (
     <div className={styles.page}>
-      {/* Recently viewed — above catalog */}
-      {recentProducts.length > 0 && (
-        <section className={styles.recentlySection}>
-          <h2 className={styles.recentlyTitle}>Вы недавно смотрели</h2>
-          <div className={styles.recentlyRow}
-            ref={dragRef}
-            onMouseDown={onMouseDown}
-            onMouseMove={onMouseMove}
-            onMouseUp={onMouseUp}
-            onDragStart={onDragStart}
-            style={{ cursor: "grab" }}
-          >
-            {recentProducts.map((product, i) => (
-              <div key={product.id} className={styles.recentlyCard}>
-                <ProductCard product={product} priority={i < 2} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
       <section className={styles.catalog}>
         <div className={styles.header}>
           <span className={styles.label}>Каталог</span>
@@ -660,6 +639,27 @@ function CatalogContent({
           </div>
         )}
       </section>
+
+      {/* Recently viewed — below catalog */}
+      {recentProducts.length > 0 && (
+        <section className={styles.recentlySection}>
+          <h2 className={styles.recentlyTitle}>Вы недавно смотрели</h2>
+          <div className={styles.recentlyRow}
+            ref={dragRef}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={onMouseUp}
+            onDragStart={onDragStart}
+            style={{ cursor: "grab" }}
+          >
+            {recentProducts.map((product, i) => (
+              <div key={product.id} className={styles.recentlyCard}>
+                <ProductCard product={product} priority={i < 2} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

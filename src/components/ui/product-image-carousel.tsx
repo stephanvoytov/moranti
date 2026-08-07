@@ -116,7 +116,6 @@ export default function ProductImageCarousel({
           />
         )}
       </Link>
-      {hasVideo && <span className={styles.videoBadge}>Видео</span>}
       {children}
       {isOutOfStock && !isArchived && (
         <span className={styles.outBadge}>Нет в наличии</span>
