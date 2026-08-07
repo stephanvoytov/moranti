@@ -1,6 +1,7 @@
 /* =============================================
    Brand SEO Text — компактный текстовый блок
    (главная, перед футером). Не мешает editorial-дизайну.
+   Абзацы листаются по одному (карусель с кнопками и точками).
    ============================================= */
 
 .section {
@@ -21,15 +22,21 @@
   text-align: center;
 }
 
-.grid {
+.storyWrap {
   max-width: 720px;
   margin: 0 auto;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
+  align-items: center;
+  gap: 16px;
 }
 
-.grid p {
+.story {
+  flex: 1;
+  min-width: 0;
+  min-height: 140px;
+}
+
+.story p {
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 400;
@@ -40,17 +47,97 @@
   text-align-last: left;
 }
 
+.story .active {
+  animation: fade-in 0.35s ease;
+}
+
+.story .inactive {
+  display: none;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.controls {
+  max-width: 720px;
+  margin: 20px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: none;
+  color: var(--dark);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.arrow:hover {
+  border-color: var(--dark);
+  background: var(--card-bg);
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.dot:hover {
+  border-color: var(--text-secondary);
+}
+
+.dotActive {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 1px solid var(--dark);
+  border-radius: 50%;
+  background: var(--dark);
+  cursor: pointer;
+}
+
 /* ——— Responsive ——— */
 
 @media (max-width: 768px) {
   .section {
     padding: 32px 0 48px;
   }
-  .grid {
-    gap: var(--space-4);
+  .story {
+    min-height: 180px;
   }
-  .grid p {
+  .story p {
     font-size: 15px;
     text-align: left;
+  }
+  .controls {
+    gap: 16px;
   }
 }
