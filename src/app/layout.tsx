@@ -8,7 +8,6 @@ import { buildGlobalJsonLd } from "@/lib/seo-jsonld";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import ScrollToTop from "@/components/ui/scroll-to-top";
-import MetrikaInit from "@/components/analytics/metrika-init";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
@@ -103,8 +102,9 @@ export default async function RootLayout({
     // 'strict-dynamic' НЕ используется — он запрещает 'self' и ломает Next.js.
     // Вместо этого: 'self' разрешает Next.js чанки, 'unsafe-inline' разрешает
     // Next.js inline-скрипты, а nonce — страховка для наших JSON-LD.
-    // tag.js Метрики загружается клиентским компонентом
-    // (createElement без nonce), поэтому нужен явный https://mc.yandex.ru в script-src.
+    // Сниппет Метрики инлайнится в <head> (официальный tag.js + ym init),
+    // а tag.js Яндекс вставляет динамически (createElement без nonce),
+    // поэтому нужен явный https://mc.yandex.ru в script-src.
     // Остальные директивы (img-src, connect-src, etc.) строгие.
     const isDev = process.env.NODE_ENV === "development";
     // Vercel инжектит виджет Live Feedback (vercel.live/_next-live/feedback/feedback.js)
@@ -169,11 +169,20 @@ export default async function RootLayout({
             __html: JSON.stringify(buildGlobalJsonLd(siteUrl)),
           }}
         />
+
+        {/* Яндекс.Метрика — обезличенный счётчик, без вебвизора (законный интерес, ФЗ-152).
+            Инлайн-сниппет в серверном HTML, чтобы проверка Яндекса и сканеры видели его
+            без JS: tag.js грузится сразу при парсинге, ym(...) — буферизованный вызов. */}
+        {ymNumber > 0 && (
+          <script
+            nonce={nonce}
+            dangerouslySetInnerHTML={{
+              __html: `(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js","ym");ym(${ymNumber},"init",{ssr:true,ecommerce:"dataLayer",accurateTrackBounce:true,trackLinks:true});`,
+            }}
+          />
+        )}
       </head>
       <body>
-        {/* Яндекс.Метрика — обезличенный счётчик, без вебвизора (законный интерес, ФЗ-152) */}
-        {ymNumber > 0 && <MetrikaInit id={ymNumber} />}
-
         <FavoritesProvider>
           <Header />
           <main>{children}</main>
