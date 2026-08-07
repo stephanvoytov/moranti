@@ -326,7 +326,7 @@ async function writeCliHistory({ stats, durationMs, error, prisma }) {
 
       try {
         await prisma.syncRun.create({ data: flat });
-      } catch (createErr) {
+      } catch {
         // Таблицы может не быть в свежей БД — создаём и повторяем
         try {
           await ensureSyncRunTable(prisma);

@@ -123,6 +123,13 @@
   white-space: nowrap;
 }
 
+/* Внутренняя обёртка категорий: сохраняет колоночный layout на десктопе
+   (на мобиле переопределяется для grid-анимации аккордеона) */
+.dropdownInner {
+  display: flex;
+  flex-direction: column;
+}
+
 .dropdown a:hover {
   color: var(--text-primary);
   background: var(--card-bg);
@@ -233,6 +240,12 @@
     pointer-events: none;
     visibility: hidden;
     transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+    /* Меню не должно уходить за экран: на низких экранах появляется скролл */
+    max-height: calc(100vh - var(--header-height));
+    max-height: calc(100dvh - var(--header-height));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .nav.open {
@@ -242,23 +255,58 @@
     visibility: visible;
   }
 
-  /* Dropdown на мобиле: статичный вложенный список, hover недоступен */
+  /* Dropdown на мобиле: аккордеон. Скрыт, раскрывается кликом по «Каталог»
+     (hover на тач-устройствах недоступен). Управляется .dropdownOpen.
+     Плавное раскрытие по реальной высоте контента: grid-template-rows 0fr→1fr
+     (вместо max-height — он даёт рывок, т.к. анимируется до фиксированного значения).
+     Категории раскрываются полноширинными, без бокового сдвига. */
+  .catalogItem {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
   .dropdown {
     position: static;
-    opacity: 1;
+    display: grid;
+    grid-template-rows: 0fr;
+    width: 100%;
+    min-width: 0;
+    opacity: 0;
     transform: none;
-    pointer-events: auto;
-    visibility: visible;
+    pointer-events: none;
+    visibility: hidden;
     box-shadow: none;
     border: none;
-    border-left: 1px solid var(--border);
-    margin: 4px 0 0 8px;
-    padding: 0 0 0 16px;
-    gap: 10px;
+    margin: 0;
+    padding: 0;
+    transition: grid-template-rows 0.3s ease, opacity 0.3s ease, visibility 0.3s;
+  }
+
+  .dropdownOpen {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+    grid-template-rows: 1fr;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .dropdownInner {
+    overflow: hidden;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-left: 12px;
   }
 
   .dropdown a {
-    padding: 4px 0;
+    padding: 7px 0;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    white-space: normal;
   }
 
   .dropdown a:hover {

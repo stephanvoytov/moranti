@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import { blobUrl } from "@/lib/blob";
 import styles from "./media-picker.module.css";
 
@@ -126,7 +127,13 @@ export default function MediaPicker({ open, onClose, onSelect }: MediaPickerProp
                   onClick={() => onSelect(item.url)}
                   title={item.pathname}
                 >
-                  <img src={blobUrl(item.url)} alt={item.pathname} loading="lazy" />
+                  <Image
+                    src={blobUrl(item.url)}
+                    alt={item.pathname}
+                    fill
+                    sizes="(max-width: 720px) 33vw, 160px"
+                    style={{ objectFit: "cover" }}
+                  />
                 </button>
               ))}
             </div>

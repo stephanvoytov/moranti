@@ -51,6 +51,15 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.public.blob.vercel-storage.com",
       },
+      /* Фавиконки маркетплейсов (бейджи на превью товара в админке) */
+      {
+        protocol: "https",
+        hostname: "www.wildberries.ru",
+      },
+      {
+        protocol: "https",
+        hostname: "www.ozon.ru",
+      },
     ],
   },
 

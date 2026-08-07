@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useFavorites } from "@/lib/favorites-context";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
@@ -13,6 +13,43 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const { count } = useFavorites();
+
+  // Закрывает меню и сворачивает аккордеон «Каталог»
+  const closeMenu = () => {
+    setMenuOpen(false);
+    setCatalogOpen(false);
+  };
+
+  // Закрывать меню при навигации назад/вперёд (popstate). Клики по ссылкам
+  // закрывают меню через closeMenu() в onClick — эффект на pathname не нужен.
+  useEffect(() => {
+    const onPopState = () => {
+      setMenuOpen(false);
+      setCatalogOpen(false);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  // Блокировать скролл страницы, пока мобильное меню открыто
+  useEffect(() => {
+    if (!menuOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [menuOpen]);
+
+  // Закрытие мобильного меню по Escape
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeMenu();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
 
   // Не показывать хедер на страницах админки
   if (pathname?.startsWith("/admin")) return null;
@@ -35,13 +72,33 @@ export default function Header() {
           </Link>
           <div
             className={styles.catalogItem}
-            onMouseEnter={() => setCatalogOpen(true)}
-            onMouseLeave={() => setCatalogOpen(false)}
+            onMouseEnter={() => {
+              // На мобиле hover недоступен — аккордеоном управляет только клик.
+              // Без этой проверки mouseenter при тапе/клике конфликтует с onClick
+              // и аккордеон не раскрывается.
+              if (!window.matchMedia("(max-width: 768px)").matches) {
+                setCatalogOpen(true);
+              }
+            }}
+            onMouseLeave={() => {
+              if (!window.matchMedia("(max-width: 768px)").matches) {
+                setCatalogOpen(false);
+              }
+            }}
           >
             <Link
               href="/catalog"
               className={catalogOpen ? styles.catalogLinkOpen : undefined}
-              onClick={() => setMenuOpen(false)}
+              onClick={(e) => {
+                // На мобиле hover недоступен — клик по «Каталог» раскрывает/
+                // сворачивает список категорий (аккордеон), а не уводит со страницы.
+                if (window.matchMedia("(max-width: 768px)").matches) {
+                  e.preventDefault();
+                  setCatalogOpen((v) => !v);
+                  return;
+                }
+                setMenuOpen(false);
+              }}
               aria-expanded={catalogOpen}
             >
               Каталог
@@ -49,18 +106,20 @@ export default function Header() {
             <div
               className={`${styles.dropdown}${catalogOpen ? " " + styles.dropdownOpen : ""}`}
             >
-              {categories.map(([slug, cat]) => (
-                <Link
-                  key={slug}
-                  href={`/catalog/${slug}`}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setCatalogOpen(false);
-                  }}
-                >
-                  {cat.name}
-                </Link>
-              ))}
+              <div className={styles.dropdownInner}>
+                {categories.map(([slug, cat]) => (
+                  <Link
+                    key={slug}
+                    href={`/catalog/${slug}`}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setCatalogOpen(false);
+                    }}
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
           <a href={MARKETPLACE_URLS.wbSeller} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>

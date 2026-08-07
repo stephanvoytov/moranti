@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { CATEGORIES, getCategoryName } from "@/lib/categories";
 import { pickDisplayImage } from "@/lib/product-images";
@@ -310,7 +311,15 @@ export default function AdminProductList() {
             >
               <span className={styles.reorderHandle} aria-label="Перетащить">⋮⋮</span>
               <span className={styles.reorderNum}>{idx + 1}</span>
-              {pickDisplayImage(p) && <img src={blobUrl(pickDisplayImage(p)!)} alt="" className={styles.reorderThumb} />}
+              {pickDisplayImage(p) && (
+                <Image
+                  src={blobUrl(pickDisplayImage(p)!)}
+                  alt=""
+                  width={64}
+                  height={86}
+                  className={styles.reorderThumb}
+                />
+              )}
               <span className={styles.reorderName}>{p.name}</span>
               <span className={styles.reorderPrice}>{formatPrice(p.price)}</span>
               <span className={styles.reorderBadge}>{getCategoryName(p.category)}</span>

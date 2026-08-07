@@ -128,8 +128,10 @@ export default async function RootLayout({
     "font-src 'self'",
     // Connections: same-origin + Яндекс.Метрика + Vercel Analytics
     // (beacon Web Vitals) (+ vercel.live для Live Feedback в превью)
+    // wss://mc.yandex.ru — WebSocket Метрики (вебвизор/реальное время);
+    // без него tag.js падает в консоль с CSP-ошибкой.
     // https://*.wbbasket.ru — hls.js тянет m3u8-плейлист и сегменты через fetch.
-    `connect-src 'self' https://mc.yandex.ru https://vitals.vercel-insights.com https://*.wbbasket.ru${vercelLive}`,
+    `connect-src 'self' https://mc.yandex.ru wss://mc.yandex.ru https://vitals.vercel-insights.com https://*.wbbasket.ru${vercelLive}`,
     // Media: HLS-видео WB (wbbasket) + blob: (hls.js играет через MSE/blob URL)
     "media-src 'self' blob: https://*.wbbasket.ru",
     // Frame: block all

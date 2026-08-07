@@ -473,7 +473,6 @@ function PlatformCard({
     if (isRunning) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setExpandedHistory(false);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setExpandedDetails(false);
     }
   }, [isRunning]);

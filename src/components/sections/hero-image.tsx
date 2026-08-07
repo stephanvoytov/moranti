@@ -27,6 +27,7 @@ export default function HeroImage({
       src={blobUrl(src)}
       alt=""
       fill
+      sizes="100vw"
       className={className}
       priority
       onError={(e) => {
