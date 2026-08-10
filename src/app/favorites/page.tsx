@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: seoConfig.pages.favorites.title,
   description: seoConfig.pages.favorites.description,
   robots: { index: false, follow: true },
+  alternates: { canonical: "/favorites" },
 };
 
 export default function FavoritesPage() {
