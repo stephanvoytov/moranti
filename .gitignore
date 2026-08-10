@@ -61,14 +61,10 @@ tmp/
 .vercel
 
 # local dev scripts (not for production)
-scripts/scrape-wb.mjs
-scripts/update-db-from-scrape.mjs
-scripts/compare-results.mjs
-scripts/test-*.mjs
-scripts/diagnose-*.mjs
+scripts/debug/
 
 # one-time migration scripts
-scripts/rename-models.mjs
+scripts/migrations/rename-models.mjs
 
 # VPS infrastructure
 docker-compose.vps.yml
@@ -80,6 +76,21 @@ scripts/init-vps-db/
 
 # runtime sync log
 /data/sync-log.json
+
+# runtime sync history fallback (JSON fallback for SyncRun table)
+/data/sync-history.json
+
+# runtime sync logs
+/logs/
+
+# Playwright MCP artifacts (console logs, page snapshots)
+/.playwright-mcp/
+
+# generated sync bundle (rebuilt by build-sync-bundle.mjs on every `npm run build`)
+scripts/sync-all.bundle.mjs
+
+# generated Yandex YML feed (exported by scripts/debug/_tmp_export_yml.cjs)
+/yandex-yml/
 
 # DB dumps
 *.dump

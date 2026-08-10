@@ -64,7 +64,7 @@ const nextConfig: NextConfig = {
   },
 
   /* ─── 301-редиректы старых slug (из внутреннего артикула) на новые SEO-слаги.
-     Карта генерируется скриптом scripts/migrate-slugs.mjs --apply. ─── */
+     Карта генерируется скриптом scripts/migrations/migrate-slugs.mjs --apply. ─── */
   async redirects() {
     const fs = await import("node:fs");
     const path = await import("node:path");

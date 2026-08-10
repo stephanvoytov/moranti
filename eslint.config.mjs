@@ -43,7 +43,7 @@ const eslintConfig = defineConfig([
     "tmp/**",
     "scripts/_archive/**",
     // Бинарный файл (парсер ломается)
-    "scripts/test-old-sync.mjs",
+    "scripts/debug/test-old-sync.mjs",
   ]),
 ]);
 

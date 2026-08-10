@@ -166,7 +166,7 @@ https://morantibags.ru/admin
 - **URL-слаги товаров** — транслитерация названия + цвета (`buildUrlSlug` в `scripts/sync-modules/transform.mjs`):
   «Сумка тоут из замши» + «серый, графит» → `/catalog/sumka-tout-iz-zamshi-seryj-grafit`.
   Старые слаги из внутреннего артикула переезжают через 301-редиректы
-  (`data/slug-redirects.json` → `next.config.ts`, генератор `scripts/migrate-slugs.mjs`).
+  (`data/slug-redirects.json` → `next.config.ts`, генератор `scripts/migrations/migrate-slugs.mjs`).
 - Динамические `generateMetadata` для каждого товара
 - `/sitemap.xml` — главная + категории + care + delivery + все товары (только при `APP_ENV=production`)
 - `/robots.txt` — `/admin/` и `/api/` скрыты; dev/preview — полный noindex
@@ -212,8 +212,9 @@ moranti/
 ├── scripts/
 │   ├── sync-all.mjs           # Синхронизация WB/Ozon (фазы)
 │   ├── sync-modules/          # transform (buildUrlSlug), ozon-browser, ozon-price, merge, models…
-│   ├── migrate-slugs.mjs      # Пересчёт URL-слагов + генерация slug-redirects.json
-│   ├── build-sync-bundle.mjs  # esbuild → sync-all.bundle.mjs
+│   ├── build-sync-bundle.mjs  # esbuild → sync-all.bundle.mjs (генерируется при сборке)
+│   ├── migrations/            # Разовые миграции: migrate-slugs.mjs, rename-models.mjs
+│   ├── debug/                 # Диагностика: ozon-*, test-*, scrape-wb.mjs (не в проде)
 │   └── backup.mjs, backup-fallback.mjs, update-json-fallback.mjs, wb-categories.js…
 ├── src/
 │   ├── app/
@@ -256,8 +257,8 @@ moranti/
 | `npm test` | Vitest (jsdom, 30s timeout) |
 | `npm run lint` | ESLint |
 | `npx vitest run --pool=threads --maxWorkers=1` | Тесты на Windows (воркер-fork падает) |
-| `node scripts/migrate-slugs.mjs` | Preview пересчёта URL-слагов (после переименования товаров) |
-| `node scripts/migrate-slugs.mjs --apply` | Применить новые слаги в БД + записать `data/slug-redirects.json` |
+| `node scripts/migrations/migrate-slugs.mjs` | Preview пересчёта URL-слагов (после переименования товаров) |
+| `node scripts/migrations/migrate-slugs.mjs --apply` | Применить новые слаги в БД + записать `data/slug-redirects.json` |
 | `node scripts/backup-fallback.mjs` | Перегенерировать `data/products.json` из БД |
 
 > На Windows дефолтный fork-пул vitest может падать с «Worker exited unexpectedly» —

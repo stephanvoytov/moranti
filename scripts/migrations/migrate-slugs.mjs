@@ -9,8 +9,8 @@
  * его подхватывает next.config.ts для 301-редиректов /catalog/:old → /catalog/:new.
  *
  * Использование:
- *   node scripts/migrate-slugs.mjs           # preview (ничего не пишет)
- *   node scripts/migrate-slugs.mjs --apply   # применить + записать redirects
+ *   node scripts/migrations/migrate-slugs.mjs           # preview (ничего не пишет)
+ *   node scripts/migrations/migrate-slugs.mjs --apply   # применить + записать redirects
  */
 
 import dotenv from "dotenv";
@@ -102,7 +102,7 @@ async function main() {
   }
 
   if (!apply) {
-    console.log(`\nДля применения: node scripts/migrate-slugs.mjs --apply`);
+    console.log(`\nДля применения: node scripts/migrations/migrate-slugs.mjs --apply`);
     return;
   }
 
