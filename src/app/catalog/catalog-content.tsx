@@ -354,7 +354,7 @@ function CatalogContent({
       <section className={styles.catalog}>
         <div className={styles.header}>
           <span className={styles.label}>Каталог</span>
-          <h1 className={styles.title}>{categoryTitle ?? "Наши сумки"}</h1>
+          <h1 className={styles.title}>{categoryTitle ?? "Каталог сумок Moranti"}</h1>
         </div>
 
         {/* Toolbar: search + toggle button + filter panel */}

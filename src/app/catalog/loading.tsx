@@ -12,7 +12,7 @@ export default function CatalogLoading() {
     <section className={styles.catalog}>
       <div className={styles.header}>
         <span className={styles.label}>Каталог</span>
-        <h1 className={styles.title}>Наши сумки</h1>
+        <div className={styles.title}>Каталог сумок Moranti</div>
       </div>
 
       {/* Filter pills skeleton */}

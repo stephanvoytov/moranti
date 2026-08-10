@@ -23,7 +23,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { buildUrlSlug } from "./sync-modules/transform.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REDIRECTS_FILE = path.join(__dirname, "..", "data", "slug-redirects.json");
+const REDIRECTS_FILE = path.join(__dirname, "..", "..", "data", "slug-redirects.json");
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({

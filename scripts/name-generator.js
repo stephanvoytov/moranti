@@ -13,9 +13,10 @@ const { CATEGORY_RU } = require("./wb-categories");
  * @param {string} opts.category  — наш slug (crossbody, tote, ...)
  * @param {string} [opts.composition] — материал (натуральная кожа, замша...)
  * @param {string} [opts.wbName] — оригинальное название с WB (для определения мини и т.д.)
+ * @param {string} [opts.colorName] — цвет ("шоколадный, коричневый, горький шоколад")
  * @returns {string}
  */
-function generateName({ category, composition, wbName }) {
+function generateName({ category, composition, wbName, colorName }) {
   const cat = category || "crossbody";
   const base = CATEGORY_RU[cat] || cat;
 
@@ -50,6 +51,13 @@ function generateName({ category, composition, wbName }) {
     else {
       name = name + " из " + composition.toLowerCase().trim();
     }
+  }
+
+  // Цвет (первый из списка синонимов) — отличает товары с одинаковым именем
+  // и делает URL уникальным: "Сумка-тоут из замши, шоколадный"
+  if (colorName) {
+    const firstColor = colorName.split(",")[0].trim().toLowerCase();
+    if (firstColor) name = name + ", " + firstColor;
   }
 
   return name;
