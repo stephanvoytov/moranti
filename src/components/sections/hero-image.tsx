@@ -31,6 +31,10 @@ export default function HeroImage({
       sizes="100vw"
       className={className}
       priority
+      // В Next 16 priority больше НЕ ставит fetchpriority автоматически
+      // (проп deprecated, теперь это только preload) — без явного
+      // fetchPriority="high" hero грузится в общей очереди и LCP падает.
+      fetchPriority="high"
     />
   );
 }

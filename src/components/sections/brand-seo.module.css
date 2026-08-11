@@ -108,6 +108,10 @@
   background: none;
   cursor: pointer;
   transition: background var(--transition-fast), border-color var(--transition-fast);
+  /* Hit-area 44px (Lighthouse target-size): точка 8px + прозрачная
+     область через box-shadow (не влияет на вёрстку, в отличие от padding) */
+  box-shadow: 0 0 0 18px transparent;
+  background-clip: padding-box;
 }
 
 .dot:hover {
@@ -122,6 +126,8 @@
   border-radius: 50%;
   background: var(--dark);
   cursor: pointer;
+  box-shadow: 0 0 0 18px transparent;
+  background-clip: padding-box;
 }
 
 /* ——— Responsive ——— */
