@@ -16,11 +16,84 @@ export default function robots(): MetadataRoute.Robots {
   }
 
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: ["/admin/", "/api/"],
-    },
+    rules: [
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: ["/admin/", "/api/"],
+      },
+      // Обучающие AI-краулеры: трафика не дают, жрут ресурсы — блокируем.
+      // Поисковые AI-боты (OAI-SearchBot, Claude-SearchBot, GoogleOther)
+      // оставлены разрешёнными — они приводят трафик из AI-поиска.
+      {
+        userAgent: "GPTBot",
+        disallow: "/",
+      },
+      {
+        userAgent: "ChatGPT-User",
+        disallow: "/",
+      },
+      {
+        userAgent: "ClaudeBot",
+        disallow: "/",
+      },
+      {
+        userAgent: "anthropic-ai",
+        disallow: "/",
+      },
+      {
+        userAgent: "Google-Extended",
+        disallow: "/",
+      },
+      {
+        userAgent: "CCBot",
+        disallow: "/",
+      },
+      {
+        userAgent: "meta-externalagent",
+        disallow: "/",
+      },
+      {
+        userAgent: "Applebot-Extended",
+        disallow: "/",
+      },
+      {
+        userAgent: "Bytespider",
+        disallow: "/",
+      },
+      {
+        userAgent: "cohere-ai",
+        disallow: "/",
+      },
+      {
+        userAgent: "Amazonbot",
+        disallow: "/",
+      },
+      {
+        userAgent: "Diffbot",
+        disallow: "/",
+      },
+      {
+        userAgent: "ImagesiftBot",
+        disallow: "/",
+      },
+      {
+        userAgent: "YouBot",
+        disallow: "/",
+      },
+      {
+        userAgent: "FacebookBot",
+        disallow: "/",
+      },
+      {
+        userAgent: "AI2Bot",
+        disallow: "/",
+      },
+      {
+        userAgent: "Scrapy",
+        disallow: "/",
+      },
+    ],
     sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

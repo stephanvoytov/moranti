@@ -120,6 +120,19 @@ describe("buildProductSeoMeta", () => {
     expect(meta.description).not.toContain("из замши из замши");
   });
 
+  it("does not duplicate color already in the name", () => {
+    // После миграции имён цвет в названии: «…кожа, тауп» + colorName «тауп, серо-коричневый».
+    // Раньше title был «Moranti — …кожа, тауп (тауп)» — цвет задваивался.
+    const meta = buildProductSeoMeta({
+      name: "Сумка кросс-боди из натуральной кожи, тауп",
+      composition: "натуральная кожа",
+      colorName: "тауп, серо-коричневый",
+    });
+    expect(meta.title).toBe("Moranti — Сумка кросс-боди из натуральной кожи, тауп");
+    expect(meta.title).not.toContain("(тауп)");
+    expect(meta.description).not.toContain("Цвет: тауп.");
+  });
+
   it("adds composition when name has no material", () => {
     const meta = buildProductSeoMeta({
       name: "Сумка кросс-боди",

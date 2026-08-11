@@ -259,9 +259,16 @@ export function buildProductSeoMeta(product: ProductSeoInput): ProductSeoMeta {
     ? ""
     : ` из ${genitive(product.composition?.trim() || "натуральной кожи")}`;
 
-  const color = (product.colorName ?? "").split(",")[0].trim();
-  const colorPart = color ? ` (${color})` : "";
-  const colorSentence = color ? ` Цвет: ${color}.` : "";
+  // Цвет уже в названии («Сумка кросс-боди из натуральной кожи, тауп») —
+  // не дублируем его в скобках/предложении. Проверяем любой из цветов colorName.
+  const colors = (product.colorName ?? "")
+    .split(",")
+    .map((c) => c.trim())
+    .filter(Boolean);
+  const color = colors[0] ?? "";
+  const colorInName = colors.some((c) => product.name.trim().endsWith(`, ${c}`));
+  const colorPart = color && !colorInName ? ` (${color})` : "";
+  const colorSentence = color && !colorInName ? ` Цвет: ${color}.` : "";
 
   return {
     title: applyTemplate(seoConfig.product.titleTemplate, {
