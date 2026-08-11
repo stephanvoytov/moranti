@@ -1,6 +1,12 @@
 import Link from "next/link";
 import styles from "./not-found.module.css";
 
+// Title подхватывает layout-шаблон («Страница не найдена — Moranti»),
+// чтобы поисковик видел осмысленный title на 404.
+export const metadata = {
+  title: "Страница не найдена",
+};
+
 export default function NotFound() {
   return (
     <main className={styles.page}>

@@ -85,7 +85,9 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
   // ─── Товар ───
   const product = await getProduct(slug);
-  if (!product) return { title: seoConfig.pages.notFound.title };
+  // notFound() до рендера страницы: иначе из-за Suspense (loading.tsx)
+  // статус остаётся 200 и not-found уходит клиенту через RSC (мягкий 404).
+  if (!product) notFound();
 
   const meta = buildProductSeoMeta(product);
   const title = meta.title;
