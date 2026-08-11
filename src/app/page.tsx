@@ -75,15 +75,22 @@ export default async function Home() {
           <div className={styles.collectionsGrid}>
             {categories.filter((cat) => cat.count > 0).map((cat) => {
               const img = getCategoryImage(products, cat.slug, categoryImages);
+              // Карточка коллекции ~315×420 — полноразмер (Ozon 3024×4032,
+              // 1,2 МБ!) не нужен: Ozon режем оптимизатором (w=520), WB big → c516x688
+              const optimized = img
+                ? img.includes("ir.ozone.ru")
+                  ? `/_next/image?url=${encodeURIComponent(img)}&w=520&q=75`
+                  : img.replace("/images/big/", "/images/c516x688/")
+                : "";
               return (
                 <Link
                   key={cat.slug}
                   href={`/catalog/${cat.slug}`}
                   className={styles.collectionCard}
                 >
-                  {img ? (
+                  {optimized ? (
                     <SmartImage
-                      src={blobUrl(img)}
+                      src={blobUrl(optimized)}
                       alt={cat.name}
                       className={styles.collectionImg}
                     />
