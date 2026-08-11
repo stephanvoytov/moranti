@@ -397,6 +397,71 @@ describe("mergeProductSources — интеграция с WB", () => {
     expect(result.category).toBe("baguette");
   });
 
+  // ─── primary_image: главное фото карточки Ozon ≠ images[0] ───
+  it("Ozon-фаза ставит primary_image первым в ozonImages", () => {
+    const db = makeDb({
+      wbArticle: null,
+      ozonImage: "https://ir.ozone.ru/s3/multimedia-1-7/9712305151.jpg",
+      ozonImages: ["https://ir.ozone.ru/s3/multimedia-1-7/9712305151.jpg"],
+      images: [],
+      image: null,
+      photoCount: 1,
+    });
+    const ozonInfo = {
+      name: "Сумка-багет",
+      images: [
+        "https://ir.ozone.ru/s3/multimedia-1-7/9712305151.jpg",
+        "https://ir.ozone.ru/s3/multimedia-1-t/9712304813.jpg",
+      ],
+      primary_image: ["https://ir.ozone.ru/s3/multimedia-1-x/9712304637.jpg"],
+    };
+    const result = mergeProductSources(null, null, null, ozonInfo, null, null, db) as Record<string, any>;
+    // primary первым, остальные без дубля, порядок сохранён
+    expect(result.ozonImage).toBe("https://ir.ozone.ru/s3/multimedia-1-x/9712304637.jpg");
+    expect(result.ozonImages).toEqual([
+      "https://ir.ozone.ru/s3/multimedia-1-x/9712304637.jpg",
+      "https://ir.ozone.ru/s3/multimedia-1-7/9712305151.jpg",
+      "https://ir.ozone.ru/s3/multimedia-1-t/9712304813.jpg",
+    ]);
+  });
+
+  it("Ozon-фаза: primary_image совпадает с images[0] — список не меняется", () => {
+    const db = makeDb({
+      wbArticle: null,
+      ozonImage: "https://ir.ozone.ru/s3/multimedia-1-7/9712305151.jpg",
+      ozonImages: ["https://ir.ozone.ru/s3/multimedia-1-7/9712305151.jpg"],
+      images: [],
+      image: null,
+      photoCount: 1,
+    });
+    const ozonInfo = {
+      name: "Сумка-багет",
+      images: ["https://ir.ozone.ru/s3/multimedia-1-7/9712305151.jpg"],
+      primary_image: ["https://ir.ozone.ru/s3/multimedia-1-7/9712305151.jpg"],
+    };
+    const result = mergeProductSources(null, null, null, ozonInfo, null, null, db) as Record<string, any>;
+    expect(result.ozonImage).toBeUndefined();
+    expect(result.ozonImages).toBeUndefined();
+  });
+
+  it("Ozon-фаза: нет primary_image — главным остаётся images[0]", () => {
+    const db = makeDb({
+      wbArticle: null,
+      ozonImage: null,
+      ozonImages: [],
+      images: [],
+      image: null,
+      photoCount: 1,
+    });
+    const ozonInfo = {
+      name: "Сумка-багет",
+      images: ["https://ir.ozone.ru/s3/multimedia-1-7/9712305151.jpg"],
+    };
+    const result = mergeProductSources(null, null, null, ozonInfo, null, null, db) as Record<string, any>;
+    expect(result.ozonImage).toBe("https://ir.ozone.ru/s3/multimedia-1-7/9712305151.jpg");
+    expect(result.ozonImages).toEqual(["https://ir.ozone.ru/s3/multimedia-1-7/9712305151.jpg"]);
+  });
+
   it("wbCard = null — не падает, возвращает дефолты", () => {
     const result = mergeProductSources(null, null, null, null, null, null, null) as Record<string, any>;
     // merge проставляет fallback-дефолты: category = "crossbody",

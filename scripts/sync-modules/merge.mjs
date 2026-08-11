@@ -131,10 +131,13 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
   }
 
   // ─── Ozon-фото (для админки, отдельно) ───
+  // Главное фото карточки Ozon = primary_image (задаётся продавцом отдельно и
+  // НЕ обязан быть первым в images). Ставим primary первым в галерее, остальные
+  // images — без дубля. Обновляется только при реальном изменении.
   if (ozonInfo?.images?.length) {
-    const firstOzon = ozonInfo.images[0];
-    if (firstOzon !== db?.ozonImage) data.ozonImage = firstOzon;
-    const allOzon = ozonInfo.images;
+    const primary = ozonInfo.primary_image?.[0] || ozonInfo.images[0];
+    const allOzon = [primary, ...ozonInfo.images.filter((u) => u !== primary)];
+    if (primary !== db?.ozonImage) data.ozonImage = primary;
     if (JSON.stringify(allOzon) !== JSON.stringify(db?.ozonImages || [])) data.ozonImages = allOzon;
   }
 

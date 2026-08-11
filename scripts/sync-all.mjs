@@ -888,6 +888,14 @@ async function main() {
             const ozonCat = ozonExtractCategory(info, attrs);
             const ozonComp = ozonExtractComposition(attrs);
 
+            // Главное фото карточки Ozon = primary_image (не обязано быть
+            // первым в images). Primary первым, остальные без дубля.
+            const ozonImgList = Array.isArray(info.images) ? info.images : [];
+            const ozonPrimary = info.primary_image?.[0] || ozonImgList[0] || "";
+            const ozonOrdered = ozonPrimary
+              ? [ozonPrimary, ...ozonImgList.filter((u) => u !== ozonPrimary)]
+              : ozonImgList;
+
             const id = await createProduct(prisma, {
               sku: offerId || null,
               name: info.name || "",
@@ -897,12 +905,12 @@ async function main() {
               ozonOriginalPrice: null,
               category: ozonCat || "crossbody",
               description: ozonExtractDescription(attrs),
-              image: info.images?.[0] || "",
-              images: info.images || [],
-              ozonImage: info.images?.[0] || null,
-              ozonImages: info.images || [],
+              image: ozonPrimary || "",
+              images: ozonOrdered,
+              ozonImage: ozonPrimary || null,
+              ozonImages: ozonOrdered,
               ozonArticle: publicSku || productId,
-              photoCount: info.images?.length || 1,
+              photoCount: ozonImgList.length || 1,
               colorName: ozonExtractColor(info, attrs),
               composition: ozonComp,
               rating: null,
