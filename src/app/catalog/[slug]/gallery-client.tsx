@@ -311,8 +311,13 @@ export default function GalleryClient({ images, video, alt }: GalleryClientProps
     setZoomPos(null);
   }, []);
 
-  const thumbUrl = (url: string) =>
-    url.replace(/\/images\/[^/]+\//, "/images/c246x328/");
+  const thumbUrl = (url: string) => {
+    if (url.includes("ir.ozone.ru")) {
+      // Ozon CDN не режет размеры (?w= игнорируется) — режет оптимизатор
+      return `/_next/image?url=${encodeURIComponent(url)}&w=128&q=75`;
+    }
+    return url.replace(/\/images\/[^/]+\//, "/images/c246x328/");
+  };
 
   const activeSlide = slides[activeIndex] || slides[0] || null;
   const activeImage =

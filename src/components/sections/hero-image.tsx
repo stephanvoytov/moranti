@@ -1,16 +1,17 @@
-"use client";
-
 import Image from "next/image";
 import { blobUrl } from "@/lib/blob";
 import styles from "./hero.module.css";
 
 /**
- * Клиентская обёртка hero-картинки: ловит ошибки загрузки (404, CSP-блок,
- * битый файл) и логирует их — иначе сбой происходит молча, без следов.
- * При ошибке прячет <img>, чтобы показался градиентный fallback.
+ * Серверный next/image для hero. ВАЖНО: компонент серверный (без "use client")
+ * — только так next/image генерирует корректный <link rel="preload"> +
+ * fetchpriority="high" для LCP. В клиентском компоненте preload не
+ * генерировался (пустой href) — hero грузился в обычной очереди, LCP падал
+ * до ~13 сек на медленном 4G.
  *
  * variant: "desktop" | "mobile" — разные картинки для ПК и телефона.
- * Показываются по media-query (см. hero.module.css).
+ * Показываются по media-query (см. hero.module.css). При ошибке загрузки
+ * next/image прячет <img> сам — остаётся градиентный fallback (.overlay).
  */
 export default function HeroImage({
   src,
@@ -30,10 +31,6 @@ export default function HeroImage({
       sizes="100vw"
       className={className}
       priority
-      onError={(e) => {
-        console.error(`[hero] ${variant} image failed to load:`, src);
-        e.currentTarget.style.display = "none";
-      }}
     />
   );
 }
