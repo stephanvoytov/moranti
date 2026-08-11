@@ -28,6 +28,9 @@ function buildOffers(
     mpInStock(mp.name),
   );
 
+  // Идентификатор для Google: артикул WB приоритетнее Ozon.
+  const sku = product.wbArticle || product.ozonArticle || undefined;
+
   return available.length
     ? available.map((mp) => ({
         "@type": "Offer",
@@ -36,6 +39,8 @@ function buildOffers(
         price: product.price,
         priceCurrency: "RUB",
         availability: "https://schema.org/InStock",
+        itemCondition: "https://schema.org/NewCondition",
+        sku,
         ...merchantFields(),
       }))
     : {
@@ -44,6 +49,8 @@ function buildOffers(
         price: product.price,
         priceCurrency: "RUB",
         availability: "https://schema.org/InStock",
+        itemCondition: "https://schema.org/NewCondition",
+        sku,
         ...merchantFields(),
       };
 }
@@ -97,6 +104,8 @@ export function buildProductJsonLd(
     name: product.name,
     description: product.description,
     brand: { "@type": "Brand", name: "Moranti" },
+    // Глобальный идентификатор (нет GTIN — используем артикул WB/Ozon)
+    sku: product.wbArticle || product.ozonArticle || undefined,
     image: product.images?.length ? product.images : [product.image],
     offers: buildOffers(product, siteUrl),
   };
