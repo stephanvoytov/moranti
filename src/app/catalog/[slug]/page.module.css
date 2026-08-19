@@ -861,6 +861,44 @@
   background: var(--accent-subtle);
 }
 
+/* ——— Cart CTA (primary, filled) ——— */
+
+.cartCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--dark);
+  border: 1px solid var(--dark);
+  padding: 14px 32px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.cartCta:hover {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.cartCtaActive {
+  composes: cartCta;
+  background: transparent;
+  color: var(--dark);
+  border-color: var(--dark);
+}
+
+.cartCtaActive:hover {
+  background: var(--dark);
+  color: var(--bg);
+}
+
 .shareBtn {
   display: inline-flex;
   align-items: center;

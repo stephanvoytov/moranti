@@ -34,7 +34,7 @@ export interface SeoConfig {
   };
   pages: Record<
     | "home" | "catalog" | "care" | "delivery" | "favorites" | "admin" | "notFound"
-    | "privacy" | "contacts",
+    | "privacy" | "contacts" | "cart",
     SeoPageMeta
   >;
   categories: Record<string, SeoCategoryMeta>;
@@ -109,6 +109,11 @@ export const seoConfig: SeoConfig = {
     favorites: {
       title: "Избранное",
       description: "Сохранённые сумки Moranti — натуральная итальянская кожа и замша.",
+      noindex: true,
+    },
+    cart: {
+      title: "Корзина",
+      description: "Корзина Moranti: выбранные сумки из натуральной итальянской кожи и замши. Заказ оформляется на Wildberries или Ozon.",
       noindex: true,
     },
     admin: {

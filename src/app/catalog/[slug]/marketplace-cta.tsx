@@ -9,6 +9,8 @@ interface MarketplaceCtasProps {
   wbStock?: number;
   ozonArticle?: number;
   ozonStock?: number;
+  /** Дополнительные CTA в той же секции (например, «В корзину») */
+  children?: React.ReactNode;
 }
 
 /** Кнопки «Купить на Wildberries/Ozon» + цели Яндекс.Метрики.
@@ -21,6 +23,7 @@ export default function MarketplaceCtas({
   wbStock,
   ozonArticle,
   ozonStock,
+  children,
 }: MarketplaceCtasProps) {
   const reachGoal = (goal: "buy-wb" | "buy-ozon") => {
     if (typeof window === "undefined") return;
@@ -34,6 +37,7 @@ export default function MarketplaceCtas({
 
   return (
     <div className={styles.ctas}>
+      {children}
       {wbArticle && (wbStock ?? 0) > 0 && (
         <a
           href={MARKETPLACE_URLS.wbProduct(wbArticle)}

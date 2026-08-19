@@ -7,6 +7,7 @@ import { seoConfig, buildProductSeoMeta } from "@/config/seo";
 import { buildProductJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo-jsonld";
 import CategoryView from "./category-view";
 import PriceClient from "./price-client";
+import ProductCartCta from "./product-cart-cta";
 import ColorSwatches from "./color-swatches";
 import GalleryClient from "./gallery-client";
 import ShareButton from "./share-button";
@@ -336,14 +337,19 @@ export default async function CatalogSlugPage({ params }: Props) {
           ) : null}
 
           {/* Marketplace CTAs — только маркетплейсы с ненулевым остатком.
-              Клиентский компонент: цели Яндекс.Метрики (buy-wb / buy-ozon) */}
+              Клиентский компонент: цели Яндекс.Метрики (buy-wb / buy-ozon).
+              «В корзину» — первичный CTA внутри той же секции. */}
           {!product.archivedAt && (
             <MarketplaceCtas
               wbArticle={product.wbArticle}
               wbStock={product.wbStock}
               ozonArticle={product.ozonArticle}
               ozonStock={product.ozonStock}
-            />
+            >
+              {product.inStock && (
+                <ProductCartCta article={product.wbArticle} />
+              )}
+            </MarketplaceCtas>
           )}
 
           {/* SEO H2 */}
