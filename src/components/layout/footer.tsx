@@ -47,7 +47,6 @@ export default function Footer() {
           </div>
           <div className={styles.social}>
             <a className={styles.credit} href="https://stefanvoytov.ru" target="_blank" rel="noopener noreferrer">Сайт сделан Стефаном В</a>
-            <a href="https://vk.com/moranti_bags" target="_blank" rel="noopener noreferrer" aria-label="VK">VK</a>
           </div>
         </div>
       </div>
