@@ -88,23 +88,26 @@ export default function Header() {
               }
             }}
           >
-            <Link
-              href="/catalog"
-              className={catalogOpen ? styles.catalogLinkOpen : undefined}
-              onClick={(e) => {
-                // На мобиле hover недоступен — клик по «Каталог» раскрывает/
-                // сворачивает список категорий (аккордеон), а не уводит со страницы.
-                if (window.matchMedia("(max-width: 768px)").matches) {
-                  e.preventDefault();
-                  setCatalogOpen((v) => !v);
-                  return;
-                }
-                setMenuOpen(false);
-              }}
-              aria-expanded={catalogOpen}
-            >
-              Каталог
-            </Link>
+            <div className={styles.catalogTop}>
+              <Link
+                href="/catalog"
+                className={catalogOpen ? styles.catalogLinkOpen : undefined}
+                onClick={() => setMenuOpen(false)}
+              >
+                Каталог
+              </Link>
+              <button
+                type="button"
+                className={`${styles.catalogToggle}${catalogOpen ? " " + styles.catalogToggleOpen : ""}`}
+                aria-label={catalogOpen ? "Скрыть список моделей" : "Показать список моделей"}
+                aria-expanded={catalogOpen}
+                onClick={() => setCatalogOpen((v) => !v)}
+              >
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
             <div
               className={`${styles.dropdown}${catalogOpen ? " " + styles.dropdownOpen : ""}`}
             >
