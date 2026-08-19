@@ -28,7 +28,7 @@ export default function ProductCartButton({ product }: ProductCartButtonProps) {
         className={`${styles.cartBtn} ${styles.cartBtnActive}`}
         aria-label={`В корзине: ${product.name}`}
       >
-        В корзине — {qty}
+        В корзине
       </Link>
     );
   }

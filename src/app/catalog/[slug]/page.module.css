@@ -896,7 +896,7 @@
 
 .cartCtaActive {
   composes: cartCta;
-  background: transparent;
+  background: var(--accent-subtle);
   color: var(--dark);
   border-color: var(--dark);
 }

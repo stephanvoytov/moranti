@@ -17,7 +17,7 @@ export default function ProductCartCta({ article }: ProductCartCtaProps) {
   if (qty > 0) {
     return (
       <Link href="/cart" className={styles.cartCtaActive}>
-        В корзине — {qty}
+        В корзине
       </Link>
     );
   }

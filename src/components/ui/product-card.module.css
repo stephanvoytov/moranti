@@ -302,6 +302,7 @@
 .cartBtnActive {
   color: var(--text-primary);
   border-color: var(--dark);
+  background: var(--accent-subtle);
 }
 
 .cartBtnActive:hover {
