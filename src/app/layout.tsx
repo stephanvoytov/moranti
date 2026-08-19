@@ -145,8 +145,8 @@ export default async function RootLayout({
     `connect-src 'self' https://mc.yandex.ru wss://mc.yandex.ru https://mc.yandex.com https://vitals.vercel-insights.com https://*.wbbasket.ru${vercelLive}`,
     // Media: HLS-видео WB (wbbasket) + blob: (hls.js играет через MSE/blob URL)
     "media-src 'self' blob: https://*.wbbasket.ru",
-    // Frame: block all
-    "frame-src 'none'",
+    // Frame: Яндекс.Метрика (tag.js) открывает iframe для вебвизора/реалтайма
+    `frame-src 'self' https://mc.yandex.ru https://mc.yandex.com`,
     // Objects: block plugins (Flash, PDF viewers)
     "object-src 'none'",
     // Base: restrict <base> to same origin
