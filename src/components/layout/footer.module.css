@@ -93,6 +93,11 @@
   color: #fff;
 }
 
+.credit {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
 @media (max-width: 768px) {
   .grid {
     grid-template-columns: 1fr 1fr;
