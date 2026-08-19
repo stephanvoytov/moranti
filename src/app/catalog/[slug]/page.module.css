@@ -324,8 +324,8 @@
 
 .navPillBtn {
   pointer-events: auto;
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -830,8 +830,8 @@
 
 /* ——— CTAs (editorial ghost) ——— */
 .ctas {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
   padding-top: var(--space-md);
   margin-top: var(--space-lg);
@@ -839,6 +839,7 @@
   border-top: 1px solid var(--border);
 }
 
+/* Маркетплейс-кнопки («Купить на WB/Ozon») — всегда в ряд */
 .cta {
   display: inline-flex;
   align-items: center;
@@ -861,9 +862,15 @@
   background: var(--accent-subtle);
 }
 
+/* Единственная маркетплейс-кнопка — на всю ширину */
+.ctas:has(> .cta:only-of-type) .cta {
+  grid-column: 1 / -1;
+}
+
 /* ——— Cart CTA (primary, filled) ——— */
 
 .cartCta {
+  grid-column: 1 / -1;
   display: inline-flex;
   align-items: center;
   justify-content: center;

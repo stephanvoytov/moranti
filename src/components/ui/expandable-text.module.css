@@ -34,7 +34,8 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px 0 0;
+  padding: 10px 8px 10px 0;
+  margin-left: -8px;
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-color: var(--border);

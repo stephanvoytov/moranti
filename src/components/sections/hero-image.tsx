@@ -27,6 +27,7 @@ export default function HeroImage({
     <Image
       src={blobUrl(src)}
       alt=""
+      aria-hidden
       fill
       sizes="100vw"
       className={className}

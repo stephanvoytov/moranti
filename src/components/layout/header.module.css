@@ -152,9 +152,14 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   text-decoration: none;
   transition: opacity var(--transition-fast);
   position: relative;
+  padding: 10px;
+  margin: -10px;
+  min-width: 40px;
+  min-height: 40px;
 }
 
 .actions a:hover {
@@ -192,8 +197,8 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px;
-  margin-left: 8px;
+  padding: 12px;
+  margin-left: 4px;
   color: var(--dark);
 }
 
