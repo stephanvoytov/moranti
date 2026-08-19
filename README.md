@@ -2,7 +2,7 @@
 
 **Moranti** — премиальный бренд женских сумок из натуральной итальянской кожи.
 Сайт-каталог с админ-панелью, синхронизацией с маркетплейсами (Wildberries, Ozon),
-живыми ценами, системой избранного и полным SEO.
+живыми ценами, системой избранного, корзиной и полным SEO.
 
 **Продакшен:** <https://morantibags.ru>
 **Dev/preview:** <https://dev.morantibags.ru>
@@ -130,9 +130,10 @@ https://morantibags.ru/admin
 | URL | Тип | Описание |
 |-----|-----|----------|
 | `/` | Static (RSC) | Hero + коллекции + популярные + CTA |
-| `/catalog` | Static | Каталог с фильтрами и категориями |
+| `/catalog` | Static | Каталог с фильтрами (sticky-сайдбар на десктопе, панель за кнопкой на мобильном), категориями и хлебными крошками |
 | `/catalog/[slug]` | SSG | Детальная страница товара |
 | `/favorites` | Static | Избранное (localStorage) |
+| `/cart` | Static | Корзина (localStorage) |
 | `/care` | Static | Уход за сумками |
 | `/delivery` | Static | Доставка |
 | `/admin/*` | Dynamic | Админ-панель |
@@ -187,6 +188,24 @@ https://morantibags.ru/admin
 - Синхронизация между вкладками (storage event)
 - Счётчик в хедере, страница `/favorites`
 
+### Корзина
+
+- `CartProvider` (`src/lib/cart-context.tsx`, localStorage `moranti_cart`, ключ — `wbArticle`)
+- Тот же паттерн, что у избранного: useSyncExternalStore + снапшот-кеш + storage event
+- Кнопки «В корзину» на карточках и странице товара (CTA); при добавлении — «В корзине»
+  со светлой заливкой и ссылкой на `/cart` (повторный клик не создаёт дубль)
+- Страница `/cart`: количество, сумма «Итого», ссылки «Купить на Wildberries/Ozon»
+  (без своей оплаты — заказ оформляется на маркетплейсах)
+- Бейдж в хедере = суммарное количество, `noindex` + canonical на `/cart`
+
+### Карточка товара (hover-карусель)
+
+- При наведении: кроссфейд 2–4 фото (keep-mounted слои — картинки не пересоздаются)
+- Видео (HLS, m3u8): монтируется один раз, старт по событию `canplay`,
+  play/pause через проп `active`, fade-out 300 мс — без «моргания»
+- `prefers-reduced-motion` — анимации отключаются
+- Интервал переключения слоёв — 1600 мс (`src/components/ui/use-hover-carousel.ts`)
+
 ### Дизайн
 
 - **Нет Tailwind** — CSS Modules + CSS Custom Properties
@@ -194,6 +213,8 @@ https://morantibags.ru/admin
 - Дизайн-токены: `src/styles/variables.css`
 - Бренд-цвет: `#2C2420` (`--dark`)
 - Рейтинг показывается при `rating >= 4`; звёзды с полушагами (4.2–4.6 → 4.5)
+- Тап-таргеты интерактивных элементов ≥ 40px (WCAG 2.5.5)
+- Футер: дискретная ссылка «Сайт сделан Стефаном В» → stefanvoytov.ru
 
 ---
 
@@ -224,10 +245,10 @@ moranti/
 │   │   ├── admin/             # Админ-панель (login, products, settings, seo, media, sync, models)
 │   │   ├── api/               # API: admin/*, data/*, prices, blob/[...path]
 │   │   ├── catalog/           # Каталог + [slug]/
-│   │   ├── care/, delivery/, favorites/
+│   │   ├── care/, delivery/, favorites/, cart/
 │   ├── components/
 │   │   ├── layout/            # header.tsx, footer.tsx
-│   │   └── ui/                # product-card, gallery-image, rating-stars…
+│   │   └── ui/                # product-card, gallery-image, rating-stars, cart-button, hls-video…
 │   ├── config/seo.ts          # SEO-конфиг (шаблоны, категории)
 │   ├── data/products.ts       # Серверный адаптер Prisma → Product[]
 │   ├── lib/
@@ -236,7 +257,7 @@ moranti/
 │   │   ├── admin-auth.ts      # Сессии AES-256-GCM
 │   │   ├── sync-runner.ts     # Оркестрация синхронизации
 │   │   ├── settings.ts, marketplaces.ts, schemas.ts, cors.ts, csrf.ts
-│   │   └── seo-jsonld.ts, favorites-context.tsx, recently-viewed.ts
+│   │   └── seo-jsonld.ts, favorites-context.tsx, cart-context.tsx, recently-viewed.ts
 │   ├── proxy.ts               # Next.js 16 proxy (защита /admin, CORS /api/data)
 │   └── styles/                # variables.css, reset.css, typography.css
 ├── .github/workflows/         # ci.yml, migrate.yml, sync-wb.yml
