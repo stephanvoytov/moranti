@@ -1,11 +1,20 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import dynamic from "next/dynamic";
 import GalleryImage from "@/components/ui/gallery-image";
 import SmartImage from "@/components/ui/smart-image";
 import HlsVideo from "@/components/ui/hls-video";
 import { blobUrl } from "@/lib/blob";
 import styles from "./page.module.css";
+import type { Slide } from "./gallery-lightbox";
+
+// Лайтбокс (модалка) грузится только по клику на фото — не входит в
+// начальный бандл страницы товара. ssr:false: лайтбокс изначально закрыт,
+// серверная разметка не нужна.
+const GalleryLightbox = dynamic(() => import("./gallery-lightbox"), {
+  ssr: false,
+});
 
 interface GalleryClientProps {
   images: string[];
@@ -13,10 +22,6 @@ interface GalleryClientProps {
   video?: string;
   alt: string;
 }
-
-type Slide =
-  | { kind: "image"; src: string }
-  | { kind: "video"; src: string };
 
 const SWIPE_THRESHOLD = 80;
 
@@ -30,7 +35,6 @@ export default function GalleryClient({ images, video, alt }: GalleryClientProps
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [zoomPos, setZoomPos] = useState<{ x: number; y: number } | null>(null);
-  const [pinchTransform, setPinchTransform] = useState("");
   const hasMultiple = slides.length > 1;
   const wrapperRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -223,81 +227,7 @@ export default function GalleryClient({ images, video, alt }: GalleryClientProps
     };
   }, [hasMultiple]);
 
-  /* ---- Pinch-to-zoom for lightbox ---- */
-  const pinchScale = useRef(1);
-  const pinchTranslateX = useRef(0);
-  const pinchTranslateY = useRef(0);
-  const pinchInitialDist = useRef(0);
-  const pinchInitialScale = useRef(1);
-  const pinchLastX = useRef(0);
-  const pinchLastY = useRef(0);
-  const pinchLastTx = useRef(0);
-  const pinchLastTy = useRef(0);
-
-  const resetPinch = () => {
-    pinchScale.current = 1;
-    pinchTranslateX.current = 0;
-    pinchTranslateY.current = 0;
-    pinchLastTx.current = 0;
-    pinchLastTy.current = 0;
-    setPinchTransform("");
-  };
-
-  const applyPinchTransform = () => {
-    const s = pinchScale.current;
-    if (s <= 1 && pinchTranslateX.current === 0 && pinchTranslateY.current === 0) {
-      setPinchTransform("");
-      return;
-    }
-    const tx = pinchTranslateX.current;
-    const ty = pinchTranslateY.current;
-    setPinchTransform(`scale(${s}) translate(${tx}px, ${ty}px)`);
-  };
-
-  const onLightboxTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 2) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      pinchInitialDist.current = Math.hypot(dx, dy);
-      pinchInitialScale.current = pinchScale.current;
-    } else if (e.touches.length === 1 && pinchScale.current > 1) {
-      pinchLastTx.current = pinchTranslateX.current;
-      pinchLastTy.current = pinchTranslateY.current;
-      pinchLastX.current = e.touches[0].clientX;
-      pinchLastY.current = e.touches[0].clientY;
-    }
-  };
-
-  const onLightboxTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length === 2) {
-      e.preventDefault();
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      const dist = Math.hypot(dx, dy);
-      const newScale = Math.max(1, Math.min(5, pinchInitialScale.current * (dist / pinchInitialDist.current)));
-      pinchScale.current = newScale;
-      applyPinchTransform();
-    } else if (e.touches.length === 1 && pinchScale.current > 1) {
-      e.preventDefault();
-      const dx = e.touches[0].clientX - pinchLastX.current;
-      const dy = e.touches[0].clientY - pinchLastY.current;
-      pinchTranslateX.current = pinchLastTx.current + dx;
-      pinchTranslateY.current = pinchLastTy.current + dy;
-      pinchLastX.current = e.touches[0].clientX;
-      pinchLastY.current = e.touches[0].clientY;
-      applyPinchTransform();
-    }
-  };
-
-  const onLightboxTouchEnd = (e: React.TouchEvent) => {
-    if (e.touches.length === 0 && pinchScale.current < 1.3) {
-      resetPinch();
-    }
-    if (e.touches.length < 2) {
-      pinchLastTx.current = pinchTranslateX.current;
-      pinchLastTy.current = pinchTranslateY.current;
-    }
-  };
+  /* ---- Pinch-to-zoom для лайтбокса — перенесён в gallery-lightbox.tsx ---- */
 
   const onMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDesktop.current || !wrapperRef.current) return;
@@ -320,8 +250,6 @@ export default function GalleryClient({ images, video, alt }: GalleryClientProps
   };
 
   const activeSlide = slides[activeIndex] || slides[0] || null;
-  const activeImage =
-    activeSlide?.kind === "image" ? activeSlide.src : images[0] || "";
 
   if (!activeSlide) {
     return (
@@ -359,6 +287,8 @@ export default function GalleryClient({ images, video, alt }: GalleryClientProps
                       src={blobUrl(thumbUrl(images[0]))}
                       alt=""
                       className={styles.thumbImage}
+                      width={246}
+                      height={328}
                       draggable={false}
                     />
                   </span>
@@ -367,6 +297,8 @@ export default function GalleryClient({ images, video, alt }: GalleryClientProps
                     src={blobUrl(thumbUrl(slide.src))}
                     alt=""
                     className={styles.thumbImage}
+                    width={246}
+                    height={328}
                     draggable={false}
                   />
                 )}
@@ -443,52 +375,14 @@ export default function GalleryClient({ images, video, alt }: GalleryClientProps
       </div>
 
       {lightboxOpen && (
-        <div className={styles.lightbox} onClick={() => setLightboxOpen(false)}>
-          <button className={styles.lightboxClose} onClick={() => setLightboxOpen(false)} aria-label="Закрыть">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-          </button>
-          {hasMultiple && (
-            <>
-              <button className={`${styles.lightboxArrow} ${styles.lightboxArrowLeft}`} onClick={(e) => { e.stopPropagation(); prevRef.current(); }} aria-label="Предыдущее фото">
-                <svg width="32" height="32" viewBox="0 0 20 20" fill="none"><path d="M13 4L7 10L13 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </button>
-              <button className={`${styles.lightboxArrow} ${styles.lightboxArrowRight}`} onClick={(e) => { e.stopPropagation(); nextRef.current(); }} aria-label="Следующее фото">
-                <svg width="32" height="32" viewBox="0 0 20 20" fill="none"><path d="M7 4L13 10L7 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </button>
-            </>
-          )}
-          <div
-            className={styles.lightboxImageWrap}
-            onClick={(e) => e.stopPropagation()}
-            onTouchStart={onLightboxTouchStart}
-            onTouchMove={onLightboxTouchMove}
-            onTouchEnd={onLightboxTouchEnd}
-          >
-            {activeSlide.kind === "video" ? (
-              <HlsVideo
-                src={activeSlide.src}
-                poster={activeImage ? blobUrl(activeImage) : undefined}
-                autoPlay
-                muted
-                loop
-                controls
-                className={styles.lightboxVideo}
-              />
-            ) : (
-              <GalleryImage
-                src={blobUrl(activeImage)}
-                alt={`${alt} — фото ${activeIndex + 1}`}
-                width={600}
-                height={800}
-                className={`${styles.lightboxImage} ${pinchTransform ? styles.lightboxImagePinched : ""}`}
-                style={pinchTransform ? { transform: pinchTransform } : undefined}
-                priority
-                draggable={false}
-              />
-            )}
-          </div>
-          <span className={styles.lightboxCounter}>{activeIndex + 1} / {slides.length}</span>
-        </div>
+        <GalleryLightbox
+          slides={slides}
+          activeIndex={activeIndex}
+          alt={alt}
+          onClose={() => setLightboxOpen(false)}
+          onPrev={() => prevRef.current()}
+          onNext={() => nextRef.current()}
+        />
       )}
     </>
   );

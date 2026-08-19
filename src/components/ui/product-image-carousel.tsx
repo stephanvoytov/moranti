@@ -127,6 +127,8 @@ export default function ProductImageCarousel({
                 src={url}
                 alt={product.name}
                 className={styles.image}
+                width={516}
+                height={688}
                 priority={priority && i === 0}
                 draggable={false}
                 onLoad={registerLoaded}

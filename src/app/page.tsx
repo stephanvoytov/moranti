@@ -93,6 +93,8 @@ export default async function Home() {
                       src={blobUrl(optimized)}
                       alt={cat.name}
                       className={styles.collectionImg}
+                      width={315}
+                      height={420}
                     />
                   ) : (
                     <div className={styles.collectionImgFallback} />

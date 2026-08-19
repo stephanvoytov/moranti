@@ -7,7 +7,7 @@ import { YANDEX_METRIKA_ID } from "@/config/analytics";
 import { buildGlobalJsonLd } from "@/lib/seo-jsonld";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import ScrollToTop from "@/components/ui/scroll-to-top";
+import ScrollToTop from "@/components/ui/scroll-to-top-lazy";
 import { YandexMetricaProvider } from "@artginzburg/next-ym";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
