@@ -46,6 +46,7 @@ export default function Footer() {
             </span>
           </div>
           <div className={styles.social}>
+            <a href="https://stefanvoytov.ru" target="_blank" rel="noopener noreferrer">Разработка сайта — Стефан В</a>
             <a href="https://vk.com/moranti_bags" target="_blank" rel="noopener noreferrer" aria-label="VK">VK</a>
           </div>
         </div>
