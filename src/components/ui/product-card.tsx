@@ -4,6 +4,7 @@ import { Product } from "@/data/products";
 import { useFavorites } from "@/lib/favorites-context";
 import ProductImageCarousel from "./product-image-carousel";
 import ProductFavoriteButton from "./product-favorite-button";
+import ProductCartButton from "./cart-button";
 import ProductInfo from "./product-info";
 import styles from "./product-card.module.css";
 
@@ -42,6 +43,8 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         isArchived={isArchived}
         isOutOfStock={isOutOfStock}
       />
+
+      {!isOutOfStock && <ProductCartButton product={product} />}
     </article>
   );
 }

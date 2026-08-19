@@ -25,13 +25,16 @@
   position: relative;
   width: 100%;
   height: 100%;
+  /* Зум на единый контейнер, а не на каждый слой: при смене кадра
+     анимация не перезапускается (нет «пульса») */
+  transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .imageLayer {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.2s ease;
   /* Создаёт stacking context: placeholder SmartImage (z-index: -1) остаётся
      внутри слоя и рисуется поверх фона .imageWrap, а не позади него. */
   isolation: isolate;
@@ -46,14 +49,15 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-.card:hover .imageLayerActive .image {
+.card:hover .imageLink {
   transform: scale(1.04);
 }
 
-/* Видео поверх фото при наведении (только если у товара есть HLS-видео WB) */
+/* Видео поверх фото при наведении (только если у товара есть HLS-видео WB).
+   Прозрачно, пока нет первого кадра (canplay): до этого под ним видно фото,
+   никаких вспышек фона. Включение/выключение — через opacity (keep-mounted). */
 .videoHover {
   position: absolute;
   inset: 0;
@@ -61,7 +65,31 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background: var(--surface);
+  background: transparent;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.videoHoverVisible {
+  opacity: 1;
+}
+
+.videoHoverExiting {
+  opacity: 0;
+}
+
+/* Пользователям с prefers-reduced-motion не нужны ни кроссфейды, ни зум */
+@media (prefers-reduced-motion: reduce) {
+  .imageLink,
+  .imageLayer,
+  .videoHover {
+    transition: none;
+  }
+
+  .card:hover .imageLink {
+    transform: none;
+  }
 }
 
 /* ——— Favorite (heart) ——— */
@@ -147,6 +175,9 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  /* Растягиваем инфоблок: кнопка «В корзину» всегда прижата к низу карточки,
+     даже если у соседних карточек разное количество строк в названии/рейтинге */
+  flex: 1;
 }
 
 /* Название — Playfair Display (editorial) */
@@ -162,6 +193,8 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   letter-spacing: 0.01em;
+  /* Резервируем 2 строки: цена/рейтинг/кнопка на одном уровне во всех карточках */
+  min-height: 2.9em;
 }
 
 .name a {
@@ -236,6 +269,53 @@
   line-height: 1;
 }
 
+/* ——— Cart button ——— */
+
+.cartBtn {
+  margin-top: 12px;
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  text-decoration: none;
+  color: var(--dark);
+  background: transparent;
+  border: 1px solid var(--dark);
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.cartBtn:hover {
+  background: var(--dark);
+  color: var(--bg);
+  border-color: var(--dark);
+}
+
+.cartBtnActive {
+  color: var(--text-primary);
+  border-color: var(--dark);
+}
+
+.cartBtnActive:hover {
+  background: var(--dark);
+  color: var(--bg);
+}
+
+@media (max-width: 768px) {
+  .cartBtn {
+    margin-top: 8px;
+    padding: 11px 12px;
+  }
+}
+
 /* ——— Responsive ——— */
 
 @media (max-width: 768px) {
@@ -260,6 +340,7 @@
   .name {
     font-size: 14px;
     line-height: 1.4;
+    min-height: 2.8em;
   }
 
   .priceRow {

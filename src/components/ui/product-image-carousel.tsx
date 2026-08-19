@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Product } from "@/data/products";
 import { useHoverCarousel } from "./use-hover-carousel";
@@ -21,11 +21,16 @@ interface ProductImageCarouselProps {
 /**
  * Фото-зона карточки: до 4 слоёв (как WB), первое — главное, остальные —
  * hover-карусель (useHoverCarousel). Ховер-слои монтируются только после
- * загрузки главного фото, чтобы не конкурировать с ним за канал.
+ * загрузки главного фото, чтобы не конкурировать с ним за канал, и дальше
+ * остаются в DOM (keep-mounted): повторные наведения не перезагружают фото
+ * и не показывают placeholder — «моргания» нет.
  *
  * Если у товара есть HLS-видео (WB) — при наведении вместо фото-карусели
  * проигрывается видео (muted autoplay loop). Видео монтируется только после
- * первого наведения (не грузим трафик для всего каталога), в углу — бейдж.
+ * первого наведения (не грузим трафик для всего каталога), затем остаётся
+ * в DOM и переключается через play/pause — m3u8 не качается заново. Старт
+ * воспроизведения — только по первому кадру (canplay), до этого элемент
+ * прозрачен и под ним видно фото.
  */
 export default function ProductImageCarousel({
   product,
@@ -58,10 +63,19 @@ export default function ProductImageCarousel({
 
   const hasVideo = Boolean(product.video);
   // Видео монтируем только после первого наведения (ленивая загрузка hls.js)
+  // и дальше держим в DOM: повторные наведения — мгновенный resume без
+  // повторной загрузки m3u8.
+  const [videoMounted, setVideoMounted] = useState(false);
+  // videoActive управляет play/pause и прозрачностью, а не монтированием.
   const [videoActive, setVideoActive] = useState(false);
-  // Hover-слои (фото 2–4) монтируем только при наведении/тапе, а не после
-  // главного фото: иначе каждая карточка качает все 4 фото (12 МБ на каталог).
-  const [hoverActive, setHoverActive] = useState(false);
+  // Короткий fade-out при уходе мыши, чтобы видео не «срывалось» резко.
+  const [videoExiting, setVideoExiting] = useState(false);
+  const videoExitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Hover-слои (фото 2–4) монтируем только при первом наведении/тапе и дальше
+  // держим в DOM (keep-mounted): после первой загрузки повторные наведения
+  // мгновенные, без перезагрузки фото и вспышек placeholder'а.
+  const [hoverMounted, setHoverMounted] = useState(false);
 
   // Предзагружаем модуль hls.js заранее (один раз на страницу, кеш на всех
   // карточках): при наведении остаётся только загрузка m3u8 + сегментов,
@@ -83,30 +97,53 @@ export default function ProductImageCarousel({
     registerFailed,
   } = useHoverCarousel(rawImages);
 
+  const clearVideoExitTimer = () => {
+    if (videoExitTimer.current) {
+      clearTimeout(videoExitTimer.current);
+      videoExitTimer.current = null;
+    }
+  };
+
   const handleEnter = () => {
+    clearVideoExitTimer();
+    setVideoExiting(false);
     if (hasVideo) {
+      setVideoMounted(true);
       setVideoActive(true);
       return;
     }
-    setHoverActive(true);
+    setHoverMounted(true);
     handleMouseEnter();
   };
 
   const handleLeave = () => {
-    setVideoActive(false);
-    setHoverActive(false);
+    if (hasVideo) {
+      setVideoActive(false);
+      setVideoExiting(true);
+      clearVideoExitTimer();
+      // Fade-out завершился — гасим класс; элемент остаётся в DOM.
+      videoExitTimer.current = setTimeout(() => {
+        setVideoExiting(false);
+        videoExitTimer.current = null;
+      }, 300);
+      return;
+    }
     handleMouseLeave();
   };
 
   const handleTouchStart = () => {
-    setHoverActive(true);
+    setHoverMounted(true);
     handleHoverTouchStart();
   };
 
   const handleTouchEnd = () => {
-    setHoverActive(false);
     handleHoverTouchEnd();
   };
+
+  // Очистка таймера ухода при размонтировании карточки.
+  useEffect(() => {
+    return () => clearVideoExitTimer();
+  }, []);
 
   return (
     <div
@@ -118,7 +155,7 @@ export default function ProductImageCarousel({
     >
       <Link href={`/catalog/${product.slug}`} aria-label={product.name} className={styles.imageLink}>
         {layers.map((url, i) =>
-          i === 0 || (isBaseReady && hoverActive) ? (
+          i === 0 || (isBaseReady && hoverMounted) ? (
             <div
               key={url}
               className={`${styles.imageLayer} ${i === hoverIndex ? styles.imageLayerActive : ""}`}
@@ -137,14 +174,17 @@ export default function ProductImageCarousel({
             </div>
           ) : null
         )}
-        {hasVideo && videoActive && (
+        {hasVideo && videoMounted && (
           <HlsVideo
             src={product.video!}
             poster={product.image}
             autoPlay
             muted
             loop
-            className={styles.videoHover}
+            active={videoActive}
+            className={`${styles.videoHover} ${
+              videoActive ? styles.videoHoverVisible : ""
+            } ${videoExiting ? styles.videoHoverExiting : ""}`}
           />
         )}
       </Link>

@@ -6,7 +6,7 @@ import { blobUrl } from "@/lib/blob";
 /** Максимум фото в карточке (как WB): первое — главное, остальные — hover-карусель */
 const MAX_HOVER_IMAGES = 4;
 /** Каденс смены кадров при наведении */
-const HOVER_INTERVAL_MS = 1200;
+const HOVER_INTERVAL_MS = 1600;
 /** Задержка touch-старта — отличает тап от удержания пальца */
 const TOUCH_DELAY_MS = 200;
 

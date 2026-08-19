@@ -51,9 +51,9 @@
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(44, 36, 32, 0.6) 0%,
-    rgba(44, 36, 32, 0.25) 40%,
-    rgba(44, 36, 32, 0.05) 100%
+    rgba(30, 24, 20, 0.78) 0%,
+    rgba(30, 24, 20, 0.45) 40%,
+    rgba(30, 24, 20, 0.2) 100%
   );
   z-index: 1;
 }

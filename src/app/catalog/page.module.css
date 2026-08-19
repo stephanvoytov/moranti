@@ -21,15 +21,37 @@
   text-align: center;
 }
 
-.label {
-  display: block;
+/* ——— Breadcrumbs (eyebrow на страницах категорий) ——— */
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 12px;
   color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   margin-bottom: 8px;
+}
+
+.breadcrumbLink {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.breadcrumbLink:hover {
+  color: var(--text-primary);
+}
+
+.breadcrumbSep {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.breadcrumbCurrent {
+  color: var(--text-primary);
 }
 
 .title {
@@ -55,7 +77,7 @@
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  margin-bottom: 8px;
+  margin: 0;
 }
 
 .filterRow {
@@ -242,18 +264,49 @@
   }
 }
 
+/* ——— Layout: sticky-сайдбар фильтров + сетка товаров ——— */
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.main {
+  min-width: 0;
+}
+
+@media (min-width: 1025px) {
+  .layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: var(--space-xl);
+  }
+
+  .sidebar {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-md));
+  }
+}
+
 /* ——— Product Grid ——— */
 
 .productGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--grid-gap);
   margin-bottom: var(--space-2xl);
 }
 
-@media (max-width: 1024px) {
+@media (min-width: 1280px) {
   .productGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -430,7 +483,9 @@
 /* ——— Filter toggle button (mobile only) ——— */
 
 .filterToggle {
-  display: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 500;
@@ -449,17 +504,34 @@
   border-color: var(--dark);
 }
 
-/* ——— Extended filter panel (sort, color, material, price) ——— */
+/* ——— Extended filter panel (sort, marketplace, color, material, price) ——— */
 
 .filterPanel {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.marketplaceGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.marketplaceGroup .filterPill {
+  width: 100%;
+  justify-content: flex-start;
 }
 
 .filterSelectWrapper {
   position: relative;
+  width: 100%;
 }
 
 .filterSelect {
@@ -473,7 +545,8 @@
   padding: 8px 24px 8px 0;
   outline: none;
   cursor: pointer;
-  min-width: 80px;
+  width: 100%;
+  min-width: 0;
   letter-spacing: 0.03em;
   transition: border-color var(--transition-fast);
   -webkit-appearance: none;
@@ -519,7 +592,8 @@
   gap: 6px;
   letter-spacing: 0.03em;
   transition: border-color var(--transition-fast);
-  min-width: 60px;
+  width: 100%;
+  min-width: 0;
 }
 
 .colorPickerTrigger:hover {
@@ -542,7 +616,7 @@
   background: var(--white);
   border: 1px solid var(--border);
   z-index: 20;
-  min-width: 130px;
+  min-width: 100%;
   padding: 4px 0;
 }
 
@@ -581,10 +655,12 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
 }
 
 .priceInput {
-  width: 56px;
+  flex: 1;
+  min-width: 0;
   font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 400;
@@ -633,13 +709,9 @@
 
 /* ——— Toolbar responsive (mobile) ——— */
 
-@media (max-width: 768px) {
-  .filterToggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-
+/* Под 1024px фильтры сворачиваются за кнопку «Фильтры»; на десктопе
+   панель всегда видна в сайдбаре. */
+@media (max-width: 1024px) {
   .filterPanel {
     display: none;
   }
@@ -648,24 +720,12 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: var(--space-md);
   }
+}
 
-  .filterSelectWrapper,
-  .colorPicker,
-  .priceGroup {
-    width: 100%;
-  }
-
-  .filterSelect,
-  .colorPickerTrigger {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .colorPickerMenu {
-    left: 0;
-    right: auto;
-    min-width: 100%;
+@media (min-width: 1025px) {
+  .filterToggle {
+    display: none;
   }
 }

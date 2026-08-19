@@ -10,7 +10,7 @@
  * poster (первое фото товара) и останавливаемся.
  */
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type Hls from "hls.js";
 
 interface HlsVideoProps {
@@ -18,12 +18,15 @@ interface HlsVideoProps {
   src: string;
   /** Картинка-постер (обычно первое фото товара) */
   poster?: string;
-  /** Начать воспроизведение сразу (требует muted для автоплея в браузерах) */
+  /** Начать воспроизведение (требует muted для автоплея в браузерах) */
   autoPlay?: boolean;
   muted?: boolean;
   loop?: boolean;
   controls?: boolean;
   playsInline?: boolean;
+  /** Внешнее управление: true — играть (когда есть первый кадр), false — пауза.
+      Элемент при этом остаётся в DOM — повторная активация мгновенная. */
+  active?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -36,11 +39,24 @@ export default function HlsVideo({
   loop = false,
   controls = false,
   playsInline = true,
+  active = true,
   className,
   style,
 }: HlsVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
+  // Первый кадр получен (canplay) — можно запускать воспроизведение.
+  const canPlayRef = useRef(false);
+  // Актуальный active для замыкания canplay-обработчика (не пересоздавать listener).
+  const activeRef = useRef(active);
+  activeRef.current = active;
+
+  const startPlayback = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || !autoPlay || !muted) return;
+    video.muted = true;
+    video.play().catch(() => {});
+  }, [autoPlay, muted]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -49,11 +65,18 @@ export default function HlsVideo({
     let hls: Hls | null = null;
     let cancelled = false;
 
+    const handleCanPlay = () => {
+      canPlayRef.current = true;
+      if (activeRef.current) startPlayback();
+    };
+
     // Нативный HLS (Safari) — просто src на <video>
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
+      video.addEventListener("canplay", handleCanPlay);
       return () => {
         cancelled = true;
+        video.removeEventListener("canplay", handleCanPlay);
         video.removeAttribute("src");
         video.load();
       };
@@ -84,10 +107,7 @@ export default function HlsVideo({
 
         hls.loadSource(src);
         hls.attachMedia(video);
-        if (autoPlay && muted) {
-          video.muted = true;
-          video.play().catch(() => {});
-        }
+        video.addEventListener("canplay", handleCanPlay);
       } catch {
         // Ошибка загрузки hls.js — молча пропускаем (остаётся poster)
       }
@@ -97,6 +117,7 @@ export default function HlsVideo({
     return () => {
       disposed = true;
       cancelled = true;
+      video.removeEventListener("canplay", handleCanPlay);
       if (hls) {
         hls.destroy();
         hlsRef.current = null;
@@ -104,7 +125,21 @@ export default function HlsVideo({
       video.removeAttribute("src");
       video.load();
     };
-  }, [src, autoPlay, muted]);
+  }, [src, autoPlay, muted, startPlayback]);
+
+  // Внешнее управление воспроизведением: пауза/возобновление без пересоздания
+  // плеера (m3u8 не качается заново при каждом наведении).
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (active) {
+      // Первый кадр мог быть получен ещё до монтирования — играем сразу;
+      // иначе стартуем по canplay из основного эффекта.
+      if (canPlayRef.current) startPlayback();
+    } else {
+      video.pause();
+    }
+  }, [active, startPlayback]);
 
   return (
     <video
