@@ -2,9 +2,11 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { CharacteristicGroup } from "@/data/products";
-import { getProducts, getProduct } from "@/data/products";
+import { getAllProducts, getProducts, getProduct } from "@/data/products";
 import { seoConfig, buildProductSeoMeta } from "@/config/seo";
 import { buildProductJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo-jsonld";
+import { getGlobalVariantPage, buildProductAlt } from "@/lib/variant-pages";
+import VariantView from "@/components/sections/variant-view";
 import CategoryView from "./category-view";
 import PriceClient from "./price-client";
 import ProductCartCta from "./product-cart-cta";
@@ -25,15 +27,17 @@ import styles from "./page.module.css";
 
 interface Props {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateStaticParams() {
-  const products = await getProducts();
-  // Товары + категории живут на одном уровне /catalog/:slug
+  // Товары (включая «Нет в наличии» — страница остаётся в индексе и отдаётся
+  // с меткой «Нет в наличии», а не 404) + категории + глобальные лендинги
+  // материалов живут на одном уровне /catalog/:slug
+  const products = await getAllProducts();
   return [
     ...products.map((p) => ({ slug: p.slug })),
     ...Object.keys(seoConfig.categories).map((slug) => ({ slug })),
+    ...Object.keys(seoConfig.variants.global).map((slug) => ({ slug })),
   ];
 }
 
@@ -46,34 +50,12 @@ export const revalidate = 60;
 // в Next 16 отдаёт 200 с not-found контентом (мягкий 404).
 export const dynamicParams = false;
 
-export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
   // ─── Категория (/catalog/crossbody) ───
   const cat = seoConfig.categories[slug];
   if (cat) {
-    const sp = await searchParams;
-    const page = Number(sp?.page ?? "1") || 1;
-    const hasFilters = [
-      sp?.sort,
-      sp?.color,
-      sp?.material,
-      sp?.q,
-      sp?.priceMin,
-      sp?.priceMax,
-      sp?.marketplace,
-    ].some((v) => v !== undefined && v !== "");
-
-    // Пагинация и фильтры — дубли категории: noindex + canonical на базу
-    if (page > 1 || hasFilters) {
-      return {
-        title: { absolute: cat.title },
-        description: cat.description,
-        robots: { index: false, follow: true },
-        alternates: { canonical: `/catalog/${slug}` },
-      };
-    }
-
     return {
       title: { absolute: cat.title },
       description: cat.description,
@@ -81,6 +63,24 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       openGraph: {
         title: cat.title,
         description: cat.description,
+        url: `/catalog/${slug}`,
+        siteName: seoConfig.site.siteName,
+        type: "website",
+        locale: seoConfig.site.locale,
+      },
+    };
+  }
+
+  // ─── Глобальный лендинг материала (/catalog/iz-zamshi) ───
+  const globalVariant = seoConfig.variants.global[slug];
+  if (globalVariant) {
+    return {
+      title: { absolute: globalVariant.title },
+      description: globalVariant.description,
+      alternates: { canonical: `/catalog/${slug}` },
+      openGraph: {
+        title: globalVariant.title,
+        description: globalVariant.description,
         url: `/catalog/${slug}`,
         siteName: seoConfig.site.siteName,
         type: "website",
@@ -168,6 +168,13 @@ export default async function CatalogSlugPage({ params }: Props) {
   // Категория? → категорийная страница
   if (seoConfig.categories[slug]) {
     return <CategoryView slug={slug} />;
+  }
+
+  // Глобальный лендинг материала? (/catalog/iz-zamshi)
+  if (seoConfig.variants.global[slug]) {
+    const products = await getProducts();
+    const page = getGlobalVariantPage(slug, products);
+    if (page) return <VariantView page={page} />;
   }
 
   // Иначе — товар
@@ -281,7 +288,7 @@ export default async function CatalogSlugPage({ params }: Props) {
           <GalleryClient
             images={product.images?.length ? product.images : [product.image]}
             video={product.video}
-            alt={product.name}
+            alt={buildProductAlt(product)}
           />
         </div>
 

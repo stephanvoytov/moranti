@@ -1,22 +1,87 @@
 import Link from "next/link";
 import { seoConfig } from "@/config/seo";
+import type { VariantPage } from "@/lib/variant-pages";
 import styles from "./catalog-seo.module.css";
+
+interface VariantLink {
+  path: string;
+  label: string;
+}
 
 interface CatalogSeoProps {
   /** Слаг категории — уникальный текст под категорию; без слага — общий текст */
   category?: string;
+  /** Лендинг варианта (категория×цвет/материал или глобальная страница материала) */
+  variant?: VariantPage;
+  /** Ссылки для перелинковки (другие варианты + категория) */
+  variantLinks?: VariantLink[];
+}
+
+/** Родительный падеж для «по уходу за …» */
+function careTarget(variant: VariantPage): string {
+  if (variant.material === "Замша") return "замшей";
+  if (variant.kind === "material" && variant.material) return "кожей";
+  return "кожей и замшей";
 }
 
 /**
  * SEO-текст каталога: видимый блок после сетки товаров.
  * Без категории — общий текст; с категорией — текст из seoConfig.categories
- * и ссылки на остальные категории (перелинковка + якоря для поисковиков).
+ * и ссылки на остальные категории (перелинковка + якоря для поисковиков);
+ * с лендингом варианта — уникальный текст под цвет/материал и ссылки на
+ * соседние варианты и родительскую категорию.
  */
-export default function CatalogSeo({ category }: CatalogSeoProps) {
+export default function CatalogSeo({
+  category,
+  variant,
+  variantLinks = [],
+}: CatalogSeoProps) {
   const cat = category ? seoConfig.categories[category] : undefined;
   const cats = Object.entries(seoConfig.categories).filter(
     ([slug]) => slug !== category,
   );
+
+  if (variant) {
+    return (
+      <section className={styles.section} aria-label={`О подборке ${variant.h1}`}>
+        <div className="container">
+          <h2 className={styles.title}>{variant.h1}</h2>
+          <div className={styles.grid}>
+            <p>{variant.description}</p>
+            {variant.category && (
+              <p>
+                Смотрите все модели категории на странице{" "}
+                <Link href={`/catalog/${variant.category}`}>
+                  {seoConfig.categories[variant.category].name}
+                </Link>{" "}
+                или выберите подборку под себя:
+              </p>
+            )}
+            {!variant.category && (
+              <p>
+                Посмотрите также подборки по категориям и материалам Moranti:
+              </p>
+            )}
+            {variantLinks.length > 0 && (
+              <div className={styles.links}>
+                {variantLinks.map((l) => (
+                  <Link key={l.path} href={l.path}>
+                    {l.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+            <p>
+              Все сумки Moranti изготавливаются в Италии из натуральной кожи и
+              замши с ручным контролем качества — поэтому они не теряют форму и
+              со временем приобретают благородную патину. Если сомневаетесь в
+              выборе — почитайте наши рекомендации по уходу за {careTarget(variant)}.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (cat) {
     return (

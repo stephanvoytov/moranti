@@ -22,8 +22,14 @@ interface CatalogContentProps {
   /** Категория из URL-пути (страница /catalog/:slug) — не пишется в query */
   initialCategory?: string | null;
   categoryFromPath?: boolean;
+  /** Цвет из пути (лендинг /catalog/:cat/:variant) — не пишется в query */
+  initialColor?: string | null;
+  /** Материал из пути (лендинг /catalog/:cat/:variant) — не пишется в query */
+  initialMaterial?: string | null;
   /** Видимый H1 (для страницы категории) */
   categoryTitle?: string;
+  /** Метка хлебных крошек (для лендинга варианта) */
+  breadcrumbLabel?: string | null;
 }
 
 const ITEMS_PER_PAGE = 24;
@@ -65,7 +71,10 @@ function CatalogContent({
   initialCatalogOrder,
   initialCategory = null,
   categoryFromPath = false,
+  initialColor = null,
+  initialMaterial = null,
   categoryTitle,
+  breadcrumbLabel,
 }: CatalogContentProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -119,8 +128,12 @@ function CatalogContent({
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     categoryFromPath ? (initialCategory ?? null) : urlCategory,
   );
-  const [selectedColor, setSelectedColor] = useState<string | null>(urlColor);
-  const [selectedMaterial, setSelectedMaterial] = useState<string | null>(urlMaterial);
+  const [selectedColor, setSelectedColor] = useState<string | null>(
+    initialColor ?? urlColor,
+  );
+  const [selectedMaterial, setSelectedMaterial] = useState<string | null>(
+    initialMaterial ?? urlMaterial,
+  );
   const [page, setPage] = useState(urlPage);
 
   // ― Search state with debounce ―
@@ -171,8 +184,10 @@ function CatalogContent({
       if (selectedMarketplace) params.set("marketplace", selectedMarketplace);
       // На странице категории категория в пути — в query не дублируем
       if (!categoryFromPath && selectedCategory) params.set("category", selectedCategory);
-      if (selectedColor) params.set("color", selectedColor);
-      if (selectedMaterial) params.set("material", selectedMaterial);
+      // На лендинге варианта цвет/материал в пути — в query не дублируем,
+      // пока не изменены пользователем (иначе дубль URL лендинга)
+      if (selectedColor && selectedColor !== initialColor) params.set("color", selectedColor);
+      if (selectedMaterial && selectedMaterial !== initialMaterial) params.set("material", selectedMaterial);
       if (sortOption && sortOption !== "default") params.set("sort", sortOption);
       if (searchInput) params.set("q", searchInput);
       if (priceMin) params.set("priceMin", priceMin);
@@ -183,7 +198,7 @@ function CatalogContent({
       router.replace(newUrl, { scroll: false });
     }, 50);
     return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
-  }, [selectedMarketplace, selectedCategory, selectedColor, selectedMaterial, sortOption, searchInput, priceMin, priceMax, page, pathname, router, categoryFromPath]);
+  }, [selectedMarketplace, selectedCategory, selectedColor, selectedMaterial, sortOption, searchInput, priceMin, priceMax, page, pathname, router, categoryFromPath, initialColor, initialMaterial]);
 
   // ― Recently viewed (все товары, включая нет в наличии) ―
   const recentlyViewed = useSyncExternalStore(
@@ -365,7 +380,7 @@ function CatalogContent({
               <Link href="/catalog" className={styles.breadcrumbLink}>Каталог</Link>
               <span className={styles.breadcrumbSep} aria-hidden="true">›</span>
               <span className={styles.breadcrumbCurrent}>
-                {categoryShortName ?? categoryTitle}
+                {breadcrumbLabel ?? categoryShortName ?? categoryTitle}
               </span>
             </nav>
           )}

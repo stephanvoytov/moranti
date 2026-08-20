@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Product } from "@/data/products";
+import { buildProductAlt } from "@/lib/variant-pages";
 import { useHoverCarousel } from "./use-hover-carousel";
 import SmartImage from "./smart-image";
 import HlsVideo from "./hls-video";
@@ -39,6 +40,7 @@ export default function ProductImageCarousel({
   isOutOfStock,
   children,
 }: ProductImageCarouselProps) {
+  const alt = buildProductAlt(product);
   // Стабилизируем вход для useHoverCarousel: его useMemo/useCallback
   // завязаны на идентичность массива (иначе пересоздавались бы каждый рендер).
   // Карточка в каталоге ≤ ~260px (DPR 2 → 520px), полноразмер качать незачем:
@@ -162,7 +164,7 @@ export default function ProductImageCarousel({
             >
               <SmartImage
                 src={url}
-                alt={product.name}
+                alt={alt}
                 className={styles.image}
                 width={516}
                 height={688}

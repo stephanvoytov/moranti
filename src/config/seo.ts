@@ -17,6 +17,13 @@ export interface SeoPageMeta {
 export interface SeoCategoryMeta extends SeoPageMeta {
   /** Название для breadcrumb («Кросс-боди») */
   name: string;
+  /** Заголовочная форма для лендингов («Сумки кросс-боди») */
+  variantName: string;
+}
+
+export interface SeoVariantMeta extends SeoPageMeta {
+  /** H1 лендинга («Сумки из замши») */
+  h1: string;
 }
 
 export interface SeoConfig {
@@ -38,6 +45,19 @@ export interface SeoConfig {
     SeoPageMeta
   >;
   categories: Record<string, SeoCategoryMeta>;
+  /** Лендинги категория×цвет/материал + глобальные страницы материалов */
+  variants: {
+    /** «{name} из {material} — купить | Moranti». {material} — родительный («замши», «натуральной кожи») */
+    materialTitleTemplate: string;
+    /** «{name} из {material}...» */
+    materialDescriptionTemplate: string;
+    /** «{name} {color} — купить | Moranti». {color} — мн.ч. («чёрные») */
+    colorTitleTemplate: string;
+    /** «{name} {color}...» */
+    colorDescriptionTemplate: string;
+    /** Глобальные лендинги материалов: /catalog/iz-zamshi, /catalog/iz-naturalnoj-kozhi, /catalog/iz-italyanskoj-kozhi */
+    global: Record<string, SeoVariantMeta>;
+  };
   product: {
     /** "{name}{color} — купить | Moranti". Без цены: динамика вредит сниппету (Google кеширует) */
     titleTemplate: string;
@@ -130,39 +150,76 @@ export const seoConfig: SeoConfig = {
   categories: {
     crossbody: {
       name: "Кросс-боди",
+      variantName: "Сумки кросс-боди",
       title: "Сумки кросс-боди из натуральной кожи — Moranti",
       description:
         "Сумки кросс-боди из натуральной кожи и замши: руки свободны, а образ собран. Компактные и вместительные модели на каждый день.",
     },
     "na-plecho": {
       name: "На плечо",
+      variantName: "Сумки на плечо",
       title: "Сумки на плечо из натуральной кожи — Moranti",
       description:
         "Классические сумки на плечо из натуральной кожи: повседневные модели для офиса и прогулок.",
     },
     baguette: {
       name: "Багет",
+      variantName: "Сумки-багеты",
       title: "Сумки-багет из кожи и замши — Moranti",
       description:
         "Компактные сумки-багет из натуральной кожи и замши: городской шик с ремешком через плечо. Модели, которые не выходят из моды.",
     },
     tote: {
       name: "Тоут",
+      variantName: "Сумки-тоуты",
       title: "Сумки-тоуты из натуральной кожи — Moranti",
       description:
         "Вместительные шоперы и тоуты из натуральной кожи и замши: для работы, учёбы и шопинга. Не теряют форму и служат годами.",
     },
     saddle: {
       name: "Седло",
+      variantName: "Сумки-седло",
       title: "Сумки-седло из натуральной кожи — Moranti",
       description:
         "Сумки-седло из натуральной кожи с характерным изгибом: casual-модель, которая выделяет образ. Минимализм без логотипов.",
     },
     backpack: {
       name: "Рюкзаки",
+      variantName: "Сумки-рюкзаки",
       title: "Кожаные рюкзаки — Moranti",
       description:
         "Кожаные рюкзаки: компактные городские и вместительные для прогулок. Удобно носить каждый день.",
+    },
+  },
+
+  variants: {
+    // «Сумки кросс-боди из замши — купить | Moranti»
+    materialTitleTemplate: "{name} из {material} — купить | Moranti",
+    materialDescriptionTemplate:
+      "{name} из {material}: минимализм без логотипов, итальянская выделка и ручной контроль качества. Доставка по всей России.",
+    // «Сумки кросс-боди чёрные — купить | Moranti»
+    colorTitleTemplate: "{name} {color} — купить | Moranti",
+    colorDescriptionTemplate:
+      "{name} {color}: минимализм без логотипов, натуральная итальянская кожа и замша. Доставка по всей России.",
+    global: {
+      "iz-zamshi": {
+        h1: "Сумки из замши",
+        title: "Сумки из замши — купить | Moranti",
+        description:
+          "Сумки из натуральной замши: кросс-боди, тоуты, багеты, модели на плечо. Мягкая итальянская замша, минимализм без логотипов. Доставка по России.",
+      },
+      "iz-naturalnoj-kozhi": {
+        h1: "Сумки из натуральной кожи",
+        title: "Сумки из натуральной кожи — купить | Moranti",
+        description:
+          "Сумки из натуральной кожи: кросс-боди, тоуты, багеты, седла, рюкзаки. Итальянская выделка, минимализм без логотипов. Доставка по России.",
+      },
+      "iz-italyanskoj-kozhi": {
+        h1: "Сумки из итальянской кожи",
+        title: "Сумки из итальянской кожи — купить | Moranti",
+        description:
+          "Сумки из натуральной итальянской кожи: кросс-боди, тоуты, багеты, седла, рюкзаки. Итальянская выделка и ручной контроль качества. Доставка по России.",
+      },
     },
   },
 
