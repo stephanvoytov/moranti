@@ -1,9 +1,10 @@
 {
   "hero": {
     "title": "Moranti",
-    "tagline": "Сумки, которые сочетают эстетику, удобство и качество натуральных материалов.",
+    "tagline": "Сумки, которые сочетают эстетику, удобство и качество натуральных материалов из Италии.",
     "subtitle": "Натуральная кожа итальянского производства",
-    "image": "/images/hero.png"
+    "image": "https://myshr8bhorjsndix.public.blob.vercel-storage.com/media/1787229582486-3vwr-vsscCEnYHlmhnEVh70d47DSVvrfVTQ.webp",
+    "imageMobile": "https://myshr8bhorjsndix.public.blob.vercel-storage.com/media/1787233980542-frrx-SbvKalgyP3SjD8fYRC8FEIcnca48dU.webp"
   },
   "featuredIds": [],
   "catalogOrder": [],

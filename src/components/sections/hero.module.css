@@ -129,6 +129,29 @@
 
 /* ——— Responsive ——— */
 
+/* Планшет: фикс-размер, чтобы логотип не «проседал» на 6vw */
+@media (min-width: 769px) and (max-width: 1199px) {
+  .title {
+    font-size: 72px;
+  }
+}
+
+/* ПК: всё крупнее на 7% (80px → 85.6px, 20px → 21.4px, 12px → 13px) */
+@media (min-width: 1200px) {
+  .title {
+    font-size: 85.6px;
+  }
+
+  .tagline {
+    font-size: 21.4px;
+  }
+
+  .cta {
+    font-size: 13px;
+    padding: 17px 39px;
+  }
+}
+
 @media (max-width: 768px) {
   .hero {
     min-height: 500px;
@@ -136,7 +159,7 @@
   }
 
   .title {
-    font-size: clamp(32px, 10vw, 48px);
+    font-size: clamp(49.9px, 15.6vw, 72px);
   }
 
   /* На телефонах показываем мобильную картинку, desktop скрываем */
