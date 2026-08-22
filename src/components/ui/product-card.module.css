@@ -6,8 +6,27 @@
 .card {
   display: flex;
   flex-direction: column;
+  position: relative;
   overflow: hidden;
   width: 100%;
+}
+
+/* ——— Badge «Новинка» (премиальный, сдержанный) ——— */
+
+.badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--camel);
+  padding: 5px 10px;
+  border-radius: 2px;
+  pointer-events: none;
 }
 
 /* ——— Image ——— */
@@ -130,13 +149,10 @@
 .heartIcon {
   width: 16px;
   height: 16px;
-  stroke: var(--dark);
+  stroke: currentColor;
   stroke-width: 1.5;
   fill: none;
   transition: fill var(--transition-fast);
-  /* Мягкая белая аура — сердце читается на любом фото, без белого кружка */
-  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.95))
-    drop-shadow(0 1px 2px rgba(255, 255, 255, 0.8));
 }
 
 /* Активное состояние — та же заливка, что на детальной странице.
@@ -267,6 +283,53 @@
   font-size: 11px;
   color: var(--text-muted);
   line-height: 1;
+}
+
+/* ——— Cart + favorite actions row ——— */
+
+.cardActions {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.cardActions .cartBtn {
+  margin-top: 0;
+  flex: 1;
+  width: auto;
+}
+
+.favoriteSquare {
+  flex: 0 0 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--dark);
+  background: transparent;
+  color: var(--dark);
+  cursor: pointer;
+  padding: 0;
+  transition: all var(--transition-base);
+}
+
+.favoriteSquare:hover {
+  background: var(--dark);
+  color: var(--bg);
+}
+
+.favoriteSquare .heartIcon {
+  width: 18px;
+  height: 18px;
+}
+
+.favoriteSquare.favoriteActive {
+  color: var(--camel);
+  border-color: var(--camel);
+}
+
+.favoriteSquare.favoriteActive .heartIcon {
+  color: var(--camel);
 }
 
 /* ——— Cart button ——— */
