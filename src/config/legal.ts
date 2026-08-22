@@ -13,7 +13,10 @@ export const legalInfo = {
   inn: "390610008609",
 } as const;
 
-/** Официальные каналы связи (без email/телефона — только VK) */
+/** Официальные каналы связи */
 export const CONTACT_URLS = {
   vk: "https://vk.com/moranti_bags",
 } as const;
+
+/** Почта для вопросов покупателей (дублируется в settings.contactEmail) */
+export const SUPPORT_EMAIL = "irina.augustan@gmail.com";

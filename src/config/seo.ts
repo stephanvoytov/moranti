@@ -41,7 +41,7 @@ export interface SeoConfig {
   };
   pages: Record<
     | "home" | "catalog" | "care" | "delivery" | "favorites" | "admin" | "notFound"
-    | "privacy" | "contacts" | "cart",
+    | "privacy" | "contacts" | "cart" | "about",
     SeoPageMeta
   >;
   categories: Record<string, SeoCategoryMeta>;
@@ -125,6 +125,11 @@ export const seoConfig: SeoConfig = {
       title: "Контакты",
       description:
         "Контакты и реквизиты Moranti: ИП Аугустан И.В., ОГРНИП 312392620100191, ИНН 390610008609. Связь через VK, покупка на Wildberries и Ozon.",
+    },
+    about: {
+      title: "О бренде",
+      description:
+        "Moranti — бренд женских сумок из натуральной итальянской кожи: минималистичные формы без кричащих логотипов, ручная работа, честные цены.",
     },
     favorites: {
       title: "Избранное",

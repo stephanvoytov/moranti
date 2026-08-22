@@ -1,0 +1,25 @@
+/* =============================================
+    Ask Question CTA — кнопка на странице товара
+    ============================================= */
+
+.askBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--camel);
+  background: transparent;
+  border: 1px solid var(--camel);
+  padding: 14px 32px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.askBtn:hover {
+  background: var(--camel);
+  color: var(--bg);
+}

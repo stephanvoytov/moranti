@@ -48,8 +48,8 @@ export default function HlsVideo({
   // Первый кадр получен (canplay) — можно запускать воспроизведение.
   const canPlayRef = useRef(false);
   // Актуальный active для замыкания canplay-обработчика (не пересоздавать listener).
+  // Обновляется в эффекте ниже — запись в ref во время рендера запрещена (react-hooks/refs).
   const activeRef = useRef(active);
-  activeRef.current = active;
 
   const startPlayback = useCallback(() => {
     const video = videoRef.current;
@@ -130,6 +130,7 @@ export default function HlsVideo({
   // Внешнее управление воспроизведением: пауза/возобновление без пересоздания
   // плеера (m3u8 не качается заново при каждом наведении).
   useEffect(() => {
+    activeRef.current = active;
     const video = videoRef.current;
     if (!video) return;
     if (active) {

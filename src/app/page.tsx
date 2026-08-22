@@ -40,12 +40,13 @@ export default async function Home() {
 
   // «Популярные модели»: ручной выбор из админки (featuredIds) — приоритет;
   // если он пуст — топ по количеству отзывов (как сортировка «По популярности» в каталоге).
+  // Максимум 8 карточек.
   const featured =
     featuredIds.length > 0
-      ? products.filter((p) => featuredIds.includes(p.id))
+      ? products.filter((p) => featuredIds.includes(p.id)).slice(0, 8)
       : [...products]
           .sort((a, b) => (b.reviewsCount || 0) - (a.reviewsCount || 0))
-          .slice(0, 4);
+          .slice(0, 8);
 
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";
 
@@ -63,6 +64,29 @@ export default async function Home() {
 
       {/* ——— Hero (серверный, с реальной картинкой сразу) ——— */}
       <Hero settings={hero} />
+
+      {/* ——— Популярные модели ——— */}
+      {featured.length > 0 && (
+        <section className={`${styles.section} ${styles.featured}`}>
+          <div className="container">
+            <h2 className={styles.sectionTitle}>Популярные модели</h2>
+            <p className={styles.sectionSubtitle}>
+              Модели, которые выбирают чаще всего. Каждая — из натуральной
+              итальянской кожи.
+            </p>
+            <div className={styles.featuredGrid}>
+              {featured.map((product, i) => (
+                <ProductCard key={product.id} product={product} priority={i === 0} />
+              ))}
+            </div>
+            <div className={styles.featuredActions}>
+              <Link href="/catalog" className={styles.featuredBtn}>
+                Смотреть ещё
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ——— Коллекции ——— */}
       <section className={`${styles.section} ${styles.collections}`}>
@@ -111,24 +135,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      {/* ——— Популярные модели ——— */}
-      {featured.length > 0 && (
-        <section className={`${styles.section} ${styles.featured}`}>
-          <div className="container">
-            <h2 className={styles.sectionTitle}>Популярные модели</h2>
-            <p className={styles.sectionSubtitle}>
-              Модели, которые выбирают чаще всего. Каждая — из натуральной
-              итальянской кожи.
-            </p>
-            <div className={styles.featuredGrid}>
-              {featured.map((product, i) => (
-                <ProductCard key={product.id} product={product} priority={i === 0} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ——— CTA ——— */}
       <section className={styles.ctaSection}>

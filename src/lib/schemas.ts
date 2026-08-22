@@ -104,6 +104,21 @@ export const settingsSchema = z.object({
   updatedAt: z.string().optional(),
 }).passthrough(); // разрешаем дополнительные поля (совместимость)
 
+/* ─── Question («Задать вопрос») ─── */
+
+export const questionSchema = z.object({
+  /** Имя посетителя — необязательно */
+  name: z.string().trim().max(80, "Имя слишком длинное").optional(),
+  email: z.string().email("Некорректный email"),
+  question: z.string().trim().min(10, "Вопрос слишком короткий").max(2000, "Вопрос слишком длинный"),
+  /** Slug товара (необязательно — форма есть и в навбаре) */
+  productSlug: z.string().max(120).optional(),
+  /** Honeypot: люди это поле не видят и не заполняют */
+  website: z.string().max(0).optional(),
+});
+
+export type QuestionInput = z.infer<typeof questionSchema>;
+
 /* ─── Products list query ─── */
 
 export const productsQuerySchema = z.object({

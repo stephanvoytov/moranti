@@ -17,6 +17,7 @@ import GalleryOverlay from "./gallery-overlay";
 import RecentlyViewedTracker from "./recently-viewed-tracker";
 import FavoriteButton from "./favorite-button";
 import MarketplaceCtas from "./marketplace-cta";
+import AskQuestionCta from "./ask-question-cta";
 import ExpandableText from "@/components/ui/expandable-text";
 import ProductCard from "@/components/ui/product-card";
 import RatingStars from "@/components/ui/rating-stars";
@@ -96,21 +97,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!product) notFound();
 
   const meta = buildProductSeoMeta(product);
-  const title = meta.title;
+
+  // Уникальность title/description: у разных моделей бывает одинаковое
+  // имя + цвет (два багета «молочный») — Яндекс склеивает такие страницы.
+  // Добавляем различитель: размеры (33×19×12 см) или артикул.
+  const all = await getAllProducts();
+  const disambig = buildTitleDisambiguator(product, all);
+
+  const title = meta.title + disambig.titleSuffix;
+  const description = meta.description + disambig.descSuffix;
 
   // Архивные товары: страница доступна, но из индекса убираем (тупик для пользователя)
   const noindex = Boolean(product.archivedAt);
 
   return {
     title: { absolute: title },
-    description: meta.description,
+    description,
     robots: noindex ? { index: false, follow: true } : undefined,
     alternates: {
       canonical: `/catalog/${product.slug}`,
     },
     openGraph: {
-      title: meta.ogTitle,
-      description: meta.description,
+      title: meta.ogTitle + disambig.titleSuffix,
+      description,
       url: `/catalog/${product.slug}`,
       type: "website",
       images: product.image
@@ -118,6 +127,41 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         : undefined,
     },
   };
+}
+
+/**
+ * Различитель для товаров с одинаковым title (имя + первый цвет совпали).
+ * Приоритет: габариты «33×19×12 см» (человекочитаемо) → артикул.
+ * Если коллизии нет — пустые суффиксы (title остаётся чистым).
+ */
+function buildTitleDisambiguator(
+  product: NonNullable<Awaited<ReturnType<typeof getProduct>>>,
+  all: Awaited<ReturnType<typeof getAllProducts>>,
+): { titleSuffix: string; descSuffix: string } {
+  const baseTitle = buildProductSeoMeta(product).title;
+  const hasCollision = all.some(
+    (p) => p.slug !== product.slug && buildProductSeoMeta(p).title === baseTitle,
+  );
+  if (!hasCollision) return { titleSuffix: "", descSuffix: "" };
+
+  const w = getCharValue(product.characteristics ?? null, "Ширина предмета");
+  const h = getCharValue(product.characteristics ?? null, "Высота предмета");
+  const d = getCharValue(product.characteristics ?? null, "Глубина предмета");
+  if (w && h && d) {
+    return {
+      titleSuffix: ` (${w}×${h}×${d} см)`,
+      descSuffix: ` Размеры: ${w}×${h}×${d} см.`,
+    };
+  }
+
+  const article = product.ozonArticle || product.wbArticle;
+  if (article) {
+    return {
+      titleSuffix: `, арт. ${article}`,
+      descSuffix: ` Артикул: ${article}.`,
+    };
+  }
+  return { titleSuffix: "", descSuffix: "" };
 }
 
 /** Извлечь значение характеристики по имени */
@@ -358,6 +402,14 @@ export default async function CatalogSlugPage({ params }: Props) {
               )}
             </MarketplaceCtas>
           )}
+
+          {/* «Задать вопрос» — письмо владельцу с автоссылкой на товар */}
+          <AskQuestionCta productSlug={product.slug} productName={product.name} />
+
+          {/* Перелинковка: условия покупки */}
+          <Link href="/delivery" className={styles.assureLink}>
+            Оплата, доставка и гарантия →
+          </Link>
 
           {/* SEO H2 */}
           <h2 className={styles.seoH2}>

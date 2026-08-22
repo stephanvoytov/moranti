@@ -32,6 +32,7 @@
 
 .nav {
   display: flex;
+  align-items: center;
   gap: 36px;
 }
 
@@ -58,6 +59,33 @@
   right: 0;
   height: 1px;
   background: var(--text-primary);
+}
+
+/* ——— Кнопка «Задать вопрос» в навбаре ——— */
+
+.dropdownDivider {
+  display: block;
+  height: 1px;
+  margin: 8px 0;
+  background: var(--border);
+}
+
+.askBtn {
+  font-family: var(--font-sans);
+  font-size: inherit;
+  line-height: 1.2;
+  color: var(--camel);
+  background: transparent;
+  border: 1px solid var(--camel);
+  padding: 5px 14px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.askBtn:hover {
+  background: var(--camel);
+  color: var(--bg);
 }
 
 /* ——— Dropdown «Каталог» ——— */
@@ -241,6 +269,8 @@
   .nav {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
     position: fixed;
     top: var(--header-height);
     left: 0;
@@ -283,19 +313,27 @@
   }
 
   .catalogTop {
-    flex-direction: row;
+    position: relative;
+    display: flex;
     align-items: center;
-    justify-content: space-between;
     width: 100%;
   }
 
+  .catalogTop > a {
+    flex: 1;
+    text-align: center;
+  }
+
   .catalogToggle {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     justify-content: center;
     width: 44px;
     height: 44px;
-    margin-right: -12px;
     background: none;
     border: none;
     color: var(--dark);
@@ -304,7 +342,7 @@
   }
 
   .catalogToggleOpen {
-    transform: rotate(180deg);
+    transform: translateY(-50%) rotate(180deg);
   }
 
   .catalogToggle:focus-visible {
@@ -344,8 +382,9 @@
     min-height: 0;
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 2px;
-    padding-left: 12px;
+    padding-left: 0;
   }
 
   .dropdown a {
@@ -353,6 +392,7 @@
     font-size: 12px;
     letter-spacing: 0.04em;
     white-space: normal;
+    text-align: center;
   }
 
   .dropdown a:hover {

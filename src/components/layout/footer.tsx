@@ -26,6 +26,7 @@ export default function Footer() {
           </div>
           <div className={styles.col}>
             <h3>Помощь</h3>
+            <Link href="/about">О бренде</Link>
             <Link href="/delivery">Доставка и оплата</Link>
             <Link href="/care">Уход за сумками</Link>
             <Link href="/privacy">Политика конфиденциальности</Link>
@@ -46,7 +47,9 @@ export default function Footer() {
             </span>
           </div>
           <div className={styles.social}>
-            <a className={styles.credit} href="https://stefanvoytov.ru" target="_blank" rel="noopener noreferrer">Сайт сделан Стефаном В</a>
+            <a className={styles.credit} href="https://stefanvoytov.ru" target="_blank" rel="noopener noreferrer">
+              Сделать такой же сайт →
+            </a>
           </div>
         </div>
       </div>

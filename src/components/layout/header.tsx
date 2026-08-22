@@ -69,6 +69,9 @@ export default function Header() {
           className={`${styles.nav}${menuOpen ? " " + styles.open : ""}`}
           id="mainNav"
         >
+          <Link href="/" onClick={() => setMenuOpen(false)}>
+            Главная
+          </Link>
           <Link href="/catalog?sort=new" onClick={() => setMenuOpen(false)}>
             Новинки
           </Link>
@@ -124,15 +127,39 @@ export default function Header() {
                     {cat.name}
                   </Link>
                 ))}
+                {/* Маркетплейсы — в конце списка, с разделителем */}
+                <span className={styles.dropdownDivider} />
+                <a
+                  href={MARKETPLACE_URLS.wbSeller}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setCatalogOpen(false);
+                  }}
+                >
+                  Wildberries
+                </a>
+                <a
+                  href={MARKETPLACE_URLS.ozonSeller}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setCatalogOpen(false);
+                  }}
+                >
+                  Ozon
+                </a>
               </div>
             </div>
           </div>
-          <a href={MARKETPLACE_URLS.wbSeller} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
-            Wildberries
-          </a>
-          <a href={MARKETPLACE_URLS.ozonSeller} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)}>
-            Ozon
-          </a>
+          <Link href="/about" onClick={() => setMenuOpen(false)}>
+            О бренде
+          </Link>
+          <Link href="/contacts" onClick={() => setMenuOpen(false)}>
+            Контакты
+          </Link>
         </nav>
 
         <div

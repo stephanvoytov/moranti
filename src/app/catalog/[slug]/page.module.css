@@ -575,6 +575,21 @@
   margin-bottom: var(--space-lg);
 }
 
+.assureLink {
+  display: inline-block;
+  margin-top: 14px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--transition-fast);
+}
+
+.assureLink:hover {
+  color: var(--camel);
+}
+
 .outOfStockLabel {
   font-family: var(--font-sans);
   font-size: 10px;
