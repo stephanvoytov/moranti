@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/admin/media", label: "Медиа", icon: "▧" },
   { href: "/admin/sync", label: "Синхронизация", icon: "↻" },
   { href: "/admin/seo", label: "SEO", icon: "◎" },
+  { href: "/admin/subscribers", label: "Подписчики", icon: "✉" },
   { href: "/admin/settings", label: "Настройки", icon: "⚙" },
 ];
 
