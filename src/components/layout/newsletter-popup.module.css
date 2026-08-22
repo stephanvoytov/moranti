@@ -1,6 +1,7 @@
 /* =============================================
-    Ask Question Modal
-    ============================================= */
+   NewsletterPopup — попап подписки (CSS Module)
+   Стиль синхронизирован с ask-question-modal
+   ============================================= */
 
 .overlay {
   position: fixed;
@@ -13,12 +14,10 @@
   padding: 20px;
 }
 
-.modal {
+.card {
   position: relative;
   width: 100%;
   max-width: 440px;
-  max-height: calc(100vh - 40px);
-  overflow-y: auto;
   background: var(--bg);
   padding: 36px 32px 32px;
 }
@@ -51,30 +50,12 @@
   margin: 0 0 6px;
 }
 
-.productName {
-  font-family: var(--font-body);
-  font-size: 13px;
-  color: var(--muted);
-  margin: 0 0 20px;
-  line-height: 1.5;
-}
-
-.directEmail {
+.text {
   font-family: var(--font-body);
   font-size: 13px;
   color: var(--text-secondary);
-  margin: 0 0 16px;
   line-height: 1.5;
-}
-
-.directEmail a {
-  color: var(--camel);
-  text-decoration: none;
-  border-bottom: 1px solid currentColor;
-}
-
-.directEmail a:hover {
-  color: var(--dark);
+  margin: 0 0 20px;
 }
 
 .form {
@@ -84,19 +65,7 @@
   margin-top: 16px;
 }
 
-.label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-family: var(--font-sans);
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-
-.input,
-.textarea {
+.input {
   font-family: var(--font-body);
   font-size: 15px;
   color: var(--dark);
@@ -105,28 +74,14 @@
   padding: 12px 14px;
   outline: none;
   transition: border-color var(--transition-fast);
-  resize: vertical;
 }
 
-.input:focus,
-.textarea:focus {
+.input::placeholder {
+  color: var(--muted);
+}
+
+.input:focus {
   border-color: var(--camel);
-}
-
-.honeypot {
-  position: absolute;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.error {
-  font-family: var(--font-body);
-  font-size: 13px;
-  color: #b3261e;
-  margin: 0;
 }
 
 .submit {
@@ -155,43 +110,26 @@
   cursor: default;
 }
 
-.checkboxRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--font-body);
-  font-size: 13px;
-  color: var(--text-secondary);
-  cursor: pointer;
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
-
-.checkboxRow input {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--camel);
-  cursor: pointer;
-}
-
-/* ——— Success ——— */
 
 .success {
-  text-align: center;
-}
-
-.successText {
   font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.7;
-  color: var(--text-secondary);
-  margin: 8px 0 24px;
+  color: var(--success);
+  margin: 14px 0 0;
 }
 
-.success .submit {
-  align-self: center;
-}
-
-@media (max-width: 480px) {
-  .modal {
-    padding: 28px 20px 24px;
-  }
+.error {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: #b3261e;
+  margin: 14px 0 0;
 }

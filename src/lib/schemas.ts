@@ -115,9 +115,21 @@ export const questionSchema = z.object({
   productSlug: z.string().max(120).optional(),
   /** Honeypot: люди это поле не видят и не заполняют */
   website: z.string().max(0).optional(),
+  /** Согласие на рассылку (галка в форме) */
+  subscribe: z.boolean().optional().default(false),
 });
 
 export type QuestionInput = z.infer<typeof questionSchema>;
+
+/* ─── Subscribe (double opt-in) ─── */
+
+export const subscribeSchema = z.object({
+  email: z.string().email("Некорректный email"),
+  /** Honeypot: люди это поле не видят и не заполняют */
+  website: z.string().max(0).optional(),
+});
+
+export type SubscribeInput = z.infer<typeof subscribeSchema>;
 
 /* ─── Products list query ─── */
 

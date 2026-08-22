@@ -9,6 +9,8 @@ import { NextResponse } from "next/server";
 import { questionSchema } from "@/lib/schemas";
 import { readSettings } from "@/lib/settings";
 import { sendQuestionEmail, isMailConfigured } from "@/lib/mailer";
+import prisma, { prismaQuery } from "@/lib/prisma";
+import { randomBytes } from "crypto";
 import { logger } from "@/lib/logger";
 
 const siteUrl = process.env.SITE_URL || "http://localhost:3001";
@@ -58,6 +60,41 @@ export async function POST(request: Request) {
       },
       recipient,
     );
+
+    // Опциональная подписка на рассылку (галка в форме вопроса).
+    // Best-effort: ошибка подписки не ломает отправку вопроса.
+    if (parsed.data.subscribe) {
+      try {
+        const subEmail = parsed.data.email.toLowerCase().trim();
+        const confirmToken = randomBytes(32).toString("hex");
+        const unsubscribeToken = randomBytes(32).toString("hex");
+        await prismaQuery(() =>
+          prisma.subscriber.upsert({
+            where: { email: subEmail },
+            update: {
+              confirmed: true,
+              confirmedAt: new Date(),
+              unsubscribedAt: null,
+              consentedAt: new Date(),
+              source: "question",
+            },
+            create: {
+              email: subEmail,
+              confirmToken,
+              unsubscribeToken,
+              consentedAt: new Date(),
+              confirmed: true,
+              confirmedAt: new Date(),
+              source: "question",
+            },
+          }),
+        );
+      } catch (subErr) {
+        logger.warn("Subscriber create failed (question form)", {
+          error: (subErr as Error)?.message,
+        });
+      }
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {

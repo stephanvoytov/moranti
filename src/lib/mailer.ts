@@ -34,6 +34,8 @@ function getTransporter(): Transporter | null {
     host,
     port,
     secure: port === 465,
+    // Для 587 (STARTTLS) требуем TLS, чтобы не уходить в plaintext.
+    requireTLS: true,
     auth: { user, pass },
   });
   return transporter;
@@ -95,4 +97,55 @@ export async function sendQuestionEmail(
   });
 
   logger.info("Question email sent", { to: recipient, productUrl: productUrl || "-" });
+}
+
+/**
+ * Double opt-in: письмо подтверждения подписки — отправляется САМОМУ подписчику.
+ * @param to email подписчика
+ * @param confirmUrl абсолютная ссылка на /api/subscribe/confirm?token=...
+ * @param unsubscribeUrl абсолютная ссылка на /api/subscribe/unsubscribe?token=...
+ */
+export async function sendDoubleOptInEmail(opts: {
+  to: string;
+  confirmUrl: string;
+  unsubscribeUrl: string;
+}): Promise<void> {
+  const tx = getTransporter();
+  if (!tx) throw new Error("SMTP is not configured");
+
+  const { to, confirmUrl, unsubscribeUrl } = opts;
+  const siteName = "Moranti";
+
+  await tx.sendMail({
+    from: `"${siteName}" <${process.env.SMTP_USER}>`,
+    to,
+    subject: `Подтвердите подписку на рассылку ${siteName}`,
+    text: [
+      `Здравствуйте!`,
+      ``,
+      `Спасибо за интерес к ${siteName}. Чтобы подтвердить подписку на рассылку`,
+      `о новых коллекциях и поступлениях, перейдите по ссылке:`,
+      confirmUrl,
+      ``,
+      `Если вы не подписывались — просто проигнорируйте это письмо.`,
+      ``,
+      `Отписаться: ${unsubscribeUrl}`,
+      ``,
+      `С уважением,`,
+      `Команда ${siteName}`,
+    ].join("\n"),
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 480px; margin: 0 auto; color: #1A1614;">
+        <h2 style="font-family: 'Playfair Display', Georgia, serif;">Подтвердите подписку</h2>
+        <p>Спасибо за интерес к <b>${siteName}</b>. Чтобы подтвердить подписку на рассылку о новых коллекциях и поступлениях, нажмите кнопку:</p>
+        <p>
+          <a href="${confirmUrl}" style="display: inline-block; padding: 12px 28px; background: #C49A6C; color: #fff; text-decoration: none; font-family: 'Montserrat', sans-serif; letter-spacing: 0.05em;">Подтвердить подписку</a>
+        </p>
+        <p style="color: #6B6560; font-size: 13px;">Если вы не подписывались — просто проигнорируйте это письмо.</p>
+        <p style="color: #6B6560; font-size: 13px;"><a href="${unsubscribeUrl}">Отписаться</a> от рассылки.</p>
+      </div>
+    `,
+  });
+
+  logger.info("Double opt-in email sent", { to });
 }

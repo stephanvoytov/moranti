@@ -27,6 +27,7 @@ export default function AskQuestionModal({
   const [email, setEmail] = useState("");
   const [question, setQuestion] = useState(initialQuestion);
   const [website, setWebsite] = useState(""); // honeypot
+  const [subscribe, setSubscribe] = useState(false); // галка рассылки
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
 
@@ -53,6 +54,7 @@ export default function AskQuestionModal({
       setStatus("idle");
       setError("");
       setQuestion(initialQuestion);
+      setSubscribe(false);
     }
   }
 
@@ -67,7 +69,7 @@ export default function AskQuestionModal({
       const res = await fetch("/api/question", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, question, productSlug, website }),
+        body: JSON.stringify({ name, email, question, productSlug, website, subscribe }),
       });
       const data = await res.json();
 
@@ -178,6 +180,15 @@ export default function AskQuestionModal({
               {status === "error" && (
                 <p className={styles.error}>{error}</p>
               )}
+
+              <label className={styles.checkboxRow}>
+                <input
+                  type="checkbox"
+                  checked={subscribe}
+                  onChange={(e) => setSubscribe(e.target.checked)}
+                />
+                <span>Подписаться на рассылку: новые коллекции, скидки, акции и промокоды</span>
+              </label>
 
               <button
                 type="submit"

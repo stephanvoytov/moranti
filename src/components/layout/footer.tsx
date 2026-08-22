@@ -2,6 +2,7 @@ import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import { legalInfo } from "@/config/legal";
 import Link from "next/link";
 import styles from "./footer.module.css";
+import NewsletterForm from "./newsletter-form";
 
 export default function Footer() {
   return (
@@ -14,6 +15,10 @@ export default function Footer() {
               Сумки из натуральной итальянской кожи. Минималистичные формы,
               ручная работа.
             </p>
+            <p className={styles.contactEmail}>
+              <a href="mailto:info@morantibags.ru">info@morantibags.ru</a>
+            </p>
+            <NewsletterForm />
           </div>
           <div className={styles.col}>
             <h3>Коллекции</h3>

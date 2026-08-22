@@ -8,6 +8,7 @@ import { YANDEX_METRIKA_ID } from "@/config/analytics";
 import { buildGlobalJsonLd } from "@/lib/seo-jsonld";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import NewsletterPopup from "@/components/layout/newsletter-popup";
 import ScrollToTop from "@/components/ui/scroll-to-top-lazy";
 import { YandexMetricaProvider } from "@artginzburg/next-ym";
 import { Analytics } from "@vercel/analytics/next";
@@ -197,6 +198,7 @@ export default async function RootLayout({
           <Header />
           <main>{children}</main>
           <Footer />
+          <NewsletterPopup />
           <ScrollToTop />
           </CartProvider>
           </FavoritesProvider>

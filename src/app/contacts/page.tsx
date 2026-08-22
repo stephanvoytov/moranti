@@ -70,6 +70,12 @@ export default function ContactsPage() {
               Расскажите, что интересует — и оставьте email для ответа в
               форме ниже. Письмо придёт напрямую владельцу магазина.
             </p>
+            <p className={styles.text}>
+              Или пишите напрямую:{" "}
+              <a className={styles.link} href="mailto:info@morantibags.ru">
+                info@morantibags.ru
+              </a>
+            </p>
             <AskQuestionButton />
           </div>
         </section>
