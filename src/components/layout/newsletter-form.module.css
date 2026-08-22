@@ -1,5 +1,7 @@
 /* =============================================
    NewsletterForm — подписка в футере (CSS Module)
+   Стиль синхронизирован с ask-question-modal / newsletter-popup
+   (острые углы, токены дизайн-системы)
    ============================================= */
 
 .form {
@@ -13,7 +15,7 @@
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #fff;
+  color: var(--white);
   margin-bottom: 6px;
   font-weight: 500;
 }
@@ -21,7 +23,7 @@
 .hint {
   margin: 0 0 12px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
+  color: color-mix(in srgb, var(--white) 55%, transparent);
   line-height: 1.6;
 }
 
@@ -36,21 +38,19 @@
   padding: 10px 12px;
   font-family: var(--font-body);
   font-size: 13px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: var(--radius-md);
+  color: var(--dark);
+  background: var(--surface);
+  border: 1px solid var(--border);
   outline: none;
   transition: border-color var(--transition-fast);
 }
 
 .input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--muted);
 }
 
 .input:focus {
   border-color: var(--camel);
-  box-shadow: 0 0 0 1px var(--camel);
 }
 
 .submit {
@@ -63,14 +63,13 @@
   color: var(--camel);
   background: transparent;
   border: 1px solid var(--camel);
-  border-radius: var(--radius-md);
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .submit:hover:not(:disabled) {
   background: var(--camel);
-  color: #fff;
+  color: var(--white);
 }
 
 .submit:disabled {

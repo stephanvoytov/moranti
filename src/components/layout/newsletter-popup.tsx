@@ -70,7 +70,10 @@ export default function NewsletterPopup() {
         return;
       }
       setStatus("success");
-      setMessage("Спасибо! Проверьте почту и подтвердите подписку.");
+      setMessage(
+        "Спасибо! Письмо для подтверждения отправлено — проверьте почту. " +
+          "Если письма нет во «Входящих», посмотрите папку «Спам».",
+      );
       localStorage.setItem(DONE_KEY, "1");
       setTimeout(() => setOpen(false), 2500);
     } catch {

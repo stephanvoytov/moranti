@@ -32,7 +32,14 @@ export default function NewsletterForm() {
       }
 
       setStatus("success");
-      setMessage("Спасибо! Проверьте почту и подтвердите подписку.");
+      setMessage(
+        "Спасибо! Письмо для подтверждения отправлено — проверьте почту. " +
+          "Если письма нет во «Входящих», посмотрите папку «Спам».",
+      );
+      // Подписались через форму → на этом устройстве попап больше не показываем.
+      try {
+        localStorage.setItem("moranti_nl_popup_done", "1");
+      } catch {}
       setEmail("");
       setWebsite("");
     } catch {
