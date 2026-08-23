@@ -108,6 +108,7 @@ export const Products: CollectionConfig = {
             { name: 'rating', type: 'number', label: 'Рейтинг' },
             { name: 'reviewsCount', type: 'number', label: 'Отзывы' },
             { name: 'salesCount', type: 'number', label: 'Продажи' },
+            { name: 'wbCreatedAt', type: 'date', label: 'Создано на WB (для новинок)' },
           ],
         },
       ],

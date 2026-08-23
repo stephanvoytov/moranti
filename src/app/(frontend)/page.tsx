@@ -105,8 +105,16 @@ export default async function Home() {
         />
       )}
 
-      {/* ——— Hero (серверный, с реальной картинкой сразу) ——— */}
-      <Hero settings={hero} />
+      {/* ——— Hero (тексты из «Тексты сайта»: hero.*) ——— */}
+      <Hero
+        settings={{
+          ...hero,
+          title: t(strings, "hero.title", hero.title),
+          tagline: t(strings, "hero.tagline", hero.tagline),
+          subtitle: t(strings, "hero.subtitle", hero.subtitle),
+        }}
+        buttonLabel={t(strings, "hero.button", "Смотреть коллекцию")}
+      />
 
       {/* ——— Редактируемые блоки Страницы «home» (Payload) ——— */}
       {homePage?.layout && (
@@ -123,8 +131,11 @@ export default async function Home() {
           <div className="container">
             <h2 className={styles.sectionTitle}>{t(strings, "section.new", "Новинки")}</h2>
             <p className={styles.sectionSubtitle}>
-              Свежие поступления натуральной кожи. То, что появилось
-              совсем недавно.
+              {t(
+                strings,
+                "home.newSubtitle",
+                "Свежие поступления натуральной кожи. То, что появилось совсем недавно.",
+              )}
             </p>
             <div className={styles.featuredGrid}>
               {newArrivals.map((product, i) => (
@@ -146,8 +157,11 @@ export default async function Home() {
           <div className="container">
             <h2 className={styles.sectionTitle}>{t(strings, "home.featuredTitle", "Популярные модели")}</h2>
             <p className={styles.sectionSubtitle}>
-              Модели, которые выбирают чаще всего. Каждая — из натуральной
-              итальянской кожи.
+              {t(
+                strings,
+                "home.featuredSubtitle",
+                "Модели, которые выбирают чаще всего. Каждая — из натуральной итальянской кожи.",
+              )}
             </p>
             <div className={styles.featuredGrid}>
               {featured.map((product, i) => (
@@ -168,8 +182,11 @@ export default async function Home() {
         <div className="container">
           <h2 className={styles.sectionTitle}>{t(strings, "home.categoriesTitle", "Наши коллекции")}</h2>
           <p className={styles.sectionSubtitle}>
-            Сумка на каждый день, вечерний выход или деловая встреча — форма
-            найдётся для любого сценария.
+            {t(
+              strings,
+              "home.categoriesSubtitle",
+              "Сумка на каждый день, вечерний выход или деловая встреча — форма найдётся для любого сценария.",
+            )}
           </p>
           <div className={styles.collectionsGrid}>
             {categories.filter((cat) => cat.count > 0).map((cat) => {
@@ -214,10 +231,13 @@ export default async function Home() {
       {/* ——— CTA ——— */}
       <section className={styles.ctaSection}>
         <div className={styles.ctaInner}>
-          <h2 className={styles.ctaTitle}>Сумки из натуральной кожи</h2>
+          <h2 className={styles.ctaTitle}>
+            {t(strings, "cta.title", "Сумки из натуральной кожи")}
+          </h2>
           <div className={styles.ctaRule} />
           <p className={styles.ctaDesc}>
-            {products.length} моделей. Доставка по всей России.
+            {products.length}{" "}
+            {t(strings, "cta.desc", "моделей. Доставка по всей России.")}
           </p>
           <Link href="/catalog" className={styles.ctaBtn}>
             {t(strings, "cta.catalog", "Открыть каталог")}

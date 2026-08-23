@@ -137,6 +137,7 @@ export async function GET() {
       rating: typeof p.rating === 'number' ? p.rating : null,
       reviewsCount: typeof p.reviewsCount === 'number' ? p.reviewsCount : null,
       salesCount: typeof p.salesCount === 'number' ? p.salesCount : null,
+      wbCreatedAt: p.wbCreatedAt || null,
       image,
       gallery,
       video: typeof p.video === 'string' ? p.video : null,
@@ -566,6 +567,15 @@ export async function GET() {
     { key: 'cta.catalog', label: 'Кнопка: Открыть каталог', value: 'Открыть каталог' },
     { key: 'btn.viewAll', label: 'Кнопка: Смотреть все', value: 'Смотреть все' },
     { key: 'btn.viewMore', label: 'Кнопка: Смотреть ещё', value: 'Смотреть ещё' },
+    { key: 'hero.title', label: 'Хиро на главной: заголовок', value: 'Moranti' },
+    { key: 'hero.tagline', label: 'Хиро: слоган', value: 'Сумки из натуральной итальянской кожи. Минимум пафоса — максимум качества. Из Италии.' },
+    { key: 'hero.subtitle', label: 'Хиро: подзаголовок', value: 'Кожаные сумки на каждый день' },
+    { key: 'hero.button', label: 'Кнопка в хиро', value: 'Смотреть коллекцию' },
+    { key: 'home.newSubtitle', label: 'Главная: подпись над новинками', value: 'Свежие поступления натуральной кожи. То, что появилось совсем недавно.' },
+    { key: 'home.featuredSubtitle', label: 'Главная: подпись над популярными', value: 'Модели, которые выбирают чаще всего. Каждая — из натуральной итальянской кожи.' },
+    { key: 'home.categoriesSubtitle', label: 'Главная: подпись над коллекциями', value: 'Сумка на каждый день, вечерний выход или деловая встреча — форма найдётся для любого сценария.' },
+    { key: 'cta.title', label: 'CTA внизу главной: заголовок', value: 'Сумки из натуральной кожи' },
+    { key: 'cta.desc', label: 'CTA: описание (перед ним подставится число моделей)', value: 'моделей. Доставка по всей России.' },
   ]
   await payload.updateGlobal({
     slug: 'site-strings',

@@ -271,6 +271,7 @@ export interface Product {
   rating?: number | null;
   reviewsCount?: number | null;
   salesCount?: number | null;
+  wbCreatedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -773,6 +774,7 @@ export interface ProductsSelect<T extends boolean = true> {
   rating?: T;
   reviewsCount?: T;
   salesCount?: T;
+  wbCreatedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -10,7 +10,13 @@ interface HeroSettings {
   imageMobile: string;
 }
 
-export default function Hero({ settings }: { settings: HeroSettings }) {
+export default function Hero({
+  settings,
+  buttonLabel = "Смотреть коллекцию",
+}: {
+  settings: HeroSettings;
+  buttonLabel?: string;
+}) {
   return (
     <section className={styles.hero}>
       {/* Фоновое изображение поверх градиента (если есть).
@@ -31,7 +37,7 @@ export default function Hero({ settings }: { settings: HeroSettings }) {
         <h1 className={styles.title}>{settings.title}</h1>
         <p className={styles.tagline}>{settings.tagline}</p>
         <Link href="/catalog" className={styles.cta}>
-          Смотреть коллекцию
+          {buttonLabel}
         </Link>
       </div>
     </section>
