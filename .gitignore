@@ -63,6 +63,17 @@ tmp/
 # local dev scripts (not for production)
 scripts/debug/
 
+# local dev server logs (experiment)
+dev.log
+dev.out.log
+dev.err.log
+dev.err
+
+# one-off Playwright verification scratch scripts
+_ptest.mjs
+pw-check.mjs
+pw-create-user.mjs
+
 # one-time migration scripts
 scripts/migrations/rename-models.mjs
 

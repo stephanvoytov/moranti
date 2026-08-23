@@ -1,0 +1,18 @@
+/* =============================================
+   Moranti — Global Styles
+   ============================================= */
+
+@import '../../styles/variables.css';
+@import '../../styles/reset.css';
+@import '../../styles/typography.css';
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+::selection {
+  background-color: var(--camel);
+  color: var(--white);
+}
