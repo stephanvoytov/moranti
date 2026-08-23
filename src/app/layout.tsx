@@ -10,6 +10,7 @@ import { getStoreRatingStats } from "@/data/products";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import NewsletterPopup from "@/components/layout/newsletter-popup";
+import SubscribeToast from "@/components/layout/subscribe-toast";
 import ScrollToTop from "@/components/ui/scroll-to-top-lazy";
 import { YandexMetricaProvider } from "@artginzburg/next-ym";
 import { Analytics } from "@vercel/analytics/next";
@@ -204,6 +205,7 @@ export default async function RootLayout({
           <main>{children}</main>
           <Footer />
           <NewsletterPopup />
+          <SubscribeToast />
           <ScrollToTop />
           </CartProvider>
           </FavoritesProvider>
