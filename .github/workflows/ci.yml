@@ -28,5 +28,12 @@ jobs:
       - name: Tests
         run: npm test
 
+      # Бандл sync-all генерируется при `npm run build` и заигнорен в git,
+      # но sync-runner.ts делает динамический import этого файла. Без сборки
+      # `tsc --noEmit` падает с TS2307 (Cannot find module). Собираем бандл
+      # перед type check (зеркалит локальный `npm run build`).
+      - name: Build sync bundle
+        run: node scripts/build-sync-bundle.mjs
+
       - name: Type check
         run: npx tsc --noEmit
