@@ -67,10 +67,10 @@ export async function GET() {
     }
     if (existing.totalDocs > 0) {
       await payload.update({ collection: 'categories', id: existing.docs[0].id, data, overrideAccess: true })
-      categoryMap[slug] = existing.docs[0].id as string
+      categoryMap[slug] = String(existing.docs[0].id)
     } else {
       const created = await payload.create({ collection: 'categories', data, overrideAccess: true })
-      categoryMap[slug] = created.id as string
+      categoryMap[slug] = String(created.id)
     }
   }
 
@@ -80,7 +80,8 @@ export async function GET() {
     const slug = m.slug || m.id
     const image = typeof m.image === 'string' ? m.image : ''
     const gallery = image ? [{ image, alt: m.name }] : []
-    const data = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any = {
       name: m.name || slug,
       slug,
       category: m.category ? categoryMap[m.category] || null : null,
@@ -98,10 +99,10 @@ export async function GET() {
     })
     if (existing.totalDocs > 0) {
       await payload.update({ collection: 'models', id: existing.docs[0].id, data, overrideAccess: true })
-      modelMap[slug] = existing.docs[0].id as string
+      modelMap[slug] = String(existing.docs[0].id)
     } else {
       const created = await payload.create({ collection: 'models', data, overrideAccess: true })
-      modelMap[slug] = created.id as string
+      modelMap[slug] = String(created.id)
     }
   }
 

@@ -132,19 +132,13 @@ export async function writeSettings(
         limit: 1,
         depth: 0,
       });
-    const socialArr = (["vk", "telegram", "whatsapp"] as const)
-      .filter((k) => merged.social[k])
-      .map((k) => ({ platform: k, url: merged.social[k] }));
-
+    // Hero и social переехали: hero — в Страницу «home», social — в глобал
+    // «Контент сайта» (src/lib/site-content.ts). Здесь остаются только ключи.
     if (res.docs.length) {
       await payload.update({
         collection: "site-settings",
         id: res.docs[0].id,
         data: {
-          heroTitle: merged.hero.title,
-          heroSubtitle: merged.hero.subtitle,
-          heroImage: merged.hero.image,
-          social: socialArr,
           wbApiKey: merged.wbApiKey,
           ozonClientId: merged.ozonClientId,
           ozonApiKey: merged.ozonApiKey,
@@ -154,10 +148,6 @@ export async function writeSettings(
       await payload.create({
         collection: "site-settings",
         data: {
-          heroTitle: merged.hero.title,
-          heroSubtitle: merged.hero.subtitle,
-          heroImage: merged.hero.image,
-          social: socialArr,
           wbApiKey: merged.wbApiKey,
           ozonClientId: merged.ozonClientId,
           ozonApiKey: merged.ozonApiKey,
