@@ -5,7 +5,13 @@
    поэтому расхождений между «что отдаём» и «что показываем» нет.
    ============================================================ */
 
-import type { Product } from "@/data/products";
+import type { Product, Review } from "@/data/products";
+
+/** Минимум полей Review, нужный для JSON-LD */
+export type ProductReviewInput = Pick<
+  Review,
+  "author" | "rating" | "text" | "reviewedAt"
+>;
 
 export interface BreadcrumbItem {
   name: string;
@@ -97,6 +103,7 @@ function merchantFields(): Record<string, unknown> {
 export function buildProductJsonLd(
   product: Product,
   siteUrl: string,
+  reviews: ProductReviewInput[] = [],
 ): Record<string, unknown> {
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -118,6 +125,24 @@ export function buildProductJsonLd(
       ratingValue: product.rating,
       reviewCount: product.reviewsCount || 0,
     };
+  }
+
+  // Импортированные отзывы с маркетплейсов — до 5 свежих с текстом.
+  // Усиливает сниппет (rich results «Отзывы») и подтверждает aggregateRating.
+  const withText = reviews.filter((r) => r.text?.trim() && r.rating);
+  if (withText.length > 0) {
+    jsonLd.review = withText.slice(0, 5).map((r) => ({
+      "@type": "Review",
+      author: { "@type": "Person", name: r.author || "Покупатель" },
+      datePublished: r.reviewedAt || undefined,
+      reviewBody: r.text.trim(),
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: r.rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }));
   }
 
   return jsonLd;
@@ -146,8 +171,9 @@ export function buildCollectionPageJsonLd(
   description: string,
   url: string,
   numberOfItems: number,
+  rating?: { ratingValue: number; reviewCount: number } | null,
 ): Record<string, unknown> {
-  return {
+  const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name,
@@ -155,25 +181,58 @@ export function buildCollectionPageJsonLd(
     url,
     numberOfItems,
   };
+  // Средний рейтинг scope'а (каталог целиком / конкретная категория) —
+  // звёзды в сниппете страницы раздела (каталог → среднее по каталогу,
+  // багеты → среднее по багетам и т.д.).
+  if (rating && rating.reviewCount > 0) {
+    jsonLd.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: rating.ratingValue,
+      reviewCount: rating.reviewCount,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
+  return jsonLd;
 }
 
 /**
  * Глобальная микроразметка для layout.tsx: Organization + WebSite.
  * Единственный источник — админ-превью (/admin/seo) показывает то же самое.
+ *
+ * storeRating — общий рейтинг витрины (взвешенный по числу оценок).
+ * Вешается на Organization: звёзды в сниппетах главной/каталога
+ * (Google self-serving отзывы не показывает, но Яндeкс и другие
+ * поисковики используют; вреда разметка не приносит).
  */
-export function buildGlobalJsonLd(siteUrl: string): Record<string, unknown>[] {
+export function buildGlobalJsonLd(
+  siteUrl: string,
+  storeRating?: { ratingValue: number; reviewCount: number } | null,
+): Record<string, unknown>[] {
+  const organization: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Moranti",
+    alternateName: "Моранти",
+    url: siteUrl,
+    logo: `${siteUrl}/images/moranti-logo.png`,
+    description:
+      "Женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов.",
+    contactPoint: { "@type": "ContactPoint", contactType: "sales" },
+  };
+
+  if (storeRating && storeRating.reviewCount > 0) {
+    organization.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: storeRating.ratingValue,
+      reviewCount: storeRating.reviewCount,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
+
   return [
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      name: "Moranti",
-      alternateName: "Моранти",
-      url: siteUrl,
-      logo: `${siteUrl}/images/moranti-logo.png`,
-      description:
-        "Женские сумки из натуральной итальянской кожи. Минималистичные формы, без кричащих логотипов.",
-      contactPoint: { "@type": "ContactPoint", contactType: "sales" },
-    },
+    organization,
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
@@ -186,20 +245,41 @@ export function buildGlobalJsonLd(siteUrl: string): Record<string, unknown>[] {
   ];
 }
 
-/** ItemList: сетка товаров (популярные модели на главной) */
+/**
+ * ItemList: сетка товаров (главная, каталог, категории).
+ * Каждый ListItem содержит вложенный Product с aggregateRating —
+ * так Google может показать звёзды в сниппетах листинговых страниц.
+ */
 export function buildItemListJsonLd(
-  products: Pick<Product, "slug" | "name" | "image">[],
+  products: (
+    Pick<Product, "slug" | "name" | "image"> &
+    Partial<Pick<Product, "rating" | "reviewsCount">>
+  )[],
   siteUrl: string,
 ): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    itemListElement: products.map((p, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      url: `${siteUrl}/catalog/${p.slug}`,
-      name: p.name,
-      image: p.image,
-    })),
+    itemListElement: products.map((p, i) => {
+      const item: Record<string, unknown> = {
+        "@type": "Product",
+        name: p.name,
+        image: p.image,
+        url: `${siteUrl}/catalog/${p.slug}`,
+      };
+      // Тот же порог ≥3.5, что и на карточке товара
+      if (p.rating && p.rating >= 3.5) {
+        item.aggregateRating = {
+          "@type": "AggregateRating",
+          ratingValue: p.rating,
+          reviewCount: p.reviewsCount || 0,
+        };
+      }
+      return {
+        "@type": "ListItem",
+        position: i + 1,
+        item,
+      };
+    }),
   };
 }

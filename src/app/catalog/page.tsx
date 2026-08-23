@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
-import { getProducts, getCategories } from "@/data/products";
+import { getProducts, getCategories, computeCatalogRating } from "@/data/products";
 import { readSettings } from "@/lib/settings";
 import { seoConfig } from "@/config/seo";
 import {
   buildCollectionPageJsonLd,
   buildBreadcrumbJsonLd,
+  buildItemListJsonLd,
 } from "@/lib/seo-jsonld";
 import CatalogPage from "./catalog-content";
 import CatalogSeo from "@/components/sections/catalog-seo";
@@ -97,13 +98,17 @@ export default async function CatalogPageWrapper({ searchParams }: Props) {
     siteUrl,
   );
 
-  // CollectionPage JSON-LD: весь каталог
+  // CollectionPage JSON-LD: весь каталог (+ средний рейтинг по каталогу)
   const collectionJsonLd = buildCollectionPageJsonLd(
     "Каталог кожаных сумок Moranti",
     "Женские сумки из натуральной итальянской кожи. Кросс-боди, тоуты, багеты, рюкзаки.",
     "/catalog",
     products.length,
+    computeCatalogRating(products),
   );
+
+  // ItemList JSON-LD с рейтингами — звёзды в сниппетах листингов
+  const itemListJsonLd = buildItemListJsonLd(products, siteUrl);
 
   return (
     <>
@@ -119,6 +124,13 @@ export default async function CatalogPageWrapper({ searchParams }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(collectionJsonLd),
+        }}
+      />
+      {/* ItemList JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(itemListJsonLd),
         }}
       />
       <CatalogPage

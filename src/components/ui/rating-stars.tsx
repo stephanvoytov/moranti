@@ -11,7 +11,13 @@ export function starsForRating(rating: number): number {
   return Math.round(rating);
 }
 
-export default function RatingStars({ rating }: { rating: number }) {
+export default function RatingStars({
+  rating,
+  size,
+}: {
+  rating: number;
+  size?: number;
+}) {
   const stars = starsForRating(rating);
   const pct = Math.max(0, Math.min(100, (stars / 5) * 100));
 
@@ -19,6 +25,7 @@ export default function RatingStars({ rating }: { rating: number }) {
     <span
       role="img"
       className={styles.stars}
+      style={size ? { fontSize: `${size}px` } : undefined}
       aria-label={`Рейтинг ${rating.toFixed(1)} из 5`}
     >
       <span className={styles.starsBg} aria-hidden="true">

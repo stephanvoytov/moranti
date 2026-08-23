@@ -116,7 +116,7 @@ function CatalogContent({
   const urlCategory = searchParams.get("category");
   const urlColor = searchParams.get("color");
   const urlMaterial = searchParams.get("material");
-  const urlSort = ["default", "new", "popular", "price-asc", "price-desc", "name"].includes(
+  const urlSort = ["default", "new", "popular", "rating", "price-asc", "price-desc", "name"].includes(
     searchParams.get("sort") ?? "",
   ) ? (searchParams.get("sort") as string) : "default";
   const urlSearch = searchParams.get("q") ?? "";
@@ -324,6 +324,13 @@ function CatalogContent({
       case "popular":
         result.sort((a, b) => (b.reviewsCount || 0) - (a.reviewsCount || 0));
         break;
+      case "rating":
+        result.sort(
+          (a, b) =>
+            (b.rating ?? 0) - (a.rating ?? 0) ||
+            (b.reviewsCount || 0) - (a.reviewsCount || 0),
+        );
+        break;
       case "new":
         result.sort((a, b) => {
           const dateA = a.wbCreatedAt ? new Date(a.wbCreatedAt).getTime() : -Infinity;
@@ -446,6 +453,7 @@ function CatalogContent({
                   >
                     <option value="default">По умолчанию</option>
                     <option value="popular">По популярности</option>
+                    <option value="rating">По рейтингу</option>
                     <option value="new">По новинкам</option>
                     <option value="price-asc">По цене: возрастание</option>
                     <option value="price-desc">По цене: убывание</option>

@@ -10,7 +10,9 @@ import prisma, { prismaQuery } from "@/lib/prisma";
 import { cacheGet } from "@/lib/data-cache";
 import { logger } from "@/lib/logger";
 import { selectProductImages } from "@/lib/product-images";
+import { readSettings } from "@/lib/settings";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
+import { EXCLUDED_REVIEW_IDS, FEATURED_REVIEW_IDS } from "./curated-reviews";
 
 /** Загрузить JSON fallback при недоступности БД */
 function loadJsonFallback<T>(file: string): T | null {
@@ -85,6 +87,18 @@ export interface ProductCategory {
   description: string;
   image: string;
   count: number;
+}
+
+/** Отзыв с маркетплейса (импорт scripts/import-reviews.mjs) */
+export interface Review {
+  id: string;
+  source: "wb" | "ozon";
+  author?: string;
+  rating?: number;
+  text: string;
+  pros?: string;
+  cons?: string;
+  reviewedAt?: string;
 }
 
 const CATEGORY_INFO: Record<string, { name: string; description: string }> = {
@@ -225,8 +239,7 @@ export async function getAllProducts(): Promise<Product[]> {
   }, 60_000, 600_000);
 }
 
-export async function getProduct(slug: string): Promise<Product | null> {
-  // ——— Сначала ищем в кеше неархивных продуктов ———
+export async function getProduct(slug: string): Promise<Product | null> {  // ——— Сначала ищем в кеше неархивных продуктов ———
   const all = await getProducts();
   const found = all.find((p) => p.slug === slug);
   if (found) return found;
@@ -246,8 +259,242 @@ export async function getProduct(slug: string): Promise<Product | null> {
   }, 60_000, 600_000);
 }
 
-export async function getCategories(): Promise<ProductCategory[]> {
-  return cacheGet("all-categories", async () => {
+/**
+ * Отзывы товара с маркетплейсов (единоразовый импорт).
+ * Нет БД / нет отзывов → [] — страница работает как раньше.
+ */
+export async function getReviews(productId: string): Promise<Review[]> {
+  return cacheGet(`reviews:${productId}`, async () => {
+    try {
+      const rows = await prismaQuery(() =>
+        prisma.review.findMany({
+          where: { productId },
+          orderBy: [{ reviewedAt: "desc" }, { createdAt: "desc" }],
+        }),
+      );
+      return rows.map((r) => ({
+        id: r.id,
+        source: r.source as "wb" | "ozon",
+        author: r.author ?? undefined,
+        rating: r.rating ?? undefined,
+        text: r.text,
+        pros: r.pros ?? undefined,
+        cons: r.cons ?? undefined,
+        reviewedAt: r.reviewedAt?.toISOString(),
+      }));
+    } catch (err) {
+      logger.warn("DB unavailable — reviews skipped", { error: (err as Error)?.message });
+      return [];
+    }
+    // Отзывы импортируются вручную — кеш можно держать долго
+  }, 300_000, 3_600_000);
+}
+
+/** Группа отзывов одного товара для страницы /reviews */
+export interface ShowcaseReviewGroup {
+  slug: string;
+  name: string;
+  image: string;
+  rating?: number;
+  reviewsCount?: number;
+  reviews: Review[];
+}
+
+/**
+ * Отзывы для витрины /reviews: только с текстом и рейтингом ≥4,
+ * сгруппированы по товару (как на карточке — негатив остаётся на МП).
+ */
+export async function getShowcaseReviews(): Promise<ShowcaseReviewGroup[]> {
+  return cacheGet("reviews-showcase", async () => {
+    try {
+      const rows = await prismaQuery(() =>
+        prisma.review.findMany({
+          where: { text: { not: "" }, rating: { gte: 4 } },
+          orderBy: [{ reviewedAt: "desc" }, { createdAt: "desc" }],
+          include: {
+            product: {
+              select: {
+                slug: true,
+                name: true,
+                images: true,
+                rating: true,
+                reviewsCount: true,
+                archivedAt: true,
+              },
+            },
+          },
+        }),
+      );
+
+      const groups = new Map<string, ShowcaseReviewGroup>();
+      for (const r of rows) {
+        if (!r.product || r.product.archivedAt) continue;
+        if (EXCLUDED_REVIEW_IDS.includes(r.id)) continue; // скрываем негатив с витрины
+        const key = r.product.slug;
+        let g = groups.get(key);
+        if (!g) {
+          g = {
+            slug: r.product.slug,
+            name: r.product.name,
+            image: r.product.images[0] ?? "",
+            rating: r.product.rating ?? undefined,
+            reviewsCount: r.product.reviewsCount ?? undefined,
+            reviews: [],
+          };
+          groups.set(key, g);
+        }
+        g.reviews.push({
+          id: r.id,
+          source: r.source as "wb" | "ozon",
+          author: r.author ?? undefined,
+          rating: r.rating ?? undefined,
+          text: r.text,
+          pros: r.pros ?? undefined,
+          cons: r.cons ?? undefined,
+          reviewedAt: r.reviewedAt?.toISOString(),
+        });
+      }
+      // Товары с наибольшим числом отзывов — первыми
+      return [...groups.values()].sort((a, b) => b.reviews.length - a.reviews.length);
+    } catch (err) {
+      logger.warn("DB unavailable — showcase reviews skipped", {
+        error: (err as Error)?.message,
+      });
+      return [];
+    }
+    // Отзывы импортируются вручную — кеш можно держать долго
+  }, 300_000, 3_600_000);
+}
+
+/** Общий рейтинг магазина для сниппетов (главная, каталог) */
+export interface StoreRatingStats {
+  ratingValue: number;
+  reviewCount: number;
+}
+
+/**
+ * Общий рейтинг магазина для сниппетов (главная, каталог).
+ * Источник — рейтинги ПРОДАВЦА на WB и Ozon (scripts/fetch-seller-ratings.mjs
+ * пишет их в settings.storeRating): взвешенное среднее по числу оценок.
+ * Настроек нет → fallback на среднее по витринным товарам.
+ */
+export async function getStoreRatingStats(): Promise<StoreRatingStats | null> {
+  return cacheGet("store-rating", async () => {
+    const settings = await readSettings();
+    if (settings.storeRating && settings.storeRating.reviewCount > 0) {
+      return {
+        ratingValue: settings.storeRating.ratingValue,
+        reviewCount: settings.storeRating.reviewCount,
+      };
+    }
+
+    // Fallback: средневзвешенный по товарам в наличии (настройки ещё не заполнены)
+    try {
+      const rows = await prismaQuery(() =>
+        prisma.product.findMany({
+          where: {
+            archivedAt: null,
+            inStock: true,
+            rating: { not: null },
+            reviewsCount: { gt: 0 },
+          },
+          select: { rating: true, reviewsCount: true },
+        }),
+      );
+      const reviewCount = rows.reduce((s, p) => s + (p.reviewsCount ?? 0), 0);
+      if (reviewCount === 0) return null;
+      const ratingValue =
+        rows.reduce(
+          (s, p) => s + (p.rating ?? 0) * (p.reviewsCount ?? 0),
+          0,
+        ) / reviewCount;
+      // Округление вниз до 0.1 — не завышаем рейтинг в сниппете
+      return {
+        ratingValue: Math.floor(ratingValue * 10) / 10,
+        reviewCount,
+      };
+    } catch (err) {
+      logger.warn("DB unavailable — store rating skipped", {
+        error: (err as Error)?.message,
+      });
+      return null;
+    }
+    // Рейтинги продавцов обновляются вручную скриптом; товары — синками
+  }, 600_000, 3_600_000);
+}
+
+/**
+ * Средневзвешенный рейтинг по набору товаров (в наличии, с рейтингом и
+ * числом оценок) — для сниппетов каталога и категорий. Округление вниз.
+ */
+export function computeCatalogRating(
+  products: Product[],
+): StoreRatingStats | null {
+  const list = products.filter(
+    (p) =>
+      !p.archivedAt &&
+      p.inStock !== false &&
+      p.rating != null &&
+      (p.reviewsCount ?? 0) > 0,
+  );
+  const reviewCount = list.reduce((s, p) => s + (p.reviewsCount ?? 0), 0);
+  if (reviewCount === 0) return null;
+  const ratingValue =
+    list.reduce((s, p) => s + (p.rating ?? 0) * (p.reviewsCount ?? 0), 0) /
+    reviewCount;
+  return {
+    ratingValue: Math.floor(ratingValue * 10) / 10,
+    reviewCount,
+  };
+}
+
+/**
+ * «Лучшие отзывы» для витрины /reviews — вручную отобранные позитивные,
+ * развёрнутые отзывы (см. FEATURED_REVIEW_IDS в curated-reviews.ts).
+ * Возвращаются строго в заданном порядке.
+ */
+export async function getBestReviews(limit = 12): Promise<Review[]> {
+  return cacheGet("best-reviews-curated", async () => {
+    try {
+      const rows = await prismaQuery(() =>
+        prisma.review.findMany({
+          where: { id: { in: FEATURED_REVIEW_IDS } },
+          include: {
+            product: {
+              select: { archivedAt: true, slug: true, name: true },
+            },
+          },
+        }),
+      );
+      const byId = new Map(rows.map((r) => [r.id, r]));
+      const best: Review[] = [];
+      for (const id of FEATURED_REVIEW_IDS) {
+        const r = byId.get(id);
+        if (!r || !r.product || r.product.archivedAt) continue;
+        best.push({
+          id: r.id,
+          source: r.source as "wb" | "ozon",
+          author: r.author ?? undefined,
+          rating: r.rating ?? undefined,
+          text: r.text,
+          pros: r.pros ?? undefined,
+          cons: r.cons ?? undefined,
+          reviewedAt: r.reviewedAt?.toISOString(),
+        });
+        if (best.length >= limit) break;
+      }
+      return best;
+    } catch (err) {
+      logger.warn("DB unavailable — best reviews skipped", {
+        error: (err as Error)?.message,
+      });
+      return [];
+    }
+    // Отзывы импортируются вручную — кеш долгий
+  }, 300_000, 3_600_000);
+}
+
+export async function getCategories(): Promise<ProductCategory[]> {  return cacheGet("all-categories", async () => {
     try {
       const counts = await prismaQuery(() =>
         prisma.product.groupBy({

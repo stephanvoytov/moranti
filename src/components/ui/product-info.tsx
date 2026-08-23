@@ -10,6 +10,7 @@ interface ProductInfoProps {
   price: number;
   originalPrice?: number;
   rating?: number;
+  reviewsCount?: number;
   isArchived: boolean;
   isOutOfStock: boolean;
 }
@@ -22,6 +23,7 @@ export default function ProductInfo({
   price,
   originalPrice,
   rating,
+  reviewsCount,
   isArchived,
   isOutOfStock,
 }: ProductInfoProps) {
@@ -52,7 +54,10 @@ export default function ProductInfo({
       {ratingValue >= 4 ? (
         <div className={styles.rating}>
           <RatingStars rating={ratingValue} />
-          <span className={styles.ratingText}>{ratingValue.toFixed(1)}</span>
+          <span className={styles.ratingText}>
+            {ratingValue.toFixed(1)}
+            {reviewsCount ? ` · ${reviewsCount}` : ""}
+          </span>
         </div>
       ) : null}
     </div>

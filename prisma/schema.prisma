@@ -166,6 +166,40 @@ model Product {
   /// Привязка к семейству (Model). Один Model = несколько Product (цветовые варианты).
   modelId           String?
   model             Model?     @relation(fields: [modelId], references: [id])
+
+  /// Отзывы с маркетплейсов (импортируются скриптом scripts/import-reviews.mjs)
+  reviews           Review[]
+}
+
+/// Отзыв покупателя, импортированный с Wildberries или Ozon.
+/// Единоразовый импорт (scripts/import-reviews.mjs), без регулярной синхронизации.
+model Review {
+  /// Внутренний ID
+  id         String    @id @default(cuid())
+  /// Товар, к которому относится отзыв
+  productId  String
+  product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  /// Источник: "wb" | "ozon"
+  source     String
+  /// ID отзыва на маркетплейсе (WB feedbacks.id / Ozon review id) — защита от дублей при повторном импорте
+  externalId String
+  /// Имя автора ("Скрыто", если МП не отдаёт)
+  author     String?
+  /// Оценка 1–5
+  rating     Int?
+  /// Текст отзыва
+  text       String
+  /// Достоинства (Ozon)
+  pros       String?
+  /// Недостатки (Ozon)
+  cons       String?
+  /// Дата отзыва на маркетплейсе
+  reviewedAt DateTime?
+
+  createdAt  DateTime  @default(now())
+
+  @@unique([source, externalId])
+  @@index([productId])
 }
 
 /// Настройки сайта: hero-секция, SEO, соцсети, API-ключи и т.д.

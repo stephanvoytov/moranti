@@ -1,8 +1,9 @@
-import { getProducts, getCategories } from "@/data/products";
+import { getProducts, getCategories, computeCatalogRating } from "@/data/products";
 import { readSettings } from "@/lib/settings";
 import {
   buildCollectionPageJsonLd,
   buildBreadcrumbJsonLd,
+  buildItemListJsonLd,
 } from "@/lib/seo-jsonld";
 import { buildVariantPages, type VariantPage } from "@/lib/variant-pages";
 import { seoConfig } from "@/config/seo";
@@ -51,13 +52,17 @@ export default async function VariantView({ page }: { page: VariantPage }) {
     siteUrl,
   );
 
-  // CollectionPage JSON-LD
+  // CollectionPage JSON-LD (+ средний рейтинг по scope'у лендинга)
   const collectionJsonLd = buildCollectionPageJsonLd(
     page.h1,
     page.description,
     page.path,
     page.products.length,
+    computeCatalogRating(page.products),
   );
+
+  // ItemList JSON-LD с рейтингами — звёзды в сниппетах листингов
+  const itemListJsonLd = buildItemListJsonLd(page.products, siteUrl);
 
   return (
     <>
@@ -68,6 +73,10 @@ export default async function VariantView({ page }: { page: VariantPage }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
       {/* key={page.path}: при переходе между лендингами состояние каталога сбрасывается */}
       <CatalogPage

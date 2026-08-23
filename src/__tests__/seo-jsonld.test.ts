@@ -173,6 +173,22 @@ describe("buildGlobalJsonLd", () => {
     expect(site["@type"]).toBe("WebSite");
     expect(site.url).toBe(SITE_URL);
     expect(site.inLanguage).toBe("ru");
+    // Без storeRating aggregateRating не добавляется
+    expect(org.aggregateRating).toBeUndefined();
+  });
+
+  it("adds store aggregateRating when provided", () => {
+    const [org] = buildGlobalJsonLd(SITE_URL, {
+      ratingValue: 4.7,
+      reviewCount: 287,
+    });
+    expect(org.aggregateRating).toEqual({
+      "@type": "AggregateRating",
+      ratingValue: 4.7,
+      reviewCount: 287,
+      bestRating: 5,
+      worstRating: 1,
+    });
   });
 });
 
@@ -191,11 +207,33 @@ describe("buildItemListJsonLd", () => {
     expect(items[0]).toEqual({
       "@type": "ListItem",
       position: 1,
-      url: "https://morantibags.ru/catalog/a",
-      name: "Сумка A",
-      image: "https://cdn.example.com/a.jpg",
+      item: {
+        "@type": "Product",
+        name: "Сумка A",
+        image: "https://cdn.example.com/a.jpg",
+        url: "https://morantibags.ru/catalog/a",
+      },
     });
     expect(items[1].position).toBe(2);
+  });
+
+  it("adds aggregateRating for products with rating >= 3.5 only", () => {
+    const ld = buildItemListJsonLd(
+      [
+        { slug: "a", name: "A", image: "", rating: 4.5, reviewsCount: 155 },
+        { slug: "b", name: "B", image: "", rating: 3.0 },
+      ],
+      SITE_URL,
+    );
+    const items = ld.itemListElement as Record<string, unknown>[];
+    const a = (items[0].item as Record<string, unknown>).aggregateRating;
+    const b = (items[1].item as Record<string, unknown>).aggregateRating;
+    expect(a).toEqual({
+      "@type": "AggregateRating",
+      ratingValue: 4.5,
+      reviewCount: 155,
+    });
+    expect(b).toBeUndefined();
   });
 
   it("handles empty list", () => {

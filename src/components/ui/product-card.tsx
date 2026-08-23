@@ -51,6 +51,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         price={product.price}
         originalPrice={product.originalPrice}
         rating={product.rating}
+        reviewsCount={product.reviewsCount}
         isArchived={isArchived}
         isOutOfStock={isOutOfStock}
       />
