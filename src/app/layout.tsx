@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import { randomUUID } from "crypto";
 import { Playfair_Display, Montserrat, Inter } from "next/font/google";
 import { FavoritesProvider } from "@/lib/favorites-context";
+import { CartProvider } from "@/lib/cart-context";
 import { seoConfig } from "@/config/seo";
 import { YANDEX_METRIKA_ID } from "@/config/analytics";
 import { buildGlobalJsonLd } from "@/lib/seo-jsonld";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import ScrollToTop from "@/components/ui/scroll-to-top";
+import NewsletterPopup from "@/components/layout/newsletter-popup";
+import ScrollToTop from "@/components/ui/scroll-to-top-lazy";
 import { YandexMetricaProvider } from "@artginzburg/next-ym";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
@@ -26,7 +28,7 @@ const montserrat = Montserrat({
   subsets: ["latin", "cyrillic"],
   variable: "--font-sans",
   display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const inter = Inter({
@@ -84,7 +86,7 @@ export async function generateMetadata(): Promise<Metadata> {
     verification: {
       // Можно задать через YANDEX_VERIFICATION в .env.local
       yandex: process.env.YANDEX_VERIFICATION || undefined,
-      google: process.env.GOOGLE_SITE_VERIFICATION || "_EUyD3GosfZHJoRCZvoCME7CJt7eCxUr7lgT-lXQVLM",
+      google: "C27KszfplH3uEPfzmgtBV4URjfN8dBv0kkS_ZOHCQzM",
     },
   };
 }
@@ -110,10 +112,12 @@ export default async function RootLayout({
     // 'strict-dynamic' НЕ используется — он запрещает 'self' и ломает Next.js.
     // Вместо этого: 'self' разрешает Next.js чанки, 'unsafe-inline' разрешает
     // Next.js inline-скрипты, а nonce — страховка для наших JSON-LD.
-    // Метрика подключается пакетом @artginzburg/next-ym через next/script:
-    // сниппет-инициализатор (inline) + tag.js (https://mc.yandex.ru) —
-    // поэтому нужен явный https://mc.yandex.ru в script-src.
-    // Остальные директивы (img-src, connect-src, etc.) строгие.
+// Метрика подключается пакетом @artginzburg/next-ym через next/script:
+      // сниппет-инициализатор (inline) + tag.js (https://mc.yandex.ru) —
+      // поэтому нужен явный https://mc.yandex.ru в script-src. tag.js также
+      // ходит на mc.yandex.com (watch, callback, advert.gif, sync_cookie) —
+      // без него Метрика падает в консоль с CSP-ошибками и не работает.
+      // Остальные директивы (img-src, connect-src, etc.) строгие.
     const isDev = process.env.NODE_ENV === "development";
     // Vercel инжектит виджет Live Feedback (vercel.live/_next-live/feedback/feedback.js)
     // только в preview-деплои. В проде скрипта нет — домен не добавляем.
@@ -127,11 +131,11 @@ export default async function RootLayout({
       // 'unsafe-eval' — нужен React DevTools в dev-режиме (eval для callstack).
       // va.vercel-scripts.com — только в dev (debug-скрипт Vercel Analytics;
       // в проде скрипт first-party, same-origin).
-      `script-src 'self' 'unsafe-inline' https://mc.yandex.ru${isDev ? " 'unsafe-eval' https://va.vercel-scripts.com" : ""}${vercelLive}`,
+      `script-src 'self' 'unsafe-inline' https://mc.yandex.ru https://mc.yandex.com${isDev ? " 'unsafe-eval' https://va.vercel-scripts.com" : ""}${vercelLive}`,
     // Styles: 'unsafe-inline' для dev-режима (Next.js Fast Refresh)
     "style-src 'self' 'unsafe-inline'",
     // Images: WB CDN + Яндекс.Метрика + фавиконки маркетплейсов + Vercel Blob (загрузки из админки)
-    "img-src 'self' https://*.wbbasket.ru https://*.geobasket.ru https://*.ozone.ru https://www.wildberries.ru https://www.ozon.ru https://mc.yandex.ru https://*.public.blob.vercel-storage.com data:",
+    "img-src 'self' https://*.wbbasket.ru https://*.geobasket.ru https://*.ozone.ru https://www.wildberries.ru https://www.ozon.ru https://mc.yandex.ru https://mc.yandex.com https://*.public.blob.vercel-storage.com data:",
     // Fonts: self-hosted via next/font
     "font-src 'self'",
     // Connections: same-origin + Яндекс.Метрика + Vercel Analytics
@@ -139,11 +143,11 @@ export default async function RootLayout({
     // wss://mc.yandex.ru — WebSocket Метрики (вебвизор/реальное время);
     // без него tag.js падает в консоль с CSP-ошибкой.
     // https://*.wbbasket.ru — hls.js тянет m3u8-плейлист и сегменты через fetch.
-    `connect-src 'self' https://mc.yandex.ru wss://mc.yandex.ru https://vitals.vercel-insights.com https://*.wbbasket.ru${vercelLive}`,
+    `connect-src 'self' https://mc.yandex.ru wss://mc.yandex.ru https://mc.yandex.com https://vitals.vercel-insights.com https://*.wbbasket.ru${vercelLive}`,
     // Media: HLS-видео WB (wbbasket) + blob: (hls.js играет через MSE/blob URL)
     "media-src 'self' blob: https://*.wbbasket.ru",
-    // Frame: block all
-    "frame-src 'none'",
+    // Frame: Яндекс.Метрика (tag.js) открывает iframe для вебвизора/реалтайма
+    `frame-src 'self' https://mc.yandex.ru https://mc.yandex.com`,
     // Objects: block plugins (Flash, PDF viewers)
     "object-src 'none'",
     // Base: restrict <base> to same origin
@@ -190,10 +194,13 @@ export default async function RootLayout({
           initParameters={{ trackLinks: true, accurateTrackBounce: true, ecommerce: "dataLayer" }}
         >
           <FavoritesProvider>
+          <CartProvider>
           <Header />
           <main>{children}</main>
           <Footer />
+          <NewsletterPopup />
           <ScrollToTop />
+          </CartProvider>
           </FavoritesProvider>
         </YandexMetricaProvider>
 

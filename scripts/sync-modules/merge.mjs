@@ -62,9 +62,13 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
   if (ozonPriceVal !== (db?.ozonPrice ?? null)) data.ozonPrice = ozonPriceVal;
   if (ozonOrigPriceVal !== (db?.ozonOriginalPrice ?? null)) data.ozonOriginalPrice = ozonOrigPriceVal;
 
-  // Display price = min across available
-  const prices = [wbPrice, ozonPriceVal].filter((p) => p != null);
-  const origPrices = [wbOrigPrice, ozonOrigPriceVal].filter((p) => p != null);
+  // Display price = min по ДОСТУПНЫМ площадкам (stock > 0). Распроданная
+  // площадка не диктует цену — иначе показываем цену WB=0шт вместо цены
+  // Ozon, где товар в наличии.
+  const wbAvail = (wbPrices?.stock ?? db?.wbStock ?? 0) > 0;
+  const ozAvail = (db?.ozonStock ?? 0) > 0;
+  const prices = [wbAvail ? wbPrice : null, ozAvail ? ozonPriceVal : null].filter((p) => p != null);
+  const origPrices = [wbAvail ? wbOrigPrice : null, ozAvail ? ozonOrigPriceVal : null].filter((p) => p != null);
   if (prices.length > 0) { const np = Math.min(...prices); if (np !== db?.price) data.price = np; }
   if (origPrices.length > 0) { const np = Math.min(...origPrices); if (np !== db?.originalPrice) data.originalPrice = np; }
 
@@ -131,10 +135,13 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
   }
 
   // ─── Ozon-фото (для админки, отдельно) ───
+  // Главное фото карточки Ozon = primary_image (задаётся продавцом отдельно и
+  // НЕ обязан быть первым в images). Ставим primary первым в галерее, остальные
+  // images — без дубля. Обновляется только при реальном изменении.
   if (ozonInfo?.images?.length) {
-    const firstOzon = ozonInfo.images[0];
-    if (firstOzon !== db?.ozonImage) data.ozonImage = firstOzon;
-    const allOzon = ozonInfo.images;
+    const primary = ozonInfo.primary_image?.[0] || ozonInfo.images[0];
+    const allOzon = [primary, ...ozonInfo.images.filter((u) => u !== primary)];
+    if (primary !== db?.ozonImage) data.ozonImage = primary;
     if (JSON.stringify(allOzon) !== JSON.stringify(db?.ozonImages || [])) data.ozonImages = allOzon;
   }
 
@@ -164,7 +171,11 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
   // webReviewProductScore.totalScore). Ozon content rating (0-100, качество
   // карточки) НЕ является звёздным рейтингом и не используется.
   const freshWbRating = wbRating?.rating ?? null;
-  const wbRatingVal = freshWbRating ?? (db?.rating ?? null);
+  // WB-рейтинг приоритетнее Ozon, но только если он СВЕЖИЙ (пришёл в этом
+  // синке). Не подставляем db.rating как WB-рейтинг: иначе устаревшее/
+  // некорректное значение (напр. 1) блокирует показ реального Ozon-рейтинга,
+  // когда у WB нет свежего рейтинга.
+  const wbRatingVal = freshWbRating;
   const hasFreshWb = freshWbRating != null;
   const wbFeedbacks = wbRating?.feedbacks ?? null;
   // Количество отзывов Ozon: браузерный счётчик с витрины (db.ozonReviewsCount,
@@ -187,7 +198,8 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
     if (wbRatingVal !== db?.rating) data.rating = Math.round(wbRatingVal * 10) / 10;
     if (totalRC !== (db?.reviewsCount ?? 0)) data.reviewsCount = totalRC;
   } else if (ozonRatingVal != null) {
-    // Нет WB рейтинга — используем звёздный рейтинг с витрины Ozon
+    // Нет свежего WB-рейтинга — используем звёздный рейтинг с витрины Ozon
+    // (db.ozonRating, пишет фаза ozon-prices из webReviewProductScore.totalScore).
     if (ozonRatingVal !== db?.rating) data.rating = Math.round(ozonRatingVal * 10) / 10;
     const totalRC = ozonReviewsCount || (db?.reviewsCount ?? 0);
     if (totalRC !== (db?.reviewsCount ?? 0)) data.reviewsCount = totalRC;

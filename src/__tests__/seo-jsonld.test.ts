@@ -106,6 +106,24 @@ describe("buildProductJsonLd", () => {
     expect(offer.hasMerchantReturnPolicy["@type"]).toBe("MerchantReturnPolicy");
     expect(offer.hasMerchantReturnPolicy["merchantReturnDays"]).toBe(14);
   });
+
+  it("includes sku (WB/Ozon article) as global identifier in offers and Product", () => {
+    const p = makeProduct({ wbArticle: 1234567, ozonArticle: 8901234 });
+    const ld = buildProductJsonLd(p, SITE_URL);
+    // WB приоритетнее Ozon
+    expect(ld.sku).toBe(1234567);
+    const raw = ld.offers as Record<string, unknown>[] | Record<string, unknown>;
+    const offer = (Array.isArray(raw) ? raw[0] : raw) as Record<string, unknown>;
+    expect(offer.sku).toBe(1234567);
+    expect(offer.itemCondition).toBe("https://schema.org/NewCondition");
+  });
+
+  it("omits sku when no WB/Ozon article", () => {
+    const ld = buildProductJsonLd(makeProduct(), SITE_URL);
+    expect(ld.sku).toBeUndefined();
+    const raw = ld.offers as Record<string, unknown>;
+    expect(raw.sku).toBeUndefined();
+  });
 });
 
 describe("buildBreadcrumbJsonLd", () => {

@@ -10,6 +10,9 @@ import SmartImage from "@/components/ui/smart-image";
 import HomeClient from "./home-client";
 import styles from "./page.module.css";
 
+// «Сейчас» фиксируется один раз при загрузке модуля (окно новинок — 90 дней).
+const NOW = Date.now();
+
 /* ——— ISR: главная пересобирается каждые 60с ——— 
    Настройки (hero, категории) меняются из админки; без ISR страница
    статична и не видит изменений до следующего деплоя. revalidatePath("/")
@@ -40,12 +43,33 @@ export default async function Home() {
 
   // «Популярные модели»: ручной выбор из админки (featuredIds) — приоритет;
   // если он пуст — топ по количеству отзывов (как сортировка «По популярности» в каталоге).
+  // Максимум 8 карточек.
   const featured =
     featuredIds.length > 0
-      ? products.filter((p) => featuredIds.includes(p.id))
+      ? products.filter((p) => featuredIds.includes(p.id)).slice(0, 8)
       : [...products]
-          .sort((a, b) => (b.reviewsCount || 0) - (a.reviewsCount || 0))
-          .slice(0, 4);
+          .sort((a, b) => {
+            // Реальный скоринг популярности: отзывы + рейтинг (вес ×10)
+            const sa = (a.reviewsCount || 0) + (a.rating || 0) * 10;
+            const sb = (b.reviewsCount || 0) + (b.rating || 0) * 10;
+            return sb - sa;
+          })
+          .slice(0, 8);
+
+  // «Новинки»: товары, появившиеся на WB за последние 3 месяца (wbCreatedAt),
+  // от свежих к старым. Максимум 8 карточек.
+  const THREE_MONTHS_MS = 90 * 24 * 60 * 60 * 1000;
+  const newArrivals = [...products]
+    .filter(
+      (p) =>
+        p.wbCreatedAt &&
+        NOW - new Date(p.wbCreatedAt).getTime() <= THREE_MONTHS_MS,
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.wbCreatedAt!).getTime() - new Date(a.wbCreatedAt!).getTime(),
+    )
+    .slice(0, 8);
 
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";
 
@@ -64,6 +88,52 @@ export default async function Home() {
       {/* ——— Hero (серверный, с реальной картинкой сразу) ——— */}
       <Hero settings={hero} />
 
+      {/* ——— Новинки (реальные поступления за 3 месяца) ——— */}
+      {newArrivals.length > 0 && (
+        <section className={`${styles.section} ${styles.featured}`}>
+          <div className="container">
+            <h2 className={styles.sectionTitle}>Новинки</h2>
+            <p className={styles.sectionSubtitle}>
+              Свежие поступления натуральной кожи. То, что появилось
+              совсем недавно.
+            </p>
+            <div className={styles.featuredGrid}>
+              {newArrivals.map((product, i) => (
+                <ProductCard key={product.id} product={product} priority={i === 0} />
+              ))}
+            </div>
+            <div className={styles.featuredActions}>
+              <Link href="/new" className={styles.featuredBtn}>
+                Смотреть все
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ——— Популярные модели ——— */}
+      {featured.length > 0 && (
+        <section className={`${styles.section} ${styles.featured}`}>
+          <div className="container">
+            <h2 className={styles.sectionTitle}>Популярные модели</h2>
+            <p className={styles.sectionSubtitle}>
+              Модели, которые выбирают чаще всего. Каждая — из натуральной
+              итальянской кожи.
+            </p>
+            <div className={styles.featuredGrid}>
+              {featured.map((product, i) => (
+                <ProductCard key={product.id} product={product} priority={i === 0} />
+              ))}
+            </div>
+            <div className={styles.featuredActions}>
+              <Link href="/catalog" className={styles.featuredBtn}>
+                Смотреть ещё
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ——— Коллекции ——— */}
       <section className={`${styles.section} ${styles.collections}`}>
         <div className="container">
@@ -75,17 +145,26 @@ export default async function Home() {
           <div className={styles.collectionsGrid}>
             {categories.filter((cat) => cat.count > 0).map((cat) => {
               const img = getCategoryImage(products, cat.slug, categoryImages);
+              // Карточка коллекции ~315×420 — полноразмер (Ozon 3024×4032,
+              // 1,2 МБ!) не нужен: Ozon режем оптимизатором (w=520), WB big → c516x688
+              const optimized = img
+                ? img.includes("ir.ozone.ru")
+                  ? `/_next/image?url=${encodeURIComponent(img)}&w=520&q=75`
+                  : img.replace("/images/big/", "/images/c516x688/")
+                : "";
               return (
                 <Link
                   key={cat.slug}
                   href={`/catalog/${cat.slug}`}
                   className={styles.collectionCard}
                 >
-                  {img ? (
+                  {optimized ? (
                     <SmartImage
-                      src={blobUrl(img)}
+                      src={blobUrl(optimized)}
                       alt={cat.name}
                       className={styles.collectionImg}
+                      width={315}
+                      height={420}
                     />
                   ) : (
                     <div className={styles.collectionImgFallback} />
@@ -102,24 +181,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      {/* ——— Популярные модели ——— */}
-      {featured.length > 0 && (
-        <section className={`${styles.section} ${styles.featured}`}>
-          <div className="container">
-            <h2 className={styles.sectionTitle}>Популярные модели</h2>
-            <p className={styles.sectionSubtitle}>
-              Модели, которые выбирают чаще всего. Каждая — из натуральной
-              итальянской кожи.
-            </p>
-            <div className={styles.featuredGrid}>
-              {featured.map((product, i) => (
-                <ProductCard key={product.id} product={product} priority={i === 0} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ——— CTA ——— */}
       <section className={styles.ctaSection}>

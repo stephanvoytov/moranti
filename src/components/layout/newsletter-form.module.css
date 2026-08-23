@@ -1,0 +1,101 @@
+/* =============================================
+   NewsletterForm — подписка в футере (CSS Module)
+   Стиль синхронизирован с ask-question-modal / newsletter-popup
+   (острые углы, токены дизайн-системы)
+   ============================================= */
+
+.form {
+  margin-top: 16px;
+  max-width: 320px;
+}
+
+.label {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.hint {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--white) 55%, transparent);
+  line-height: 1.6;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--dark);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.input::placeholder {
+  color: var(--muted);
+}
+
+.input:focus {
+  border-color: var(--camel);
+}
+
+.submit {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--camel);
+  background: transparent;
+  border: 1px solid var(--camel);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.submit:hover:not(:disabled) {
+  background: var(--camel);
+  color: var(--white);
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.success {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--success);
+  line-height: 1.6;
+}
+
+.error {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--error);
+  line-height: 1.6;
+}

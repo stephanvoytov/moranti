@@ -210,3 +210,30 @@ model SyncRun {
 
   @@index([platform, timestamp])
 }
+
+/// Подписчик рассылки (double opt-in).
+/// Email хранится в нижнем регистре; подтверждение — по ссылке с confirmToken.
+model Subscriber {
+  /// Внутренний ID
+  id               String    @id @default(cuid())
+  /// Email подписчика (уникален, в нижнем регистре)
+  email            String    @unique
+  /// Подтверждён ли email после перехода по ссылке
+  confirmed        Boolean   @default(false)
+  /// Когда получено согласие на рассылку (152-ФЗ)
+  consentedAt      DateTime
+  /// Источник подписки: "footer" | "question" и т.п.
+  source           String    @default("footer")
+  /// Токен подтверждения (double opt-in)
+  confirmToken     String    @unique
+  /// Токен отписки
+  unsubscribeToken String    @unique
+  /// Когда подписка подтверждена
+  confirmedAt      DateTime?
+  /// Когда отписан (null = активен)
+  unsubscribedAt   DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([confirmed])
+}

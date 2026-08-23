@@ -17,6 +17,13 @@ export interface SeoPageMeta {
 export interface SeoCategoryMeta extends SeoPageMeta {
   /** Название для breadcrumb («Кросс-боди») */
   name: string;
+  /** Заголовочная форма для лендингов («Сумки кросс-боди») */
+  variantName: string;
+}
+
+export interface SeoVariantMeta extends SeoPageMeta {
+  /** H1 лендинга («Сумки из замши») */
+  h1: string;
 }
 
 export interface SeoConfig {
@@ -34,10 +41,23 @@ export interface SeoConfig {
   };
   pages: Record<
     | "home" | "catalog" | "care" | "delivery" | "favorites" | "admin" | "notFound"
-    | "privacy" | "contacts",
+    | "privacy" | "contacts" | "cart" | "about",
     SeoPageMeta
   >;
   categories: Record<string, SeoCategoryMeta>;
+  /** Лендинги категория×цвет/материал + глобальные страницы материалов */
+  variants: {
+    /** «{name} из {material} — купить | Moranti». {material} — родительный («замши», «натуральной кожи») */
+    materialTitleTemplate: string;
+    /** «{name} из {material}...» */
+    materialDescriptionTemplate: string;
+    /** «{name} {color} — купить | Moranti». {color} — мн.ч. («чёрные») */
+    colorTitleTemplate: string;
+    /** «{name} {color}...» */
+    colorDescriptionTemplate: string;
+    /** Глобальные лендинги материалов: /catalog/iz-zamshi, /catalog/iz-naturalnoj-kozhi, /catalog/iz-italyanskoj-kozhi */
+    global: Record<string, SeoVariantMeta>;
+  };
   product: {
     /** "{name}{color} — купить | Moranti". Без цены: динамика вредит сниппету (Google кеширует) */
     titleTemplate: string;
@@ -106,9 +126,19 @@ export const seoConfig: SeoConfig = {
       description:
         "Контакты и реквизиты Moranti: ИП Аугустан И.В., ОГРНИП 312392620100191, ИНН 390610008609. Связь через VK, покупка на Wildberries и Ozon.",
     },
+    about: {
+      title: "О бренде",
+      description:
+        "Moranti — бренд женских сумок из натуральной итальянской кожи: минималистичные формы без кричащих логотипов, ручная работа, честные цены.",
+    },
     favorites: {
       title: "Избранное",
       description: "Сохранённые сумки Moranti — натуральная итальянская кожа и замша.",
+      noindex: true,
+    },
+    cart: {
+      title: "Корзина",
+      description: "Корзина Moranti: выбранные сумки из натуральной итальянской кожи и замши. Заказ оформляется на Wildberries или Ozon.",
       noindex: true,
     },
     admin: {
@@ -125,39 +155,76 @@ export const seoConfig: SeoConfig = {
   categories: {
     crossbody: {
       name: "Кросс-боди",
+      variantName: "Сумки кросс-боди",
       title: "Сумки кросс-боди из натуральной кожи — Moranti",
       description:
         "Сумки кросс-боди из натуральной кожи и замши: руки свободны, а образ собран. Компактные и вместительные модели на каждый день.",
     },
     "na-plecho": {
       name: "На плечо",
+      variantName: "Сумки на плечо",
       title: "Сумки на плечо из натуральной кожи — Moranti",
       description:
         "Классические сумки на плечо из натуральной кожи: повседневные модели для офиса и прогулок.",
     },
     baguette: {
       name: "Багет",
+      variantName: "Сумки-багеты",
       title: "Сумки-багет из кожи и замши — Moranti",
       description:
         "Компактные сумки-багет из натуральной кожи и замши: городской шик с ремешком через плечо. Модели, которые не выходят из моды.",
     },
     tote: {
       name: "Тоут",
+      variantName: "Сумки-тоуты",
       title: "Сумки-тоуты из натуральной кожи — Moranti",
       description:
         "Вместительные шоперы и тоуты из натуральной кожи и замши: для работы, учёбы и шопинга. Не теряют форму и служат годами.",
     },
     saddle: {
       name: "Седло",
+      variantName: "Сумки-седло",
       title: "Сумки-седло из натуральной кожи — Moranti",
       description:
         "Сумки-седло из натуральной кожи с характерным изгибом: casual-модель, которая выделяет образ. Минимализм без логотипов.",
     },
     backpack: {
       name: "Рюкзаки",
+      variantName: "Сумки-рюкзаки",
       title: "Кожаные рюкзаки — Moranti",
       description:
         "Кожаные рюкзаки: компактные городские и вместительные для прогулок. Удобно носить каждый день.",
+    },
+  },
+
+  variants: {
+    // «Сумки кросс-боди из замши — купить | Moranti»
+    materialTitleTemplate: "{name} из {material} — купить | Moranti",
+    materialDescriptionTemplate:
+      "{name} из {material}: минимализм без логотипов, итальянская выделка и ручной контроль качества. Доставка по всей России.",
+    // «Сумки кросс-боди чёрные — купить | Moranti»
+    colorTitleTemplate: "{name} {color} — купить | Moranti",
+    colorDescriptionTemplate:
+      "{name} {color}: минимализм без логотипов, натуральная итальянская кожа и замша. Доставка по всей России.",
+    global: {
+      "iz-zamshi": {
+        h1: "Сумки из замши",
+        title: "Сумки из замши — купить | Moranti",
+        description:
+          "Сумки из натуральной замши: кросс-боди, тоуты, багеты, модели на плечо. Мягкая итальянская замша, минимализм без логотипов. Доставка по России.",
+      },
+      "iz-naturalnoj-kozhi": {
+        h1: "Сумки из натуральной кожи",
+        title: "Сумки из натуральной кожи — купить | Moranti",
+        description:
+          "Сумки из натуральной кожи: кросс-боди, тоуты, багеты, седла, рюкзаки. Итальянская выделка, минимализм без логотипов. Доставка по России.",
+      },
+      "iz-italyanskoj-kozhi": {
+        h1: "Сумки из итальянской кожи",
+        title: "Сумки из итальянской кожи — купить | Moranti",
+        description:
+          "Сумки из натуральной итальянской кожи: кросс-боди, тоуты, багеты, седла, рюкзаки. Итальянская выделка и ручной контроль качества. Доставка по России.",
+      },
     },
   },
 
@@ -259,9 +326,16 @@ export function buildProductSeoMeta(product: ProductSeoInput): ProductSeoMeta {
     ? ""
     : ` из ${genitive(product.composition?.trim() || "натуральной кожи")}`;
 
-  const color = (product.colorName ?? "").split(",")[0].trim();
-  const colorPart = color ? ` (${color})` : "";
-  const colorSentence = color ? ` Цвет: ${color}.` : "";
+  // Цвет уже в названии («Сумка кросс-боди из натуральной кожи, тауп») —
+  // не дублируем его в скобках/предложении. Проверяем любой из цветов colorName.
+  const colors = (product.colorName ?? "")
+    .split(",")
+    .map((c) => c.trim())
+    .filter(Boolean);
+  const color = colors[0] ?? "";
+  const colorInName = colors.some((c) => product.name.trim().endsWith(`, ${c}`));
+  const colorPart = color && !colorInName ? ` (${color})` : "";
+  const colorSentence = color && !colorInName ? ` Цвет: ${color}.` : "";
 
   return {
     title: applyTemplate(seoConfig.product.titleTemplate, {

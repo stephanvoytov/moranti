@@ -21,19 +21,28 @@ function HeartIcon({ filled }: { filled: boolean }) {
 interface ProductFavoriteButtonProps {
   isFavorited: boolean;
   onToggle: () => void;
+  /** "overlay" — поверх фото (по умолчанию); "square" — квадратная в футере карточки */
+  variant?: "overlay" | "square";
 }
 
-/** Кнопка «в избранное» поверх фото карточки */
-export default function ProductFavoriteButton({ isFavorited, onToggle }: ProductFavoriteButtonProps) {
+/** Кнопка «в избранное» */
+export default function ProductFavoriteButton({
+  isFavorited,
+  onToggle,
+  variant = "overlay",
+}: ProductFavoriteButtonProps) {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     onToggle();
   };
 
+  const baseClass =
+    variant === "square" ? styles.favoriteSquare : styles.favorite;
+
   return (
     <button
-      className={`${styles.favorite} ${isFavorited ? styles.favoriteActive : ""}`}
+      className={`${baseClass} ${isFavorited ? styles.favoriteActive : ""}`}
       onClick={handleClick}
       aria-label={isFavorited ? "Убрать из избранного" : "Добавить в избранное"}
     >

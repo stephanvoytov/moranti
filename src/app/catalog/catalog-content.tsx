@@ -22,8 +22,14 @@ interface CatalogContentProps {
   /** Категория из URL-пути (страница /catalog/:slug) — не пишется в query */
   initialCategory?: string | null;
   categoryFromPath?: boolean;
+  /** Цвет из пути (лендинг /catalog/:cat/:variant) — не пишется в query */
+  initialColor?: string | null;
+  /** Материал из пути (лендинг /catalog/:cat/:variant) — не пишется в query */
+  initialMaterial?: string | null;
   /** Видимый H1 (для страницы категории) */
   categoryTitle?: string;
+  /** Метка хлебных крошек (для лендинга варианта) */
+  breadcrumbLabel?: string | null;
 }
 
 const ITEMS_PER_PAGE = 24;
@@ -65,7 +71,10 @@ function CatalogContent({
   initialCatalogOrder,
   initialCategory = null,
   categoryFromPath = false,
+  initialColor = null,
+  initialMaterial = null,
   categoryTitle,
+  breadcrumbLabel,
 }: CatalogContentProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -119,8 +128,12 @@ function CatalogContent({
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     categoryFromPath ? (initialCategory ?? null) : urlCategory,
   );
-  const [selectedColor, setSelectedColor] = useState<string | null>(urlColor);
-  const [selectedMaterial, setSelectedMaterial] = useState<string | null>(urlMaterial);
+  const [selectedColor, setSelectedColor] = useState<string | null>(
+    initialColor ?? urlColor,
+  );
+  const [selectedMaterial, setSelectedMaterial] = useState<string | null>(
+    initialMaterial ?? urlMaterial,
+  );
   const [page, setPage] = useState(urlPage);
 
   // ― Search state with debounce ―
@@ -171,8 +184,10 @@ function CatalogContent({
       if (selectedMarketplace) params.set("marketplace", selectedMarketplace);
       // На странице категории категория в пути — в query не дублируем
       if (!categoryFromPath && selectedCategory) params.set("category", selectedCategory);
-      if (selectedColor) params.set("color", selectedColor);
-      if (selectedMaterial) params.set("material", selectedMaterial);
+      // На лендинге варианта цвет/материал в пути — в query не дублируем,
+      // пока не изменены пользователем (иначе дубль URL лендинга)
+      if (selectedColor && selectedColor !== initialColor) params.set("color", selectedColor);
+      if (selectedMaterial && selectedMaterial !== initialMaterial) params.set("material", selectedMaterial);
       if (sortOption && sortOption !== "default") params.set("sort", sortOption);
       if (searchInput) params.set("q", searchInput);
       if (priceMin) params.set("priceMin", priceMin);
@@ -183,7 +198,7 @@ function CatalogContent({
       router.replace(newUrl, { scroll: false });
     }, 50);
     return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
-  }, [selectedMarketplace, selectedCategory, selectedColor, selectedMaterial, sortOption, searchInput, priceMin, priceMax, page, pathname, router, categoryFromPath]);
+  }, [selectedMarketplace, selectedCategory, selectedColor, selectedMaterial, sortOption, searchInput, priceMin, priceMax, page, pathname, router, categoryFromPath, initialColor, initialMaterial]);
 
   // ― Recently viewed (все товары, включая нет в наличии) ―
   const recentlyViewed = useSyncExternalStore(
@@ -349,15 +364,30 @@ function CatalogContent({
     setPage(1);
   };
 
+  // Короткое имя категории для хлебных крошек (на странице категории).
+  const categoryShortName = categoryTitle
+    ? categories.find((c) => c.slug === initialCategory)?.name ?? null
+    : null;
+
   return (
     <div className={styles.page}>
       <section className={styles.catalog}>
         <div className={styles.header}>
-          <span className={styles.label}>Каталог</span>
+          {categoryTitle && (
+            <nav className={styles.breadcrumbs} aria-label="Хлебные крошки">
+              <Link href="/" className={styles.breadcrumbLink}>Главная</Link>
+              <span className={styles.breadcrumbSep} aria-hidden="true">›</span>
+              <Link href="/catalog" className={styles.breadcrumbLink}>Каталог</Link>
+              <span className={styles.breadcrumbSep} aria-hidden="true">›</span>
+              <span className={styles.breadcrumbCurrent}>
+                {breadcrumbLabel ?? categoryShortName ?? categoryTitle}
+              </span>
+            </nav>
+          )}
           <h1 className={styles.title}>{categoryTitle ?? "Каталог сумок Moranti"}</h1>
         </div>
 
-        {/* Toolbar: search + toggle button + filter panel */}
+        {/* Toolbar: поиск + кнопка «Фильтры» (на мобильном) */}
         <div className={styles.toolbar}>
           <div className={styles.toolbarMain}>
             <input
@@ -373,126 +403,6 @@ function CatalogContent({
             >
               {showFilters ? "Скрыть" : "Фильтры"}
             </button>
-          </div>
-
-          <div
-            className={`${styles.filterPanel} ${showFilters ? styles.filterPanelVisible : ""}`}
-          >
-            <div className={styles.filterSelectWrapper}>
-              <select
-                className={styles.filterSelect}
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-                aria-label="Сортировка"
-              >
-                <option value="default">По умолчанию</option>
-                <option value="popular">По популярности</option>
-                <option value="new">По новинкам</option>
-                <option value="price-asc">По цене: возрастание</option>
-                <option value="price-desc">По цене: убывание</option>
-                <option value="name">По названию</option>
-              </select>
-            </div>
-
-            {colorOptions.length > 0 && (
-              <div className={styles.colorPicker} ref={colorRef}>
-                <button
-                  className={styles.colorPickerTrigger}
-                  onClick={() => setColorOpen((p) => !p)}
-                >
-                  <span
-                    className={styles.colorPickerDot}
-                    style={{
-                      backgroundColor: selectedColor
-                        ? resolveColor(selectedColor)
-                        : "transparent",
-                    }}
-                  />
-                  <span>{selectedColor || "Цвет"}</span>
-                </button>
-                {colorOpen && (
-                  <div className={styles.colorPickerMenu}>
-                    {!selectedColor && (
-                      <div className={styles.colorPickerArrow} />
-                    )}
-                    <button
-                      className={`${styles.colorPickerOption} ${!selectedColor ? styles.colorPickerOptionActive : ""}`}
-                      onClick={() => {
-                        setSelectedColor(null);
-                        setColorOpen(false);
-                      }}
-                    >
-                      <span
-                        className={styles.colorPickerDot}
-                        style={{
-                          backgroundColor: "transparent",
-                          border: "1px dashed var(--border)",
-                        }}
-                      />
-                      Цвет
-                    </button>
-                    {colorOptions.map((color) => (
-                      <button
-                        key={color}
-                        className={`${styles.colorPickerOption} ${selectedColor === color ? styles.colorPickerOptionActive : ""}`}
-                        onClick={() => {
-                          setSelectedColor(color);
-                          setColorOpen(false);
-                        }}
-                      >
-                        <span
-                          className={styles.colorPickerDot}
-                          style={{
-                            backgroundColor: resolveColor(color),
-                          }}
-                        />
-                        {color}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {materialOptions.length > 0 && (
-              <div className={styles.filterSelectWrapper}>
-                <select
-                  className={styles.filterSelect}
-                  value={selectedMaterial || ""}
-                  onChange={(e) =>
-                    setSelectedMaterial(e.target.value || null)
-                  }
-                  aria-label="Материал"
-                >
-                  <option value="">Материал</option>
-                  {materialOptions.map((mat) => (
-                    <option key={mat} value={mat}>
-                      {mat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <div className={styles.priceGroup}>
-              <input
-                type="number"
-                className={styles.priceInput}
-                placeholder="от"
-                value={priceMin}
-                onChange={(e) => setPriceMin(e.target.value)}
-                min={0}
-              />
-              <span className={styles.priceDash}>—</span>
-              <input
-                type="number"
-                className={styles.priceInput}
-                placeholder="до"
-                value={priceMax}
-                onChange={(e) => setPriceMax(e.target.value)}
-                min={0}
-              />
-            </div>
           </div>
         </div>
 
@@ -517,80 +427,222 @@ function CatalogContent({
           </div>
         </div>
 
-        {/* Marketplace pills */}
-        <div className={styles.filterSection}>
-          <div className={styles.filterRow}>
-            <button
-              className={`${styles.filterPill} ${selectedMarketplace === null ? styles.pillActive : ""}`}
-              onClick={() => { setSelectedMarketplace(null); setPage(1); }}
+        {/* Фильтры + товары. На десктопе фильтры — sticky-сайдбар слева
+            (не съедают вертикальное место, как WB/Ozon); на мобильном —
+            панель за кнопкой «Фильтры». */}
+        <div className={styles.layout}>
+          <aside className={styles.sidebar}>
+            <div
+              className={`${styles.filterPanel} ${showFilters ? styles.filterPanelVisible : ""}`}
             >
-              Все площадки
-            </button>
-            <button
-              className={`${styles.filterPill} ${selectedMarketplace === "wb" ? styles.pillActive : ""}`}
-              onClick={() => { setSelectedMarketplace("wb"); setPage(1); }}
-            >
-              Wildberries
-            </button>
-            <button
-              className={`${styles.filterPill} ${selectedMarketplace === "ozon" ? styles.pillActive : ""}`}
-              onClick={() => { setSelectedMarketplace("ozon"); setPage(1); }}
-            >
-              Ozon
-            </button>
-          </div>
-        </div>
+              <div className={styles.filterGroup}>
+                <span className={styles.filterLabel}>Сортировка</span>
+                <div className={styles.filterSelectWrapper}>
+                  <select
+                    className={styles.filterSelect}
+                    value={sortOption}
+                    onChange={(e) => setSortOption(e.target.value)}
+                    aria-label="Сортировка"
+                  >
+                    <option value="default">По умолчанию</option>
+                    <option value="popular">По популярности</option>
+                    <option value="new">По новинкам</option>
+                    <option value="price-asc">По цене: возрастание</option>
+                    <option value="price-desc">По цене: убывание</option>
+                    <option value="name">По названию</option>
+                  </select>
+                </div>
+              </div>
 
-        {/* Active filter strip */}
-        {hasActiveFilter && (
-          <div className={styles.activeFilters}>
-            {selectedMarketplace && (
-              <span className={styles.activePill}>
-                {selectedMarketplace === "wb" ? "Wildberries" : "Ozon"}
-                <button className={styles.activeRemove} onClick={() => setSelectedMarketplace(null)}>×</button>
-              </span>
-            )}
-            {selectedCategory && (
-              <span className={styles.activePill}>
-                {categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory}
-                <button className={styles.activeRemove} onClick={() => setSelectedCategory(null)}>×</button>
-              </span>
-            )}
-            {selectedColor && (
-              <span className={styles.activePill}>
-                {selectedColor}
-                <button className={styles.activeRemove} onClick={() => setSelectedColor(null)}>×</button>
-              </span>
-            )}
-            {selectedMaterial && (
-              <span className={styles.activePill}>
-                {selectedMaterial}
-                <button className={styles.activeRemove} onClick={() => setSelectedMaterial(null)}>×</button>
-              </span>
-            )}
-            <button className={styles.clearBtn} onClick={clearFilters}>Сбросить всё</button>
-          </div>
-        )}
+              <div className={styles.filterGroup}>
+                <span className={styles.filterLabel}>Площадка</span>
+                <div className={styles.marketplaceGroup}>
+                  <button
+                    className={`${styles.filterPill} ${selectedMarketplace === null ? styles.pillActive : ""}`}
+                    onClick={() => { setSelectedMarketplace(null); setPage(1); }}
+                  >
+                    Все площадки
+                  </button>
+                  <button
+                    className={`${styles.filterPill} ${selectedMarketplace === "wb" ? styles.pillActive : ""}`}
+                    onClick={() => { setSelectedMarketplace("wb"); setPage(1); }}
+                  >
+                    Wildberries
+                  </button>
+                  <button
+                    className={`${styles.filterPill} ${selectedMarketplace === "ozon" ? styles.pillActive : ""}`}
+                    onClick={() => { setSelectedMarketplace("ozon"); setPage(1); }}
+                  >
+                    Ozon
+                  </button>
+                </div>
+              </div>
 
-        {/* Loading state */}
-        {!loaded ? (
-          <div className={styles.loadingGrid}>
-            <div className={styles.spinner} />
-          </div>
-        ) : paginated.length > 0 ? (
-          /* Product grid */
-          <div className={styles.productGrid}>
-            {paginated.map((product, i) => (
-              <ProductCard key={product.id} product={product} priority={i < 4} />
-            ))}
-          </div>
-        ) : (
-          /* Empty state */
-          <p className={styles.noResults}>Ничего не найдено</p>
-        )}
+              {colorOptions.length > 0 && (
+                <div className={styles.filterGroup}>
+                  <span className={styles.filterLabel}>Цвет</span>
+                  <div className={styles.colorPicker} ref={colorRef}>
+                    <button
+                      className={styles.colorPickerTrigger}
+                      onClick={() => setColorOpen((p) => !p)}
+                    >
+                      <span
+                        className={styles.colorPickerDot}
+                        style={{
+                          backgroundColor: selectedColor
+                            ? resolveColor(selectedColor)
+                            : "transparent",
+                        }}
+                      />
+                      <span>{selectedColor || "Цвет"}</span>
+                    </button>
+                    {colorOpen && (
+                      <div className={styles.colorPickerMenu}>
+                        {!selectedColor && (
+                          <div className={styles.colorPickerArrow} />
+                        )}
+                        <button
+                          className={`${styles.colorPickerOption} ${!selectedColor ? styles.colorPickerOptionActive : ""}`}
+                          onClick={() => {
+                            setSelectedColor(null);
+                            setColorOpen(false);
+                          }}
+                        >
+                          <span
+                            className={styles.colorPickerDot}
+                            style={{
+                              backgroundColor: "transparent",
+                              border: "1px dashed var(--border)",
+                            }}
+                          />
+                          Цвет
+                        </button>
+                        {colorOptions.map((color) => (
+                          <button
+                            key={color}
+                            className={`${styles.colorPickerOption} ${selectedColor === color ? styles.colorPickerOptionActive : ""}`}
+                            onClick={() => {
+                              setSelectedColor(color);
+                              setColorOpen(false);
+                            }}
+                          >
+                            <span
+                              className={styles.colorPickerDot}
+                              style={{
+                                backgroundColor: resolveColor(color),
+                              }}
+                            />
+                            {color}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
-        {/* Pagination — ссылки для краулеров */}
-        {totalPages > 1 && (
+              {materialOptions.length > 0 && (
+                <div className={styles.filterGroup}>
+                  <span className={styles.filterLabel}>Материал</span>
+                  <div className={styles.filterSelectWrapper}>
+                    <select
+                      className={styles.filterSelect}
+                      value={selectedMaterial || ""}
+                      onChange={(e) =>
+                        setSelectedMaterial(e.target.value || null)
+                      }
+                      aria-label="Материал"
+                    >
+                      <option value="">Материал</option>
+                      {materialOptions.map((mat) => (
+                        <option key={mat} value={mat}>
+                          {mat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              <div className={styles.filterGroup}>
+                <span className={styles.filterLabel}>Цена</span>
+                <div className={styles.priceGroup}>
+                  <input
+                    type="number"
+                    className={styles.priceInput}
+                    placeholder="от"
+                    value={priceMin}
+                    onChange={(e) => setPriceMin(e.target.value)}
+                    min={0}
+                  />
+                  <span className={styles.priceDash}>—</span>
+                  <input
+                    type="number"
+                    className={styles.priceInput}
+                    placeholder="до"
+                    value={priceMax}
+                    onChange={(e) => setPriceMax(e.target.value)}
+                    min={0}
+                  />
+                </div>
+              </div>
+
+              <button className={styles.clearBtn} onClick={clearFilters}>
+                Сбросить всё
+              </button>
+            </div>
+          </aside>
+
+          <div className={styles.main}>
+            {/* Active filter strip */}
+            {hasActiveFilter && (
+              <div className={styles.activeFilters}>
+                {selectedMarketplace && (
+                  <span className={styles.activePill}>
+                    {selectedMarketplace === "wb" ? "Wildberries" : "Ozon"}
+                    <button className={styles.activeRemove} onClick={() => setSelectedMarketplace(null)}>×</button>
+                  </span>
+                )}
+                {selectedCategory && (
+                  <span className={styles.activePill}>
+                    {categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory}
+                    <button className={styles.activeRemove} onClick={() => setSelectedCategory(null)}>×</button>
+                  </span>
+                )}
+                {selectedColor && (
+                  <span className={styles.activePill}>
+                    {selectedColor}
+                    <button className={styles.activeRemove} onClick={() => setSelectedColor(null)}>×</button>
+                  </span>
+                )}
+                {selectedMaterial && (
+                  <span className={styles.activePill}>
+                    {selectedMaterial}
+                    <button className={styles.activeRemove} onClick={() => setSelectedMaterial(null)}>×</button>
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Loading state */}
+            {!loaded ? (
+              <div className={styles.loadingGrid}>
+                <div className={styles.spinner} />
+              </div>
+            ) : paginated.length > 0 ? (
+              /* Product grid */
+              <div className={styles.productGrid}>
+                {paginated.map((product, i) => (
+                  <ProductCard key={product.id} product={product} priority={i < 4} />
+                ))}
+              </div>
+            ) : (
+              /* Empty state */
+              <p className={styles.noResults}>Ничего не найдено</p>
+            )}
+
+            {/* Pagination — ссылки для краулеров */}
+            {totalPages > 1 && (
           <div className={styles.pagination}>
             {safePage <= 1 ? (
               <span className={`${styles.pageBtn} ${styles.pageBtnDisabled}`}>←</span>
@@ -636,8 +688,10 @@ function CatalogContent({
                 →
               </Link>
             )}
+            </div>
+          )}
           </div>
-        )}
+        </div>
       </section>
 
       {/* Recently viewed — below catalog */}

@@ -71,7 +71,11 @@ export default function BrandSeo() {
         </div>
 
         <div className={styles.controls}>
-          <div className={styles.dots} role="tablist" aria-label="Абзацы">
+          {/* Это карусель точек, а не табы: role="tablist" без дочерних
+              role="tab" ломал a11y-дерево (Lighthouse/агенты: "Certain ARIA
+              roles must contain particular children"). Кнопки остаются
+              доступными через aria-label. */}
+          <div className={styles.dots}>
             {PARAGRAPHS.map((_, i) => (
               <button
                 key={i}

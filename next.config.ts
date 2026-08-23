@@ -38,6 +38,10 @@ const nextConfig: NextConfig = {
   /* ─── Image optimization ─── */
   images: {
     formats: ["image/avif", "image/webp"],
+    /* Размеры под наши нужды: 520 — карточки каталога (Ozon-фото режутся
+       до 520px, 260px × DPR 2), 128 — тумбы галереи товара. Заменяет
+       дефолтный список imageSizes — остальные ширины не используются. */
+    imageSizes: [128, 520],
     remotePatterns: [
       {
         protocol: "https",
@@ -50,6 +54,12 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "*.public.blob.vercel-storage.com",
+      },
+      /* Ozon CDN фото товаров — через оптимизатор (у Ozon нет уменьшенных
+         версий по URL: ?w= игнорируется, отдаёт оригинал 1290×1720) */
+      {
+        protocol: "https",
+        hostname: "ir.ozone.ru",
       },
       /* Фавиконки маркетплейсов (бейджи на превью товара в админке) */
       {

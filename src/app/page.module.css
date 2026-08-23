@@ -108,13 +108,50 @@
 
 .featured {
   background: var(--bg);
-  padding-top: 0;
 }
 
 .featuredGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--grid-gap);
+}
+
+.featuredActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-top: var(--space-7);
+}
+
+.featuredActions::before,
+.featuredActions::after {
+  content: '';
+  height: 1px;
+  width: min(140px, 18vw);
+  background: var(--border);
+}
+
+.featuredBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--camel);
+  background: transparent;
+  border: 1px solid var(--camel);
+  padding: 16px 36px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.featuredBtn:hover {
+  background: var(--camel);
+  color: var(--bg);
 }
 
 /* ——— CTA ——— */

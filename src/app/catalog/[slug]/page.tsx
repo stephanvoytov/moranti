@@ -2,11 +2,14 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { CharacteristicGroup } from "@/data/products";
-import { getProducts, getProduct } from "@/data/products";
+import { getAllProducts, getProducts, getProduct } from "@/data/products";
 import { seoConfig, buildProductSeoMeta } from "@/config/seo";
 import { buildProductJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo-jsonld";
+import { getGlobalVariantPage, buildProductAlt } from "@/lib/variant-pages";
+import VariantView from "@/components/sections/variant-view";
 import CategoryView from "./category-view";
 import PriceClient from "./price-client";
+import ProductCartCta from "./product-cart-cta";
 import ColorSwatches from "./color-swatches";
 import GalleryClient from "./gallery-client";
 import ShareButton from "./share-button";
@@ -14,6 +17,7 @@ import GalleryOverlay from "./gallery-overlay";
 import RecentlyViewedTracker from "./recently-viewed-tracker";
 import FavoriteButton from "./favorite-button";
 import MarketplaceCtas from "./marketplace-cta";
+import AskQuestionCta from "./ask-question-cta";
 import ExpandableText from "@/components/ui/expandable-text";
 import ProductCard from "@/components/ui/product-card";
 import RatingStars from "@/components/ui/rating-stars";
@@ -24,15 +28,17 @@ import styles from "./page.module.css";
 
 interface Props {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateStaticParams() {
-  const products = await getProducts();
-  // Товары + категории живут на одном уровне /catalog/:slug
+  // Товары (включая «Нет в наличии» — страница остаётся в индексе и отдаётся
+  // с меткой «Нет в наличии», а не 404) + категории + глобальные лендинги
+  // материалов живут на одном уровне /catalog/:slug
+  const products = await getAllProducts();
   return [
     ...products.map((p) => ({ slug: p.slug })),
     ...Object.keys(seoConfig.categories).map((slug) => ({ slug })),
+    ...Object.keys(seoConfig.variants.global).map((slug) => ({ slug })),
   ];
 }
 
@@ -40,34 +46,17 @@ export async function generateStaticParams() {
 // данных, а не висеть до следующего деплоя (синк меняет остатки/inStock в БД)
 export const revalidate = 60;
 
-export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+// Слаги вне generateStaticParams (мусорные/несуществующие) — жёсткий 404
+// от Next до рендера страницы. Без этого флага неFound() на ISR-странице
+// в Next 16 отдаёт 200 с not-found контентом (мягкий 404).
+export const dynamicParams = false;
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
   // ─── Категория (/catalog/crossbody) ───
   const cat = seoConfig.categories[slug];
   if (cat) {
-    const sp = await searchParams;
-    const page = Number(sp?.page ?? "1") || 1;
-    const hasFilters = [
-      sp?.sort,
-      sp?.color,
-      sp?.material,
-      sp?.q,
-      sp?.priceMin,
-      sp?.priceMax,
-      sp?.marketplace,
-    ].some((v) => v !== undefined && v !== "");
-
-    // Пагинация и фильтры — дубли категории: noindex + canonical на базу
-    if (page > 1 || hasFilters) {
-      return {
-        title: { absolute: cat.title },
-        description: cat.description,
-        robots: { index: false, follow: true },
-        alternates: { canonical: `/catalog/${slug}` },
-      };
-    }
-
     return {
       title: { absolute: cat.title },
       description: cat.description,
@@ -83,26 +72,54 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     };
   }
 
+  // ─── Глобальный лендинг материала (/catalog/iz-zamshi) ───
+  const globalVariant = seoConfig.variants.global[slug];
+  if (globalVariant) {
+    return {
+      title: { absolute: globalVariant.title },
+      description: globalVariant.description,
+      alternates: { canonical: `/catalog/${slug}` },
+      openGraph: {
+        title: globalVariant.title,
+        description: globalVariant.description,
+        url: `/catalog/${slug}`,
+        siteName: seoConfig.site.siteName,
+        type: "website",
+        locale: seoConfig.site.locale,
+      },
+    };
+  }
+
   // ─── Товар ───
   const product = await getProduct(slug);
-  if (!product) return { title: seoConfig.pages.notFound.title };
+  // notFound() до рендера страницы: иначе из-за Suspense (loading.tsx)
+  // статус остаётся 200 и not-found уходит клиенту через RSC (мягкий 404).
+  if (!product) notFound();
 
   const meta = buildProductSeoMeta(product);
-  const title = meta.title;
+
+  // Уникальность title/description: у разных моделей бывает одинаковое
+  // имя + цвет (два багета «молочный») — Яндекс склеивает такие страницы.
+  // Добавляем различитель: размеры (33×19×12 см) или артикул.
+  const all = await getAllProducts();
+  const disambig = buildTitleDisambiguator(product, all);
+
+  const title = meta.title + disambig.titleSuffix;
+  const description = meta.description + disambig.descSuffix;
 
   // Архивные товары: страница доступна, но из индекса убираем (тупик для пользователя)
   const noindex = Boolean(product.archivedAt);
 
   return {
     title: { absolute: title },
-    description: meta.description,
+    description,
     robots: noindex ? { index: false, follow: true } : undefined,
     alternates: {
       canonical: `/catalog/${product.slug}`,
     },
     openGraph: {
-      title: meta.ogTitle,
-      description: meta.description,
+      title: meta.ogTitle + disambig.titleSuffix,
+      description,
       url: `/catalog/${product.slug}`,
       type: "website",
       images: product.image
@@ -110,6 +127,41 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
         : undefined,
     },
   };
+}
+
+/**
+ * Различитель для товаров с одинаковым title (имя + первый цвет совпали).
+ * Приоритет: габариты «33×19×12 см» (человекочитаемо) → артикул.
+ * Если коллизии нет — пустые суффиксы (title остаётся чистым).
+ */
+function buildTitleDisambiguator(
+  product: NonNullable<Awaited<ReturnType<typeof getProduct>>>,
+  all: Awaited<ReturnType<typeof getAllProducts>>,
+): { titleSuffix: string; descSuffix: string } {
+  const baseTitle = buildProductSeoMeta(product).title;
+  const hasCollision = all.some(
+    (p) => p.slug !== product.slug && buildProductSeoMeta(p).title === baseTitle,
+  );
+  if (!hasCollision) return { titleSuffix: "", descSuffix: "" };
+
+  const w = getCharValue(product.characteristics ?? null, "Ширина предмета");
+  const h = getCharValue(product.characteristics ?? null, "Высота предмета");
+  const d = getCharValue(product.characteristics ?? null, "Глубина предмета");
+  if (w && h && d) {
+    return {
+      titleSuffix: ` (${w}×${h}×${d} см)`,
+      descSuffix: ` Размеры: ${w}×${h}×${d} см.`,
+    };
+  }
+
+  const article = product.ozonArticle || product.wbArticle;
+  if (article) {
+    return {
+      titleSuffix: `, арт. ${article}`,
+      descSuffix: ` Артикул: ${article}.`,
+    };
+  }
+  return { titleSuffix: "", descSuffix: "" };
 }
 
 /** Извлечь значение характеристики по имени */
@@ -160,6 +212,13 @@ export default async function CatalogSlugPage({ params }: Props) {
   // Категория? → категорийная страница
   if (seoConfig.categories[slug]) {
     return <CategoryView slug={slug} />;
+  }
+
+  // Глобальный лендинг материала? (/catalog/iz-zamshi)
+  if (seoConfig.variants.global[slug]) {
+    const products = await getProducts();
+    const page = getGlobalVariantPage(slug, products);
+    if (page) return <VariantView page={page} />;
   }
 
   // Иначе — товар
@@ -273,7 +332,7 @@ export default async function CatalogSlugPage({ params }: Props) {
           <GalleryClient
             images={product.images?.length ? product.images : [product.image]}
             video={product.video}
-            alt={product.name}
+            alt={buildProductAlt(product)}
           />
         </div>
 
@@ -329,15 +388,28 @@ export default async function CatalogSlugPage({ params }: Props) {
           ) : null}
 
           {/* Marketplace CTAs — только маркетплейсы с ненулевым остатком.
-              Клиентский компонент: цели Яндекс.Метрики (buy-wb / buy-ozon) */}
+              Клиентский компонент: цели Яндекс.Метрики (buy-wb / buy-ozon).
+              «В корзину» — первичный CTA внутри той же секции. */}
           {!product.archivedAt && (
             <MarketplaceCtas
               wbArticle={product.wbArticle}
               wbStock={product.wbStock}
               ozonArticle={product.ozonArticle}
               ozonStock={product.ozonStock}
-            />
+            >
+              {product.inStock && (
+                <ProductCartCta article={product.wbArticle} />
+              )}
+            </MarketplaceCtas>
           )}
+
+          {/* «Задать вопрос» — письмо владельцу с автоссылкой на товар */}
+          <AskQuestionCta productSlug={product.slug} productName={product.name} />
+
+          {/* Перелинковка: условия покупки */}
+          <Link href="/delivery" className={styles.assureLink}>
+            Оплата, доставка и гарантия →
+          </Link>
 
           {/* SEO H2 */}
           <h2 className={styles.seoH2}>

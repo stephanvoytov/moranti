@@ -98,3 +98,5 @@ backup-*.json
 
 # Debug / temp scripts
 _tmp_*
+
+dev-server.log

@@ -19,6 +19,8 @@ export interface SiteSettings {
   ozonClientId: string;
   ozonApiKey: string;
   yandexMetrikaId: string;
+  /** Email владельца — куда приходят вопросы из формы «Задать вопрос» */
+  contactEmail: string;
   categoryImages: Record<string, string>;
   social: { vk: string; telegram: string; whatsapp: string };
   marketplaces: { wildberries: string; ozon: string };
@@ -39,6 +41,7 @@ const DEFAULTS: SiteSettings = {
   ozonClientId: "",
   ozonApiKey: "",
   yandexMetrikaId: "",
+  contactEmail: "",
   categoryImages: {},
   social: { vk: "", telegram: "", whatsapp: "" },
   marketplaces: { wildberries: MARKETPLACE_URLS.wbSeller, ozon: MARKETPLACE_URLS.ozonSeller },

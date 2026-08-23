@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
-import { getAllProducts } from "@/data/products";
+import { getAllProducts, getProducts } from "@/data/products";
 import { seoConfig } from "@/config/seo";
+import { buildVariantPages } from "@/lib/variant-pages";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dev/preview окружение — sitemap пустой (см. robots.ts: noindex)
@@ -21,6 +22,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categoryUrls: MetadataRoute.Sitemap = Object.keys(seoConfig.categories).map(
     (cat) => ({
       url: `${siteUrl}/catalog/${cat}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }),
+  );
+
+  // Лендинги категория×цвет/материал + глобальные страницы материалов —
+  // строятся из актуальных товаров (комбинации с ≥2 товарами)
+  const inStockProducts = await getProducts();
+  const variantUrls: MetadataRoute.Sitemap = buildVariantPages(inStockProducts).map(
+    (page) => ({
+      url: `${siteUrl}${page.path}`,
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.8,
@@ -65,6 +78,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.3,
     },
     ...categoryUrls,
+    ...variantUrls,
     ...productUrls,
   ];
 }

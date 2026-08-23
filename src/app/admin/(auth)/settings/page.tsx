@@ -22,6 +22,8 @@ interface SettingsForm {
   whatsapp: string;
   wbUrl: string;
   ozonUrl: string;
+  /** Email для вопросов из формы «Задать вопрос» */
+  contactEmail: string;
   /** Фото категорий: { slug → URL } */
   catImages: Record<string, string>;
 }
@@ -39,6 +41,7 @@ const emptyForm: SettingsForm = {
   whatsapp: "",
   wbUrl: "",
   ozonUrl: "",
+  contactEmail: "",
   catImages: {},
 };
 
@@ -148,6 +151,7 @@ export default function AdminSettingsPage() {
           whatsapp: data.social?.whatsapp || "",
           wbUrl: data.marketplaces?.wildberries || "",
           ozonUrl: data.marketplaces?.ozon || "",
+          contactEmail: data.contactEmail || "",
         });
         setLoading(false);
       })
@@ -235,6 +239,7 @@ export default function AdminSettingsPage() {
         wildberries: form.wbUrl,
         ozon: form.ozonUrl,
       },
+      contactEmail: form.contactEmail.trim(),
     };
   }
 
@@ -305,6 +310,7 @@ export default function AdminSettingsPage() {
         whatsapp: parsed.social?.whatsapp || "",
         wbUrl: parsed.marketplaces?.wildberries || "",
         ozonUrl: parsed.marketplaces?.ozon || "",
+        contactEmail: parsed.contactEmail || "",
         catImages: parsed.categoryImages || {},
       });
       setMode("form");
@@ -624,10 +630,44 @@ export default function AdminSettingsPage() {
               </div>
             </section>
 
-            {/* 07 — API ключи */}
+            {/* 07 — Вопросы с сайта */}
             <section className={styles.section}>
               <div className={styles.sectionHead}>
                 <span className={styles.sectionNum}>07</span>
+                <div>
+                  <h2 className={styles.sectionTitle}>Вопросы с сайта</h2>
+                  <p className={styles.sectionDesc}>
+                    Форма «Задать вопрос» (навбар и страница товара)
+                  </p>
+                </div>
+              </div>
+              <div className={styles.fieldGrid}>
+                <label className={styles.field}>
+                  <span className={styles.fieldLabel}>Email для вопросов</span>
+                  <input
+                    type="email"
+                    className={styles.input}
+                    value={form.contactEmail}
+                    onChange={(e) => updateField("contactEmail", e.target.value)}
+                    placeholder="questions@example.ru"
+                  />
+                  <span className={styles.hint}>
+                    Сюда приходят вопросы посетителей. Ответьте письмом — оно
+                    уйдёт прямо автору вопроса.
+                  </span>
+                </label>
+              </div>
+              <p className={styles.hint}>
+                SMTP-доступ задаётся переменными окружения (SMTP_HOST, SMTP_PORT,
+                SMTP_USER, SMTP_PASS) — на Vercel это Settings → Environment
+                Variables.
+              </p>
+            </section>
+
+            {/* 08 — API ключи */}
+            <section className={styles.section}>
+              <div className={styles.sectionHead}>
+                <span className={styles.sectionNum}>08</span>
                 <div>
                   <h2 className={styles.sectionTitle}>API ключи</h2>
                   <p className={styles.sectionDesc}>Доступы к маркетплейсам</p>
