@@ -17,6 +17,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
+      // Payload SDK импортирует конфиг по алиасу (как next.config.ts)
+      "@payload-config": path.resolve(__dirname, "payload.config.ts"),
     },
   },
 });

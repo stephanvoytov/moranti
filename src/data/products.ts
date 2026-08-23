@@ -1,18 +1,18 @@
 /* =============================================
    Moranti — Product Data
-   Источник (чтение): Супрабаза (Prisma)
+   Источник (чтение): Payload CMS (единственный источник правды)
    ============================================= */
 
 import { readFileSync, existsSync } from "fs";
 import path from "path";
-import type { Product as PrismaProduct } from "@prisma/client";
-import prisma, { prismaQuery } from "@/lib/prisma";
+import { getPayload } from "payload";
+import config from "@payload-config";
 import { cacheGet } from "@/lib/data-cache";
 import { logger } from "@/lib/logger";
-import { selectProductImages } from "@/lib/product-images";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
+import { richTextToText } from "@/lib/richtext";
 
-/** Загрузить JSON fallback при недоступности БД */
+/** Загрузить JSON fallback при недоступности Payload */
 function loadJsonFallback<T>(file: string): T | null {
   try {
     const p = path.join(process.cwd(), "data", file);
@@ -96,186 +96,259 @@ const CATEGORY_INFO: Record<string, { name: string; description: string }> = {
   backpack: { name: "Рюкзак", description: "Рюкзаки" },
 };
 
-function mapProduct(p: PrismaProduct): Product {
-  // Auto-generate marketplace links from articles if missing in DB
-  const storedMps = (p.marketplaces ?? []) as { name: string; url: string; icon: string }[];
+/** Получить инициализированный Payload-инстанс */
+async function getPayloadInstance() {
+  return getPayload({ config });
+}
+
+/**
+ * Карта id категории → slug.
+ * `category` в коллекции — relationship; при depth:0 Payload возвращает
+ * числовой id, а витрина работает со слагами («crossbody», «tote»…).
+ */
+async function getCategorySlugMap(): Promise<Record<string, string>> {
+  const payload = await getPayloadInstance();
+  const res = await payload.find({
+    collection: "categories",
+    limit: 200,
+    depth: 0,
+  });
+  const map: Record<string, string> = {};
+  for (const c of res.docs as any[]) {
+    map[String(c.id)] = String(c.slug);
+  }
+  return map;
+}
+
+function mapPayloadProduct(
+  p: Record<string, any>,
+  catMap?: Record<string, string>,
+): Product {
   const wbArt = p.wbArticle ? Number(p.wbArticle) : null;
   const ozonArt = p.ozonArticle ? Number(p.ozonArticle) : null;
 
   const marketplaces: MarketplaceLink[] = [];
-
-  // WB marketplace
-  if (wbArt && !storedMps.some((m) => m.name === "Wildberries")) {
+  if (wbArt) {
     marketplaces.push({
       name: "Wildberries",
       url: MARKETPLACE_URLS.wbProduct(wbArt),
       icon: "/images/icons/wb.svg",
     });
   }
-  // Ozon marketplace
-  if (ozonArt && !storedMps.some((m) => m.name === "Ozon")) {
+  if (ozonArt) {
     marketplaces.push({
       name: "Ozon",
       url: MARKETPLACE_URLS.ozonProduct(ozonArt),
       icon: "/images/icons/ozon.svg",
     });
   }
-  // Include any stored marketplaces not already added
-  for (const mp of storedMps) {
-    if (!marketplaces.some((m) => m.name === mp.name)) {
-      marketplaces.push(mp as MarketplaceLink);
-    }
+
+  const galleryImages: string[] = (p.gallery || [])
+    .map((g: any) => g?.image)
+    .filter((x: any) => typeof x === "string" && x.length > 0);
+
+  const image = typeof p.image === "string" && p.image ? p.image : galleryImages[0] || "";
+  const images = galleryImages.length ? galleryImages : image ? [image] : [];
+
+  const characteristics: CharacteristicGroup[] = (p.characteristics || []).map(
+    (c: any) => ({
+      group_name: c.key,
+      options: [{ name: c.key, value: c.value }],
+    }),
+  );
+
+  const modelId =
+    typeof p.model === "string"
+      ? p.model
+      : p.model?.id ?? undefined;
+
+  // category: relationship (число при depth:0) | объект (depth:1) | slug-строка (fallback JSON)
+  let categorySlug = "";
+  if (typeof p.category === "number") {
+    categorySlug = catMap?.[String(p.category)] ?? "";
+  } else if (p.category && typeof p.category === "object") {
+    categorySlug = String(p.category.slug ?? "");
+  } else if (typeof p.category === "string") {
+    categorySlug = p.category;
   }
 
-  // Приоритет: реальные URL из БД (от WB API). Fallback — генерация из article + photoCount.
-  // Если товар не в наличии на WB и есть фото с Ozon — берём Ozon-фото (selectProductImages).
-  const photoCount = p.photoCount || p.images?.length || 1;
-  const selected = selectProductImages({
-    wbStock: p.wbStock,
-    wbArticle: p.wbArticle ? Number(p.wbArticle) : null,
-    image: p.image,
-    images: p.images,
-    ozonImage: p.ozonImage,
-    ozonImages: p.ozonImages,
-    photoCount,
-  });
-  const image = selected.image;
-  const images = selected.images;
-
   return {
-    id: p.id,
+    id: String(p.id),
     slug: p.slug,
     sku: p.sku ?? undefined,
     name: p.name,
-    price: p.price,
-    originalPrice: p.originalPrice,
-    wbPrice: p.wbPrice ?? undefined,
-    wbOriginalPrice: p.wbOriginalPrice ?? undefined,
-    wbStock: p.wbStock ?? undefined,
-    ozonPrice: p.ozonPrice ?? undefined,
-    ozonOriginalPrice: p.ozonOriginalPrice ?? undefined,
-    ozonStock: p.ozonStock ?? undefined,
-    currency: p.currency,
-    category: p.category,
-    description: p.description,
+    price: typeof p.price === "number" ? p.price : 0,
+    originalPrice: typeof p.originalPrice === "number" ? p.originalPrice : 0,
+    wbPrice: typeof p.wbPrice === "number" ? p.wbPrice : undefined,
+    wbOriginalPrice:
+      typeof p.wbOriginalPrice === "number" ? p.wbOriginalPrice : undefined,
+    wbStock: typeof p.wbStock === "number" ? p.wbStock : undefined,
+    ozonPrice: typeof p.ozonPrice === "number" ? p.ozonPrice : undefined,
+    ozonOriginalPrice:
+      typeof p.ozonOriginalPrice === "number" ? p.ozonOriginalPrice : undefined,
+    ozonStock: typeof p.ozonStock === "number" ? p.ozonStock : undefined,
+    currency: p.currency || "₽",
+    category: categorySlug,
+    description: richTextToText(p.description),
     image,
     images,
-    video: p.video ?? undefined,
+    video: undefined,
     marketplaces,
-    wbArticle: p.wbArticle ? Number(p.wbArticle) : 0,
-    ozonArticle: p.ozonArticle ? Number(p.ozonArticle) : undefined,
-    rating: p.rating ?? undefined,
-    reviewsCount: p.reviewsCount ?? undefined,
-    salesCount: p.salesCount ?? undefined,
+    wbArticle: wbArt ?? 0,
+    ozonArticle: ozonArt ?? undefined,
+    rating: typeof p.rating === "number" ? p.rating : undefined,
+    reviewsCount: typeof p.reviewsCount === "number" ? p.reviewsCount : undefined,
+    salesCount: undefined,
     colorName: p.colorName ?? undefined,
-
     composition: p.composition ?? undefined,
     nameAutoGenerated: p.nameAutoGenerated ?? undefined,
     descAutoGenerated: p.descAutoGenerated ?? undefined,
-    archivedAt: p.archivedAt?.toISOString() ?? undefined,
-    updatedAt: p.updatedAt?.toISOString() ?? undefined,
-    inStock: p.inStock,
-    wbCreatedAt: p.wbCreatedAt?.toISOString() ?? undefined,
-    characteristics: p.characteristics
-      ? (p.characteristics as unknown as CharacteristicGroup[])
-      : undefined,
-    photoCount,
-    modelId: p.modelId ?? undefined,
+    archivedAt: p.archivedAt ?? undefined,
+    updatedAt: p.updatedAt ?? undefined,
+    inStock: p.inStock ?? true,
+    wbCreatedAt: p.wbCreatedAt ?? undefined,
+    characteristics: characteristics.length ? characteristics : undefined,
+    photoCount: images.length || 1,
+    modelId,
   };
 }
 
 export async function getProducts(): Promise<Product[]> {
-  return cacheGet("all-products", async () => {
-    try {
-      const rows = await prismaQuery(() =>
-        prisma.product.findMany({
-          where: { archivedAt: null, inStock: true },
-          orderBy: { createdAt: "asc" },
-        }),
-      );
-      return rows.map(mapProduct);
-    } catch (err) {
-      logger.warn("DB unavailable, fallback to products.json", {
-        error: (err as Error)?.message,
-      });
-      const fallback = loadJsonFallback<{ products: Product[] }>("products.json");
-      if (!fallback?.products) throw err;
-      return fallback.products;
-    }
-    // 60s свежих + SWR-окно 10 мин: мутации продуктов инвалидируют ключ
-  }, 60_000, 600_000);
+  return cacheGet(
+    "all-products",
+    async () => {
+      try {
+        const payload = await getPayloadInstance();
+        const catMap = await getCategorySlugMap();
+        const res = await payload.find({
+          collection: "products",
+          where: { inStock: { equals: true } },
+          sort: "createdAt",
+          limit: 1000,
+          depth: 0,
+        });
+        return res.docs.map((p) => mapPayloadProduct(p as any, catMap));
+      } catch (err) {
+        logger.warn("Payload unavailable, fallback to products.json", {
+          error: (err as Error)?.message,
+        });
+        const fallback = loadJsonFallback<{ products: Product[] }>(
+          "products.json",
+        );
+        if (!fallback?.products) throw err;
+        return fallback.products;
+      }
+    },
+    60_000,
+    600_000,
+  );
 }
 
-/** Все товары, включая нет в наличии (кроме архивных) */
+/** Все товары, включая нет в наличии */
 export async function getAllProducts(): Promise<Product[]> {
-  return cacheGet("all-products-all", async () => {
-    try {
-      const rows = await prismaQuery(() =>
-        prisma.product.findMany({ orderBy: { createdAt: "asc" } }),
-      );
-      return rows.filter((p) => !p.archivedAt).map(mapProduct);
-    } catch (err) {
-      logger.warn("DB unavailable, fallback to products.json (all)", {
-        error: (err as Error)?.message,
-      });
-      const fallback = loadJsonFallback<{ products: Product[] }>("products.json");
-      if (!fallback?.products) throw err;
-      return fallback.products;
-    }
-  }, 60_000, 600_000);
+  return cacheGet(
+    "all-products-all",
+    async () => {
+      try {
+        const payload = await getPayloadInstance();
+        const catMap = await getCategorySlugMap();
+        const res = await payload.find({
+          collection: "products",
+          sort: "createdAt",
+          limit: 1000,
+          depth: 0,
+        });
+        return res.docs.map((p) => mapPayloadProduct(p as any, catMap));
+      } catch (err) {
+        logger.warn("Payload unavailable, fallback to products.json (all)", {
+          error: (err as Error)?.message,
+        });
+        const fallback = loadJsonFallback<{ products: Product[] }>(
+          "products.json",
+        );
+        if (!fallback?.products) throw err;
+        return fallback.products;
+      }
+    },
+    60_000,
+    600_000,
+  );
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
-  // ——— Сначала ищем в кеше неархивных продуктов ———
-  const all = await getProducts();
-  const found = all.find((p) => p.slug === slug);
-  if (found) return found;
-
-  // ——— Архивный товар? Прямой запрос к БД + JSON fallback ———
-  return cacheGet(`product:${slug}`, async () => {
-    try {
-      const row = await prismaQuery(() =>
-        prisma.product.findUnique({ where: { slug } }),
+  return cacheGet(
+    `product:${slug}`,
+    async () => {
+      try {
+        const payload = await getPayloadInstance();
+        const catMap = await getCategorySlugMap();
+        const res = await payload.find({
+          collection: "products",
+          where: { slug: { equals: slug } },
+          limit: 1,
+          depth: 0,
+        });
+        if (res.docs.length) return mapPayloadProduct(res.docs[0] as any, catMap);
+      } catch (err) {
+        logger.warn("Payload unavailable, fallback to products.json", {
+          error: (err as Error)?.message,
+        });
+      }
+      const fallback = loadJsonFallback<{ products: Product[] }>(
+        "products.json",
       );
-      if (row) return mapProduct(row);
-    } catch {
-      // DB недоступна — fallback на JSON
-    }
-    const fallback = loadJsonFallback<{ products: Product[] }>("products.json");
-    return fallback?.products?.find((p) => p.slug === slug) ?? null;
-  }, 60_000, 600_000);
+      return fallback?.products?.find((p) => p.slug === slug) ?? null;
+    },
+    60_000,
+    600_000,
+  );
 }
 
 export async function getCategories(): Promise<ProductCategory[]> {
-  return cacheGet("all-categories", async () => {
-    try {
-      const counts = await prismaQuery(() =>
-        prisma.product.groupBy({
-          by: ["category"],
-          where: { archivedAt: null, inStock: true },
-          _count: { id: true },
-        }),
-      );
+  return cacheGet(
+    "all-categories",
+    async () => {
+      try {
+        const payload = await getPayloadInstance();
+        const catMap = await getCategorySlugMap();
+        const res = await payload.find({
+          collection: "products",
+          where: { inStock: { equals: true } },
+          limit: 1000,
+          depth: 0,
+        });
+        const countMap = new Map<string, number>();
+        for (const doc of res.docs) {
+          const raw = (doc as any).category;
+          // relationship → числовой id; мапим в slug категории
+          const cat =
+            typeof raw === "number"
+              ? catMap[String(raw)]
+              : typeof raw === "object" && raw
+                ? String(raw.slug ?? "")
+                : raw;
+          if (cat) countMap.set(cat, (countMap.get(cat) || 0) + 1);
+        }
 
-      const countMap = new Map(counts.map((c) => [c.category, c._count.id]));
-
-      return Object.entries(CATEGORY_INFO).map(([slug, info]) => ({
-        slug,
-        name: info.name,
-        description: info.description,
-        image: `/images/categories/${slug}.jpg`,
-        count: countMap.get(slug) ?? 0,
-      }));
-    } catch (err) {
-      logger.warn("DB unavailable, fallback to products.json for categories", {
-        error: (err as Error)?.message,
-      });
-      const fallback = loadJsonFallback<{
-        categories: ProductCategory[];
-      }>("products.json");
-      if (!fallback?.categories) throw err;
-      return fallback.categories;
-    }
-    // Счётчики категорий меняются только на мутациях — 5 мин свежести
-  }, 300_000, 600_000);
+        return Object.entries(CATEGORY_INFO).map(([slug, info]) => ({
+          slug,
+          name: info.name,
+          description: info.description,
+          image: `/images/categories/${slug}.jpg`,
+          count: countMap.get(slug) ?? 0,
+        }));
+      } catch (err) {
+        logger.warn("Payload unavailable, fallback to products.json for categories", {
+          error: (err as Error)?.message,
+        });
+        const fallback = loadJsonFallback<{
+          categories: ProductCategory[];
+        }>("products.json");
+        if (!fallback?.categories) throw err;
+        return fallback.categories;
+      }
+    },
+    300_000,
+    600_000,
+  );
 }

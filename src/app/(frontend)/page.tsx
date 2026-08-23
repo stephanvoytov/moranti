@@ -8,6 +8,11 @@ import BrandSeo from "@/components/sections/brand-seo";
 import ProductCard from "@/components/ui/product-card";
 import SmartImage from "@/components/ui/smart-image";
 import HomeClient from "./home-client";
+import { getSiteStrings } from "@/lib/site-content";
+import { getPayload } from "payload";
+import config from "@payload-config";
+import { RenderBlocks } from "@/components/sections/page-view";
+import { t } from "@/lib/strings";
 import styles from "./page.module.css";
 
 // «Сейчас» фиксируется один раз при загрузке модуля (окно новинок — 90 дней).
@@ -31,10 +36,25 @@ function getCategoryImage(
 }
 
 export default async function Home() {
-  const [products, categories, settings] = await Promise.all([
+  const [products, categories, settings, strings, homePage] = await Promise.all([
     getProducts(),
     getCategories(),
     readSettings(),
+    getSiteStrings(),
+    (async () => {
+      try {
+        const payload = await getPayload({ config });
+        const res = await payload.find({
+          collection: "pages",
+          where: { slug: { equals: "home" } },
+          limit: 1,
+          depth: 0,
+        });
+        return res.docs[0] || null;
+      } catch {
+        return null;
+      }
+    })(),
   ]);
 
   const hero = settings.hero;
@@ -88,11 +108,20 @@ export default async function Home() {
       {/* ——— Hero (серверный, с реальной картинкой сразу) ——— */}
       <Hero settings={hero} />
 
+      {/* ——— Редактируемые блоки Страницы «home» (Payload) ——— */}
+      {homePage?.layout && (
+        <section className={styles.section}>
+          <div className="container">
+            <RenderBlocks blocks={homePage.layout} />
+          </div>
+        </section>
+      )}
+
       {/* ——— Новинки (реальные поступления за 3 месяца) ——— */}
       {newArrivals.length > 0 && (
         <section className={`${styles.section} ${styles.featured}`}>
           <div className="container">
-            <h2 className={styles.sectionTitle}>Новинки</h2>
+            <h2 className={styles.sectionTitle}>{t(strings, "section.new", "Новинки")}</h2>
             <p className={styles.sectionSubtitle}>
               Свежие поступления натуральной кожи. То, что появилось
               совсем недавно.
@@ -104,7 +133,7 @@ export default async function Home() {
             </div>
             <div className={styles.featuredActions}>
               <Link href="/new" className={styles.featuredBtn}>
-                Смотреть все
+                {t(strings, "btn.viewAll", "Смотреть все")}
               </Link>
             </div>
           </div>
@@ -115,7 +144,7 @@ export default async function Home() {
       {featured.length > 0 && (
         <section className={`${styles.section} ${styles.featured}`}>
           <div className="container">
-            <h2 className={styles.sectionTitle}>Популярные модели</h2>
+            <h2 className={styles.sectionTitle}>{t(strings, "home.featuredTitle", "Популярные модели")}</h2>
             <p className={styles.sectionSubtitle}>
               Модели, которые выбирают чаще всего. Каждая — из натуральной
               итальянской кожи.
@@ -127,7 +156,7 @@ export default async function Home() {
             </div>
             <div className={styles.featuredActions}>
               <Link href="/catalog" className={styles.featuredBtn}>
-                Смотреть ещё
+                {t(strings, "btn.viewMore", "Смотреть ещё")}
               </Link>
             </div>
           </div>
@@ -137,7 +166,7 @@ export default async function Home() {
       {/* ——— Коллекции ——— */}
       <section className={`${styles.section} ${styles.collections}`}>
         <div className="container">
-          <h2 className={styles.sectionTitle}>Наши коллекции</h2>
+          <h2 className={styles.sectionTitle}>{t(strings, "home.categoriesTitle", "Наши коллекции")}</h2>
           <p className={styles.sectionSubtitle}>
             Сумка на каждый день, вечерний выход или деловая встреча — форма
             найдётся для любого сценария.
@@ -191,7 +220,7 @@ export default async function Home() {
             {products.length} моделей. Доставка по всей России.
           </p>
           <Link href="/catalog" className={styles.ctaBtn}>
-            Открыть каталог
+            {t(strings, "cta.catalog", "Открыть каталог")}
           </Link>
         </div>
       </section>

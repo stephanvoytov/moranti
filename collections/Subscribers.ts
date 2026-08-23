@@ -2,48 +2,27 @@ import type { CollectionConfig } from 'payload'
 
 export const Subscribers: CollectionConfig = {
   slug: 'subscribers',
-  admin: {
-    useAsTitle: 'email',
-  },
+  labels: { singular: 'Подписчик', plural: 'Подписчики' },
+  admin: { useAsTitle: 'email', defaultColumns: ['email', 'name', 'status', 'createdAt'] },
   fields: [
+    { name: 'email', type: 'email', label: 'Email', required: true, unique: true },
+    { name: 'name', type: 'text', label: 'Имя' },
     {
-      name: 'email',
-      type: 'text',
-      required: true,
-      unique: true,
+      name: 'status',
+      type: 'select',
+      label: 'Статус',
+      defaultValue: 'active',
+      options: [
+        { value: 'active', label: 'Активен' },
+        { value: 'unsubscribed', label: 'Отписан' },
+      ],
     },
+    { name: 'source', type: 'text', label: 'Источник' },
     {
-      name: 'confirmed',
-      type: 'checkbox',
-      defaultValue: false,
-    },
-    {
-      name: 'consentedAt',
-      type: 'date',
-      required: true,
-    },
-    {
-      name: 'source',
-      type: 'text',
-      defaultValue: 'footer',
-    },
-    {
-      name: 'confirmToken',
-      type: 'text',
-      unique: true,
-    },
-    {
-      name: 'unsubscribeToken',
-      type: 'text',
-      unique: true,
-    },
-    {
-      name: 'confirmedAt',
-      type: 'date',
-    },
-    {
-      name: 'unsubscribedAt',
-      type: 'date',
+      name: 'tags',
+      type: 'array',
+      label: 'Теги',
+      fields: [{ name: 'tag', type: 'text', label: 'Тег' }],
     },
   ],
 }

@@ -2,6 +2,7 @@
   "name": "moranti",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --port 3001",
     "build": "node scripts/build-sync-bundle.mjs && prisma generate && next build",
@@ -19,6 +20,7 @@
     "@payloadcms/db-postgres": "^3.88.0",
     "@payloadcms/next": "^3.88.0",
     "@payloadcms/richtext-lexical": "^3.88.0",
+    "@payloadcms/storage-vercel-blob": "^3.88.0",
     "@power-seo/preview": "^1.0.19",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",

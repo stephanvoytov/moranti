@@ -110,4 +110,7 @@ backup-*.json
 # Debug / temp scripts
 _tmp_*
 
+# local Payload uploads (dev, без Blob-токена)
+/media/
+
 dev-server.log

@@ -50,7 +50,7 @@ import { syncModels, syncOzonModels, archiveGoneProducts } from "./sync-modules/
 // --- Зависимости (прямой import — esbuild трассирует его для бандла) ---
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { generateName } from "./name-generator.js";
+import { generateName } from "./name-generator.cjs";
 
 // ============================================================
 // Config
@@ -461,6 +461,8 @@ async function getExistingProducts(prisma) {
       photoCount: true,
       rating: true,
       reviewsCount: true,
+      ozonRating: true,
+      ozonReviewsCount: true,
       colorName: true,
       composition: true,
       characteristics: true,
@@ -1016,23 +1018,29 @@ async function main() {
               );
             }
 
-            // Нет WB-рейтинга — витринный Ozon-рейтинг/отзывы сразу в итог
-            if (db.rating == null && rating != null && rating !== db.rating) {
-              updates.rating = rating;
-              changes.push(`rating — → ${rating}`);
-            }
-            if (
-              db.rating == null &&
-              db.ozonRating == null &&
-              reviewsCount != null &&
-              reviewsCount !== (db.reviewsCount ?? null)
-            ) {
-              updates.reviewsCount = reviewsCount;
-              changes.push(`reviewsCount — → ${reviewsCount}`);
+            // Показываем Ozon-рейтинг/отзывы в итоговых полях, когда у товара
+            // нет показываемого WB-рейтинга (db.rating == null ИЛИ < 4).
+            // Фикс: товары с низким db.rating (напр. 1) ранее скрывали Ozon 4.5.
+            const dbRatingNum = typeof db.rating === "number" ? db.rating : null;
+            const wbRatingShown = dbRatingNum != null && dbRatingNum >= 4;
+            if (!wbRatingShown) {
+              if (rating != null && rating !== db.rating) {
+                updates.rating = rating;
+                changes.push(`rating ${db.rating ?? "—"} → ${rating}`);
+              }
+              if (
+                reviewsCount != null &&
+                reviewsCount !== (db.reviewsCount ?? null)
+              ) {
+                updates.reviewsCount = reviewsCount;
+                changes.push(`reviewsCount ${db.reviewsCount ?? "—"} → ${reviewsCount}`);
+              }
             }
 
-            // Пересчитываем общую price = min(wbPrice, ozonPrice)
-            const wbP = db.wbPrice ?? null;
+            // Пересчитываем общую price = min по ДОСТУПНЫМ площадкам (stock > 0).
+            // Распроданная площадка не диктует цену (фикс: WB в нуле → цена Ozon).
+            const wbAvailable = (db.wbStock ?? 0) > 0;
+            const wbP = wbAvailable ? (db.wbPrice ?? null) : null;
             const allPrices = [wbP, effectivePrice].filter((p) => p != null);
             if (allPrices.length > 0) {
               const newPrice = Math.min(...allPrices);
@@ -1044,9 +1052,9 @@ async function main() {
               }
             }
 
-            // Пересчитываем originalPrice = min(wbOriginalPrice, ozonOriginalPrice)
+            // Пересчитываем originalPrice = min по ДОСТУПНЫМ площадкам.
             const origPrice = oldPrice ?? db.ozonOriginalPrice ?? null;
-            const wbOrigP = db.wbOriginalPrice ?? null;
+            const wbOrigP = wbAvailable ? (db.wbOriginalPrice ?? null) : null;
             const allOrigPrices = [wbOrigP, origPrice].filter((p) => p != null);
             if (allOrigPrices.length > 0) {
               const newOrigPrice = Math.min(...allOrigPrices);

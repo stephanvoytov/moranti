@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getProducts } from "@/data/products";
+import { getPage, layoutToText } from "@/lib/site-content";
 import { buildBreadcrumbJsonLd } from "@/lib/seo-jsonld";
 import ProductCard from "@/components/ui/product-card";
 import styles from "./page.module.css";
@@ -25,7 +26,10 @@ export const metadata: Metadata = {
 };
 
 export default async function NewArrivalsPage() {
-  const products = await getProducts();
+  const [products, page] = await Promise.all([
+    getProducts(),
+    getPage("novinki"),
+  ]);
 
   const newArrivals = [...products]
     .filter(
@@ -60,13 +64,13 @@ export default async function NewArrivalsPage() {
       <div className={styles.page}>
         <section className={styles.intro}>
           <div className="container">
-            <p className={styles.eyebrow}>Свежие поступления</p>
-            <h1 className={styles.title}>Новинки</h1>
-            <p className={styles.lead}>
-              То, что появилось в коллекции за последние три месяца. Натуральная
-              итальянская кожа, новые силуэты и оттенки — успейте заметить
-              первыми.
-            </p>
+            {/* Текст редактируется в админке → Страницы → Новинки */}
+            <h1 className={styles.title}>
+              {page?.title || "Новинки"}
+            </h1>
+            {page && (
+              <p className={styles.lead}>{layoutToText(page.layout)}</p>
+            )}
           </div>
         </section>
 

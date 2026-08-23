@@ -6,7 +6,7 @@ import {
 } from "@/lib/seo-jsonld";
 import { buildVariantPages, type VariantPage } from "@/lib/variant-pages";
 import { seoConfig } from "@/config/seo";
-import CatalogPage from "@/app/catalog/catalog-content";
+import CatalogPage from "@/app/(frontend)/catalog/catalog-content";
 import CatalogSeo from "@/components/sections/catalog-seo";
 
 /**

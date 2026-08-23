@@ -9,6 +9,7 @@ import { buildGlobalJsonLd } from "@/lib/seo-jsonld";
 import { YandexMetricaProvider } from "@artginzburg/next-ym";
 import { Analytics } from "@vercel/analytics/next";
 import { StorefrontShell } from "@/components/layout/storefront-shell";
+import { getSiteContent, getSiteStrings } from "@/lib/site-content";
 import "./globals.css";
 
 /* ——— Google Fonts (next/font — self-hosted, optimized) ——— */
@@ -100,6 +101,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // ID Яндекс.Метрики — константа в src/config/analytics.ts (без env и админки)
+ 
+  // ─── Контент сайта и редактируемые строки (Payload) ───
+  const [siteContent, strings] = await Promise.all([
+    getSiteContent(),
+    getSiteStrings(),
+  ]);
 
   // ─── CSP nonce (per-request, prevents XSS via inline scripts) ───
   const nonce = randomUUID();
@@ -192,7 +199,7 @@ export default async function RootLayout({
         >
           <FavoritesProvider>
           <CartProvider>
-          <StorefrontShell>{children}</StorefrontShell>
+          <StorefrontShell siteContent={siteContent} strings={strings}>{children}</StorefrontShell>
           </CartProvider>
           </FavoritesProvider>
         </YandexMetricaProvider>

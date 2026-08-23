@@ -40,6 +40,28 @@
   margin: 0 auto;
 }
 
+/* RichText-лид из Страницы «Новинки» */
+.leadRich {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.leadRich p {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin: 0 0 12px;
+}
+
+.leadRich h2,
+.leadRich h3 {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  color: var(--dark);
+  margin: 16px 0 8px;
+}
+
 .gridSection {
   padding-bottom: var(--section-gap);
 }
