@@ -11,7 +11,7 @@ import { CDN_HOSTS } from "../wb-utils.mjs";
 
 /** Geo CDN — единственный хост с CORS-заголовками */
 const GEO_CDN_HOST = "kgd-basket-cdn-01bl.geobasket.ru";
-import { wbToCategory } from "../wb-categories.js";
+import { wbToCategory } from "../wb-categories.cjs";
 
 /**
  * Выбирает CDN-хост для артикула WB (по vol, для равномерного распределения).

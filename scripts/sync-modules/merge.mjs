@@ -24,7 +24,7 @@ import {
   isBagProduct,
 } from "./transform.mjs";
 
-import { generateName } from "../name-generator.js";
+import { generateName } from "../name-generator.cjs";
 
 /**
  * Собирает финальные данные товара из WB и Ozon источников.
@@ -64,9 +64,12 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
 
   // Display price = min по ДОСТУПНЫМ площадкам (stock > 0). Распроданная
   // площадка не диктует цену — иначе показываем цену WB=0шт вместо цены
-  // Ozon, где товар в наличии.
+  // Ozon, где товар в наличии. Остаток Ozon считаем суммой по всем
+  // складам FBS (present − reserved), фолбэк — db.ozonStock.
   const wbAvail = (wbPrices?.stock ?? db?.wbStock ?? 0) > 0;
-  const ozAvail = (db?.ozonStock ?? 0) > 0;
+  const ozAvail = (ozonInfo?.stocks?.stocks
+    ? ozonInfo.stocks.stocks.reduce((s, st) => s + Math.max(0, (st.present || 0) - (st.reserved || 0)), 0)
+    : (db?.ozonStock ?? 0)) > 0;
   const prices = [wbAvail ? wbPrice : null, ozAvail ? ozonPriceVal : null].filter((p) => p != null);
   const origPrices = [wbAvail ? wbOrigPrice : null, ozAvail ? ozonOrigPriceVal : null].filter((p) => p != null);
   if (prices.length > 0) { const np = Math.min(...prices); if (np !== db?.price) data.price = np; }

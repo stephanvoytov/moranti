@@ -22,7 +22,7 @@ import { fileURLToPath } from "node:url";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { buildUrlSlug, isBagProduct } from "../sync-modules/transform.mjs";
-import { generateName } from "../name-generator.js";
+import { generateName } from "../name-generator.cjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REDIRECTS_FILE = path.join(__dirname, "..", "..", "data", "slug-redirects.json");

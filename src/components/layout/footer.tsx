@@ -3,8 +3,18 @@ import { legalInfo } from "@/config/legal";
 import Link from "next/link";
 import styles from "./footer.module.css";
 import NewsletterForm from "./newsletter-form";
+import type { SiteContentData } from "@/lib/site-content";
 
-export default function Footer() {
+const SOCIAL_LABELS: Record<string, string> = {
+  vk: "VK",
+  telegram: "Telegram",
+  whatsapp: "WhatsApp",
+};
+
+export default function Footer({ siteContent }: { siteContent: SiteContentData }) {
+  const { footer, contacts, social } = siteContent;
+  const year = new Date().getFullYear();
+
   return (
     <footer className={styles.footer}>
       <div className="container">
@@ -12,12 +22,21 @@ export default function Footer() {
           <div>
             <div className={styles.brand}>Moranti</div>
             <p className={styles.desc}>
-              Сумки из натуральной итальянской кожи. Минималистичные формы,
-              ручная работа.
+              {footer.aboutText ||
+                "Сумки из натуральной итальянской кожи. Минималистичные формы, ручная работа."}
             </p>
-            <p className={styles.contactEmail}>
-              <a href="mailto:info@morantibags.ru">info@morantibags.ru</a>
-            </p>
+            {contacts.email && (
+              <p className={styles.contactEmail}>
+                <a href={`mailto:${contacts.email}`}>{contacts.email}</a>
+              </p>
+            )}
+            {contacts.phone && (
+              <p className={styles.contactEmail}>
+                <a href={`tel:${contacts.phone.replace(/[^+\d]/g, "")}`}>
+                  {contacts.phone}
+                </a>
+              </p>
+            )}
             <NewsletterForm />
           </div>
           <div className={styles.col}>
@@ -39,20 +58,40 @@ export default function Footer() {
           </div>
           <div className={styles.col}>
             <h3>Магазины</h3>
-            <a href={MARKETPLACE_URLS.wbSeller} target="_blank" rel="noopener noreferrer">Wildberries</a>
-            <a href={MARKETPLACE_URLS.ozonSeller} target="_blank" rel="noopener noreferrer">Ozon</a>
-            <a href="https://vk.com/moranti_bags" target="_blank" rel="noopener noreferrer">VK</a>
+            <a href={MARKETPLACE_URLS.wbSeller} target="_blank" rel="noopener noreferrer">
+              Wildberries
+            </a>
+            <a href={MARKETPLACE_URLS.ozonSeller} target="_blank" rel="noopener noreferrer">
+              Ozon
+            </a>
+            {social
+              .filter((s) => s.url)
+              .map((s) => (
+                <a
+                  key={s.platform}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {SOCIAL_LABELS[s.platform] || s.platform}
+                </a>
+              ))}
           </div>
         </div>
         <div className={styles.bottom}>
           <div className={styles.legal}>
-            <span>&copy; {new Date().getFullYear()} Moranti. Все права защищены.</span>
+            <span>{footer.copyright || `© ${year} Moranti. Все права защищены.`}</span>
             <span>
               {legalInfo.shortName} · ОГРНИП {legalInfo.ogrnip} · ИНН {legalInfo.inn}
             </span>
           </div>
           <div className={styles.social}>
-            <a className={styles.credit} href="https://stefanvoytov.ru" target="_blank" rel="noopener noreferrer">
+            <a
+              className={styles.credit}
+              href="https://stefanvoytov.ru"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Сделать такой же сайт →
             </a>
           </div>

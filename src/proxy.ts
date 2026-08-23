@@ -1,15 +1,10 @@
 /* =============================================
    Moranti — Proxy (formerly Middleware)
-   - Защищает /admin/* (кроме /admin/login)
-   - noindex для админки
-   - CORS preflight для публичных API
+   - CORS preflight + headers for public /api/data/* APIs
+   - Admin auth is now handled by Payload (its own /admin auth)
    ============================================= */
 
 import { NextResponse, type NextRequest } from "next/server";
-import { validateToken } from "@/lib/admin-auth";
-
-const ADMIN_LOGIN = "/admin/login";
-const COOKIE_NAME = "admin_session";
 
 /* ─── CORS allowed origins (mirrors csrf.ts + cors.ts) ─── */
 
@@ -59,14 +54,6 @@ function handleCorsPreflight(request: NextRequest): NextResponse | null {
   });
 }
 
-/** Проверка сессии через admin-auth (единая логика decrypt). */
-function validateSessionCookie(token: string | undefined): boolean {
-  if (!token) return false;
-  return validateToken(token);
-}
-
-/* ─── Proxy handler ─── */
-
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -74,24 +61,8 @@ export function proxy(request: NextRequest) {
   const preflight = handleCorsPreflight(request);
   if (preflight) return preflight;
 
-  // ─── Admin page protection ───
-  if (pathname.startsWith("/admin") && pathname !== ADMIN_LOGIN) {
-    const token = request.cookies.get(COOKIE_NAME)?.value;
-    if (!validateSessionCookie(token)) {
-      const loginUrl = new URL(ADMIN_LOGIN, request.url);
-      const response = NextResponse.redirect(loginUrl);
-      response.cookies.delete(COOKIE_NAME);
-      return response;
-    }
-  }
-
   // ─── Build base response ───
   const response = NextResponse.next();
-
-  // ─── noindex for admin pages ───
-  if (pathname.startsWith("/admin")) {
-    response.headers.set("X-Robots-Tag", "noindex, nofollow");
-  }
 
   // ─── CORS for public API routes ───
   if (pathname.startsWith("/api/data/")) {
@@ -114,5 +85,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/:path*"],
+  matcher: ["/api/:path*"],
 };

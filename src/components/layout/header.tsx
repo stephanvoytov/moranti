@@ -7,9 +7,10 @@ import { useFavorites } from "@/lib/favorites-context";
 import { useCart } from "@/lib/cart-context";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import { seoConfig } from "@/config/seo";
+import { t, type SiteStrings } from "@/lib/strings";
 import styles from "./header.module.css";
 
-export default function Header() {
+export default function Header({ strings }: { strings?: SiteStrings }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
@@ -70,10 +71,10 @@ export default function Header() {
           id="mainNav"
         >
           <Link href="/" onClick={() => setMenuOpen(false)}>
-            Главная
+            {t(strings, "nav.home", "Главная")}
           </Link>
           <Link href="/new" onClick={() => setMenuOpen(false)}>
-            Новинки
+            {t(strings, "nav.new", "Новинки")}
           </Link>
           <div
             className={styles.catalogItem}
@@ -92,13 +93,13 @@ export default function Header() {
             }}
           >
             <div className={styles.catalogTop}>
-              <Link
-                href="/catalog"
-                className={catalogOpen ? styles.catalogLinkOpen : undefined}
-                onClick={() => setMenuOpen(false)}
-              >
-                Каталог
-              </Link>
+                <Link
+                  href="/catalog"
+                  className={catalogOpen ? styles.catalogLinkOpen : undefined}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {t(strings, "nav.catalog", "Каталог")}
+                </Link>
               <button
                 type="button"
                 className={`${styles.catalogToggle}${catalogOpen ? " " + styles.catalogToggleOpen : ""}`}
@@ -138,7 +139,7 @@ export default function Header() {
                     setCatalogOpen(false);
                   }}
                 >
-                  Wildberries
+                  {t(strings, "marketplace.wb", "Wildberries")}
                 </a>
                 <a
                   href={MARKETPLACE_URLS.ozonSeller}
@@ -149,16 +150,16 @@ export default function Header() {
                     setCatalogOpen(false);
                   }}
                 >
-                  Ozon
+                  {t(strings, "marketplace.ozon", "Ozon")}
                 </a>
               </div>
             </div>
           </div>
           <Link href="/about" onClick={() => setMenuOpen(false)}>
-            О бренде
+            {t(strings, "nav.about", "О бренде")}
           </Link>
           <Link href="/contacts" onClick={() => setMenuOpen(false)}>
-            Контакты
+            {t(strings, "nav.contacts", "Контакты")}
           </Link>
         </nav>
 

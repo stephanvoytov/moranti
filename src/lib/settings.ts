@@ -1,12 +1,12 @@
 /* =============================================
    Moranti — Settings
-   Источник: Супрабаза (Prisma)
+   Источник: Payload CMS (единственный источник правды)
    ============================================= */
 
 import { readFileSync, existsSync } from "fs";
 import path from "path";
-import type { Prisma } from "@prisma/client";
-import prisma, { prismaQuery } from "@/lib/prisma";
+import { getPayload } from "payload";
+import config from "@payload-config";
 import { cacheGet, invalidateCache } from "@/lib/data-cache";
 import { logger } from "@/lib/logger";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
@@ -62,28 +62,57 @@ function readSettingsFallback(): SiteSettings | null {
   }
 }
 
-export async function readSettings(): Promise<SiteSettings> {
-  return cacheGet("site-settings", async () => {
-    try {
-      const row = await prismaQuery(() =>
-        prisma.settings.findUnique({ where: { id: "singleton" } }),
-      );
-
-      if (!row) return defaultSettings();
-
-      return { ...DEFAULTS, ...(row.data as unknown as SiteSettings) };
-    } catch (err) {
-      logger.warn("DB unavailable, fallback to settings.json", {
-        error: (err as Error)?.message,
-      });
-      const fallback = readSettingsFallback();
-      if (fallback) return fallback;
-      return defaultSettings();
+function mapPayloadSettings(doc: Record<string, any>, base: SiteSettings): SiteSettings {
+  const social: SiteSettings["social"] = { vk: "", telegram: "", whatsapp: "" };
+  for (const s of doc.social || []) {
+    const platform = String(s.platform || "").toLowerCase();
+    if (platform in social && s.url) {
+      (social as any)[platform] = s.url;
     }
-    // Настройки меняются из админки; TTL 30с — чтобы изменения (hero, категории)
-    // распространялись быстро между serverless-инстансами. writeSettings
-    // инвалидирует ключ после записи.
-  }, 30_000, 600_000);
+  }
+
+  return {
+    ...base,
+    hero: {
+      ...base.hero,
+      title: doc.heroTitle || base.hero.title,
+      tagline: doc.heroSubtitle || base.hero.tagline,
+      subtitle: doc.heroSubtitle || base.hero.subtitle,
+      image: doc.heroImage || base.hero.image,
+      imageMobile: doc.heroImage || base.hero.imageMobile,
+    },
+    social,
+    wbApiKey: doc.wbApiKey || base.wbApiKey,
+    ozonClientId: doc.ozonClientId || base.ozonClientId,
+    ozonApiKey: doc.ozonApiKey || base.ozonApiKey,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+export async function readSettings(): Promise<SiteSettings> {
+  return cacheGet(
+    "site-settings",
+    async () => {
+      const fallback = readSettingsFallback() || defaultSettings();
+      try {
+        const payload = await getPayload({ config });
+        const res = await payload.find({
+          collection: "site-settings",
+          limit: 1,
+          depth: 0,
+        });
+        if (res.docs.length) return mapPayloadSettings(res.docs[0] as any, fallback);
+        return fallback;
+      } catch (err) {
+        logger.warn("Payload unavailable, fallback to settings.json", {
+          error: (err as Error)?.message,
+        });
+        return fallback;
+      }
+    },
+    30_000,
+    600_000,
+  );
 }
 
 export async function writeSettings(
@@ -96,13 +125,50 @@ export async function writeSettings(
     updatedAt: new Date().toISOString(),
   };
 
-  await prismaQuery(() =>
-    prisma.settings.upsert({
-      where: { id: "singleton" },
-      create: { id: "singleton", data: merged as unknown as Prisma.InputJsonValue },
-      update: { data: merged as unknown as Prisma.InputJsonValue },
-    }),
-  );
+    try {
+      const payload = await getPayload({ config });
+      const res = await payload.find({
+        collection: "site-settings",
+        limit: 1,
+        depth: 0,
+      });
+    const socialArr = (["vk", "telegram", "whatsapp"] as const)
+      .filter((k) => merged.social[k])
+      .map((k) => ({ platform: k, url: merged.social[k] }));
+
+    if (res.docs.length) {
+      await payload.update({
+        collection: "site-settings",
+        id: res.docs[0].id,
+        data: {
+          heroTitle: merged.hero.title,
+          heroSubtitle: merged.hero.subtitle,
+          heroImage: merged.hero.image,
+          social: socialArr,
+          wbApiKey: merged.wbApiKey,
+          ozonClientId: merged.ozonClientId,
+          ozonApiKey: merged.ozonApiKey,
+        },
+      });
+    } else {
+      await payload.create({
+        collection: "site-settings",
+        data: {
+          heroTitle: merged.hero.title,
+          heroSubtitle: merged.hero.subtitle,
+          heroImage: merged.hero.image,
+          social: socialArr,
+          wbApiKey: merged.wbApiKey,
+          ozonClientId: merged.ozonClientId,
+          ozonApiKey: merged.ozonApiKey,
+        },
+      });
+    }
+  } catch (err) {
+    logger.warn("Failed to write settings to Payload", {
+      error: (err as Error)?.message,
+    });
+  }
 
   invalidateCache("site-settings");
   return merged;
