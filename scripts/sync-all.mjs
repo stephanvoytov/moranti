@@ -1018,11 +1018,19 @@ async function main() {
               );
             }
 
-            // Для Ozon-only товаров (нет wbArticle) фаза WB не вызывает merge,
-            // поэтому переносим Ozon-рейтинг/отзывы в отображаемые поля здесь.
-            // Для WB+Ozon товаров приоритетом управляет merge.mjs (свежий
-            // WB-рейтинг > Ozon), здесь не трогаем, чтобы не перезаписать WB.
-            if (db.wbArticle == null) {
+            // Переносим Ozon-рейтинг/отзывы в отображаемые поля. WB-фаза уже
+            // отработала и проставила WB-рейтинг (если он был). Здесь домазываем
+            // реальный рейтинг Ozon (webReviewProductScore, 1-5) для случаев,
+            // когда отображаемого WB-рейтинга НЕТ:
+            //  - Ozon-only товары (нет wbArticle);
+            //  - у товара нет показываемого WB-рейтинга (db.rating == null или < 4,
+            //    т.е. блок рейтинга всё равно скрыт на сайте) — показываем
+            //    реальный Ozon-рейтинг вместо скрытого/некорректного значения.
+            // Если у товара уже есть показываемый WB-рейтинг (>= 4), приоритет
+            // остаётся за WB — не перезаписываем.
+            const dbRatingNum = typeof db.rating === "number" ? db.rating : null;
+            const wbRatingShown = dbRatingNum != null && dbRatingNum >= 4;
+            if (!wbRatingShown) {
               if (rating != null && rating !== db.rating) {
                 updates.rating = rating;
                 changes.push(`rating ${db.rating ?? "—"} → ${rating} (Ozon)`);

@@ -172,10 +172,13 @@ export function mergeProductSources(wbCard, wbPrices, wbRating, ozonInfo, ozonAt
   // карточки) НЕ является звёздным рейтингом и не используется.
   const freshWbRating = wbRating?.rating ?? null;
   // WB-рейтинг приоритетнее Ozon, но только если он СВЕЖИЙ (пришёл в этом
-  // синке). Не подставляем db.rating как WB-рейтинг: иначе устаревшее/
-  // некорректное значение (напр. 1) блокирует показ реального Ozon-рейтинга,
-  // когда у WB нет свежего рейтинга.
-  const wbRatingVal = freshWbRating;
+  // синке). Если свежего нет — берём сохранённый db.rating как WB-рейтинг
+  // (обратная совместимость: старые WB-рейтинги в БД сохраняются, см. тест
+  // «старый WB рейтинг в БД без свежего WB»). Случай, когда db.rating
+  // некорректен (напр. 1) и блокирует показ реального Ozon-рейтинга,
+  // исправляется в фазе ozon-prices (sync-all.mjs): она перезаписывает
+  // отображаемый рейтинг на Ozon, когда у товара нет показываемого WB-рейтинга.
+  const wbRatingVal = freshWbRating ?? (db?.rating ?? null);
   const hasFreshWb = freshWbRating != null;
   const wbFeedbacks = wbRating?.feedbacks ?? null;
   // Количество отзывов Ozon: браузерный счётчик с витрины (db.ozonReviewsCount,
