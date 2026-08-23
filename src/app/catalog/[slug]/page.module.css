@@ -877,8 +877,9 @@
   background: var(--accent-subtle);
 }
 
-/* Единственная маркетплейс-кнопка — на всю ширину */
-.ctas:has(> .cta:only-of-type) .cta {
+/* Единственная маркетплейс-кнопка — на всю ширину (независимо от Cart CTA,
+   который при товаре в корзине тоже рендерится как <a>, ломая :only-of-type) */
+.ctas:has(> .cta):not(:has(> .cta ~ .cta)) .cta {
   grid-column: 1 / -1;
 }
 
