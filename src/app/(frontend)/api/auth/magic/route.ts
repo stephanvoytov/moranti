@@ -48,7 +48,7 @@ export async function GET(request: Request) {
   const result = (await payload.login({
     collection: "customers",
     data: { email, password: temp },
-    // @ts-expect-error Next.js Request совместим с Payload в рантайме
+    // Next.js Request совместим с Payload в рантайме
     req: request,
   })) as any;
 

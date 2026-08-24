@@ -1,4 +1,5 @@
 import { buildConfig } from 'payload'
+import type { CustomComponent } from 'payload'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor, UploadFeature } from '@payloadcms/richtext-lexical'
 import { en } from '@payloadcms/translations/languages/en'
@@ -59,7 +60,7 @@ export default buildConfig({
   admin: {
     user: 'users',
     components: {
-      beforeDashboard: [DashboardWidgets],
+      beforeDashboard: [DashboardWidgets as unknown as CustomComponent],
     },
   },
   collections: [

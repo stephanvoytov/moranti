@@ -26,6 +26,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     marketplaces: [],
     wbArticle: 0,
     inStock: true,
+    isDirectSale: false,
     photoCount: 1,
     ...overrides,
   };

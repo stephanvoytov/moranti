@@ -219,8 +219,8 @@ export function RenderBlock({
     case "cta": {
       const buttons = Array.isArray(block.buttons) ? block.buttons : [];
       const count = data?.products?.length ?? 0;
-      const fill = (s?: unknown) =>
-        typeof s === "string" ? s.replace(/\{count\}/g, String(count)) : s;
+      const fill = (s?: unknown): string | undefined =>
+        typeof s === "string" ? s.replace(/\{count\}/g, String(count)) : (s ? String(s) : undefined);
       return (
         <section className={styles.cta}>
           {block.title && <h2 className={styles.ctaTitle}>{fill(block.title)}</h2>}

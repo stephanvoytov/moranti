@@ -31,6 +31,8 @@ export interface SiteSettings {
   marketplaces: { wildberries: string; ozon: string };
   /** Рейтинги продавца WB/Ozon + взвешенное среднее — для сниппетов */
   storeRating: StoreSellerRating | null;
+  /** Порядок категорий в каталоге (по slug) */
+  catalogOrder: string[];
   updatedAt: string;
 }
 
@@ -43,6 +45,7 @@ const DEFAULTS: SiteSettings = {
   social: { vk: "", telegram: "", whatsapp: "" },
   marketplaces: { wildberries: MARKETPLACE_URLS.wbSeller, ozon: MARKETPLACE_URLS.ozonSeller },
   storeRating: null,
+  catalogOrder: [],
   updatedAt: new Date().toISOString(),
 };
 

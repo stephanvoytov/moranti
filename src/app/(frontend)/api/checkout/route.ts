@@ -130,7 +130,7 @@ export async function POST(request: Request) {
       collection: "orders",
       overrideAccess: true,
       data: {
-        customer: customerId,
+        customer: customerId as number,
         email: customer.email,
         phone: customer.phone || "",
         items: orderItems,

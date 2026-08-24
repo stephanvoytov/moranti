@@ -21,6 +21,11 @@ export default function RegisterClient() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (password.length < 6) {
+      setError("Пароль должен быть не короче 6 символов");
+      setBusy(false);
+      return;
+    }
     setBusy(true);
     try {
       await register({ email, password, firstName, phone });
@@ -70,7 +75,6 @@ export default function RegisterClient() {
             name="password"
             type="password"
             required
-            minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="минимум 6 символов"

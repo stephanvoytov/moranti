@@ -22,7 +22,6 @@ export const SiteStrings: GlobalConfig = {
       label: 'Тексты (любой текст на сайте)',
       admin: {
         description: 'Каждая строка: группа, ключ (системный, не менять), назначение (для себя), текст. Строки свёрнуты по группам.',
-        group: { fields: ['group'] },
       },
       fields: [
         {

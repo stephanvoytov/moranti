@@ -13,7 +13,7 @@ await payload.update({
   collection: 'orders',
   id,
   overrideAccess: true,
-  data: { status },
+  data: { status: status as any },
 })
 
 console.log(`order ${id} -> status ${status}`)

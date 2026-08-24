@@ -7,7 +7,10 @@ export const Products: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'sku', 'category', 'isDirectSale', 'price', 'inStock', 'updatedAt'],
-    preview: ({ data }) => (data?.slug ? `/catalog/${data.slug}` : undefined),
+    preview: ({ data }) => {
+      const slug = (data as { slug?: string } | undefined)?.slug
+      return slug ? `/catalog/${slug}` : null
+    },
     group: 'Магазин',
     description: 'Товары магазина — сумки из каталога (фото, цены, наличие, маркетплейсы).',
   },

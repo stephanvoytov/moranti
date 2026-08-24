@@ -2,11 +2,11 @@ import type { CollectionConfig } from 'payload'
 
 export const Customers: CollectionConfig = {
   slug: 'customers',
+  defaultSort: '-createdAt',
   labels: { singular: 'Покупатель', plural: 'Покупатели' },
   admin: {
     useAsTitle: 'email',
     defaultColumns: ['email', 'firstName', 'lastName', 'phone', 'createdAt'],
-    defaultSort: '-createdAt',
     group: 'Магазин',
     description: 'Клиенты, зарегистрированные на сайте (не путать с «Сотрудники»).',
   },

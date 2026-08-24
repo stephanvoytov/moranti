@@ -18,11 +18,11 @@ const PAYMENT_LABELS: Record<string, string> = {
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
+  defaultSort: '-createdAt',
   labels: { singular: 'Заказ', plural: 'Заказы' },
   admin: {
     useAsTitle: 'orderNumber',
     defaultColumns: ['orderNumber', 'customer', 'status', 'total', 'paymentStatus', 'createdAt'],
-    defaultSort: '-createdAt',
     group: 'Магазин',
     description: 'Заказы из витрины: статусы, оплата, позиции и доставка.',
   },

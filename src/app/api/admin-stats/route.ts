@@ -47,17 +47,22 @@ export async function GET() {
       createdAt: o.createdAt,
     }));
 
+    const totalOf = (r: unknown): number => {
+      const r2 = r as { total?: number; totalDocs?: number }
+      return r2.total ?? r2.totalDocs ?? 0
+    }
+
     return NextResponse.json({
       ok: true,
       metrics: {
-        products: products.total,
-        ordersNew: ordersNew.total,
-        ordersProcessing: ordersProcessing.total,
-        ordersDone: ordersDone.total,
-        subscribers: subscribers.total,
-        customers: customers.total,
+        products: totalOf(products),
+        ordersNew: totalOf(ordersNew),
+        ordersProcessing: totalOf(ordersProcessing),
+        ordersDone: totalOf(ordersDone),
+        subscribers: totalOf(subscribers),
+        customers: totalOf(customers),
       },
-      attention: ordersNew.total + ordersProcessing.total,
+      attention: totalOf(ordersNew) + totalOf(ordersProcessing),
       recentOrders,
     });
   } catch (e: any) {
