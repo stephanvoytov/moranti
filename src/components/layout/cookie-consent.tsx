@@ -11,6 +11,7 @@ export default function CookieConsent() {
 
   useEffect(() => {
     try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- чтение localStorage после гидратации
       if (!localStorage.getItem(STORAGE_KEY)) setVisible(true);
     } catch {
       /* localStorage недоступен — баннер не показываем */
