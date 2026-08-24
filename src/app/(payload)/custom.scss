@@ -1,0 +1,75 @@
+/* Moranti — кастомные стили админки */
+
+.mp-media-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--theme-elevation-150, #e3e3e3);
+  border-radius: 4px;
+  background: var(--theme-elevation-50, #f9f9f9);
+}
+
+.mp-media-picker__preview {
+  width: 140px;
+  height: 140px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--theme-elevation-150, #e3e3e3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mp-media-picker__thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mp-media-picker__empty {
+  font-size: 0.8rem;
+  color: var(--theme-elevation-500, #777);
+  text-align: center;
+}
+
+.mp-media-picker__controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mp-media-picker__url {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--theme-elevation-150, #e3e3e3);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  background: #fff;
+}
+
+.mp-btn {
+  appearance: none;
+  border: 1px solid var(--theme-elevation-150, #e3e3e3);
+  background: #fff;
+  color: var(--theme-elevation-800, #333);
+  padding: 0.45rem 0.9rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.mp-btn:hover {
+  background: var(--theme-elevation-100, #f1f1f1);
+}
+
+.mp-btn--primary {
+  background: var(--theme-primary-500, #3250a8);
+  border-color: var(--theme-primary-500, #3250a8);
+  color: #fff;
+}
+
+.mp-btn--primary:hover {
+  background: var(--theme-primary-600, #284287);
+}

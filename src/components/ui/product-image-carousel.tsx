@@ -158,10 +158,10 @@ export default function ProductImageCarousel({
       <Link href={`/catalog/${product.slug}`} aria-label={product.name} className={styles.imageLink}>
         {layers.map((url, i) =>
           i === 0 || (isBaseReady && hoverMounted) ? (
-            <div
-              key={url}
-              className={`${styles.imageLayer} ${i === hoverIndex ? styles.imageLayerActive : ""}`}
-            >
+              <div
+                key={i}
+                className={`${styles.imageLayer} ${i === hoverIndex ? styles.imageLayerActive : ""}`}
+              >
               <SmartImage
                 src={url}
                 alt={alt}

@@ -7,6 +7,9 @@ export const Products: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'sku', 'category', 'isDirectSale', 'price', 'inStock', 'updatedAt'],
+    preview: ({ data }) => (data?.slug ? `/catalog/${data.slug}` : undefined),
+    group: 'Магазин',
+    description: 'Товары магазина — сумки из каталога (фото, цены, наличие, маркетплейсы).',
   },
   fields: [
     {
@@ -61,13 +64,22 @@ export const Products: CollectionConfig = {
         {
           label: 'Медиа',
           fields: [
-            { name: 'image', type: 'text', label: 'Основное фото (URL)' },
+            {
+              name: 'image',
+              type: 'text',
+              label: 'Основное фото',
+              admin: {
+                components: {
+                  Field: { path: '@/components/admin/MediaPicker#MediaPicker' },
+                },
+              },
+            },
             {
               name: 'gallery',
               type: 'array',
               label: 'Галерея',
               fields: [
-                { name: 'image', type: 'text', label: 'URL' },
+                { name: 'image', type: 'text', label: 'URL', admin: { components: { Field: { path: '@/components/admin/MediaPicker#MediaPicker' } } } },
                 { name: 'alt', type: 'text', label: 'Alt' },
               ],
             },
@@ -109,6 +121,20 @@ export const Products: CollectionConfig = {
             { name: 'reviewsCount', type: 'number', label: 'Отзывы' },
             { name: 'salesCount', type: 'number', label: 'Продажи' },
             { name: 'wbCreatedAt', type: 'date', label: 'Создано на WB (для новинок)' },
+          ],
+        },
+        {
+          label: 'Превью',
+          fields: [
+            {
+              name: 'preview',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: { path: '@/components/admin/ProductPreview#ProductPreview' },
+                },
+              },
+            },
           ],
         },
       ],

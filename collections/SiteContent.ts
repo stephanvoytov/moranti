@@ -8,6 +8,10 @@ import type { GlobalConfig } from 'payload'
 export const SiteContent: GlobalConfig = {
   slug: 'site-content',
   label: 'Контент сайта',
+  admin: {
+    group: 'Настройки',
+    description: 'Что повторяется на всех страницах: подвал (описание бренда, копирайт), контакты, соцсети.',
+  },
   access: { read: () => true },
   fields: [
     {

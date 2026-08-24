@@ -114,3 +114,5 @@ _tmp_*
 /media/
 
 dev-server.log
+
+tunnel.log

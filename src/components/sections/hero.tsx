@@ -13,9 +13,11 @@ interface HeroSettings {
 export default function Hero({
   settings,
   buttonLabel = "Смотреть коллекцию",
+  buttonHref = "/catalog",
 }: {
   settings: HeroSettings;
   buttonLabel?: string;
+  buttonHref?: string;
 }) {
   return (
     <section className={styles.hero}>
@@ -36,9 +38,9 @@ export default function Hero({
       <div className={styles.content}>
         <h1 className={styles.title}>{settings.title}</h1>
         <p className={styles.tagline}>{settings.tagline}</p>
-        <Link href="/catalog" className={styles.cta}>
-          {buttonLabel}
-        </Link>
+      <Link href={buttonHref} className={styles.cta}>
+        {buttonLabel}
+      </Link>
       </div>
     </section>
   );

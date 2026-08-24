@@ -4,7 +4,7 @@ export const Models: CollectionConfig = {
   slug: 'models',
   access: { read: () => true },
   labels: { singular: 'Модель', plural: 'Модели' },
-  admin: { useAsTitle: 'name', defaultColumns: ['name', 'category', 'imtId', 'updatedAt'] },
+  admin: { useAsTitle: 'name', defaultColumns: ['name', 'category', 'imtId', 'updatedAt'], group: 'Магазин', description: 'Модели (линейки/вариации товаров, общие фото и состав).' },
   fields: [
     { name: 'name', type: 'text', label: 'Название', required: true },
     { name: 'slug', type: 'text', label: 'ЧПУ', required: true, unique: true },
@@ -12,7 +12,7 @@ export const Models: CollectionConfig = {
     { name: 'imtId', type: 'number', label: 'WB imtId' },
     { name: 'description', type: 'textarea', label: 'Описание' },
     { name: 'composition', type: 'text', label: 'Состав' },
-    { name: 'image', type: 'text', label: 'Фото (URL)' },
+    { name: 'image', type: 'text', label: 'Фото', admin: { components: { Field: { path: '@/components/admin/MediaPicker#MediaPicker' } } } },
     {
       name: 'gallery',
       type: 'array',

@@ -5,6 +5,7 @@ import { useCart, type CartItem } from "@/lib/cart-context";
 import { useAllProducts } from "@/lib/use-products";
 import type { Product } from "@/data/products";
 import SmartImage from "@/components/ui/smart-image";
+import Button from "@/components/ui/Button";
 import styles from "./page.module.css";
 
 function plural(n: number, one: string, few: string, many: string): string {
@@ -150,6 +151,9 @@ export default function CartClient() {
                 Заказ оформляется на Wildberries или Ozon — выберите площадку
                 в строке каждого товара.
               </p>
+              <Button variant="primary" href="/checkout">
+                Оформить заказ на сайте
+              </Button>
             </div>
           </>
         ) : (

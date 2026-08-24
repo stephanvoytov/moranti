@@ -131,6 +131,37 @@ export const subscribeSchema = z.object({
 
 export type SubscribeInput = z.infer<typeof subscribeSchema>;
 
+/* ─── Checkout (оформление заказа на сайте) ─── */
+
+export const checkoutItemSchema = z.object({
+  productId: z.number().int().positive("Некорректный товар"),
+  qty: z.number().int().positive().max(99, "Слишком много штук").default(1),
+});
+
+export const checkoutSchema = z.object({
+  items: z
+    .array(checkoutItemSchema)
+    .min(1, "Корзина пуста")
+    .max(50, "Слишком много позиций"),
+  customer: z.object({
+    email: z.string().email("Некорректный email"),
+    firstName: z.string().trim().max(80).optional(),
+    lastName: z.string().trim().max(80).optional(),
+    phone: z
+      .string()
+      .trim()
+      .max(30)
+      .regex(/^[0-9+\s()-]*$/, "Только цифры и + ( ) -")
+      .optional(),
+  }),
+  address: z.string().trim().max(500).optional(),
+  shippingMethod: z.string().trim().max(80).optional(),
+  paymentMethod: z.enum(["yookassa", "cod", "invoice"]).optional().default("cod"),
+  notes: z.string().trim().max(2000).optional(),
+});
+
+export type CheckoutInput = z.infer<typeof checkoutSchema>;
+
 /* ─── Products list query ─── */
 
 export const productsQuerySchema = z.object({

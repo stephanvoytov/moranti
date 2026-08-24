@@ -35,7 +35,13 @@ function imgSrc(block: Record<string, any>): string {
 
 /* ---------- рендер одного блока ---------- */
 
-export function RenderBlock({ block }: { block: any }) {
+export function RenderBlock({
+  block,
+  data,
+}: {
+  block: any;
+  data?: { products?: any[] };
+}) {
   if (!block || typeof block !== "object") return null;
 
   switch (block.blockType) {
@@ -212,10 +218,13 @@ export function RenderBlock({ block }: { block: any }) {
     /* ——— Призыв к действию ——— */
     case "cta": {
       const buttons = Array.isArray(block.buttons) ? block.buttons : [];
+      const count = data?.products?.length ?? 0;
+      const fill = (s?: unknown) =>
+        typeof s === "string" ? s.replace(/\{count\}/g, String(count)) : s;
       return (
         <section className={styles.cta}>
-          {block.title && <h2 className={styles.ctaTitle}>{block.title}</h2>}
-          {block.text && <p className={styles.ctaDesc}>{block.text}</p>}
+          {block.title && <h2 className={styles.ctaTitle}>{fill(block.title)}</h2>}
+          {block.text && <p className={styles.ctaDesc}>{fill(block.text)}</p>}
           {buttons.length > 0 && (
             <div className={styles.ctaActions}>
               {buttons.map((btn: any, i: number) =>
@@ -242,12 +251,18 @@ export function RenderBlock({ block }: { block: any }) {
 
 /* ---------- список блоков ---------- */
 
-export function RenderBlocks({ blocks }: { blocks?: any[] }) {
+export function RenderBlocks({
+  blocks,
+  data,
+}: {
+  blocks?: any[];
+  data?: { products?: any[] };
+}) {
   if (!Array.isArray(blocks) || blocks.length === 0) return null;
   return (
     <>
       {blocks.map((b, i) => (
-        <RenderBlock key={i} block={b} />
+        <RenderBlock key={i} block={b} data={data} />
       ))}
     </>
   );

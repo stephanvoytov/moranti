@@ -12,37 +12,23 @@ import { logger } from "@/lib/logger";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 
 export interface SiteSettings {
-  hero: { title: string; tagline: string; subtitle: string; image: string; imageMobile: string };
-  featuredIds: string[];
-  catalogOrder: string[];
   wbApiKey: string;
   ozonClientId: string;
   ozonApiKey: string;
   yandexMetrikaId: string;
   /** Email владельца — куда приходят вопросы из формы «Задать вопрос» */
   contactEmail: string;
-  categoryImages: Record<string, string>;
   social: { vk: string; telegram: string; whatsapp: string };
   marketplaces: { wildberries: string; ozon: string };
   updatedAt: string;
 }
 
 const DEFAULTS: SiteSettings = {
-  hero: {
-    title: "Moranti",
-    tagline: "Сумки из натуральной итальянской кожи. Минимум пафоса — максимум качества. Из Италии.",
-    subtitle: "Кожаные сумки на каждый день",
-    image: "",
-    imageMobile: "",
-  },
-  featuredIds: [],
-  catalogOrder: [],
   wbApiKey: "",
   ozonClientId: "",
   ozonApiKey: "",
   yandexMetrikaId: "",
   contactEmail: "",
-  categoryImages: {},
   social: { vk: "", telegram: "", whatsapp: "" },
   marketplaces: { wildberries: MARKETPLACE_URLS.wbSeller, ozon: MARKETPLACE_URLS.ozonSeller },
   updatedAt: new Date().toISOString(),
@@ -73,14 +59,7 @@ function mapPayloadSettings(doc: Record<string, any>, base: SiteSettings): SiteS
 
   return {
     ...base,
-    hero: {
-      ...base.hero,
-      title: doc.heroTitle || base.hero.title,
-      tagline: doc.heroSubtitle || base.hero.tagline,
-      subtitle: doc.heroSubtitle || base.hero.subtitle,
-      image: doc.heroImage || base.hero.image,
-      imageMobile: doc.heroImage || base.hero.imageMobile,
-    },
+    contactEmail: doc.contactEmail || base.contactEmail,
     social,
     wbApiKey: doc.wbApiKey || base.wbApiKey,
     ozonClientId: doc.ozonClientId || base.ozonClientId,

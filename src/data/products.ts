@@ -62,6 +62,9 @@ export interface Product {
   archivedAt?: string;
   updatedAt?: string;
   inStock: boolean;
+  isDirectSale: boolean;
+  directPrice?: number;
+  stockQuantity?: number;
   wbCreatedAt?: string;
   characteristics?: CharacteristicGroup[];
   photoCount: number;
@@ -206,6 +209,9 @@ function mapPayloadProduct(
     archivedAt: p.archivedAt ?? undefined,
     updatedAt: p.updatedAt ?? undefined,
     inStock: p.inStock ?? true,
+    isDirectSale: p.isDirectSale ?? false,
+    directPrice: typeof p.directPrice === "number" ? p.directPrice : undefined,
+    stockQuantity: typeof p.stockQuantity === "number" ? p.stockQuantity : undefined,
     wbCreatedAt: p.wbCreatedAt ?? undefined,
     characteristics: characteristics.length ? characteristics : undefined,
     photoCount: images.length || 1,

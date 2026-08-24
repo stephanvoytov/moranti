@@ -1,13 +1,13 @@
 /* =============================================
    Moranti — Media usage lookup
    Ищет, где используется URL изображения:
-   настройки (hero, категории), товары, модели.
+   товары, модели. Фото героя и категорий — связи Payload
+   (загрузки/URL), отслеживаются автоматически.
    Нужно перед удалением файла из медиа-хранилища,
    чтобы не сломать витрину.
    ============================================= */
 
 import prisma, { prismaQuery } from "@/lib/prisma";
-import { readSettings } from "@/lib/settings";
 
 export interface MediaUsage {
   /** Человекочитаемое описание места использования */
@@ -18,21 +18,6 @@ export interface MediaUsage {
 
 export async function findMediaUsage(url: string): Promise<MediaUsage[]> {
   const usages: MediaUsage[] = [];
-
-  // Настройки: hero-картинка + фото категорий
-  try {
-    const settings = await readSettings();
-    if (settings.hero.image === url) {
-      usages.push({ where: "Настройки — hero-картинка" });
-    }
-    for (const [slug, img] of Object.entries(settings.categoryImages)) {
-      if (img === url) {
-        usages.push({ where: "Настройки — фото категории", slug });
-      }
-    }
-  } catch {
-    // БД недоступна — пропускаем проверку настроек (не блокируем удаление)
-  }
 
   // Товары: витринное фото, галерея, ozon-фото
   try {

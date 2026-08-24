@@ -25,6 +25,7 @@ function safeName(name: string): string {
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  labels: { singular: 'Файл', plural: 'Медиатека' },
   access: {
     read: () => true,
     create: ({ req: { user } }) => Boolean(user),
@@ -33,6 +34,8 @@ export const Media: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'alt',
+    group: 'Контент',
+    description: 'Изображения и файлы сайта (загружаются в облако/Vercel Blob).',
   },
   upload: {
     // Локальное хранилище — фолбэк, когда Blob-токена нет.

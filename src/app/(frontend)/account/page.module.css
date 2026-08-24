@@ -1,0 +1,120 @@
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: calc(var(--header-height) + var(--space-lg)) var(--container-padding)
+    var(--space-4xl);
+}
+
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  margin-bottom: var(--space-5);
+}
+
+.title {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: var(--text-h2);
+  color: var(--dark);
+}
+
+.profileRow {
+  display: flex;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
+}
+
+.profileRow b {
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-right: 6px;
+}
+
+.orders {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.order {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  background: var(--surface);
+}
+
+.orderHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-2);
+}
+
+.orderNum {
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.orderDate {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.badges {
+  display: flex;
+  gap: 8px;
+  margin-bottom: var(--space-3);
+}
+
+.badge {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-subtle);
+  color: var(--camel);
+}
+
+.badgePaid {
+  background: rgba(122, 139, 119, 0.14);
+  color: var(--success);
+}
+
+.items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.total {
+  margin-top: var(--space-3);
+  font-weight: 600;
+  color: var(--camel);
+}
+
+.empty {
+  color: var(--text-secondary);
+}
+
+.loading {
+  color: var(--muted);
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: var(--space-5);
+  }
+}

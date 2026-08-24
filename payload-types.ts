@@ -161,6 +161,8 @@ export interface CustomerAuthOperations {
   };
 }
 /**
+ * Сотрудники с доступом в админку (роли: admin / editor / user).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -188,6 +190,8 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Изображения и файлы сайта (загружаются в облако/Vercel Blob).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
@@ -207,6 +211,8 @@ export interface Media {
   focalY?: number | null;
 }
 /**
+ * Товары магазина — сумки из каталога (фото, цены, наличие, маркетплейсы).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
@@ -276,6 +282,8 @@ export interface Product {
   createdAt: string;
 }
 /**
+ * Категории каталога (кросс-боди, тоут, багет, седло, рюкзак и т.п.).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
@@ -290,6 +298,8 @@ export interface Category {
   createdAt: string;
 }
 /**
+ * Модели (линейки/вариации товаров, общие фото и состав).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "models".
  */
@@ -313,6 +323,8 @@ export interface Model {
   createdAt: string;
 }
 /**
+ * Клиенты, зарегистрированные на сайте (не путать с «Сотрудники»).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "customers".
  */
@@ -330,6 +342,8 @@ export interface Customer {
       }[]
     | null;
   notes?: string | null;
+  magicToken?: string | null;
+  magicTokenExpiry?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -350,6 +364,8 @@ export interface Customer {
   collection: 'customers';
 }
 /**
+ * Заказы из витрины: статусы, оплата, позиции и доставка.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders".
  */
@@ -381,6 +397,8 @@ export interface Order {
   createdAt: string;
 }
 /**
+ * Подписчики рассылки (email-маркетинг).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "subscribers".
  */
@@ -400,6 +418,8 @@ export interface Subscriber {
   createdAt: string;
 }
 /**
+ * Контент страниц сайта: Главная, О бренде, Уход, Доставка, Контакты, Политика. Редактируется блоками.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -501,6 +521,42 @@ export interface Page {
             blockName?: string | null;
             blockType: 'cta';
           }
+        | {
+            eyebrow?: string | null;
+            title?: string | null;
+            tagline?: string | null;
+            subtitle?: string | null;
+            buttonLabel?: string | null;
+            buttonHref?: string | null;
+            image?: (number | null) | Media;
+            /**
+             * Например: /about/bag-4.jpg или https://…
+             */
+            imageUrl?: string | null;
+            imageMobile?: (number | null) | Media;
+            imageMobileUrl?: string | null;
+            caption?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'homeHero';
+          }
+        | {
+            title?: string | null;
+            subtitle?: string | null;
+            source?: ('new' | 'popular' | 'manual') | null;
+            manualProducts?: (number | Product)[] | null;
+            limit?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'products';
+          }
+        | {
+            title?: string | null;
+            subtitle?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'categories';
+          }
       )[]
     | null;
   featuredImage?: string | null;
@@ -513,6 +569,8 @@ export interface Page {
   createdAt: string;
 }
 /**
+ * Статьи блога (если используется).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
@@ -543,6 +601,8 @@ export interface Post {
   createdAt: string;
 }
 /**
+ * Название магазина, валюта, ключи API маркетплейсов и SMTP.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".
  */
@@ -830,6 +890,8 @@ export interface CustomersSelect<T extends boolean = true> {
         id?: T;
       };
   notes?: T;
+  magicToken?: T;
+  magicTokenExpiry?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -991,6 +1053,42 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        homeHero?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              tagline?: T;
+              subtitle?: T;
+              buttonLabel?: T;
+              buttonHref?: T;
+              image?: T;
+              imageUrl?: T;
+              imageMobile?: T;
+              imageMobileUrl?: T;
+              caption?: T;
+              id?: T;
+              blockName?: T;
+            };
+        products?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              source?: T;
+              manualProducts?: T;
+              limit?: T;
+              id?: T;
+              blockName?: T;
+            };
+        categories?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   featuredImage?: T;
   status?: T;
@@ -1078,6 +1176,8 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * Что повторяется на всех страницах: подвал (описание бренда, копирайт), контакты, соцсети.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-content".
  */
@@ -1119,16 +1219,19 @@ export interface SiteContent {
   createdAt?: string | null;
 }
 /**
+ * Все повторяющиеся надписи интерфейса: меню, кнопки, заголовки, подписи, футер. Тексты главной страницы редактируются в разделе «Страницы → Главная». Меняется сразу на сайте.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-strings".
  */
 export interface SiteString {
   id: number;
   /**
-   * Каждая строка: ключ (системный, не менять), назначение (для себя), текст.
+   * Каждая строка: группа, ключ (системный, не менять), назначение (для себя), текст. Строки свёрнуты по группам.
    */
   strings?:
     | {
+        group?: ('nav' | 'btn' | 'title' | 'label' | 'footer' | 'common' | 'marketplace') | null;
         key?: string | null;
         label?: string | null;
         value?: string | null;
@@ -1177,6 +1280,7 @@ export interface SiteStringsSelect<T extends boolean = true> {
   strings?:
     | T
     | {
+        group?: T;
         key?: T;
         label?: T;
         value?: T;

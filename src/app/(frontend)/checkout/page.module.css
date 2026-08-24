@@ -1,0 +1,173 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: calc(var(--header-height) + var(--space-lg)) var(--container-padding)
+    var(--space-4xl);
+}
+
+.section {
+  width: 100%;
+}
+
+.header {
+  margin-bottom: var(--space-5);
+}
+
+.label {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--camel);
+  margin-bottom: 6px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: var(--text-h1);
+  color: var(--dark);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (max-width: 820px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.blockTitle {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--camel);
+  margin: var(--space-5) 0 var(--space-2);
+}
+
+.error {
+  color: var(--error);
+  font-size: 0.9rem;
+}
+
+.summary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-3));
+}
+
+.list {
+  list-style: none;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: 0.92rem;
+  color: var(--text-primary);
+}
+
+.rowName {
+  display: flex;
+  flex-direction: column;
+}
+
+.rowQty {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  color: var(--dark);
+}
+
+.summaryTotal {
+  color: var(--camel);
+}
+
+.empty,
+.successBox {
+  padding: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.mpNote {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.mpNote p {
+  margin: 0 0 8px;
+}
+
+.mpList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mpList li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.mpLinks {
+  display: flex;
+  gap: 8px;
+}
+
+.mpLinks a {
+  color: var(--brown);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.mpLinks a:hover {
+  color: var(--camel);
+}

@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const SiteSettings: CollectionConfig = {
   slug: 'site-settings',
   labels: { singular: 'Настройки', plural: 'Настройки' },
-  admin: { useAsTitle: 'storeName' },
+  admin: { useAsTitle: 'storeName', group: 'Настройки', description: 'Название магазина, валюта, ключи API маркетплейсов и SMTP.' },
   fields: [
     {
       type: 'tabs',

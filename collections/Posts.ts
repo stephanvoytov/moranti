@@ -4,7 +4,7 @@ export const Posts: CollectionConfig = {
   slug: 'posts',
   access: { read: () => true },
   labels: { singular: 'Статья', plural: 'Статьи' },
-  admin: { useAsTitle: 'title', defaultColumns: ['title', 'slug', 'status', 'publishedAt'] },
+  admin: { useAsTitle: 'title', defaultColumns: ['title', 'slug', 'status', 'publishedAt'], group: 'Контент', description: 'Статьи блога (если используется).' },
   fields: [
     { name: 'title', type: 'text', label: 'Заголовок', required: true },
     { name: 'slug', type: 'text', label: 'ЧПУ', required: true, unique: true },

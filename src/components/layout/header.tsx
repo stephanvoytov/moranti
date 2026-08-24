@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useFavorites } from "@/lib/favorites-context";
 import { useCart } from "@/lib/cart-context";
+import { useAuth } from "@/lib/auth-context";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 import { seoConfig } from "@/config/seo";
 import { t, type SiteStrings } from "@/lib/strings";
@@ -16,6 +17,7 @@ export default function Header({ strings }: { strings?: SiteStrings }) {
   const [catalogOpen, setCatalogOpen] = useState(false);
   const { count } = useFavorites();
   const { count: cartCount } = useCart();
+  const { user, logout } = useAuth();
 
   // Закрывает меню и сворачивает аккордеон «Каталог»
   const closeMenu = () => {
@@ -185,6 +187,35 @@ export default function Header({ strings }: { strings?: SiteStrings }) {
             </svg>
             {cartCount > 0 && <span className={styles.favBadge}>{cartCount}</span>}
           </Link>
+
+          {user ? (
+            <>
+              <Link href="/account" className={styles.favWrap} aria-label="Кабинет">
+                <svg className={styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+                </svg>
+              </Link>
+              <button
+                className={styles.favWrap}
+                aria-label="Выйти"
+                onClick={() => logout()}
+              >
+                <svg className={styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M16 17l5-5-5-5" />
+                  <path d="M21 12H9" />
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                </svg>
+              </button>
+            </>
+          ) : (
+            <Link href="/login" className={styles.favWrap} aria-label="Вход">
+              <svg className={styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+              </svg>
+            </Link>
+          )}
 
           <button
             className={styles.menuToggle}

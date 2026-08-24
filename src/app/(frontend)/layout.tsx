@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { Playfair_Display, Montserrat, Inter } from "next/font/google";
 import { FavoritesProvider } from "@/lib/favorites-context";
 import { CartProvider } from "@/lib/cart-context";
+import { AuthProvider } from "@/lib/auth-context";
 import { seoConfig } from "@/config/seo";
 import { YANDEX_METRIKA_ID } from "@/config/analytics";
 import { buildGlobalJsonLd } from "@/lib/seo-jsonld";
@@ -199,7 +200,9 @@ export default async function RootLayout({
         >
           <FavoritesProvider>
           <CartProvider>
+          <AuthProvider>
           <StorefrontShell siteContent={siteContent} strings={strings}>{children}</StorefrontShell>
+          </AuthProvider>
           </CartProvider>
           </FavoritesProvider>
         </YandexMetricaProvider>

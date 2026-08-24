@@ -25,6 +25,8 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'status', 'updatedAt'],
+    group: 'Контент',
+    description: 'Контент страниц сайта: Главная, О бренде, Уход, Доставка, Контакты, Политика. Редактируется блоками.',
   },
   fields: [
     { name: 'title', type: 'text', label: 'Заголовок страницы (H1 и меню)', required: true },
@@ -152,9 +154,64 @@ export const Pages: CollectionConfig = {
               ],
             },
           ],
-        },
-      ],
-    },
+         },
+          /* ——— Герой главной (полноэкранный, с фото) ——— */
+          {
+            slug: 'homeHero',
+            labels: { singular: 'Герой главной', plural: 'Герой главной' },
+            fields: [
+              { name: 'eyebrow', type: 'text', label: 'Надзаголовок (мелко сверху)' },
+              { name: 'title', type: 'text', label: 'Заголовок' },
+              { name: 'tagline', type: 'textarea', label: 'Лид (под заголовком)' },
+              { name: 'subtitle', type: 'text', label: 'Подзаголовок (мелко)' },
+              { name: 'buttonLabel', type: 'text', label: 'Надпись на кнопке', defaultValue: 'Смотреть коллекцию' },
+              { name: 'buttonHref', type: 'text', label: 'Ссылка кнопки', defaultValue: '/catalog' },
+              ...imageFields,
+              { name: 'imageMobile', type: 'upload', relationTo: 'media', label: 'Файл из Медиатеки (мобильная версия, опц.)' },
+              { name: 'imageMobileUrl', type: 'text', label: '…или путь / URL мобильной версии' },
+              { name: 'caption', type: 'text', label: 'Подпись под фото' },
+            ],
+          },
+          /* ——— Товары (новинки / популярные / ручной выбор) ——— */
+          {
+            slug: 'products',
+            labels: { singular: 'Товары', plural: 'Товары' },
+            fields: [
+              { name: 'title', type: 'text', label: 'Заголовок секции' },
+              { name: 'subtitle', type: 'textarea', label: 'Подзаголовок секции' },
+              {
+                name: 'source',
+                type: 'select',
+                label: 'Откуда брать товары',
+                defaultValue: 'popular',
+                options: [
+                  { value: 'new', label: 'Новинки (за 90 дней)' },
+                  { value: 'popular', label: 'Популярные (по отзывам и рейтингу)' },
+                  { value: 'manual', label: 'Ручной выбор' },
+                ],
+              },
+              {
+                name: 'manualProducts',
+                type: 'relationship',
+                label: 'Товары (для «Ручной выбор»)',
+                relationTo: 'products',
+                hasMany: true,
+                admin: { condition: (data: any) => data?.source === 'manual' },
+              },
+              { name: 'limit', type: 'number', label: 'Сколько показывать', defaultValue: 8 },
+            ],
+          },
+          /* ——— Категории (карточки коллекций) ——— */
+          {
+            slug: 'categories',
+            labels: { singular: 'Категории', plural: 'Категории' },
+            fields: [
+              { name: 'title', type: 'text', label: 'Заголовок секции' },
+              { name: 'subtitle', type: 'textarea', label: 'Подзаголовок секции' },
+            ],
+          },
+       ],
+     },
 
     { name: 'featuredImage', type: 'text', label: 'Картинка (URL)', hidden: true },
     {

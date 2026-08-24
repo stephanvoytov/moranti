@@ -1,254 +1,101 @@
-import { readSettings } from "@/lib/settings";
 import { getProducts, getCategories } from "@/data/products";
-import { blobUrl } from "@/lib/blob";
 import { buildItemListJsonLd } from "@/lib/seo-jsonld";
-import Link from "next/link";
-import Hero from "@/components/sections/hero";
 import BrandSeo from "@/components/sections/brand-seo";
-import ProductCard from "@/components/ui/product-card";
-import SmartImage from "@/components/ui/smart-image";
 import HomeClient from "./home-client";
-import { getSiteStrings } from "@/lib/site-content";
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { RenderBlocks } from "@/components/sections/page-view";
-import { t } from "@/lib/strings";
-import styles from "./page.module.css";
+import { RenderBlock } from "@/components/sections/page-view";
+import {
+  HomeHero,
+  HomeProducts,
+  HomeCategories,
+  resolveProducts,
+  type CategoryView,
+} from "./home-blocks";
 
-// «Сейчас» фиксируется один раз при загрузке модуля (окно новинок — 90 дней).
-const NOW = Date.now();
-
-/* ——— ISR: главная пересобирается каждые 60с ——— 
-   Настройки (hero, категории) меняются из админки; без ISR страница
-   статична и не видит изменений до следующего деплоя. revalidatePath("/")
-   из API-роутов даёт мгновенную инвалидацию, а 60с — страховка. */
 export const revalidate = 60;
 
-/* ——— Фото категории: приоритет у настроек, fallback на первый товар ——— */
-function getCategoryImage(
-  products: Awaited<ReturnType<typeof getProducts>>,
-  slug: string,
-  overrides: Record<string, string>,
-): string {
-  if (overrides[slug]) return overrides[slug];
-  const found = products.find((p) => p.category === slug);
-  return found?.image || found?.images?.[0] || "";
-}
+const HOME_BLOCKS = new Set(["homeHero", "products", "categories"]);
 
 export default async function Home() {
-  const [products, categories, settings, strings, homePage] = await Promise.all([
-    getProducts(),
-    getCategories(),
-    readSettings(),
-    getSiteStrings(),
-    (async () => {
-      try {
-        const payload = await getPayload({ config });
-        const res = await payload.find({
-          collection: "pages",
-          where: { slug: { equals: "home" } },
-          limit: 1,
-          depth: 0,
-        });
-        return res.docs[0] || null;
-      } catch {
-        return null;
-      }
-    })(),
-  ]);
+  const [products, baseCategories, homePage, categoriesColl] =
+    await Promise.all([
+      getProducts(),
+      getCategories(),
+      (async () => {
+        try {
+          const payload = await getPayload({ config });
+          const res = await payload.find({
+            collection: "pages",
+            where: { slug: { equals: "home" } },
+            limit: 1,
+            depth: 3,
+          });
+          return res.docs[0] || null;
+        } catch {
+          return null;
+        }
+      })(),
+      (async () => {
+        try {
+          const payload = await getPayload({ config });
+          const res = await payload.find({
+            collection: "categories",
+            limit: 200,
+            depth: 0,
+          });
+          return (res.docs as any[]) || [];
+        } catch {
+          return [];
+        }
+      })(),
+    ]);
 
-  const hero = settings.hero;
-  const featuredIds = settings.featuredIds ?? [];
-  const categoryImages = settings.categoryImages ?? {};
+  // Фото категории: из карточки Категории, иначе фолбэк на первый товар
+  const catImageMap: Record<string, string> = {};
+  for (const c of categoriesColl as any[]) {
+    if (c?.slug && c?.image) catImageMap[String(c.slug)] = String(c.image);
+  }
+  const categories: CategoryView[] = baseCategories.map((c) => {
+    const img = catImageMap[c.slug] || "";
+    const display = img || products.find((p) => p.category === c.slug)?.image || "";
+    return { slug: c.slug, name: c.name, count: c.count, image: display };
+  });
 
-  // «Популярные модели»: ручной выбор из админки (featuredIds) — приоритет;
-  // если он пуст — топ по количеству отзывов (как сортировка «По популярности» в каталоге).
-  // Максимум 8 карточек.
-  const featured =
-    featuredIds.length > 0
-      ? products.filter((p) => featuredIds.includes(p.id)).slice(0, 8)
-      : [...products]
-          .sort((a, b) => {
-            // Реальный скоринг популярности: отзывы + рейтинг (вес ×10)
-            const sa = (a.reviewsCount || 0) + (a.rating || 0) * 10;
-            const sb = (b.reviewsCount || 0) + (b.rating || 0) * 10;
-            return sb - sa;
-          })
-          .slice(0, 8);
-
-  // «Новинки»: товары, появившиеся на WB за последние 3 месяца (wbCreatedAt),
-  // от свежих к старым. Максимум 8 карточек.
-  const THREE_MONTHS_MS = 90 * 24 * 60 * 60 * 1000;
-  const newArrivals = [...products]
-    .filter(
-      (p) =>
-        p.wbCreatedAt &&
-        NOW - new Date(p.wbCreatedAt).getTime() <= THREE_MONTHS_MS,
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.wbCreatedAt!).getTime() - new Date(a.wbCreatedAt!).getTime(),
-    )
-    .slice(0, 8);
+  const blocks = Array.isArray((homePage as any)?.layout)
+    ? ((homePage as any).layout as any[])
+    : [];
 
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";
 
+  // JSON-LD для первого блока «Товары» (если есть)
+  const firstProductsBlock = blocks.find((b) => b.blockType === "products");
+  const jsonLdProducts = firstProductsBlock
+    ? resolveProducts(firstProductsBlock, products)
+    : [];
+
   return (
     <>
-      {/* ItemList JSON-LD: популярные модели (если есть) */}
-      {featured.length > 0 && (
+      {jsonLdProducts.length > 0 && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(buildItemListJsonLd(featured, siteUrl)),
+            __html: JSON.stringify(buildItemListJsonLd(jsonLdProducts, siteUrl)),
           }}
         />
       )}
 
-      {/* ——— Hero (тексты из «Тексты сайта»: hero.*) ——— */}
-      <Hero
-        settings={{
-          ...hero,
-          title: t(strings, "hero.title", hero.title),
-          tagline: t(strings, "hero.tagline", hero.tagline),
-          subtitle: t(strings, "hero.subtitle", hero.subtitle),
-        }}
-        buttonLabel={t(strings, "hero.button", "Смотреть коллекцию")}
-      />
+      {blocks.map((block, i) => {
+        if (block.blockType === "homeHero")
+          return <HomeHero key={i} block={block} />;
+        if (block.blockType === "products")
+          return <HomeProducts key={i} block={block} products={products} />;
+        if (block.blockType === "categories")
+          return <HomeCategories key={i} block={block} categories={categories} />;
+        return <RenderBlock key={i} block={block} data={{ products }} />;
+      })}
 
-      {/* ——— Редактируемые блоки Страницы «home» (Payload) ——— */}
-      {homePage?.layout && (
-        <section className={styles.section}>
-          <div className="container">
-            <RenderBlocks blocks={homePage.layout} />
-          </div>
-        </section>
-      )}
-
-      {/* ——— Новинки (реальные поступления за 3 месяца) ——— */}
-      {newArrivals.length > 0 && (
-        <section className={`${styles.section} ${styles.featured}`}>
-          <div className="container">
-            <h2 className={styles.sectionTitle}>{t(strings, "section.new", "Новинки")}</h2>
-            <p className={styles.sectionSubtitle}>
-              {t(
-                strings,
-                "home.newSubtitle",
-                "Свежие поступления натуральной кожи. То, что появилось совсем недавно.",
-              )}
-            </p>
-            <div className={styles.featuredGrid}>
-              {newArrivals.map((product, i) => (
-                <ProductCard key={product.id} product={product} priority={i === 0} />
-              ))}
-            </div>
-            <div className={styles.featuredActions}>
-              <Link href="/new" className={styles.featuredBtn}>
-                {t(strings, "btn.viewAll", "Смотреть все")}
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ——— Популярные модели ——— */}
-      {featured.length > 0 && (
-        <section className={`${styles.section} ${styles.featured}`}>
-          <div className="container">
-            <h2 className={styles.sectionTitle}>{t(strings, "home.featuredTitle", "Популярные модели")}</h2>
-            <p className={styles.sectionSubtitle}>
-              {t(
-                strings,
-                "home.featuredSubtitle",
-                "Модели, которые выбирают чаще всего. Каждая — из натуральной итальянской кожи.",
-              )}
-            </p>
-            <div className={styles.featuredGrid}>
-              {featured.map((product, i) => (
-                <ProductCard key={product.id} product={product} priority={i === 0} />
-              ))}
-            </div>
-            <div className={styles.featuredActions}>
-              <Link href="/catalog" className={styles.featuredBtn}>
-                {t(strings, "btn.viewMore", "Смотреть ещё")}
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ——— Коллекции ——— */}
-      <section className={`${styles.section} ${styles.collections}`}>
-        <div className="container">
-          <h2 className={styles.sectionTitle}>{t(strings, "home.categoriesTitle", "Наши коллекции")}</h2>
-          <p className={styles.sectionSubtitle}>
-            {t(
-              strings,
-              "home.categoriesSubtitle",
-              "Сумка на каждый день, вечерний выход или деловая встреча — форма найдётся для любого сценария.",
-            )}
-          </p>
-          <div className={styles.collectionsGrid}>
-            {categories.filter((cat) => cat.count > 0).map((cat) => {
-              const img = getCategoryImage(products, cat.slug, categoryImages);
-              // Карточка коллекции ~315×420 — полноразмер (Ozon 3024×4032,
-              // 1,2 МБ!) не нужен: Ozon режем оптимизатором (w=520), WB big → c516x688
-              const optimized = img
-                ? img.includes("ir.ozone.ru")
-                  ? `/_next/image?url=${encodeURIComponent(img)}&w=520&q=75`
-                  : img.replace("/images/big/", "/images/c516x688/")
-                : "";
-              return (
-                <Link
-                  key={cat.slug}
-                  href={`/catalog/${cat.slug}`}
-                  className={styles.collectionCard}
-                >
-                  {optimized ? (
-                    <SmartImage
-                      src={blobUrl(optimized)}
-                      alt={cat.name}
-                      className={styles.collectionImg}
-                      width={315}
-                      height={420}
-                    />
-                  ) : (
-                    <div className={styles.collectionImgFallback} />
-                  )}
-                  <div className={styles.collectionOverlay}>
-                    <span className={styles.collectionName}>{cat.name}</span>
-                    <span className={styles.collectionCount}>
-                      {cat.count} {cat.count === 1 ? "модель" : cat.count < 5 ? "модели" : "моделей"}
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ——— CTA ——— */}
-      <section className={styles.ctaSection}>
-        <div className={styles.ctaInner}>
-          <h2 className={styles.ctaTitle}>
-            {t(strings, "cta.title", "Сумки из натуральной кожи")}
-          </h2>
-          <div className={styles.ctaRule} />
-          <p className={styles.ctaDesc}>
-            {products.length}{" "}
-            {t(strings, "cta.desc", "моделей. Доставка по всей России.")}
-          </p>
-          <Link href="/catalog" className={styles.ctaBtn}>
-            {t(strings, "cta.catalog", "Открыть каталог")}
-          </Link>
-        </div>
-      </section>
-
-      {/* ——— SEO-текст (компактный, перед футером) ——— */}
       <BrandSeo />
-
-      {/* ——— Кнопка на админку (клиентский компонент) ——— */}
       <HomeClient />
     </>
   );
