@@ -13,7 +13,7 @@ await payload.update({
   collection: 'orders',
   id,
   overrideAccess: true,
-  data: { status: status as any },
+  data: { status: status as "new" | "processing" | "completed" | "cancelled" | "refunded" },
 })
 
 console.log(`order ${id} -> status ${status}`)
