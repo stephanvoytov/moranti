@@ -65,11 +65,11 @@ export const siteContentData = {
     copyright: '© 2026 Moranti. Все права защищены.',
   },
   contacts: {
-    phone: '+7 (495) 123-45-67',
-    email: 'info@moranti.ru',
-    address: 'Москва, ул. Тверская, 15',
-    city: 'Москва',
-    workHours: 'Ежедневно 10:00–21:00',
+    phone: '',
+    email: 'info@morantibags.ru',
+    address: '',
+    city: '',
+    workHours: '',
   },
   social: [],
 }
