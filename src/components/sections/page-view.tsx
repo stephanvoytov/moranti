@@ -10,6 +10,43 @@ import Link from "next/link";
 import { getPage } from "@/lib/site-content";
 import styles from "./page-view.module.css";
 
+/* ---------- типы блоков ---------- */
+interface BlockItem {
+  text?: string;
+}
+interface BlockImage {
+  image?: unknown;
+  caption?: string;
+}
+interface BlockCard {
+  name?: string;
+  subtitle?: string;
+  text?: string;
+  href?: string;
+}
+interface BlockButton {
+  style?: string;
+  href?: string;
+  label?: string;
+}
+export interface PageBlock {
+  blockType?: string;
+  image?: unknown;
+  imageUrl?: string;
+  imageCaption?: string;
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
+  number?: string | number;
+  items?: BlockItem[];
+  text?: string;
+  images?: BlockImage[];
+  cards?: BlockCard[];
+  outro?: string;
+  buttons?: BlockButton[];
+  [k: string]: unknown;
+}
+
 /* ---------- утилиты ---------- */
 
 /** Разбить textarea на абзацы по пустой строке */
@@ -22,10 +59,10 @@ function paragraphs(t?: unknown): string[] {
 }
 
 /** Ссылка на картинку: приоритет у загруженного файла из «Медиатеки» */
-function imgSrc(block: Record<string, any>): string {
+function imgSrc(block: { image?: unknown; imageUrl?: string }): string {
   const uploaded = block?.image;
-  if (uploaded && typeof uploaded === "object" && uploaded.url) {
-    return String(uploaded.url);
+  if (uploaded && typeof uploaded === "object" && "url" in uploaded) {
+    return String((uploaded as { url?: unknown }).url);
   }
   if (typeof block?.imageUrl === "string" && block.imageUrl) {
     return block.imageUrl;
@@ -39,8 +76,8 @@ export function RenderBlock({
   block,
   data,
 }: {
-  block: any;
-  data?: { products?: any[] };
+  block: PageBlock;
+  data?: { products?: unknown[] };
 }) {
   if (!block || typeof block !== "object") return null;
 
@@ -99,7 +136,7 @@ export function RenderBlock({
             ))}
             {items.length > 0 && (
               <ul className={styles.list}>
-                {items.map((it: any, i: number) => (
+                {items.map((it, i: number) => (
                   <li key={i}>{it?.text ?? ""}</li>
                 ))}
               </ul>
@@ -153,7 +190,7 @@ export function RenderBlock({
         <section
           className={imgs.length > 1 ? styles.photoStrip : styles.singleImage}
         >
-          {imgs.map((im: any, i: number) => {
+          {imgs.map((im, i: number) => {
             const src = imgSrc(im);
             if (!src) return null;
             return (
@@ -185,7 +222,7 @@ export function RenderBlock({
             <h2 className={styles.sectionTitleCenter}>{block.title}</h2>
           )}
           <div className={styles.lifeGrid}>
-            {cards.map((c: any, i: number) => {
+            {cards.map((c, i: number) => {
               const inner = (
                 <>
                   {c.name && <span className={styles.lifeName}>{c.name}</span>}
@@ -227,7 +264,7 @@ export function RenderBlock({
           {block.text && <p className={styles.ctaDesc}>{fill(block.text)}</p>}
           {buttons.length > 0 && (
             <div className={styles.ctaActions}>
-              {buttons.map((btn: any, i: number) =>
+              {buttons.map((btn, i: number) =>
                 btn.style === "secondary" ? (
                   <Link key={i} href={btn.href || "#"} className={styles.ctaSecondary}>
                     {btn.label}
@@ -255,8 +292,8 @@ export function RenderBlocks({
   blocks,
   data,
 }: {
-  blocks?: any[];
-  data?: { products?: any[] };
+  blocks?: PageBlock[];
+  data?: { products?: unknown[] };
 }) {
   if (!Array.isArray(blocks) || blocks.length === 0) return null;
   return (
@@ -292,7 +329,7 @@ export default async function PageView({
     );
   }
 
-  const blocks = Array.isArray(page.layout) ? page.layout : [];
+  const blocks = (Array.isArray(page.layout) ? page.layout : []) as PageBlock[];
   // Если первый блок не хиро — рисуем H1 из названия страницы
   const needsTitle = blocks[0]?.blockType !== "hero";
 

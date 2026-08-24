@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface RecentOrder {
   id: string;
@@ -138,9 +139,9 @@ export default function DashboardWidgets() {
         >
           <strong>Требует внимания:</strong> {data.attention} заказ(ов) в статусе
           «Новый» или «В обработке».{" "}
-          <a href="/admin/collections/orders" style={{ fontWeight: 600 }}>
+          <Link href="/admin/collections/orders" style={{ fontWeight: 600 }}>
             Перейти к заказам →
-          </a>
+          </Link>
         </div>
       )}
 

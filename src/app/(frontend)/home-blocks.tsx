@@ -8,14 +8,34 @@ import styles from "./page.module.css";
 
 const THREE_MONTHS_MS = 90 * 24 * 60 * 60 * 1000;
 
+interface HomeBlockImage {
+  url?: string;
+}
+export interface HomeBlock {
+  blockType?: string;
+  limit?: number;
+  source?: string;
+  manualProducts?: (string | { id?: string })[];
+  image?: HomeBlockImage;
+  imageUrl?: string;
+  imageMobile?: HomeBlockImage;
+  imageMobileUrl?: string;
+  title?: string;
+  tagline?: string;
+  subtitle?: string;
+  buttonLabel?: string;
+  buttonHref?: string;
+  [k: string]: unknown;
+}
+
 /** Какие товары показывать в блоке «Товары» */
-export function resolveProducts(block: any, products: Product[]): Product[] {
+export function resolveProducts(block: HomeBlock, products: Product[]): Product[] {
   const limit =
     typeof block?.limit === "number" && block.limit > 0 ? block.limit : 8;
 
   if (block?.source === "manual" && Array.isArray(block.manualProducts)) {
     const ids = block.manualProducts
-      .map((p: any) => (typeof p === "string" ? p : p?.id))
+      .map((p: string | { id?: string }) => (typeof p === "string" ? p : p?.id))
       .filter(Boolean);
     return products.filter((p) => ids.includes(p.id)).slice(0, limit);
   }
@@ -54,7 +74,7 @@ export interface CategoryView {
 }
 
 /** Герой главной (полноэкранный, с фото) — переиспользует <Hero> */
-export function HomeHero({ block }: { block: any }) {
+export function HomeHero({ block }: { block: HomeBlock }) {
   const image = block?.image?.url || block?.imageUrl || "";
   const imageMobile =
     block?.imageMobile?.url || block?.imageMobileUrl || image;
@@ -78,7 +98,7 @@ export function HomeProducts({
   block,
   products,
 }: {
-  block: any;
+  block: HomeBlock;
   products: Product[];
 }) {
   const items = resolveProducts(block, products);
@@ -113,7 +133,7 @@ export function HomeCategories({
   block,
   categories,
 }: {
-  block: any;
+  block: HomeBlock;
   categories: CategoryView[];
 }) {
   const cats = (categories || []).filter((c) => c.count > 0);

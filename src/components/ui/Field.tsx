@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 import styles from "./Field.module.css";
 
 interface FieldProps {
@@ -11,7 +11,7 @@ interface FieldProps {
   placeholder?: string;
   value?: string;
   defaultValue?: string;
-  onChange?: (e: any) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   required?: boolean;
   autoComplete?: string;
   disabled?: boolean;

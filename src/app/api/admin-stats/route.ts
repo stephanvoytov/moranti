@@ -39,7 +39,15 @@ export async function GET() {
       }),
     ]);
 
-    const recentOrders = (recent.docs as any[]).map((o) => ({
+    const recentOrders = (
+      recent.docs as Array<{
+        id: unknown;
+        orderNumber?: string;
+        status?: string;
+        total?: number;
+        createdAt?: string;
+      }>
+    ).map((o) => ({
       id: o.id,
       orderNumber: o.orderNumber,
       status: o.status,
@@ -65,9 +73,10 @@ export async function GET() {
       attention: totalOf(ordersNew) + totalOf(ordersProcessing),
       recentOrders,
     });
-  } catch (e: any) {
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Ошибка сервера";
     return NextResponse.json(
-      { ok: false, error: e?.message },
+      { ok: false, error: message },
       { status: 500 },
     );
   }

@@ -11,6 +11,23 @@ import { cacheGet } from "@/lib/data-cache";
 import { richTextToText } from "@/lib/richtext";
 import type { SiteStrings } from "@/lib/strings";
 
+interface RawSocial {
+  platform?: unknown;
+  url?: unknown;
+}
+interface RawSiteContent {
+  footer?: { aboutText?: unknown; copyright?: string };
+  contacts?: {
+    phone?: string;
+    email?: string;
+    address?: string;
+    city?: string;
+    workHours?: string;
+  };
+  social?: RawSocial[];
+  [k: string]: unknown;
+}
+
 export interface SiteContentData {
   footer: { aboutText: string; copyright: string };
   contacts: {
@@ -35,9 +52,9 @@ export async function getSiteContent(): Promise<SiteContentData> {
     async () => {
       try {
         const payload = await getPayload({ config });
-        const doc = (await payload.findGlobal({ slug: "site-content" })) as any;
-        const footer = doc?.footer || {};
-        const contacts = doc?.contacts || {};
+        const doc = (await payload.findGlobal({ slug: "site-content" })) as unknown as RawSiteContent;
+        const footer: RawSiteContent["footer"] = doc?.footer ?? {};
+        const contacts: RawSiteContent["contacts"] = doc?.contacts ?? {};
         const social = Array.isArray(doc?.social) ? doc.social : [];
         return {
           footer: {
@@ -51,7 +68,7 @@ export async function getSiteContent(): Promise<SiteContentData> {
             city: contacts.city || "",
             workHours: contacts.workHours || "",
           },
-          social: social.map((s: any) => ({
+          social: social.map((s) => ({
             platform: String(s?.platform || ""),
             url: String(s?.url || ""),
           })),
@@ -69,7 +86,7 @@ export interface PageData {
   title: string;
   slug: string;
   /** Блоки страницы (hero / section / statement / images / cards / cta) */
-  layout: any[];
+  layout: unknown[];
 }
 
 /**
@@ -88,7 +105,7 @@ export async function getPage(slug: string): Promise<PageData | null> {
           limit: 1,
           overrideAccess: true,
         });
-        const doc: any = res.docs?.[0];
+        const doc = res.docs?.[0] as unknown as Record<string, unknown>;
         if (!doc || doc.status !== "published") return null;
         return {
           title: String(doc.title || ""),
@@ -105,18 +122,22 @@ export async function getPage(slug: string): Promise<PageData | null> {
 }
 
 /** Плоский текст из блоков (для лидов на функциональных страницах) */
-export function layoutToText(layout?: any[]): string {
+export function layoutToText(layout?: unknown[]): string {
   if (!Array.isArray(layout)) return "";
   const out: string[] = [];
-  for (const b of layout) {
-    if (!b || typeof b !== "object") continue;
+  for (const raw of layout) {
+    if (!raw || typeof raw !== "object") continue;
+    const b = raw as Record<string, unknown>;
     if (typeof b.text === "string" && b.blockType === "statement") {
       out.push(b.text);
     }
     if (typeof b.subtitle === "string" && b.subtitle) out.push(b.subtitle);
     if (typeof b.paragraphs === "string") out.push(b.paragraphs.trim());
     if (Array.isArray(b.items)) {
-      for (const it of b.items) if (it?.text) out.push(String(it.text));
+      for (const it of b.items) {
+        const item = it as { text?: unknown };
+        if (item?.text) out.push(String(item.text));
+      }
     }
   }
   return out.join(" ");
@@ -128,7 +149,7 @@ export async function getSiteStrings(): Promise<SiteStrings> {
     async () => {
       try {
         const payload = await getPayload({ config });
-        const doc = (await payload.findGlobal({ slug: "site-strings" })) as any;
+        const doc = (await payload.findGlobal({ slug: "site-strings" })) as unknown as Record<string, unknown>;
         const arr = Array.isArray(doc?.strings) ? doc.strings : [];
         const map: SiteStrings = {};
         for (const s of arr) {

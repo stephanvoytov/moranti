@@ -2,8 +2,54 @@ import { getPayload } from 'payload'
 import { NextResponse } from 'next/server'
 import { Client } from 'pg'
 import config from '@payload-config'
-import { textToRichText } from '@/lib/richtext'
+import { textToRichText, type LexicalRoot } from '@/lib/richtext'
 import { defaultStrings, siteContentData } from './seed-data'
+
+interface LegacyModel {
+  slug?: unknown;
+  id?: unknown;
+  image?: unknown;
+  name?: unknown;
+  category?: unknown;
+  imtId?: unknown;
+  description?: unknown;
+  composition?: unknown;
+}
+interface LegacyProduct {
+  description?: unknown;
+  image?: unknown;
+  images?: unknown;
+  characteristics?: unknown;
+  modelId?: unknown;
+  name?: unknown;
+  slug?: unknown;
+  sku?: unknown;
+  id?: unknown;
+  category?: unknown;
+  price?: unknown;
+  originalPrice?: unknown;
+  currency?: unknown;
+  inStock?: unknown;
+  wbStock?: unknown;
+  ozonStock?: unknown;
+  colorName?: unknown;
+  composition?: unknown;
+  rating?: unknown;
+  reviewsCount?: unknown;
+  salesCount?: unknown;
+  wbCreatedAt?: unknown;
+  video?: unknown;
+  wbArticle?: unknown;
+  ozonArticle?: unknown;
+  wbPrice?: unknown;
+  ozonPrice?: unknown;
+  wbOriginalPrice?: unknown;
+  ozonOriginalPrice?: unknown;
+}
+interface GalleryImage {
+  image: string;
+  alt?: string;
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +62,7 @@ const CATEGORY_INFO: Record<string, { name: string; description: string }> = {
   backpack: { name: 'Рюкзак', description: 'Рюкзаки' },
 }
 
-function flattenCharacteristics(raw: any): { key: string; value: string }[] {
+function flattenCharacteristics(raw: unknown): { key: string; value: string }[] {
   if (!Array.isArray(raw)) return []
   const out: { key: string; value: string }[] = []
   for (const group of raw) {
@@ -49,7 +95,7 @@ export async function GET() {
 
   // ---- CATEGORIES (from distinct product.category) ----
   const catSlugs = Array.from(
-    new Set(legacyProducts.map((p: any) => p.category).filter(Boolean)),
+    new Set(legacyProducts.map((p: unknown) => (p as { category?: unknown }).category).filter(Boolean)),
   ) as string[]
   const categoryMap: Record<string, string> = {}
   for (const slug of catSlugs) {
@@ -77,18 +123,19 @@ export async function GET() {
 
   // ---- MODELS ----
   const modelMap: Record<string, string> = {}
-  for (const m of legacyModels) {
-    const slug = m.slug || m.id
+  for (const m of legacyModels as LegacyModel[]) {
+    const slug = typeof m.slug === 'string' && m.slug ? m.slug : String(m.id ?? '')
     const image = typeof m.image === 'string' ? m.image : ''
-    const gallery = image ? [{ image, alt: m.name }] : []
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: any = {
-      name: m.name || slug,
+    const gallery: GalleryImage[] = image
+      ? [{ image, alt: typeof m.name === 'string' ? m.name : undefined }]
+      : []
+    const data: Record<string, unknown> = {
+      name: typeof m.name === 'string' ? m.name : slug,
       slug,
-      category: m.category ? categoryMap[m.category] || null : null,
+      category: typeof m.category === 'string' && m.category ? categoryMap[m.category] || null : null,
       imtId: typeof m.imtId === 'number' ? m.imtId : null,
-      description: m.description || null,
-      composition: m.composition || null,
+      description: typeof m.description === 'string' ? m.description : null,
+      composition: typeof m.composition === 'string' ? m.composition : null,
       image,
       gallery,
     }
@@ -99,74 +146,78 @@ export async function GET() {
       overrideAccess: true,
     })
     if (existing.totalDocs > 0) {
-      await payload.update({ collection: 'models', id: existing.docs[0].id, data, overrideAccess: true })
+      await payload.update({ collection: 'models', id: existing.docs[0].id, data: data as never, overrideAccess: true })
       modelMap[slug] = String(existing.docs[0].id)
     } else {
-      const created = await payload.create({ collection: 'models', data, overrideAccess: true })
+      const created = await payload.create({ collection: 'models', data: data as never, overrideAccess: true })
       modelMap[slug] = String(created.id)
     }
   }
 
   // ---- PRODUCTS (marketplace-only) ----
   let productsUpserted = 0
-  for (const p of legacyProducts) {
+  for (const p of legacyProducts as LegacyProduct[]) {
     // В legacy-данных попадаются перепутанные записи: название «Сумка…»,
     // категория crossbody, а по факту — футболка/топ (описание про одежду).
     // Признак настоящей сумки: слово «сумк/сумоч» в начале описания.
-    if (!/сумк|сумоч/i.test((p.description || '').slice(0, 60))) continue
+    if (!/сумк|сумоч/i.test((typeof p.description === 'string' ? p.description : '').slice(0, 60))) continue
 
     const image = typeof p.image === 'string' ? p.image : ''
-    const images: string[] = Array.isArray(p.images) ? p.images : []
-    const gallery = (image ? [image, ...images] : images).slice(0, 18).map((u) => ({ image: u, alt: p.name }))
+    const images: string[] = Array.isArray(p.images) ? (p.images as unknown[]) as string[] : []
+    const gallery: GalleryImage[] = (image ? [image, ...images] : images)
+      .slice(0, 18)
+      .map((u) => ({ image: u, alt: typeof p.name === 'string' ? p.name : undefined }))
     const characteristics = flattenCharacteristics(p.characteristics)
-    const modelDocId = p.modelId ? modelMap[p.modelId] || null : null
+    const modelDocId =
+      typeof p.modelId === 'string' && p.modelId ? modelMap[p.modelId] || null : null
+    const slug = typeof p.slug === 'string' ? p.slug : ''
 
-    const data: any = {
-      name: p.name || 'Без названия',
-      slug: p.slug,
-      sku: p.sku || p.id,
-      category: p.category ? categoryMap[p.category] || null : null,
+    const data: Record<string, unknown> = {
+      name: typeof p.name === 'string' ? p.name : 'Без названия',
+      slug,
+      sku: typeof p.sku === 'string' ? p.sku : String(p.id ?? ''),
+      category: typeof p.category === 'string' && p.category ? categoryMap[p.category] || null : null,
       status: 'published',
       isDirectSale: false,
       directPrice: 0,
       price: typeof p.price === 'number' ? p.price : 0,
       originalPrice: typeof p.originalPrice === 'number' ? p.originalPrice : 0,
-      currency: p.currency || '₽',
-      inStock: p.inStock ?? true,
-      wbStock: typeof p.wbStock === 'number' ? p.wbStock : p.wbArticle ? 10 : 0,
-      ozonStock: typeof p.ozonStock === 'number' ? p.ozonStock : p.ozonArticle ? 10 : 0,
+      currency: typeof p.currency === 'string' ? p.currency : '₽',
+      inStock: typeof p.inStock === 'boolean' ? p.inStock : true,
+      wbStock: typeof p.wbStock === 'number' ? p.wbStock : typeof p.wbArticle === 'number' ? 10 : 0,
+      ozonStock: typeof p.ozonStock === 'number' ? p.ozonStock : typeof p.ozonArticle === 'number' ? 10 : 0,
       stockQuantity: 0,
-      shortDescription: truncate(p.description),
-      description: textToRichText(p.description),
-      colorName: p.colorName || null,
-      composition: p.composition || null,
+      shortDescription: truncate(typeof p.description === 'string' ? p.description : null),
+      description: textToRichText(typeof p.description === 'string' ? p.description : null),
+      colorName: typeof p.colorName === 'string' ? p.colorName : null,
+      composition: typeof p.composition === 'string' ? p.composition : null,
       rating: typeof p.rating === 'number' ? p.rating : null,
       reviewsCount: typeof p.reviewsCount === 'number' ? p.reviewsCount : null,
       salesCount: typeof p.salesCount === 'number' ? p.salesCount : null,
-      wbCreatedAt: p.wbCreatedAt || null,
+      wbCreatedAt: typeof p.wbCreatedAt === 'string' ? p.wbCreatedAt : null,
       image,
       gallery,
       video: typeof p.video === 'string' ? p.video : null,
       characteristics,
-      wbArticle: p.wbArticle ?? null,
-      ozonArticle: p.ozonArticle ?? null,
-      wbPrice: p.wbPrice ?? null,
-      ozonPrice: p.ozonPrice ?? null,
-      wbOriginalPrice: p.wbOriginalPrice ?? null,
-      ozonOriginalPrice: p.ozonOriginalPrice ?? null,
+      wbArticle: typeof p.wbArticle === 'number' ? p.wbArticle : null,
+      ozonArticle: typeof p.ozonArticle === 'number' ? p.ozonArticle : null,
+      wbPrice: typeof p.wbPrice === 'number' ? p.wbPrice : null,
+      ozonPrice: typeof p.ozonPrice === 'number' ? p.ozonPrice : null,
+      wbOriginalPrice: typeof p.wbOriginalPrice === 'number' ? p.wbOriginalPrice : null,
+      ozonOriginalPrice: typeof p.ozonOriginalPrice === 'number' ? p.ozonOriginalPrice : null,
       model: modelDocId,
     }
 
     const existing = await payload.find({
       collection: 'products',
-      where: { slug: { equals: p.slug } },
+      where: { slug: { equals: slug } },
       limit: 1,
       overrideAccess: true,
     })
     if (existing.totalDocs > 0) {
-      await payload.update({ collection: 'products', id: existing.docs[0].id, data, overrideAccess: true })
+      await payload.update({ collection: 'products', id: existing.docs[0].id, data: data as never, overrideAccess: true })
     } else {
-      await payload.create({ collection: 'products', data, overrideAccess: true })
+      await payload.create({ collection: 'products', data: data as never, overrideAccess: true })
     }
     productsUpserted++
   }
@@ -494,8 +545,7 @@ export async function GET() {
 
   let pagesUpserted = 0
   for (const pg of defaultPages) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: any = { title: pg.title, slug: pg.slug, layout: pg.layout, status: 'published' }
+    const data: Record<string, unknown> = { title: pg.title, slug: pg.slug, layout: pg.layout, status: 'published' }
     const existing = await payload.find({
       collection: 'pages',
       where: { slug: { equals: pg.slug } },
@@ -503,9 +553,9 @@ export async function GET() {
       overrideAccess: true,
     })
     if (existing.totalDocs > 0) {
-      await payload.update({ collection: 'pages', id: existing.docs[0].id, data, overrideAccess: true })
+      await payload.update({ collection: 'pages', id: existing.docs[0].id, data: data as never, overrideAccess: true })
     } else {
-      await payload.create({ collection: 'pages', data, overrideAccess: true })
+      await payload.create({ collection: 'pages', data: data as never, overrideAccess: true })
     }
     pagesUpserted++
   }

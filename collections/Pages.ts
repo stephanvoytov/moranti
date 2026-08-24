@@ -196,7 +196,7 @@ export const Pages: CollectionConfig = {
                 label: 'Товары (для «Ручной выбор»)',
                 relationTo: 'products',
                 hasMany: true,
-                admin: { condition: (data: any) => data?.source === 'manual' },
+                admin: { condition: (data: { source?: string }) => data?.source === 'manual' },
               },
               { name: 'limit', type: 'number', label: 'Сколько показывать', defaultValue: 8 },
             ],

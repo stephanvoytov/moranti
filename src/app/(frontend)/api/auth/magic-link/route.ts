@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const customer = existing.docs[0] as any;
+    const customer = existing.docs[0] as { id: string | number };
     const token = randomBytes(24).toString("hex");
     const expiry = new Date(Date.now() + 30 * 60 * 1000).toISOString();
 

@@ -3,20 +3,21 @@
 import { useAllFormFields } from "@payloadcms/ui";
 
 export function ProductPreview() {
-  const [fields] = useAllFormFields() as any;
+  type FormFields = Record<string, unknown>;
+  const [fields] = useAllFormFields() as [FormFields, unknown];
 
-  const val = (k: string) => {
+  const val = (k: string): unknown => {
     const x = fields?.[k];
-    if (x && typeof x === "object" && "value" in x) return x.value;
+    if (x && typeof x === "object" && "value" in x) return (x as { value: unknown }).value;
     return x;
   };
 
-  const name = val("name");
-  const slug = val("slug");
-  const image = val("image");
-  const price = val("directPrice") ?? val("price");
-  const inStock = val("inStock");
-  const isDirectSale = val("isDirectSale");
+  const name = val("name") as string | undefined;
+  const slug = val("slug") as string | undefined;
+  const image = val("image") as string | undefined;
+  const price = (val("directPrice") as number | undefined) ?? (val("price") as number | undefined);
+  const inStock = val("inStock") as boolean | undefined;
+  const isDirectSale = val("isDirectSale") as boolean | undefined;
   const iframeSrc = slug ? `/catalog/${slug}` : null;
 
   return (

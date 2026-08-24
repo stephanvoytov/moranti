@@ -7,11 +7,16 @@ export interface LexicalNode {
   type?: string
   text?: string
   children?: LexicalNode[]
-  [k: string]: any
+  [k: string]: unknown
+}
+
+export interface LexicalRoot {
+  root: LexicalNode
+  [k: string]: unknown
 }
 
 /** Преобразовать обычный текст в Lexical richText (для записи в Payload) */
-export function textToRichText(text?: string | null): any {
+export function textToRichText(text?: string | null): LexicalRoot | null {
   if (text == null || String(text).trim() === '') return null
   return {
     root: {
@@ -37,7 +42,7 @@ export function textToRichText(text?: string | null): any {
 export type RichBlock = { tag?: string; text?: string; list?: string[] }
 
 /** Собрать Lexical richText из блоков */
-export function blocksToRichText(blocks?: RichBlock[]): any {
+export function blocksToRichText(blocks?: RichBlock[]): LexicalRoot | null {
   if (!Array.isArray(blocks) || blocks.length === 0) return null
   const children = blocks.map((b) => {
     if (Array.isArray(b.list) && b.list.length > 0) {
@@ -57,7 +62,7 @@ export function blocksToRichText(blocks?: RichBlock[]): any {
         })),
       }
     }
-    const node: any =
+    const node: LexicalNode =
       b.tag
         ? {
             type: 'heading',
@@ -89,9 +94,10 @@ export function blocksToRichText(blocks?: RichBlock[]): any {
 }
 
 /** Извлечь плоский текст из Lexical richText (для витрины) */
-export function richTextToText(rt?: any): string {
+export function richTextToText(rt?: unknown): string {
   if (!rt) return ''
   if (typeof rt === 'string') return rt
+  const root = (rt as { root?: LexicalNode }).root
   let out = ''
   const walk = (n?: LexicalNode) => {
     if (!n) return
@@ -99,6 +105,6 @@ export function richTextToText(rt?: any): string {
     if (Array.isArray(n.children)) n.children.forEach(walk)
     if (n.type === 'paragraph' || n.type === 'linebreak') out += '\n'
   }
-  if (rt.root) walk(rt.root)
+  if (root) walk(root)
   return out.replace(/\n{2,}/g, '\n').trim()
 }

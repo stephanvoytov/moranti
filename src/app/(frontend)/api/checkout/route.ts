@@ -15,6 +15,21 @@ import { sendMail, getAdminEmail } from "@/lib/mailer";
 
 export const dynamic = "force-dynamic";
 
+interface CheckoutProduct {
+  id?: number | string;
+  isDirectSale?: boolean;
+  name?: string;
+  stockQuantity?: number;
+  directPrice?: number;
+  price?: number;
+}
+interface OrderItem {
+  product: number;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
 function formatItems(items: { name: string; price: number; quantity: number }[]) {
   return items
     .map(
@@ -48,12 +63,12 @@ export async function POST(request: Request) {
       limit: items.length,
       depth: 0,
     });
-    const productMap = new Map<number, any>();
-    for (const p of productsRes.docs as any[]) {
+    const productMap = new Map<number, CheckoutProduct>();
+    for (const p of productsRes.docs as unknown as CheckoutProduct[]) {
       productMap.set(Number(p.id), p);
     }
 
-    const orderItems: any[] = [];
+    const orderItems: OrderItem[] = [];
     let subtotal = 0;
 
     for (const item of items) {
@@ -89,7 +104,7 @@ export async function POST(request: Request) {
       subtotal += price * item.qty;
       orderItems.push({
         product: Number(product.id),
-        name: product.name,
+        name: product.name ?? "",
         price,
         quantity: item.qty,
       });
@@ -105,7 +120,7 @@ export async function POST(request: Request) {
 
     let customerId: number | string;
     if (existing.totalDocs > 0) {
-      customerId = (existing.docs[0] as any).id;
+      customerId = (existing.docs[0] as { id: number | string }).id;
     } else {
       const created = await payload.create({
         collection: "customers",
@@ -120,7 +135,7 @@ export async function POST(request: Request) {
           password: randomBytes(16).toString("hex"),
         },
       });
-      customerId = (created as any).id;
+      customerId = (created as { id: number | string }).id;
     }
 
     const shippingCost = 0; // MVP: бесплатная доставка / считается позже
@@ -145,8 +160,8 @@ export async function POST(request: Request) {
       },
     });
 
-    const orderId = (order as any).id;
-    const orderNumber = (order as any).orderNumber;
+    const orderId = (order as { id: number | string }).id;
+    const orderNumber = (order as { orderNumber?: string | number }).orderNumber;
 
     // Списываем остаток со своего склада
     for (const item of orderItems) {

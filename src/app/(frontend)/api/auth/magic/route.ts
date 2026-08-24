@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
   if (found.totalDocs === 0) return fail();
 
-  const customer = found.docs[0] as any;
+  const customer = found.docs[0] as { id: string | number; hash?: string; salt?: string };
   const oldHash = customer.hash;
   const oldSalt = customer.salt;
   const temp = randomBytes(16).toString("hex");
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
     data: { email, password: temp },
     // Next.js Request совместим с Payload в рантайме
     req: request,
-  })) as any;
+  })) as { token: string };
 
   // Восстанавливаем прежний пароль, чтобы вход по ссылке не сбрасывал его.
   // shouldSavePassword срабатывает только если в data есть password, поэтому

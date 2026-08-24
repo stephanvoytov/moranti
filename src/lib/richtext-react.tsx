@@ -5,21 +5,22 @@
    ============================================= */
 
 import React from "react";
+import type { LexicalNode } from "./richtext";
 
-export function RichText({ data }: { data: any }) {
-  if (!data || !data.root) return null;
+export function RichText({ data }: { data: { root?: LexicalNode } }) {
+  if (!data.root) return null;
   return <>{renderNodes(data.root.children || [])}</>;
 }
 
-function renderNodes(nodes: any[]): React.ReactNode[] {
+function renderNodes(nodes: LexicalNode[]): React.ReactNode[] {
   return (nodes || []).map((n, i) => renderNode(n, i));
 }
 
-function renderNode(node: any, key: number): React.ReactNode {
+function renderNode(node: LexicalNode, key: number): React.ReactNode {
   if (!node) return null;
   switch (node.type) {
     case "heading": {
-      const Tag = (node.tag || "h2") as any;
+      const Tag = (node.tag || "h2") as React.ElementType;
       return <Tag key={key}>{renderText(node)}</Tag>;
     }
     case "paragraph":
@@ -33,7 +34,7 @@ function renderNode(node: any, key: number): React.ReactNode {
     case "listitem":
       return <li key={key}>{renderText(node)}</li>;
     case "link": {
-      const url = node.fields?.url || "#";
+      const url = String((node.fields as { url?: unknown })?.url || "#");
       const external = /^https?:\/\//i.test(url);
       return (
         <a
@@ -48,28 +49,28 @@ function renderNode(node: any, key: number): React.ReactNode {
     case "upload": {
       // Картинка, вставленная через «Загрузить картинку» (коллекция «Медиа»).
       // При depth>0 value — заполненный документ Media { url, alt, ... }.
-      const v = node.value as any;
+      const v = node.value as { url?: unknown; alt?: unknown };
       if (!v || typeof v !== "object" || !v.url) return null;
       return (
         <img
           key={key}
-          src={v.url as string}
-          alt={(v.alt as string) || ""}
+          src={String(v.url)}
+          alt={String(v.alt ?? "")}
           loading="lazy"
         />
       );
     }
     default:
-      if (node.text != null) return <span key={key}>{node.text}</span>;
+      if (node.text != null) return <span key={key}>{String(node.text)}</span>;
       return null;
   }
 }
 
-function renderText(node: any): React.ReactNode {
+function renderText(node: LexicalNode): React.ReactNode {
   const children = node.children || [];
-  if (children.length === 0) return node.text ?? "";
-  return children.map((c: any, i: number) => {
-    if (c.type === "text") return <React.Fragment key={i}>{c.text}</React.Fragment>;
+  if (children.length === 0) return String(node.text ?? "");
+  return children.map((c, i: number) => {
+    if (c.type === "text") return <React.Fragment key={i}>{String(c.text)}</React.Fragment>;
     return renderNode(c, i);
   });
 }

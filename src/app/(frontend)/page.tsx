@@ -4,18 +4,27 @@ import BrandSeo from "@/components/sections/brand-seo";
 import HomeClient from "./home-client";
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { RenderBlock } from "@/components/sections/page-view";
+import { RenderBlock, type PageBlock } from "@/components/sections/page-view";
 import {
   HomeHero,
   HomeProducts,
   HomeCategories,
   resolveProducts,
   type CategoryView,
+  type HomeBlock,
 } from "./home-blocks";
 
 export const revalidate = 60;
 
 const HOME_BLOCKS = new Set(["homeHero", "products", "categories"]);
+
+interface RawCategoryDoc {
+  slug?: string;
+  image?: unknown;
+}
+interface RawHomePage {
+  layout?: unknown;
+}
 
 export default async function Home() {
   const [products, baseCategories, homePage, categoriesColl] =
@@ -44,7 +53,7 @@ export default async function Home() {
             limit: 200,
             depth: 0,
           });
-          return (res.docs as any[]) || [];
+          return res.docs as unknown as RawCategoryDoc[];
         } catch {
           return [];
         }
@@ -53,7 +62,7 @@ export default async function Home() {
 
   // Фото категории: из карточки Категории, иначе фолбэк на первый товар
   const catImageMap: Record<string, string> = {};
-  for (const c of categoriesColl as any[]) {
+  for (const c of categoriesColl) {
     if (c?.slug && c?.image) catImageMap[String(c.slug)] = String(c.image);
   }
   const categories: CategoryView[] = baseCategories.map((c) => {
@@ -62,8 +71,8 @@ export default async function Home() {
     return { slug: c.slug, name: c.name, count: c.count, image: display };
   });
 
-  const blocks = Array.isArray((homePage as any)?.layout)
-    ? ((homePage as any).layout as any[])
+  const blocks: HomeBlock[] = Array.isArray((homePage as RawHomePage)?.layout)
+    ? ((homePage as RawHomePage).layout as HomeBlock[])
     : [];
 
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";
@@ -92,7 +101,7 @@ export default async function Home() {
           return <HomeProducts key={i} block={block} products={products} />;
         if (block.blockType === "categories")
           return <HomeCategories key={i} block={block} categories={categories} />;
-        return <RenderBlock key={i} block={block} data={{ products }} />;
+        return <RenderBlock key={i} block={block as PageBlock} data={{ products }} />;
       })}
 
       <BrandSeo />

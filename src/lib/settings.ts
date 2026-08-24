@@ -63,22 +63,24 @@ function readSettingsFallback(): SiteSettings | null {
   }
 }
 
-function mapPayloadSettings(doc: Record<string, any>, base: SiteSettings): SiteSettings {
+function mapPayloadSettings(doc: Record<string, unknown>, base: SiteSettings): SiteSettings {
   const social: SiteSettings["social"] = { vk: "", telegram: "", whatsapp: "" };
-  for (const s of doc.social || []) {
-    const platform = String(s.platform || "").toLowerCase();
-    if (platform in social && s.url) {
-      (social as any)[platform] = s.url;
+  const socialList = (doc.social as unknown[]) || [];
+  for (const s of socialList) {
+    const item = s as { platform?: unknown; url?: unknown };
+    const platform = String(item.platform || "").toLowerCase();
+    if (platform in social && item.url) {
+      social[platform as keyof typeof social] = String(item.url);
     }
   }
 
   return {
     ...base,
-    contactEmail: doc.contactEmail || base.contactEmail,
+    contactEmail: typeof doc.contactEmail === "string" ? doc.contactEmail : base.contactEmail,
     social,
-    wbApiKey: doc.wbApiKey || base.wbApiKey,
-    ozonClientId: doc.ozonClientId || base.ozonClientId,
-    ozonApiKey: doc.ozonApiKey || base.ozonApiKey,
+    wbApiKey: typeof doc.wbApiKey === "string" ? doc.wbApiKey : base.wbApiKey,
+    ozonClientId: typeof doc.ozonClientId === "string" ? doc.ozonClientId : base.ozonClientId,
+    ozonApiKey: typeof doc.ozonApiKey === "string" ? doc.ozonApiKey : base.ozonApiKey,
     updatedAt: new Date().toISOString(),
   };
 }
@@ -95,7 +97,7 @@ export async function readSettings(): Promise<SiteSettings> {
           limit: 1,
           depth: 0,
         });
-        if (res.docs.length) return mapPayloadSettings(res.docs[0] as any, fallback);
+        if (res.docs.length) return mapPayloadSettings(res.docs[0] as unknown as Record<string, unknown>, fallback);
         return fallback;
       } catch (err) {
         logger.warn("Payload unavailable, fallback to settings.json", {
