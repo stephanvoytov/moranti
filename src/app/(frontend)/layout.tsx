@@ -7,6 +7,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import { seoConfig } from "@/config/seo";
 import { YANDEX_METRIKA_ID } from "@/config/analytics";
 import { buildGlobalJsonLd } from "@/lib/seo-jsonld";
+import { getStoreRatingStats } from "@/data/products";
 import { YandexMetricaProvider } from "@artginzburg/next-ym";
 import { Analytics } from "@vercel/analytics/next";
 import { StorefrontShell } from "@/components/layout/storefront-shell";
@@ -112,6 +113,10 @@ export default async function RootLayout({
   // ─── CSP nonce (per-request, prevents XSS via inline scripts) ───
   const nonce = randomUUID();
 
+  // Общий рейтинг витрины для Organization (звёзды в сниппетах главной/каталога).
+  // Кешируется в data-слое; БД недоступна → null, разметка без aggregateRating.
+  const storeRating = await getStoreRatingStats();
+
     // ─── Content-Security-Policy via <meta> tag ───
     // Важно: Next.js injects свои inline-скрипты (chunks, bootstrap) без nonce.
     // 'strict-dynamic' НЕ используется — он запрещает 'self' и ломает Next.js.
@@ -185,7 +190,7 @@ export default async function RootLayout({
           nonce={nonce}
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(buildGlobalJsonLd(siteUrl)),
+            __html: JSON.stringify(buildGlobalJsonLd(siteUrl, storeRating)),
           }}
         />
       </head>

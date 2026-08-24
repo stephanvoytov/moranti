@@ -1,0 +1,100 @@
+/* =============================================
+    Moranti — Product Reviews (вкладка на карточке)
+    ============================================= */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.item {
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+}
+
+.item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+}
+
+.author {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.date {
+  font-size: 13px;
+  color: var(--text-muted, #888);
+}
+
+.source {
+  margin-left: auto;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted, #888);
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.stars {
+  font-size: 13px;
+  color: #e0a53c;
+  letter-spacing: 1px;
+}
+
+.text {
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.prosCons {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.label {
+  color: var(--text-muted, #888);
+  margin-right: 6px;
+}
+
+.empty {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-muted, #666);
+}
+
+.moreBtn {
+  display: block;
+  margin: 24px auto 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-primary, #1a1a1a);
+  background: none;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.2));
+  padding: 12px 32px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.moreBtn:hover {
+  background: var(--dark, #1a1a1a);
+  color: #fff;
+}

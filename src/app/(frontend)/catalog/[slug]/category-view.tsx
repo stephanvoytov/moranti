@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
-import { getProducts, getCategories } from "@/data/products";
+import { getProducts, getCategories, computeCatalogRating } from "@/data/products";
 import { readSettings } from "@/lib/settings";
 import { seoConfig } from "@/config/seo";
 import {
   buildCollectionPageJsonLd,
   buildBreadcrumbJsonLd,
+  buildItemListJsonLd,
 } from "@/lib/seo-jsonld";
 import CatalogPage from "../catalog-content";
 import CatalogSeo from "@/components/sections/catalog-seo";
@@ -36,13 +37,18 @@ export default async function CategoryView({ slug }: { slug: string }) {
     siteUrl,
   );
 
-  // CollectionPage JSON-LD
+  // CollectionPage JSON-LD (+ средний рейтинг по категории, напр. багеты)
+  const categoryProducts = products.filter((p) => p.category === slug);
   const collectionJsonLd = buildCollectionPageJsonLd(
     categoryTitle,
     cat.description,
     `/catalog/${slug}`,
-    products.filter((p) => p.category === slug).length,
+    categoryProducts.length,
+    computeCatalogRating(categoryProducts),
   );
+
+  // ItemList JSON-LD с рейтингами — звёзды в сниппетах листингов
+  const itemListJsonLd = buildItemListJsonLd(categoryProducts, siteUrl);
 
   return (
     <>
@@ -53,6 +59,10 @@ export default async function CategoryView({ slug }: { slug: string }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
       {/* key={slug}: при переходе между категориями клиентский каталог
           пересоздаётся — состояние фильтров сбрасывается корректно */}

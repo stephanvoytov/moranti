@@ -11,6 +11,15 @@ import { cacheGet, invalidateCache } from "@/lib/data-cache";
 import { logger } from "@/lib/logger";
 import { MARKETPLACE_URLS } from "@/lib/marketplaces";
 
+/** Рейтинг продавца с маркетплейсов (заполняет scripts/fetch-seller-ratings.mjs) */
+export interface StoreSellerRating {
+  ratingValue: number;
+  reviewCount: number;
+  wb?: { ratingValue: number; reviewCount: number };
+  ozon?: { ratingValue: number; reviewCount: number };
+  updatedAt: string;
+}
+
 export interface SiteSettings {
   wbApiKey: string;
   ozonClientId: string;
@@ -20,6 +29,8 @@ export interface SiteSettings {
   contactEmail: string;
   social: { vk: string; telegram: string; whatsapp: string };
   marketplaces: { wildberries: string; ozon: string };
+  /** Рейтинги продавца WB/Ozon + взвешенное среднее — для сниппетов */
+  storeRating: StoreSellerRating | null;
   updatedAt: string;
 }
 
@@ -31,6 +42,7 @@ const DEFAULTS: SiteSettings = {
   contactEmail: "",
   social: { vk: "", telegram: "", whatsapp: "" },
   marketplaces: { wildberries: MARKETPLACE_URLS.wbSeller, ozon: MARKETPLACE_URLS.ozonSeller },
+  storeRating: null,
   updatedAt: new Date().toISOString(),
 };
 

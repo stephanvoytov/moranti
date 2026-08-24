@@ -4,7 +4,7 @@
    Moranti — Product Tabs
    ============================================= */
 
-import { useState, useId, type ReactNode } from "react";
+import { useState, useEffect, useId, type ReactNode } from "react";
 import styles from "./product-tabs.module.css";
 
 interface Tab {
@@ -19,6 +19,22 @@ interface Props {
 export default function ProductTabs({ tabs }: Props) {
   const [active, setActive] = useState(0);
   const id = useId();
+
+  // Якорь #otzyvy (клик по рейтингу) — открываем вкладку отзывов:
+  // и при загрузке страницы с хешем, и при клике по ссылке после загрузки
+  useEffect(() => {
+    const applyHash = () => {
+      if (window.location.hash !== "#otzyvy") return;
+      const idx = tabs.findIndex((t) => /отзыв/i.test(t.label));
+      if (idx >= 0) setActive(idx);
+    };
+    const timer = setTimeout(applyHash, 0);
+    window.addEventListener("hashchange", applyHash);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("hashchange", applyHash);
+    };
+  }, [tabs]);
 
   if (tabs.length === 0) return null;
 

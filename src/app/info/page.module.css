@@ -1,0 +1,194 @@
+/* =============================================
+   Info Page — хаб со всей информацией
+   ============================================= */
+
+.page {
+  margin-top: var(--header-height);
+  padding: var(--space-lg) var(--container-padding) var(--space-3xl);
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ——— Breadcrumb ——— */
+
+.breadcrumb {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: var(--space-xl);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-weight: 400;
+}
+
+.breadcrumbLink {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.breadcrumbLink:hover {
+  color: var(--dark);
+}
+
+.breadcrumbSep {
+  color: var(--border);
+}
+
+.breadcrumbCurrent {
+  color: var(--muted);
+}
+
+/* ——— Hero ——— */
+
+.hero {
+  margin-bottom: var(--space-2xl);
+}
+
+.heroTitle {
+  font-family: var(--font-serif);
+  font-size: 48px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--dark);
+  margin: 0 0 var(--space-sm);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.heroDesc {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0;
+  max-width: 620px;
+}
+
+/* ——— Rating banner ——— */
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: var(--space-lg) 0;
+  margin-bottom: var(--space-2xl);
+  border-bottom: 1px solid var(--border);
+}
+
+.bannerLogo {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.ratingCol {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.starsWrap {
+  display: inline-flex;
+  align-items: center;
+  transform: translateY(8px);
+}
+
+.score {
+  font-family: var(--font-serif);
+  font-size: 40px;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1;
+  color: var(--dark);
+}
+
+.caption {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ——— Cards ——— */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  padding: var(--space-lg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  text-decoration: none;
+  color: inherit;
+  background: var(--white, #fff);
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.card:hover {
+  border-color: var(--dark);
+  transform: translateY(-2px);
+}
+
+.cardTitle {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--dark);
+  margin: 0;
+}
+
+.cardText {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0;
+  flex-grow: 1;
+}
+
+.cardCta {
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dark);
+  margin-top: var(--space-sm);
+}
+
+/* ——— Responsive ——— */
+
+@media (max-width: 900px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .heroTitle {
+    font-size: 34px;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}

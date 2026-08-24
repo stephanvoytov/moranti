@@ -15,11 +15,12 @@ export default function Footer({ siteContent }: { siteContent: SiteContentData }
   const { footer, contacts, social } = siteContent;
   const year = new Date().getFullYear();
 
+
   return (
     <footer className={styles.footer}>
       <div className="container">
         <div className={styles.grid}>
-          <div>
+          <div className={styles.brandCol}>
             <div className={styles.brand}>Moranti</div>
             <p className={styles.desc}>
               {footer.aboutText ||
@@ -39,8 +40,10 @@ export default function Footer({ siteContent }: { siteContent: SiteContentData }
             )}
             <NewsletterForm />
           </div>
+
           <div className={styles.col}>
-            <h3>Коллекции</h3>
+            <h3>Каталог</h3>
+            <Link href="/catalog">Все модели</Link>
             <Link href="/catalog/crossbody">Кросс-боди</Link>
             <Link href="/catalog/na-plecho">На плечо</Link>
             <Link href="/catalog/baguette">Багет</Link>
@@ -48,16 +51,20 @@ export default function Footer({ siteContent }: { siteContent: SiteContentData }
             <Link href="/catalog/saddle">Седло</Link>
             <Link href="/catalog/backpack">Рюкзаки</Link>
           </div>
+
           <div className={styles.col}>
-            <h3>Помощь</h3>
+            <h3>Информация</h3>
+            <Link href="/info">Вся информация</Link>
             <Link href="/about">О бренде</Link>
+            <Link href="/reviews">Отзывы</Link>
             <Link href="/delivery">Доставка и оплата</Link>
             <Link href="/care">Уход за сумками</Link>
-            <Link href="/privacy">Политика конфиденциальности</Link>
             <Link href="/contacts">Контакты</Link>
+            <Link href="/privacy">Политика конфиденциальности</Link>
           </div>
+
           <div className={styles.col}>
-            <h3>Магазины</h3>
+            <h3>Магазины и соцсети</h3>
             <a href={MARKETPLACE_URLS.wbSeller} target="_blank" rel="noopener noreferrer">
               Wildberries
             </a>
@@ -78,6 +85,7 @@ export default function Footer({ siteContent }: { siteContent: SiteContentData }
               ))}
           </div>
         </div>
+
         <div className={styles.bottom}>
           <div className={styles.legal}>
             <span>{footer.copyright || `© ${year} Moranti. Все права защищены.`}</span>

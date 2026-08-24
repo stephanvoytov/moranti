@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import NewsletterPopup from "@/components/layout/newsletter-popup";
+import SubscribeToast from "@/components/layout/subscribe-toast";
 import ScrollToTop from "@/components/ui/scroll-to-top-lazy";
 import type { SiteContentData } from "@/lib/site-content";
 import type { SiteStrings } from "@/lib/strings";
@@ -36,6 +37,7 @@ export function StorefrontShell({
       <main>{children}</main>
       <Footer siteContent={siteContent} />
       <NewsletterPopup />
+      <SubscribeToast />
       <ScrollToTop />
     </>
   );

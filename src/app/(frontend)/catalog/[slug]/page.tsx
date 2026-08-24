@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { CharacteristicGroup } from "@/data/products";
-import { getAllProducts, getProducts, getProduct } from "@/data/products";
-import { seoConfig, buildProductSeoMeta } from "@/config/seo";
+import { getAllProducts, getProducts, getProduct, getReviews } from "@/data/products";import { seoConfig, buildProductSeoMeta } from "@/config/seo";
 import { buildProductJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo-jsonld";
+import { pluralRu } from "@/lib/plural";
 import { getGlobalVariantPage, buildProductAlt } from "@/lib/variant-pages";
 import VariantView from "@/components/sections/variant-view";
 import CategoryView from "./category-view";
@@ -23,6 +23,7 @@ import ProductCard from "@/components/ui/product-card";
 import RatingStars from "@/components/ui/rating-stars";
 import ProductCharacteristics from "@/components/ui/product-characteristics";
 import ProductTabs from "@/components/ui/product-tabs";
+import ProductReviews from "@/components/ui/product-reviews";
 import RecentlyViewed from "./recently-viewed";
 import styles from "./page.module.css";
 
@@ -226,6 +227,11 @@ export default async function CatalogSlugPage({ params }: Props) {
 
   if (!product) notFound();
 
+  // Отзывы с маркетплейсов (единоразовый импорт, кешируются).
+  // На витрине показываем только позитив (≥4★) — негатив остаётся на МП.
+  const reviews = await getReviews(product.id);
+  const goodReviews = reviews.filter((r) => r.text.trim() && (r.rating ?? 0) >= 4);
+
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";
   const allProducts = await getProducts();
 
@@ -270,11 +276,33 @@ export default async function CatalogSlugPage({ params }: Props) {
     ],
     siteUrl,
   );
-  const productJsonLd = buildProductJsonLd(product, siteUrl);
+  const productJsonLd = buildProductJsonLd(product, siteUrl, goodReviews);
 
   // Build subtitle & dimensions
   const subtitle = buildSubtitle(product.composition ?? null, product.characteristics ?? null);
   const dimensions = extractDimensions(product.characteristics ?? null);
+
+  // Краткие факты для правой колонки (полный список — в табе «Характеристики»)
+  const keyFacts = [
+    { label: "Материал", value: product.composition },
+    {
+      label: "Страна",
+      value: getCharValue(
+        product.characteristics ?? null,
+        "Страна производства"
+      ),
+    },
+    {
+      label: "Габариты",
+      value: dimensions
+        ? dimensions.map((d) => d.value.replace(/[^\d,.]/g, "")).join(" × ") + " см"
+        : null,
+    },
+    {
+      label: "Цвет",
+      value: getCharValue(product.characteristics ?? null, "Цвет предмета"),
+    },
+  ].filter((f): f is { label: string; value: string } => Boolean(f.value));
 
   return (
     <main className={styles.page}>
@@ -373,18 +401,36 @@ export default async function CatalogSlugPage({ params }: Props) {
             <ColorSwatches current={product} siblings={siblings} />
           ) : null}
 
-          {product.rating && product.rating >= 4 ? (
-            <div className={styles.rating}>
-              <RatingStars rating={product.rating} />
-              <span className={styles.ratingText}>
-                {product.rating.toFixed(1)} · {product.reviewsCount}{" "}
-                {product.reviewsCount === 1
-                  ? "оценка"
-                  : product.reviewsCount! < 5
-                    ? "оценки"
-                    : "оценок"}
-              </span>
-            </div>
+          {/* Рейтинг — показываем всегда, если есть оценки (даже ниже 4).
+              Клик открывает вкладку отзывов, когда витринные отзывы есть. */}
+          {product.rating != null && (product.reviewsCount ?? 0) > 0 ? (
+            goodReviews.length > 0 ? (
+              <a href="#otzyvy" className={styles.ratingLink}>
+                <span className={styles.rating}>
+                  <RatingStars rating={product.rating} />
+                  <span className={styles.ratingText}>
+                    {product.rating.toFixed(1)} · {product.reviewsCount}{" "}
+                    {product.reviewsCount === 1
+                      ? "оценка"
+                      : product.reviewsCount! < 5
+                        ? "оценки"
+                        : "оценок"}
+                  </span>
+                </span>
+              </a>
+            ) : (
+              <div className={styles.rating}>
+                <RatingStars rating={product.rating} />
+                <span className={styles.ratingText}>
+                  {product.rating.toFixed(1)} · {product.reviewsCount}{" "}
+                  {product.reviewsCount === 1
+                    ? "оценка"
+                    : product.reviewsCount! < 5
+                      ? "оценки"
+                      : "оценок"}
+                </span>
+              </div>
+            )
           ) : null}
 
           {/* Marketplace CTAs — только маркетплейсы с ненулевым остатком.
@@ -411,46 +457,28 @@ export default async function CatalogSlugPage({ params }: Props) {
             Оплата, доставка и гарантия →
           </Link>
 
+          {/* Краткие факты — заполняют правую колонку, полный список в табе */}
+          {keyFacts.length > 0 && (
+            <div className={styles.keyFacts}>
+              <h3 className={styles.keyFactsTitle}>Характеристики</h3>
+              <dl className={styles.keyFactsList}>
+                {keyFacts.map((f) => (
+                  <div key={f.label} className={styles.keyFact}>
+                    <dt>{f.label}</dt>
+                    <dd>{f.value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <a href="#otzyvy" className={styles.keyFactsMore}>
+                Все характеристики и отзывы ↓
+              </a>
+            </div>
+          )}
+
           {/* SEO H2 */}
           <h2 className={styles.seoH2}>
             {product.name} — {catName}, {product.composition || "натуральная кожа"}
           </h2>
-
-          {/* Tabs: Description / Characteristics / Dimensions */}
-          <ProductTabs
-            tabs={[
-              {
-                label: "Описание",
-                content: <ExpandableText text={product.description} />,
-              },
-              {
-                label: "Характеристики",
-                content: (
-                  <ProductCharacteristics
-                    data={product.characteristics ?? []}
-                    composition={product.composition ?? undefined}
-                  />
-                ),
-              },
-              ...(dimensions
-                ? [
-                    {
-                      label: "Размеры",
-                      content: (
-                        <div className={styles.dimensionsGrid}>
-                          {dimensions.map((d) => (
-                            <div key={d.label} className={styles.dimItem}>
-                              <span className={styles.dimValue}>{d.value}</span>
-                              <span className={styles.dimLabel}>{d.label}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ),
-                    },
-                  ]
-                : []),
-            ]}
-          />
 
           {/* Примечание к цене — синхронизируется с маркетплейсов и может измениться */}
           <p className={styles.priceFootnote}>
@@ -460,6 +488,71 @@ export default async function CatalogSlugPage({ params }: Props) {
           </p>
         </div>
       </div>
+
+      {/* Tabs: Описание / Характеристики / Размеры / Отзывы —
+          full-width секция под карточкой, как на italymade.ru */}
+      <section id="otzyvy" className={styles.tabsSection}>
+        <ProductTabs
+          tabs={[
+            {
+              label: "Описание",
+              content: <ExpandableText text={product.description} />,
+            },
+            {
+              label: "Характеристики",
+              content: (
+                <ProductCharacteristics
+                  data={product.characteristics ?? []}
+                  composition={product.composition ?? undefined}
+                />
+              ),
+            },
+            ...(dimensions
+              ? [
+                  {
+                    label: "Размеры",
+                    content: (
+                      <div className={styles.dimensionsGrid}>
+                        {dimensions.map((d) => (
+                          <div key={d.label} className={styles.dimItem}>
+                            <span className={styles.dimValue}>{d.value}</span>
+                            <span className={styles.dimLabel}>{d.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ),
+                  },
+                ]
+              : []),
+            // Вкладка отзывов — только позитив (≥4★), негатив остаётся на МП
+            ...(goodReviews.length > 0
+              ? [
+                  {
+                    label: `${goodReviews.length} ${pluralRu(
+                      goodReviews.length,
+                      "отзыв",
+                      "отзыва",
+                      "отзывов"
+                    )}`,
+                    content: (
+                      <>
+                        <div className={styles.reviewsTabHeader}>
+                          <Link href="/reviews" className={styles.reviewsTabMore}>
+                            Все отзывы о Moranti →
+                          </Link>
+                        </div>
+                        <ProductReviews
+                          reviews={goodReviews}
+                          marketplaceLinks={product.marketplaces}
+                        />
+                      </>
+                    ),
+                  },
+                ]
+              : []),
+          ]}
+        />
+      </section>
 
       {/* Related products */}
       {related.length > 0 && (

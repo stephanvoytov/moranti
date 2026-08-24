@@ -1,0 +1,352 @@
+/* =============================================
+   Reviews Page — витрина отзывов
+   ============================================= */
+
+/* ——— Page wrapper ——— */
+
+.page {
+  margin-top: var(--header-height);
+  padding: var(--space-lg) var(--container-padding) var(--space-3xl);
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ——— Breadcrumb ——— */
+
+.breadcrumb {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: var(--space-xl);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-weight: 400;
+}
+
+.breadcrumbLink {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.breadcrumbLink:hover {
+  color: var(--dark);
+}
+
+.breadcrumbSep {
+  color: var(--border);
+}
+
+.breadcrumbCurrent {
+  color: var(--muted);
+}
+
+/* ——— Hero ——— */
+
+.hero {
+  margin-bottom: var(--space-3xl);
+}
+
+/* ——— Banner: рейтинг магазина ——— */
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: var(--space-lg) 0;
+  margin-bottom: var(--space-2xl);
+  border-bottom: 1px solid var(--border);
+}
+
+.bannerLogo {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.ratingCol {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.scoreRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.starsWrap {
+  display: inline-flex;
+  align-items: center;
+  transform: translateY(8px);
+}
+
+.score {
+  font-family: var(--font-serif);
+  font-size: 40px;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1;
+  color: var(--dark);
+}
+
+.caption {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.heroTitle {
+  font-family: var(--font-serif);
+  font-size: 48px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--dark);
+  margin: 0 0 var(--space-sm);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.heroDesc {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0;
+  max-width: 560px;
+}
+
+.empty {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+/* ——— Product block ——— */
+
+.productBlock {
+  margin-bottom: var(--space-3xl);
+}
+
+.productBlock:last-child {
+  margin-bottom: 0;
+}
+
+.productHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.productThumb {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--cream, #f5f1ea);
+}
+
+.productName {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 var(--space-2xs);
+}
+
+.productLink {
+  color: var(--dark);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.productLink:hover {
+  opacity: 0.7;
+}
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.ratingText {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.viewProduct {
+  margin-left: auto;
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dark);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+  transition: opacity var(--transition-fast);
+}
+
+.viewProduct:hover {
+  opacity: 0.7;
+}
+
+/* ——— Review grid ——— */
+
+.reviewGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+
+.reviewCard {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.reviewHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2xs);
+}
+
+.reviewAuthor {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dark);
+}
+
+.reviewSource {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.reviewStars {
+  font-size: 14px;
+}
+
+.reviewText {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.reviewDate {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: auto;
+}
+
+.moreNote {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: var(--space-xs);
+}
+
+/* ——— Featured + sections ——— */
+
+.featured {
+  margin-bottom: var(--space-3xl);
+}
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--dark);
+  margin: 0 0 var(--space-md);
+  letter-spacing: -0.01em;
+}
+
+/* ——— FAQ ——— */
+
+.faq {
+  margin-top: var(--space-3xl);
+  padding-top: var(--space-2xl);
+  border-top: 1px solid var(--border);
+}
+
+.faqList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-lg);
+}
+
+.faqItem {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--space-md);
+}
+
+.faqQuestion {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--dark);
+  margin: 0 0 var(--space-2xs);
+}
+
+.faqAnswer {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ——— Responsive ——— */
+
+@media (max-width: 900px) {
+  .reviewGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .faqList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .heroTitle {
+    font-size: 34px;
+  }
+
+  .productHeader {
+    flex-wrap: wrap;
+  }
+
+  .viewProduct {
+    margin-left: 0;
+    width: 100%;
+    order: 3;
+  }
+
+  .reviewGrid {
+    grid-template-columns: 1fr;
+  }
+}

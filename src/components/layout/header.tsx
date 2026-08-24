@@ -15,6 +15,7 @@ export default function Header({ strings }: { strings?: SiteStrings }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const { count } = useFavorites();
   const { count: cartCount } = useCart();
   const { user, logout } = useAuth();
@@ -160,9 +161,94 @@ export default function Header({ strings }: { strings?: SiteStrings }) {
           <Link href="/about" onClick={() => setMenuOpen(false)}>
             {t(strings, "nav.about", "О бренде")}
           </Link>
-          <Link href="/contacts" onClick={() => setMenuOpen(false)}>
-            {t(strings, "nav.contacts", "Контакты")}
-          </Link>
+          <div
+            className={styles.catalogItem}
+            onMouseEnter={() => {
+              if (!window.matchMedia("(max-width: 768px)").matches) {
+                setAboutOpen(true);
+              }
+            }}
+            onMouseLeave={() => {
+              if (!window.matchMedia("(max-width: 768px)").matches) {
+                setAboutOpen(false);
+              }
+            }}
+          >
+            <div className={styles.catalogTop}>
+              <Link
+                href="/info"
+                className={aboutOpen ? styles.catalogLinkOpen : undefined}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setAboutOpen(false);
+                }}
+              >
+                Информация
+              </Link>
+              <button
+                type="button"
+                className={`${styles.catalogToggle}${aboutOpen ? " " + styles.catalogToggleOpen : ""}`}
+                aria-label={aboutOpen ? "Скрыть меню" : "Показать меню"}
+                aria-expanded={aboutOpen}
+                onClick={() => setAboutOpen((v) => !v)}
+              >
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+            <div
+              className={`${styles.dropdown}${aboutOpen ? " " + styles.dropdownOpen : ""}`}
+            >
+              <div className={styles.dropdownInner}>
+                <Link
+                  href="/reviews"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setAboutOpen(false);
+                  }}
+                >
+                  Отзывы
+                </Link>
+                <Link
+                  href="/delivery"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setAboutOpen(false);
+                  }}
+                >
+                  Доставка и оплата
+                </Link>
+                <Link
+                  href="/care"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setAboutOpen(false);
+                  }}
+                >
+                  Уход за сумками
+                </Link>
+                <Link
+                  href="/contacts"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setAboutOpen(false);
+                  }}
+                >
+                  Контакты
+                </Link>
+                <Link
+                  href="/privacy"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setAboutOpen(false);
+                  }}
+                >
+                  Политика конфиденциальности
+                </Link>
+              </div>
+            </div>
+          </div>
         </nav>
 
         <div

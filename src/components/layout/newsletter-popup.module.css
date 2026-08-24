@@ -1,31 +1,43 @@
 /* =============================================
-   NewsletterPopup — попап подписки (CSS Module)
-   Стиль синхронизирован с ask-question-modal
+   NewsletterPopup — вежливая карточка подписки:
+   угол экрана на десктопе, баннер снизу на мобильных.
+   Без затемнения — сайт остаётся доступным.
    ============================================= */
 
-.overlay {
+.card {
   position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(44, 36, 32, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  right: 24px;
+  bottom: 24px;
+  z-index: 950;
+  width: min(360px, calc(100vw - 48px));
+  background: var(--bg);
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 40px rgba(44, 36, 32, 0.18);
+  padding: 26px 26px 24px;
+  animation: nl-in 0.35s ease both;
 }
 
-.card {
-  position: relative;
-  width: 100%;
-  max-width: 440px;
-  background: var(--bg);
-  padding: 36px 32px 32px;
+@keyframes nl-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+  }
 }
 
 .close {
   position: absolute;
-  top: 14px;
-  right: 14px;
+  top: 8px;
+  right: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,7 +56,7 @@
 
 .title {
   font-family: var(--font-serif);
-  font-size: 26px;
+  font-size: 21px;
   font-weight: 400;
   color: var(--dark);
   margin: 0 0 6px;
@@ -55,14 +67,13 @@
   font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.5;
-  margin: 0 0 20px;
+  margin: 0 0 16px;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 16px;
+  gap: 12px;
 }
 
 .input {
@@ -71,7 +82,7 @@
   color: var(--dark);
   background: var(--surface);
   border: 1px solid var(--border);
-  padding: 12px 14px;
+  padding: 11px 13px;
   outline: none;
   transition: border-color var(--transition-fast);
 }
@@ -84,16 +95,22 @@
   border-color: var(--camel);
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .submit {
-  align-self: flex-start;
   font-family: var(--font-sans);
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--camel);
   background: transparent;
   border: 1px solid var(--camel);
-  padding: 14px 32px;
+  padding: 11px 24px;
   cursor: pointer;
   font-weight: 500;
   transition: background var(--transition-fast), color var(--transition-fast),
@@ -110,6 +127,24 @@
   cursor: default;
 }
 
+.never {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--muted);
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  text-decoration: underline transparent;
+  text-underline-offset: 3px;
+  transition: color var(--transition-fast), text-decoration-color var(--transition-fast);
+}
+
+.never:hover {
+  color: var(--text-secondary);
+  text-decoration-color: var(--muted);
+}
+
 .honeypot {
   position: absolute;
   left: -9999px;
@@ -121,15 +156,44 @@
 
 .success {
   font-family: var(--font-body);
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 13px;
+  line-height: 1.6;
   color: var(--success);
-  margin: 14px 0 0;
+  margin: 12px 0 0;
 }
 
 .error {
   font-family: var(--font-body);
   font-size: 13px;
   color: #b3261e;
-  margin: 14px 0 0;
+  margin: 12px 0 0;
+}
+
+/* Мобильный: тонкий ненавязчивый баннер снизу во всю ширину */
+@media (max-width: 768px) {
+  .card {
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 18px 16px calc(16px + env(safe-area-inset-bottom));
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    box-shadow: 0 -8px 30px rgba(44, 36, 32, 0.14);
+  }
+
+  .title {
+    font-size: 18px;
+    margin: 0 0 4px;
+  }
+
+  .text {
+    font-size: 12px;
+    margin: 0 0 12px;
+  }
+
+  .close {
+    top: 2px;
+    right: 2px;
+  }
 }

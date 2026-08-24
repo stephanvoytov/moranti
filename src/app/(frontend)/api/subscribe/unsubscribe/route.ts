@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server";
 import prisma, { prismaQuery } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { simpleHtmlPage } from "@/lib/simple-html";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,11 @@ export async function GET(request: Request) {
   const token = searchParams.get("token");
 
   if (!token) {
-    return NextResponse.json({ error: "Неверная ссылка отписки" }, { status: 400 });
+    return simpleHtmlPage({
+      title: "Неверная ссылка",
+      text: "Ссылка отписки неполная — попробуйте скопировать её из письма целиком.",
+      status: 400,
+    });
   }
 
   try {
@@ -22,7 +27,11 @@ export async function GET(request: Request) {
     );
 
     if (!sub) {
-      return NextResponse.json({ error: "Подписка не найдена" }, { status: 404 });
+      return simpleHtmlPage({
+        title: "Подписка не найдена",
+        text: "Возможно, вы уже отписались ранее. Если письма продолжают приходить — напишите нам через форму на сайте.",
+        status: 404,
+      });
     }
 
     await prismaQuery(() =>
@@ -35,6 +44,10 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/?unsubscribed=1", request.url));
   } catch (err) {
     logger.error("Unsubscribe failed", { error: (err as Error)?.message });
-    return NextResponse.json({ error: "Ошибка отписки" }, { status: 500 });
+    return simpleHtmlPage({
+      title: "Что-то пошло не так",
+      text: "Не удалось отписаться. Попробуйте позже — ссылка в письме остаётся действительной.",
+      status: 500,
+    });
   }
 }
