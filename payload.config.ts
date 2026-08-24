@@ -19,6 +19,7 @@ import { Posts } from './collections/Posts.ts'
 import { SiteContent } from './collections/SiteContent.ts'
 import { SiteSettings } from './collections/SiteSettings.ts'
 import { SiteStrings } from './collections/SiteStrings.ts'
+import { Newsletter } from './collections/Newsletter.ts'
 
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
@@ -79,6 +80,7 @@ export default buildConfig({
   globals: [
     SiteContent,
     SiteStrings,
+    Newsletter,
   ],
   typescript: {
     outputFile: 'payload-types.ts',

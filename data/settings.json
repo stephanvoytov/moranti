@@ -21,5 +21,12 @@
     "yandexMarket": ""
   },
   "updatedAt": "2026-06-21T23:36:51.706Z",
-  "contactEmail": "irina.augustan@gmail.com"
+  "contactEmail": "irina.augustan@gmail.com",
+  "storeRating": {
+    "ratingValue": 4.7,
+    "reviewCount": 1828,
+    "wb": { "ratingValue": 4.7, "reviewCount": 1783 },
+    "ozon": { "ratingValue": 4.8, "reviewCount": 45 },
+    "updatedAt": "2026-08-24T00:00:00.000Z"
+  }
 }

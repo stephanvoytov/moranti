@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Banner, Button, Card, Pill } from "@payloadcms/ui";
 
 interface RecentOrder {
   id: string;
@@ -32,19 +33,19 @@ const STATUS_LABELS: Record<string, string> = {
   refunded: "Возврат",
 };
 
-const card: React.CSSProperties = {
-  background: "var(--theme-elevation-100, #f5f5f5)",
-  border: "1px solid var(--theme-border-color, #e2e2e2)",
-  borderRadius: 8,
-  padding: "16px 18px",
-  minWidth: 150,
+const STATUS_PILL: Record<string, "error" | "warning" | "success" | "light"> = {
+  new: "error",
+  processing: "warning",
+  completed: "success",
+  cancelled: "light",
+  refunded: "light",
 };
 
-const grid: React.CSSProperties = {
+const gridStyle: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
-  gap: 12,
-  marginTop: 12,
+  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+  gap: "var(--base, 16px)",
+  marginTop: "calc(var(--base, 16px) * 0.5)",
 };
 
 export default function DashboardWidgets() {
@@ -63,100 +64,97 @@ export default function DashboardWidgets() {
 
   const m = data.metrics;
 
-  const metricCards: { label: string; value: number; accent?: boolean }[] = [
-    { label: "Товары (в наличии)", value: m.products },
-    { label: "Заказы — новые", value: m.ordersNew, accent: m.ordersNew > 0 },
-    {
-      label: "Заказы — в работе",
-      value: m.ordersProcessing,
-      accent: m.ordersProcessing > 0,
-    },
-    { label: "Заказы — выполнено", value: m.ordersDone },
-    { label: "Подписчики", value: m.subscribers },
-    { label: "Покупатели", value: m.customers },
+  const metricCards: {
+    label: string;
+    value: number;
+    href: string;
+    accent?: boolean;
+  }[] = [
+    { label: "Товары (в наличии)", value: m.products, href: "/admin/collections/products" },
+    { label: "Заказы — новые", value: m.ordersNew, href: "/admin/collections/orders", accent: m.ordersNew > 0 },
+    { label: "Заказы — в работе", value: m.ordersProcessing, href: "/admin/collections/orders", accent: m.ordersProcessing > 0 },
+    { label: "Заказы — выполнено", value: m.ordersDone, href: "/admin/collections/orders" },
+    { label: "Подписчики", value: m.subscribers, href: "/admin/collections/subscribers" },
+    { label: "Покупатели", value: m.customers, href: "/admin/collections/customers" },
   ];
 
   return (
-    <div style={{ marginBottom: 28 }}>
+    <div style={{ marginBottom: "calc(var(--base, 16px) * 2)" }}>
       <h2
         style={{
           fontSize: 18,
           fontWeight: 600,
-          margin: "4px 0",
+          margin: "4px 0 0",
           color: "var(--theme-text, #111)",
         }}
       >
         Обзор магазина
       </h2>
 
-      <div style={grid}>
+      <div style={gridStyle}>
         {metricCards.map((c) => (
-          <div
+          <Card
             key={c.label}
-            style={{
-              ...card,
-              borderColor: c.accent
-                ? "var(--theme-error-500, #d23)"
-                : "var(--theme-border-color, #e2e2e2)",
-            }}
-          >
-            <div
-              style={{
-                fontSize: 26,
-                fontWeight: 700,
-                lineHeight: 1.1,
-                color: c.accent
-                  ? "var(--theme-error-500, #d23)"
-                  : "var(--theme-text, #111)",
-              }}
-            >
-              {c.value}
-            </div>
-            <div
-              style={{
-                fontSize: 13,
-                marginTop: 6,
-                color: "var(--theme-text, #111)",
-                opacity: 0.75,
-              }}
-            >
-              {c.label}
-            </div>
-          </div>
+            title={c.label}
+            href={c.href}
+            actions={
+              <Pill pillStyle={c.accent ? "error" : "light"}>{c.value}</Pill>
+            }
+          />
         ))}
       </div>
 
       {data.attention > 0 && (
-        <div
-          style={{
-            marginTop: 16,
-            padding: "12px 16px",
-            borderRadius: 8,
-            background: "var(--theme-error-100, #fde8e8)",
-            border: "1px solid var(--theme-error-500, #d23)",
-            color: "var(--theme-text, #111)",
-          }}
-        >
-          <strong>Требует внимания:</strong> {data.attention} заказ(ов) в статусе
-          «Новый» или «В обработке».{" "}
-          <Link href="/admin/collections/orders" style={{ fontWeight: 600 }}>
-            Перейти к заказам →
-          </Link>
+        <div style={{ marginTop: "var(--base, 16px)" }}>
+          <Banner type="error" alignIcon="left">
+            Требует внимания: {data.attention} заказ(ов) в статусе «Новый» или
+            «В обработке».{" "}
+            <Button
+              el="anchor"
+              url="/admin/collections/orders"
+              size="small"
+              buttonStyle="error"
+            >
+              Перейти к заказам
+            </Button>
+          </Banner>
         </div>
       )}
 
       {data.recentOrders.length > 0 && (
-        <div style={{ marginTop: 16 }}>
-          <h3 style={{ fontSize: 15, margin: "0 0 8px", color: "var(--theme-text, #111)" }}>
+        <div style={{ marginTop: "var(--base, 16px)" }}>
+          <h3
+            style={{
+              fontSize: 15,
+              margin: "0 0 8px",
+              color: "var(--theme-text, #111)",
+            }}
+          >
             Последние заказы
           </h3>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              fontSize: 14,
+              background: "var(--theme-elevation-0, #fff)",
+              border: "1px solid var(--theme-border-color, #e2e2e2)",
+            }}
+          >
             <thead>
-              <tr style={{ textAlign: "left", opacity: 0.7 }}>
-                <th style={{ padding: "6px 8px" }}>№</th>
-                <th style={{ padding: "6px 8px" }}>Статус</th>
-                <th style={{ padding: "6px 8px" }}>Сумма</th>
-                <th style={{ padding: "6px 8px" }}>Дата</th>
+              <tr
+                style={{
+                  textAlign: "left",
+                  color: "var(--theme-elevation-600, #666)",
+                  fontSize: 12,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.04em",
+                }}
+              >
+                <th style={{ padding: "10px 12px" }}>№</th>
+                <th style={{ padding: "10px 12px" }}>Статус</th>
+                <th style={{ padding: "10px 12px" }}>Сумма</th>
+                <th style={{ padding: "10px 12px" }}>Дата</th>
               </tr>
             </thead>
             <tbody>
@@ -165,18 +163,29 @@ export default function DashboardWidgets() {
                   key={o.id}
                   style={{ borderTop: "1px solid var(--theme-border-color, #eee)" }}
                 >
-                  <td style={{ padding: "6px 8px" }}>
-                    <a href={`/admin/collections/orders/${o.id}`}>
+                  <td style={{ padding: "10px 12px" }}>
+                    <Link
+                      href={`/admin/collections/orders/${o.id}`}
+                      style={{
+                        color: "var(--theme-success-500, #0f7d4c)",
+                        fontWeight: 600,
+                        textDecoration: "none",
+                      }}
+                    >
                       {o.orderNumber}
-                    </a>
+                    </Link>
                   </td>
-                  <td style={{ padding: "6px 8px" }}>
-                    {STATUS_LABELS[o.status] || o.status}
+                  <td style={{ padding: "10px 12px" }}>
+                    <Pill pillStyle={STATUS_PILL[o.status] || "light"}>
+                      {STATUS_LABELS[o.status] || o.status}
+                    </Pill>
                   </td>
-                  <td style={{ padding: "6px 8px" }}>
-                    {typeof o.total === "number" ? `${o.total} ₽` : "—"}
+                  <td style={{ padding: "10px 12px" }}>
+                    {typeof o.total === "number"
+                      ? `${o.total.toLocaleString("ru-RU")} ₽`
+                      : "—"}
                   </td>
-                  <td style={{ padding: "6px 8px" }}>
+                  <td style={{ padding: "10px 12px", color: "var(--theme-elevation-600, #666)" }}>
                     {o.createdAt
                       ? new Date(o.createdAt).toLocaleDateString("ru-RU")
                       : ""}

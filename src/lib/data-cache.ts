@@ -22,6 +22,8 @@ interface CacheEntry<T> {
 
 const store = new Map<string, CacheEntry<unknown>>();
 const pending = new Map<string, Promise<unknown>>();
+// cache-bust 2: инвалидирует in-memory кэш при изменении данных БД/настроек вручную
+
 
 /** Свежее окно по умолчанию */
 const DEFAULT_TTL = 30_000; // 30 s

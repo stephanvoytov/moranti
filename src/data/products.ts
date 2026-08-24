@@ -388,14 +388,22 @@ export async function getCategories(): Promise<ProductCategory[]> {
 
 /**
  * Отзывы товара с маркетплейсов (единоразовый импорт).
- * Нет БД / нет отзывов → [] — страница работает как раньше.
+ * Ищем prisma-товар по slug (id витринного товара из Payload отличается),
+ * затем отзывы по его prisma-id. Нет БД / нет отзывов → [].
  */
-export async function getReviews(productId: string): Promise<Review[]> {
-  return cacheGet(`reviews:${productId}`, async () => {
+export async function getReviews(productSlug: string): Promise<Review[]> {
+  return cacheGet(`reviews:${productSlug}`, async () => {
     try {
+      const prod = await prismaQuery(() =>
+        prisma.product.findFirst({
+          where: { slug: productSlug },
+          select: { id: true },
+        }),
+      );
+      if (!prod) return [];
       const rows = await prismaQuery(() =>
         prisma.review.findMany({
-          where: { productId },
+          where: { productId: prod.id },
           orderBy: [{ reviewedAt: "desc" }, { createdAt: "desc" }],
         }),
       );

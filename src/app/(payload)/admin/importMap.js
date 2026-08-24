@@ -23,6 +23,8 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { MediaPicker as MediaPicker_7b9a9cd87f6c3ace0c57414e35ab6bea } from '@/components/admin/MediaPicker'
 import { ProductPreview as ProductPreview_41c3f0555ad471b8c129ad6b95419312 } from '@/components/admin/ProductPreview'
+import ImageCell_7d8f2a1b9c4e5f60 from '@/components/admin/ImageCell'
+import { NewsletterSend as NewsletterSend_9a2b3c4d5e6f7081 } from '@/components/admin/NewsletterSend'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -52,5 +54,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/components/admin/MediaPicker#MediaPicker": MediaPicker_7b9a9cd87f6c3ace0c57414e35ab6bea,
   "@/components/admin/ProductPreview#ProductPreview": ProductPreview_41c3f0555ad471b8c129ad6b95419312,
+  "@/components/admin/ImageCell#ImageCell": ImageCell_7d8f2a1b9c4e5f60,
+  "@/components/admin/NewsletterSend#NewsletterSend": NewsletterSend_9a2b3c4d5e6f7081,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

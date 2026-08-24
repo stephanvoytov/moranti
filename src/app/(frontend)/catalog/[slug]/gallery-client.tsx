@@ -323,7 +323,7 @@ export default function GalleryClient({ images, video, alt }: GalleryClientProps
             style={{ "--i": activeIndex, "--n": slides.length } as React.CSSProperties}
           >
             {slides.map((slide, i) => (
-              <div key={slide.kind === "video" ? `video:${slide.src}` : slide.src} className={styles.slide}>
+              <div key={`${slide.kind === "video" ? `video:${slide.src}` : slide.src}:${i}`} className={styles.slide}>
                 {slide.kind === "image" ? (
                   <GalleryImage
                     src={blobUrl(slide.src)}

@@ -229,7 +229,7 @@ export default async function CatalogSlugPage({ params }: Props) {
 
   // Отзывы с маркетплейсов (единоразовый импорт, кешируются).
   // На витрине показываем только позитив (≥4★) — негатив остаётся на МП.
-  const reviews = await getReviews(product.id);
+  const reviews = await getReviews(product.slug);
   const goodReviews = reviews.filter((r) => r.text.trim() && (r.rating ?? 0) >= 4);
 
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";

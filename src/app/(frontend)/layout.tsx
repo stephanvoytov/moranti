@@ -11,6 +11,7 @@ import { getStoreRatingStats } from "@/data/products";
 import { YandexMetricaProvider } from "@artginzburg/next-ym";
 import { Analytics } from "@vercel/analytics/next";
 import { StorefrontShell } from "@/components/layout/storefront-shell";
+import CookieConsent from "@/components/layout/cookie-consent";
 import { getSiteContent, getSiteStrings } from "@/lib/site-content";
 import "./globals.css";
 
@@ -211,6 +212,9 @@ export default async function RootLayout({
           </CartProvider>
           </FavoritesProvider>
         </YandexMetricaProvider>
+
+        {/* Согласие на использование cookie (ФЗ-152, стандартный баннер) */}
+        <CookieConsent />
 
         {/* Vercel Analytics — Web Vitals + page views (first-party, ~2KB) */}
         <Analytics />

@@ -6,7 +6,7 @@ export const Products: CollectionConfig = {
   labels: { singular: 'Товар', plural: 'Товары' },
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'sku', 'category', 'isDirectSale', 'price', 'inStock', 'updatedAt'],
+    defaultColumns: ['image', 'name', 'sku', 'category', 'isDirectSale', 'price', 'inStock', 'updatedAt'],
     preview: ({ data }) => {
       const slug = (data as { slug?: string } | undefined)?.slug
       return slug ? `/catalog/${slug}` : null
@@ -74,6 +74,7 @@ export const Products: CollectionConfig = {
               admin: {
                 components: {
                   Field: { path: '@/components/admin/MediaPicker#MediaPicker' },
+                  Cell: { path: '@/components/admin/ImageCell#ImageCell' },
                 },
               },
             },
