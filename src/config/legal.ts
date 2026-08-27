@@ -19,4 +19,4 @@ export const CONTACT_URLS = {
 } as const;
 
 /** Почта для вопросов покупателей (дублируется в settings.contactEmail) */
-export const SUPPORT_EMAIL = "irina.augustan@gmail.com";
+export const SUPPORT_EMAIL = "info@morantibags.ru";
