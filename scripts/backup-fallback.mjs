@@ -66,7 +66,7 @@ async function main() {
   // Продукты
   const products = await retry(() =>
     prisma.product.findMany({
-      where: { archivedAt: null, inStock: true },
+      where: { archivedAt: null, inStock: true, price: { gt: 0 } },
       orderBy: { id: 'asc' },
     })
   );

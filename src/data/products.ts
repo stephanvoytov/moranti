@@ -203,7 +203,7 @@ export async function getProducts(): Promise<Product[]> {
     try {
       const rows = await prismaQuery(() =>
         prisma.product.findMany({
-          where: { archivedAt: null, inStock: true },
+          where: { archivedAt: null, inStock: true, price: { gt: 0 } },
           orderBy: { createdAt: "asc" },
         }),
       );
@@ -227,7 +227,9 @@ export async function getAllProducts(): Promise<Product[]> {
       const rows = await prismaQuery(() =>
         prisma.product.findMany({ orderBy: { createdAt: "asc" } }),
       );
-      return rows.filter((p) => !p.archivedAt).map(mapProduct);
+      return rows
+        .filter((p) => !p.archivedAt && (p.price ?? 0) > 0)
+        .map(mapProduct);
     } catch (err) {
       logger.warn("DB unavailable, fallback to products.json (all)", {
         error: (err as Error)?.message,
@@ -248,14 +250,14 @@ export async function getProduct(slug: string): Promise<Product | null> {  // �
   return cacheGet(`product:${slug}`, async () => {
     try {
       const row = await prismaQuery(() =>
-        prisma.product.findUnique({ where: { slug } }),
+        prisma.product.findUnique({ where: { slug, price: { gt: 0 } } }),
       );
       if (row) return mapProduct(row);
     } catch {
       // DB недоступна — fallback на JSON
     }
     const fallback = loadJsonFallback<{ products: Product[] }>("products.json");
-    return fallback?.products?.find((p) => p.slug === slug) ?? null;
+    return fallback?.products?.find((p) => p.slug === slug && (p.price ?? 0) > 0) ?? null;
   }, 60_000, 600_000);
 }
 

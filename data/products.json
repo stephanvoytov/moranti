@@ -5,11 +5,11 @@
       "slug": "sumka-kross-bodi-iz-naturalnoj-kozhi-taup",
       "sku": "KvadratTaup",
       "name": "Сумка кросс-боди из натуральной кожи, тауп",
-      "price": 9071,
-      "originalPrice": 23150,
+      "price": 9844,
+      "originalPrice": 30000,
       "wbPrice": 9071,
       "wbOriginalPrice": 23150,
-      "ozonPrice": 10028,
+      "ozonPrice": 9844,
       "ozonOriginalPrice": 30000,
       "currency": "₽",
       "category": "crossbody",
@@ -52,7 +52,7 @@
       "wbArticle": 253051367,
       "ozonArticle": 4203797768,
       "rating": 4.9,
-      "reviewsCount": 55,
+      "reviewsCount": 60,
       "salesCount": 765,
       "colorName": "тауп, латте, коричневый, капучино",
       "composition": "натуральная кожа",
@@ -230,115 +230,77 @@
       "modelId": "model-wb-229103887"
     },
     {
-      "id": "mor-005",
-      "slug": "sumka-tout-iz-zamshi-seryj",
-      "sku": "BalensaGr",
-      "name": "Сумка-тоут из замши, серый",
-      "price": 10263,
-      "originalPrice": 0,
-      "wbPrice": 10263,
+      "id": "mor-004",
+      "slug": "sumka-tout-iz-zamshi-taup-2",
+      "sku": "RoadBagTaupe",
+      "name": "Сумка-тоут из замши, тауп",
+      "price": 12129,
+      "originalPrice": 30000,
+      "wbPrice": 12129,
       "wbOriginalPrice": 30000,
-      "ozonPrice": 25000,
       "currency": "₽",
       "category": "tote",
-      "description": "Сумка Moranti из натуральной замши - это воплощение итальянского стиля и качества. Изготовленная из высококачественной натуральной итальянской замши с фактурой велюр, сумка отличается не только своим роскошным внешним видом, но и невероятной прочностью. Натуральная замша, произведенная в Италии, придает сумке неповторимую текстуру и благородный оттенок. Ее лаконичный дизайн в стиле Balenciaga Rodeo (Баленсиага) подчеркивает элегантность и изысканность. Эта модель станет идеальным дополнением к любому образу, подчеркивая ваш безупречный вкус и чувство стиля. \nДлина плечевого ремня регулируется 65 - 121см\nВысота ручки - 20 см.\nВыберете себе или в подарок сумки Moranti\nСумка Moranti - это не просто аксессуар, а инвестиция в качество и долговечность.",
-      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/1.webp",
+      "description": "Сумка Moranti из коллекции Italy Bag - это стильный и практичный аксессуар для современной женщины, ценящей комфорт и качество. Изготовленная из натуральной замши, сумка обладает мягкой, ворсистой фактурой, которая придает ей особый шарм и тактильное удовольствие. Трендовая модель 2026 года, она станет идеальным дополнением к любому образу, будь то повседневный или праздничный.  Большой размер сумки позволяет вместить все необходимые вещи, превращая ее в удобный шоппер для покупок или вместительный мешок для путешествий.  Внутри сумки вас ждут три просторных отделения, одно из которых закрывается на молнию, а также три кармана для мелочей. Ручки из натуральной кожи обеспечивают удобный захват и носку, а съемный плечевой ремень позволяет носить сумку как на плече, так и кросс-боди.  Стильная и функциональная сумка Moranti станет незаменимым спутником в поездках, на отдыхе или в повседневной жизни. Ее вместительность и удобство оценят все, кто ценит практичность и элегантность.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/1.webp",
       "images": [
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/1.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/2.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/3.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/4.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/5.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/6.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/7.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/8.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/9.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/10.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/11.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/12.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/13.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/14.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/15.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/16.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/17.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/18.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/19.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/20.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/21.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3280/part328031/328031735/images/big/22.webp"
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/1.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/2.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/3.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/4.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/5.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/6.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/7.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/8.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/9.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/10.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/11.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/12.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/13.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/14.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/15.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/16.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/17.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/18.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/19.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/20.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/21.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/22.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899355/899355983/images/big/23.webp"
       ],
       "marketplaces": [
         {
-          "url": "https://www.wildberries.ru/catalog/328031735/detail.aspx",
+          "url": "https://www.wildberries.ru/catalog/899355983/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
-        },
-        {
-          "url": "https://www.ozon.ru/product/4203970460/",
-          "icon": "/images/icons/ozon.svg",
-          "name": "Ozon"
         }
       ],
-      "wbArticle": 328031735,
-      "ozonArticle": 4203970460,
-      "rating": 4.4,
-      "reviewsCount": 10,
-      "salesCount": 135,
-      "colorName": "серый, графит",
-      "composition": "замша натуральная",
+      "wbArticle": 899355983,
+      "rating": 4,
+      "reviewsCount": 2,
+      "salesCount": 15,
+      "colorName": "тауп, капучино, бежевый",
+      "composition": "замша натуральная, натуральная кожа",
       "nameAutoGenerated": true,
       "inStock": true,
-      "wbCreatedAt": "2025-02-07T10:12:57.058Z",
+      "wbCreatedAt": "2026-03-19T16:08:56.990Z",
       "characteristics": [
         {
           "options": [
             {
-              "name": "Вес товара без упаковки (г)",
-              "value": "700"
+              "name": "Номер декларации соответствия",
+              "value": "ЕАЭС N RU Д-IT.РА02.В.33619/26"
             },
             {
-              "name": "Вид застежки",
-              "value": "поворотный замок"
+              "name": "Особенности сумки",
+              "value": "большая, вместительная, дорожная"
             },
             {
-              "name": "Высота предмета",
-              "value": "23"
+              "name": "Состав",
+              "value": "замша натуральная, натуральная кожа"
             },
             {
-              "name": "Глубина предмета",
-              "value": "13"
-            },
-            {
-              "name": "Дата окончания действия сертификата/декларации",
-              "value": "04.03.2031"
-            },
-            {
-              "name": "Дата регистрации сертификата/декларации",
-              "value": "18.03.2026"
-            },
-            {
-              "name": "Декоративные элементы",
-              "value": "натуральная кожа"
-            },
-            {
-              "name": "Длина плечевого ремня",
-              "value": "121"
-            },
-            {
-              "name": "Карманы",
-              "value": "наружный сзади на молнии, внутренний на молнии"
-            },
-            {
-              "name": "Количество отделений",
-              "value": "2"
-            },
-            {
-              "name": "Коллекция",
-              "value": "баленсиага"
-            },
-            {
-              "name": "Комплектация",
-              "value": "1 шт сумка, 1 шт ремень"
+              "name": "Цвет",
+              "value": "тауп, капучино, бежевый"
             },
             {
               "name": "Материал подкладки",
@@ -349,36 +311,48 @@
               "value": "тоут"
             },
             {
+              "name": "Вид застежки",
+              "value": "молния"
+            },
+            {
+              "name": "Высота предмета",
+              "value": "31"
+            },
+            {
+              "name": "Глубина предмета",
+              "value": "14"
+            },
+            {
+              "name": "Карманы",
+              "value": "3, внутренний на молнии"
+            },
+            {
+              "name": "Комплектация",
+              "value": "1 шт сумка, 1 плечевой ремень"
+            },
+            {
               "name": "Назначение",
-              "value": "повседневная, на каждый день, через плечо"
+              "value": "на спорт, в поездку, в дорогу"
             },
             {
               "name": "Назначение ремня сумки",
-              "value": "на плечо, на руку, кроссбоди"
+              "value": "через плечо, кроссбоди, на плечо"
             },
             {
-              "name": "Номер декларации соответствия",
-              "value": "ЕАЭС N RU Д-IT.РА02.В.33619/26"
+              "name": "Рисунок",
+              "value": "однотонная"
             },
             {
-              "name": "Особенности сумки",
-              "value": "вместительная, объемная, средняя"
+              "name": "Дата окончания действия сертификата/декларации",
+              "value": "04.03.2031"
+            },
+            {
+              "name": "Количество отделений",
+              "value": "3"
             },
             {
               "name": "Пол",
               "value": "Женский"
-            },
-            {
-              "name": "Рисунок",
-              "value": "без рисунка"
-            },
-            {
-              "name": "Состав",
-              "value": "замша натуральная"
-            },
-            {
-              "name": "Ставка НДС",
-              "value": "Без НДС"
             },
             {
               "name": "Страна производства",
@@ -390,187 +364,75 @@
             },
             {
               "name": "Фактура материала",
-              "value": "велюр"
-            },
-            {
-              "name": "Цвет",
-              "value": "серый, графит"
+              "value": "ворсистая"
             },
             {
               "name": "Ширина предмета",
-              "value": "33"
+              "value": "44"
+            },
+            {
+              "name": "Дата регистрации сертификата/декларации",
+              "value": "18.03.2026"
+            },
+            {
+              "name": "Коллекция",
+              "value": "italy bag"
             }
           ],
           "group_name": "Wildberries"
-        },
-        {
-          "options": [
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            },
-            {
-              "value": ""
-            }
-          ],
-          "group_name": "Ozon"
         }
       ],
-      "photoCount": 22,
-      "modelId": "model-wb-309204328"
+      "photoCount": 23,
+      "modelId": "model-wb-608159463"
     },
     {
-      "id": "mor-008",
-      "slug": "sumka-tout-iz-zamshi-shokoladnyj-3",
-      "sku": "BalensaChoko/Zamsh",
-      "name": "Сумка-тоут из замши, шоколадный",
-      "price": 9330,
-      "originalPrice": 0,
-      "wbPrice": 9330,
-      "wbOriginalPrice": 30000,
-      "ozonPrice": 12241,
+      "id": "mor-010",
+      "slug": "sumka-kross-bodi-iz-naturalnoj-kozhi-belyj-2",
+      "sku": "KolechkoWhite",
+      "name": "Сумка кросс-боди из натуральной кожи, белый",
+      "price": 7252,
+      "originalPrice": 22000,
+      "wbPrice": 7252,
+      "wbOriginalPrice": 22000,
+      "ozonPrice": 16000,
+      "ozonOriginalPrice": 30000,
       "currency": "₽",
-      "category": "tote",
-      "description": "Сумка Moranti из натуральной замши - это стильное и практичное решение для современной женщины. Изготовленная из высококачественной натуральной итальянской замши с фактурой велюр, сумка отличается мягкостью и приятными тактильными ощущениями. Трендовая модель тоут в среднем размере идеально подходит для повседневного использования, вмещая все необходимые вещи. Сумка оснащена поворотным замком, обеспечивая надежную защиту ваших личных принадлежностей. Наличие наружного кармана на молнии сзади и внутреннего кармана на молнии добавляет удобства и функциональности. Мягкая и объемная сумка легко трансформируется из тоут в родео, а съемный ремень позволяет носить ее как через плечо, так и crossbody. Ее лаконичный дизайн в стиле Balenciaga Rodeo (Баленсиага) подчеркивает элегантность и изысканность. Декоративные элементы из натуральной кожи придают сумке особый шик, а производство в Италии гарантирует высокое качество и долговечность.\nДлина плечевого ремня регулируется 65 - 121см\nВысота ручки - 20 см.\nВыберете себе или в подарок сумки Moranti",
-      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/1.webp",
+      "category": "crossbody",
+      "description": "Небольшая сумка женская из натуральной кожи производства Италия.  Наша кроссбоди это стильная базовая маленькая сумочка, которая выполнена из 100% натуральной качественной кожи на фабрике в Италии. Сумка женская кожаная может использоваться как кросс-боди через плечо или как сумка клатч. В комплекте к сумочке идет удобный регулируемый ремень с максимальной длинной 130 см и минимальной длиной 110 см, позволяющий носить ее через плечо как кроссбоди и носить на плече. Вариант с коротким ремнем подходит как для повседневной носки в офис на работу для учебы как офисная так и для вечернего варианты на свадьбу день рождения,вечеринку. Модель люкс модная является трендом. Подойдет как для молодежи подростков девушке так и для более строгих образов для мамы. Итальянская сумка на бедро имеет одно отделение, которое закрывается клапаном на магнитной кнопке, а также молнией. Внутри есть карман на молнии.  Фурнитура сумки багет высокого качества итальянского производства. Цвет фурнитуры - золото. Клач, благодаря регулируемому ремню можно носить как летнюю сумку и на куртку на осень или пальто, как зимний вариант. \n Товар качественно упакован в плотную коробку, также прилагается пыльник.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226023/226023435/images/big/1.webp",
       "images": [
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/1.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/2.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/3.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/4.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/5.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/6.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/7.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/8.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/9.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/10.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/11.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/12.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/13.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/14.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/15.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/16.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/17.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/18.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/19.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/20.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/21.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/22.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/23.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/24.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/25.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/26.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/27.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4630/part463001/463001457/images/big/28.webp"
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226023/226023435/images/big/1.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226023/226023435/images/big/2.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226023/226023435/images/big/3.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226023/226023435/images/big/4.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226023/226023435/images/big/5.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226023/226023435/images/big/6.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226023/226023435/images/big/7.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226023/226023435/images/big/8.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol2260/part226023/226023435/images/big/9.webp"
       ],
       "marketplaces": [
         {
-          "url": "https://www.wildberries.ru/catalog/463001457/detail.aspx",
+          "url": "https://www.wildberries.ru/catalog/226023435/detail.aspx",
           "icon": "/images/icons/wb.svg",
           "name": "Wildberries"
         },
         {
-          "url": "https://www.ozon.ru/product/3791983538/",
+          "url": "https://www.ozon.ru/product/3890520375/",
           "icon": "/images/icons/ozon.svg",
           "name": "Ozon"
         }
       ],
-      "wbArticle": 463001457,
-      "ozonArticle": 3791983538,
-      "rating": 4.6,
-      "reviewsCount": 33,
-      "salesCount": 480,
-      "colorName": "шоколадный, коричневый, горький шоколад",
-      "composition": "замша натуральная",
+      "wbArticle": 226023435,
+      "ozonArticle": 3931030511,
+      "rating": 4.5,
+      "reviewsCount": 16,
+      "salesCount": 240,
+      "colorName": "белый",
+      "composition": "натуральная кожа",
       "nameAutoGenerated": true,
       "inStock": true,
-      "wbCreatedAt": "2025-07-10T12:49:48.410Z",
+      "wbCreatedAt": "2024-04-22T12:36:13.577Z",
       "characteristics": [
         {
           "options": [
@@ -580,15 +442,15 @@
             },
             {
               "name": "Вид застежки",
-              "value": "поворотный замок"
+              "value": "замок, молния"
             },
             {
               "name": "Высота предмета",
-              "value": "23"
+              "value": "15"
             },
             {
               "name": "Глубина предмета",
-              "value": "13"
+              "value": "7"
             },
             {
               "name": "Дата окончания действия сертификата/декларации",
@@ -600,27 +462,23 @@
             },
             {
               "name": "Декоративные элементы",
-              "value": "натуральная кожа"
-            },
-            {
-              "name": "Длина плечевого ремня",
-              "value": "121"
+              "value": "пряжка"
             },
             {
               "name": "Карманы",
-              "value": "наружный сзади на молнии, внутренний на молнии"
+              "value": "внутренний на молнии"
             },
             {
               "name": "Количество отделений",
-              "value": "2"
+              "value": "1"
             },
             {
               "name": "Коллекция",
-              "value": "баленсиага"
+              "value": "лето 2025"
             },
             {
               "name": "Комплектация",
-              "value": "1 шт сумка, 1 шт ремень"
+              "value": "1 шт сумка, 2 шт ремень, 1 шт пыльник"
             },
             {
               "name": "Материал подкладки",
@@ -628,15 +486,15 @@
             },
             {
               "name": "Модель сумки",
-              "value": "тоут"
+              "value": "кроссбоди"
             },
             {
               "name": "Назначение",
-              "value": "повседневная, на каждый день, через плечо"
+              "value": "повседневная, вечерняя, летняя"
             },
             {
               "name": "Назначение ремня сумки",
-              "value": "на плечо, на руку, кроссбоди"
+              "value": "на руку, на плечо, через плечо"
             },
             {
               "name": "Номер декларации соответствия",
@@ -644,23 +502,15 @@
             },
             {
               "name": "Особенности сумки",
-              "value": "вместительная, объемная, средняя"
+              "value": "маленькая сумка, клатч кожаный, вечерняя"
             },
             {
               "name": "Пол",
               "value": "Женский"
             },
             {
-              "name": "Рисунок",
-              "value": "без рисунка"
-            },
-            {
               "name": "Состав",
-              "value": "замша натуральная"
-            },
-            {
-              "name": "Ставка НДС",
-              "value": "Без НДС"
+              "value": "натуральная кожа"
             },
             {
               "name": "Страна производства",
@@ -672,15 +522,15 @@
             },
             {
               "name": "Фактура материала",
-              "value": "велюр"
+              "value": "зернистая натуральная кожа"
             },
             {
               "name": "Цвет",
-              "value": "шоколадный, коричневый, горький шоколад"
+              "value": "белый"
             },
             {
               "name": "Ширина предмета",
-              "value": "33"
+              "value": "23"
             }
           ],
           "group_name": "Wildberries"
@@ -776,24 +626,33 @@
             },
             {
               "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
             }
           ],
           "group_name": "Ozon"
         }
       ],
-      "photoCount": 28,
-      "modelId": "model-wb-309204328"
+      "photoCount": 9,
+      "modelId": "model-wb-203406688"
     },
     {
       "id": "mor-011",
       "slug": "sumka-kross-bodi-iz-naturalnoj-kozhi-molochnyj-3",
       "sku": "KolechkoMolochnyj",
       "name": "Сумка кросс-боди из натуральной кожи, молочный",
-      "price": 7428,
-      "originalPrice": 22000,
+      "price": 6295,
+      "originalPrice": 30000,
       "wbPrice": 7485,
       "wbOriginalPrice": 22000,
-      "ozonPrice": 7428,
+      "ozonPrice": 6295,
       "ozonOriginalPrice": 30000,
       "currency": "₽",
       "category": "crossbody",
@@ -832,7 +691,7 @@
       "wbArticle": 226024975,
       "ozonArticle": 3931050807,
       "rating": 4.7,
-      "reviewsCount": 21,
+      "reviewsCount": 24,
       "salesCount": 315,
       "colorName": "молочный, бежевый",
       "composition": "натуральная кожа",
@@ -1050,11 +909,11 @@
       "slug": "sumka-baget-iz-zamshi-taup",
       "sku": "OblakoTaupe",
       "name": "Сумка-багет из замши, тауп",
-      "price": 8916,
-      "originalPrice": 25150,
+      "price": 7293,
+      "originalPrice": 30000,
       "wbPrice": 8916,
       "wbOriginalPrice": 25150,
-      "ozonPrice": 19500,
+      "ozonPrice": 7293,
       "ozonOriginalPrice": 30000,
       "currency": "₽",
       "category": "baguette",
@@ -1102,7 +961,7 @@
       "wbArticle": 584857819,
       "ozonArticle": 4203943182,
       "rating": 4.7,
-      "reviewsCount": 12,
+      "reviewsCount": 24,
       "salesCount": 150,
       "colorName": "тауп, серо-коричневый",
       "composition": "натуральная замша",
@@ -1332,7 +1191,7 @@
       "originalPrice": 19000,
       "wbPrice": 6046,
       "wbOriginalPrice": 19000,
-      "ozonPrice": 6921,
+      "ozonPrice": 6296,
       "ozonOriginalPrice": 30000,
       "currency": "₽",
       "category": "baguette",
@@ -1377,7 +1236,7 @@
       "wbArticle": 165436666,
       "ozonArticle": 3890543949,
       "rating": 4.9,
-      "reviewsCount": 30,
+      "reviewsCount": 38,
       "salesCount": 390,
       "colorName": "бежевый",
       "composition": "натуральная кожа",
@@ -1596,11 +1455,11 @@
       "slug": "sumka-kross-bodi-zheltyj",
       "sku": "KellyYellow",
       "name": "Сумка кросс-боди, желтый",
-      "price": 7360,
-      "originalPrice": 13000,
+      "price": 6699,
+      "originalPrice": 20000,
       "wbPrice": 20000,
       "wbOriginalPrice": 13000,
-      "ozonPrice": 7360,
+      "ozonPrice": 6699,
       "ozonOriginalPrice": 20000,
       "currency": "₽",
       "category": "crossbody",
@@ -1644,7 +1503,7 @@
       "wbArticle": 899375103,
       "ozonArticle": 3878128886,
       "rating": 5,
-      "reviewsCount": 2,
+      "reviewsCount": 9,
       "salesCount": 15,
       "colorName": "желтый, лимонный",
       "nameAutoGenerated": true,
@@ -1855,11 +1714,11 @@
       "slug": "sumka-tout-iz-zamshi-taup-3",
       "sku": "BalensaTaup",
       "name": "Сумка-тоут из замши, тауп",
-      "price": 10263,
+      "price": 11644,
       "originalPrice": 24000,
       "wbPrice": 10263,
       "wbOriginalPrice": 30000,
-      "ozonPrice": 12880,
+      "ozonPrice": 11644,
       "ozonOriginalPrice": 24000,
       "currency": "₽",
       "category": "tote",
@@ -1897,7 +1756,7 @@
       "wbArticle": 328035699,
       "ozonArticle": 3672922562,
       "rating": 4.7,
-      "reviewsCount": 26,
+      "reviewsCount": 28,
       "salesCount": 375,
       "colorName": "тауп",
       "composition": "замша натуральная",
@@ -2118,15 +1977,443 @@
       "modelId": "model-wb-309204328"
     },
     {
+      "id": "mor-020",
+      "slug": "sumka-kross-bodi-iz-zamshi-shokoladnyj",
+      "sku": "BalensaMiniChoko/Zamsh",
+      "name": "Сумка кросс-боди из замши, шоколадный",
+      "price": 7464,
+      "originalPrice": 20000,
+      "wbPrice": 7464,
+      "wbOriginalPrice": 20000,
+      "ozonPrice": 17000,
+      "ozonOriginalPrice": 30000,
+      "currency": "₽",
+      "category": "crossbody",
+      "description": "Эта стильная сумка кросс-боди из натуральной замши станет идеальным дополнением к любому образу. Изготовленная в Италии из высококачественной натуральной замши с фактурой велюр, она отличается мягкостью и приятной текстурой. Компактный  размер делает ее удобной для повседневного использования, а также для особых случаев. Сумка оснащена надежной застежкой-молнией и замком, а также одним внутренним карманом для хранения необходимых мелочей. Мягкий текстильный подклад обеспечивает дополнительный комфорт.  Благодаря универсальному дизайну, сумка кросс-боди подходит как для прогулок, так и для вечеринок. Ее можно носить на плече, на руке или через плечо, что делает ее еще более практичной.  Эта трендовая модель, вдохновленная стилем Miu Miu ( миу миу) и Balenciaga,  уже стала хитом сезона 2025 года, о чем говорят стилисты.  Сумка станет прекрасным подарком на 8 марта или 14 февраля для любой женщины, ценящей качество и стиль.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/1.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/2.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/3.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/4.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/5.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/6.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/7.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/8.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/9.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/10.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/11.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/12.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/13.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol3911/part391176/391176745/images/big/14.webp"
+      ],
+      "marketplaces": [
+        {
+          "url": "https://www.wildberries.ru/catalog/391176745/detail.aspx",
+          "icon": "/images/icons/wb.svg",
+          "name": "Wildberries"
+        },
+        {
+          "url": "https://www.ozon.ru/product/3891442328/",
+          "icon": "/images/icons/ozon.svg",
+          "name": "Ozon"
+        }
+      ],
+      "wbArticle": 391176745,
+      "ozonArticle": 3774130831,
+      "rating": 4.6,
+      "reviewsCount": 21,
+      "salesCount": 270,
+      "colorName": "шоколадный",
+      "composition": "натуральная замша",
+      "nameAutoGenerated": true,
+      "inStock": true,
+      "wbCreatedAt": "2025-04-15T11:54:43.449Z",
+      "characteristics": [
+        {
+          "options": [
+            {
+              "name": "Вес товара без упаковки (г)",
+              "value": "288"
+            },
+            {
+              "name": "Вид застежки",
+              "value": "молния, Замок"
+            },
+            {
+              "name": "Высота предмета",
+              "value": "14"
+            },
+            {
+              "name": "Глубина предмета",
+              "value": "6"
+            },
+            {
+              "name": "Дата окончания действия сертификата/декларации",
+              "value": "04.03.2031"
+            },
+            {
+              "name": "Дата регистрации сертификата/декларации",
+              "value": "18.03.2026"
+            },
+            {
+              "name": "Длина плечевого ремня",
+              "value": "121"
+            },
+            {
+              "name": "Карманы",
+              "value": "1"
+            },
+            {
+              "name": "Количество отделений",
+              "value": "2"
+            },
+            {
+              "name": "Коллекция",
+              "value": "стиль баленсиага"
+            },
+            {
+              "name": "Комплектация",
+              "value": "1 сумка женская, 1 плечевой ремень"
+            },
+            {
+              "name": "Материал подкладки",
+              "value": "текстиль"
+            },
+            {
+              "name": "Модель сумки",
+              "value": "кросс-боди"
+            },
+            {
+              "name": "Назначение",
+              "value": "для телефона, повседневная, crossbody"
+            },
+            {
+              "name": "Назначение ремня сумки",
+              "value": "на плечо, на руку, Через плечо"
+            },
+            {
+              "name": "Номер декларации соответствия",
+              "value": "ЕАЭС N RU Д-IT.РА02.В.33619/26"
+            },
+            {
+              "name": "Особенности сумки",
+              "value": "мягкая"
+            },
+            {
+              "name": "Пол",
+              "value": "Женский"
+            },
+            {
+              "name": "Состав",
+              "value": "натуральная замша"
+            },
+            {
+              "name": "Страна производства",
+              "value": "Италия"
+            },
+            {
+              "name": "Упаковка",
+              "value": "коробка"
+            },
+            {
+              "name": "Фактура материала",
+              "value": "велюр"
+            },
+            {
+              "name": "Цвет",
+              "value": "шоколадный"
+            },
+            {
+              "name": "Ширина предмета",
+              "value": "24"
+            }
+          ],
+          "group_name": "Wildberries"
+        },
+        {
+          "options": [
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            }
+          ],
+          "group_name": "Ozon"
+        }
+      ],
+      "photoCount": 14,
+      "modelId": "model-wb-440884678"
+    },
+    {
+      "id": "mor-028",
+      "slug": "sumka-baget-iz-zamshi-shokoladnyj",
+      "sku": "MiuChoko/Zamsh",
+      "name": "Сумка-багет из замши, шоколадный",
+      "price": 6057,
+      "originalPrice": 20200,
+      "wbPrice": 6057,
+      "wbOriginalPrice": 20200,
+      "currency": "₽",
+      "category": "baguette",
+      "description": "Сумка Moranti из натуральной замши – это стильный и практичный аксессуар, созданный для современных женщин. Изготовленная из высококачественной натуральной замши и кожи, сумка отличается мягкой фактурой велюра и безупречным качеством исполнения. Модель багет, также известная как такса, имеет средний размер, что делает ее идеальным вариантом для повседневного использования и вечерних выходов. Сумка оснащена удобным ремнем, который можно носить на плече, через плечо или на руке, а также внутренним карманом для хранения мелочей.  Натуральная замша, производство в Италии и трендовый дизайн в стиле Миу Миу (Miu Miu) делают эту сумку желанным подарком на 8 марта, 14 февраля или просто так. Стилисты рекомендуют эту модель как must-have в 2025 году, подчеркивая ее универсальность и актуальность.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/1.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/2.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/3.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/4.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/5.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/6.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/7.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/8.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/9.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/10.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/11.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/12.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/13.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/14.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/15.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/16.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/17.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/18.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/19.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/20.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/21.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/22.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol4629/part462990/462990511/images/big/23.webp"
+      ],
+      "marketplaces": [
+        {
+          "url": "https://www.wildberries.ru/catalog/462990511/detail.aspx",
+          "icon": "/images/icons/wb.svg",
+          "name": "Wildberries"
+        }
+      ],
+      "wbArticle": 462990511,
+      "rating": 4.8,
+      "reviewsCount": 13,
+      "salesCount": 195,
+      "colorName": "шоколадный, коричневый",
+      "composition": "натуральная замша, натуральная кожа",
+      "nameAutoGenerated": true,
+      "inStock": true,
+      "wbCreatedAt": "2025-07-10T12:25:07.551Z",
+      "characteristics": [
+        {
+          "options": [
+            {
+              "name": "Назначение ремня сумки",
+              "value": "на плечо, через плечо, на руку"
+            },
+            {
+              "name": "Пол",
+              "value": "Женский"
+            },
+            {
+              "name": "Декоративные элементы",
+              "value": "без элементов"
+            },
+            {
+              "name": "Материал подкладки",
+              "value": "текстиль"
+            },
+            {
+              "name": "Назначение",
+              "value": "повседневная, вечерняя"
+            },
+            {
+              "name": "Рисунок",
+              "value": "без рисунка"
+            },
+            {
+              "name": "Страна производства",
+              "value": "Италия"
+            },
+            {
+              "name": "Фактура материала",
+              "value": "велюр"
+            },
+            {
+              "name": "Коллекция",
+              "value": "стиль миу"
+            },
+            {
+              "name": "Комплектация",
+              "value": "1 шт сумка, 1 шт плечевой ремень"
+            },
+            {
+              "name": "Состав",
+              "value": "натуральная замша, натуральная кожа"
+            },
+            {
+              "name": "Упаковка",
+              "value": "коробка, пыльник"
+            },
+            {
+              "name": "Высота предмета",
+              "value": "16"
+            },
+            {
+              "name": "Карманы",
+              "value": "внутренний"
+            },
+            {
+              "name": "Ширина предмета",
+              "value": "30"
+            },
+            {
+              "name": "Дата регистрации сертификата/декларации",
+              "value": "18.03.2026"
+            },
+            {
+              "name": "Номер декларации соответствия",
+              "value": "ЕАЭС N RU Д-IT.РА02.В.33619/26"
+            },
+            {
+              "name": "Особенности сумки",
+              "value": "маленькая, багет"
+            },
+            {
+              "name": "Вес товара без упаковки (г)",
+              "value": "470"
+            },
+            {
+              "name": "Вид застежки",
+              "value": "молния"
+            },
+            {
+              "name": "Дата окончания действия сертификата/декларации",
+              "value": "04.03.2031"
+            },
+            {
+              "name": "Длина плечевого ремня",
+              "value": "113"
+            },
+            {
+              "name": "Цвет",
+              "value": "шоколадный, коричневый"
+            },
+            {
+              "name": "Глубина предмета",
+              "value": "9"
+            },
+            {
+              "name": "Количество отделений",
+              "value": "1"
+            },
+            {
+              "name": "Модель сумки",
+              "value": "такса"
+            }
+          ],
+          "group_name": "Wildberries"
+        }
+      ],
+      "photoCount": 23,
+      "modelId": "model-wb-382509233"
+    },
+    {
       "id": "mor-029",
       "slug": "sumka-kross-bodi-iz-zamshi-karamelnyj",
       "sku": "BalensaMiniKaramel/zamsh",
       "name": "Сумка кросс-боди из замши, карамельный",
-      "price": 7409,
-      "originalPrice": 20000,
+      "price": 6276,
+      "originalPrice": 30000,
       "wbPrice": 7704,
       "wbOriginalPrice": 20000,
-      "ozonPrice": 7409,
+      "ozonPrice": 6276,
       "ozonOriginalPrice": 30000,
       "currency": "₽",
       "category": "crossbody",
@@ -2166,7 +2453,7 @@
       "wbArticle": 445414843,
       "ozonArticle": 3774156486,
       "rating": 5,
-      "reviewsCount": 13,
+      "reviewsCount": 15,
       "salesCount": 150,
       "colorName": "карамельный, рыжий",
       "composition": "натуральная замша",
@@ -2385,171 +2672,6 @@
       "modelId": "model-wb-440884678"
     },
     {
-      "id": "mor-031",
-      "slug": "sumka-tout-iz-naturalnoj-kozhi-shokoladnyj-4",
-      "sku": "Korzinka2Choko/leather",
-      "name": "Сумка-тоут из натуральной кожи, шоколадный",
-      "price": 10309,
-      "originalPrice": 25500,
-      "wbPrice": 10309,
-      "wbOriginalPrice": 25500,
-      "currency": "₽",
-      "category": "tote",
-      "description": "Сумка Moranti - это стильный и вместительный аксессуар, созданный из высококачественной натуральной кожи. Эта трендовая модель, выполненная в классическом стиле Polene, станет идеальным дополнением к любому образу.  Сумка-тоут, выполненная из зернистой натуральной кожи, отличается своей вместительностью и практичностью. Она прекрасно подойдет как для ежедневного использования в офисе, так и для поездок или походов в спортзал.  Благодаря удобному плечевому ремню, сумку можно носить как через плечо, crossbody так и в руке, а ее просторный внутренний отсек с карманом на молнии позволит удобно разместить все необходимые вещи.  Эта большая сумка, произведенная в Италии,  отличается высоким качеством исполнения и стильным дизайном, который вдохновлен моделями люкс-брендов italy bag. Ее шоколадный цвет и лаконичный дизайн делают ее универсальной и подходящей для любого случая.",
-      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/1.webp",
-      "images": [
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/1.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/2.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/3.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/4.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/5.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/6.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/7.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/8.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/9.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/10.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/11.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/12.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/13.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/14.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/15.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/16.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/17.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/18.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/19.webp",
-        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584881/584881064/images/big/20.webp"
-      ],
-      "marketplaces": [
-        {
-          "url": "https://www.wildberries.ru/catalog/584881064/detail.aspx",
-          "icon": "/images/icons/wb.svg",
-          "name": "Wildberries"
-        }
-      ],
-      "wbArticle": 584881064,
-      "rating": 5,
-      "reviewsCount": 4,
-      "salesCount": 60,
-      "colorName": "шоколадный, коричневый",
-      "composition": "натуральная кожа",
-      "nameAutoGenerated": true,
-      "inStock": true,
-      "wbCreatedAt": "2025-10-28T11:58:48.140Z",
-      "characteristics": [
-        {
-          "options": [
-            {
-              "name": "Вид застежки",
-              "value": "молния"
-            },
-            {
-              "name": "Карманы",
-              "value": "внутренний на молнии"
-            },
-            {
-              "name": "Длина плечевого ремня",
-              "value": "123"
-            },
-            {
-              "name": "Количество отделений",
-              "value": "1"
-            },
-            {
-              "name": "Коллекция",
-              "value": "полене"
-            },
-            {
-              "name": "Материал подкладки",
-              "value": "текстиль"
-            },
-            {
-              "name": "Особенности сумки",
-              "value": "вместительная, шоппер, средняя"
-            },
-            {
-              "name": "Ширина предмета",
-              "value": "21"
-            },
-            {
-              "name": "Вес товара без упаковки (г)",
-              "value": "800"
-            },
-            {
-              "name": "Назначение",
-              "value": "в офис, на спорт, в поездку"
-            },
-            {
-              "name": "Назначение ремня сумки",
-              "value": "на плечо, в руке, через плечо"
-            },
-            {
-              "name": "Номер декларации соответствия",
-              "value": "ЕАЭС N RU Д-IT.РА02.В.33619/26"
-            },
-            {
-              "name": "Упаковка",
-              "value": "картонная коробка"
-            },
-            {
-              "name": "Высота предмета",
-              "value": "22"
-            },
-            {
-              "name": "Дата регистрации сертификата/декларации",
-              "value": "18.03.2026"
-            },
-            {
-              "name": "Декоративные элементы",
-              "value": "ремешок, замок"
-            },
-            {
-              "name": "Модель сумки",
-              "value": "тоут"
-            },
-            {
-              "name": "Фактура материала",
-              "value": "зернистая натуральная кожа"
-            },
-            {
-              "name": "Комплектация",
-              "value": "1 шт сумка, 1 плечевой ремень"
-            },
-            {
-              "name": "Глубина предмета",
-              "value": "15"
-            },
-            {
-              "name": "Пол",
-              "value": "Женский"
-            },
-            {
-              "name": "Цвет",
-              "value": "шоколадный, коричневый"
-            },
-            {
-              "name": "Дата окончания действия сертификата/декларации",
-              "value": "04.03.2031"
-            },
-            {
-              "name": "Рисунок",
-              "value": "однотонная"
-            },
-            {
-              "name": "Состав",
-              "value": "натуральная кожа"
-            },
-            {
-              "name": "Страна производства",
-              "value": "Италия"
-            }
-          ],
-          "group_name": "Wildberries"
-        }
-      ],
-      "photoCount": 20,
-      "modelId": "model-wb-608167729"
-    },
-    {
       "id": "mor-037",
       "slug": "sumka-kross-bodi-iz-naturalnoj-kozhi-chernyj-5",
       "sku": "VisjuchkaBlack",
@@ -2705,6 +2827,412 @@
       ],
       "photoCount": 20,
       "modelId": "model-wb-151647669"
+    },
+    {
+      "id": "mor-041",
+      "slug": "sumka-kross-bodi-iz-naturalnoj-kozhi-chernyj-3",
+      "sku": "KellyBlack",
+      "name": "Сумка кросс-боди из натуральной кожи, черный",
+      "price": 7835,
+      "originalPrice": 30000,
+      "wbPrice": 8224,
+      "wbOriginalPrice": 20100,
+      "ozonPrice": 7835,
+      "ozonOriginalPrice": 30000,
+      "currency": "₽",
+      "category": "crossbody",
+      "description": "Элегантная маленькая сумка Moranti из натуральной итальянской кожи станет идеальным дополнением к вашему вечернему образу. Ее кросс-боди дизайн, выполненный из зернистой кожи черного цвета, придает ей стильный и универсальный вид, подходящий как для праздничных мероприятий, так и для посещения театра или вечеринки. Сумка оснащена удобным плечевым ремнем длиной 121 см, который позволяет носить ее как на руке, так и через плечо. Внутри одно отделение, дополненное внутренним карманом для хранения ваших ценных мелочей. Модель выполнена в духе культовых сумок Birkin и Hermès, подчеркивая ваш изысканный вкус и чувство стиля. Сумка Moranti - это не просто аксессуар, а стильное заявление о вашей индивидуальности.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/1.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/2.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/3.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/4.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/5.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/6.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/7.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/8.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/9.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/10.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/11.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/12.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/13.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/14.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/15.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/16.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/17.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/18.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol5848/part584837/584837180/images/big/19.webp"
+      ],
+      "marketplaces": [
+        {
+          "url": "https://www.wildberries.ru/catalog/584837180/detail.aspx",
+          "icon": "/images/icons/wb.svg",
+          "name": "Wildberries"
+        },
+        {
+          "url": "https://www.ozon.ru/product/3823524564/",
+          "icon": "/images/icons/ozon.svg",
+          "name": "Ozon"
+        }
+      ],
+      "wbArticle": 584837180,
+      "ozonArticle": 3823524564,
+      "rating": 4.4,
+      "reviewsCount": 16,
+      "salesCount": 90,
+      "colorName": "черный",
+      "composition": "натуральная кожа",
+      "nameAutoGenerated": true,
+      "inStock": true,
+      "wbCreatedAt": "2025-10-28T11:14:10.050Z",
+      "characteristics": [
+        {
+          "options": [
+            {
+              "name": "Вес товара без упаковки (г)",
+              "value": "415"
+            },
+            {
+              "name": "Вид застежки",
+              "value": "замок"
+            },
+            {
+              "name": "Высота предмета",
+              "value": "13"
+            },
+            {
+              "name": "Глубина предмета",
+              "value": "8"
+            },
+            {
+              "name": "Дата окончания действия сертификата/декларации",
+              "value": "04.03.2031"
+            },
+            {
+              "name": "Дата регистрации сертификата/декларации",
+              "value": "18.03.2026"
+            },
+            {
+              "name": "Декоративные элементы",
+              "value": "ремешки"
+            },
+            {
+              "name": "Длина плечевого ремня",
+              "value": "121"
+            },
+            {
+              "name": "Карманы",
+              "value": "внутренний"
+            },
+            {
+              "name": "Количество отделений",
+              "value": "1"
+            },
+            {
+              "name": "Коллекция",
+              "value": "мини"
+            },
+            {
+              "name": "Комплектация",
+              "value": "1 сумка женская, 1 ремень плечевой"
+            },
+            {
+              "name": "Модель сумки",
+              "value": "кросс-боди"
+            },
+            {
+              "name": "Назначение",
+              "value": "вечерняя, маленькая, праздничная"
+            },
+            {
+              "name": "Назначение ремня сумки",
+              "value": "на руку, на плечо, через плечо"
+            },
+            {
+              "name": "Номер декларации соответствия",
+              "value": "ЕАЭС N RU Д-IT.РА02.В.33619/26"
+            },
+            {
+              "name": "Особенности сумки",
+              "value": "crossbody"
+            },
+            {
+              "name": "Пол",
+              "value": "Женский"
+            },
+            {
+              "name": "Состав",
+              "value": "натуральная кожа"
+            },
+            {
+              "name": "Страна производства",
+              "value": "Италия"
+            },
+            {
+              "name": "Упаковка",
+              "value": "картонная коробка"
+            },
+            {
+              "name": "Фактура материала",
+              "value": "зернистая итальянская кожа"
+            },
+            {
+              "name": "Цвет",
+              "value": "черный"
+            },
+            {
+              "name": "Ширина предмета",
+              "value": "20"
+            }
+          ],
+          "group_name": "Wildberries"
+        },
+        {
+          "options": [
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            },
+            {
+              "value": ""
+            }
+          ],
+          "group_name": "Ozon"
+        }
+      ],
+      "photoCount": 19,
+      "modelId": "model-wb-608120169"
+    },
+    {
+      "id": "mor-043",
+      "slug": "sumka-kross-bodi-iz-naturalnoj-kozhi-chernyj-2",
+      "sku": "GucciBlack",
+      "name": "Сумка кросс-боди из натуральной кожи, черный",
+      "price": 9330,
+      "originalPrice": 25000,
+      "wbPrice": 9330,
+      "wbOriginalPrice": 25000,
+      "currency": "₽",
+      "category": "crossbody",
+      "description": "Сумка женская кросс боди из натуральной кожи на плечо. Наша кроссбоди это стильная базовая маленькая сумочка, которая выполнена из 100% натуральной качественной кожи на фабрике в Италии. Сумка женская кожаная может использоваться как  кросс-боди через плечо или как сумка клатч. В комплекте к сумочке идет широкий удобный регулируемый ремень с максимальной длинной 130 см и минимальной длиной 110 см, позволяющий носить ее через плечо как кроссбоди  и носить  на плече. Вариант с широким ремнем подходит как для повседневной носки в офис на работу для учебы как офисная так и для вечернего варианты на свадьбу день рождения,вечеринку. Модель люкс модная является трендом. Подойдет как для молодежи подростков девушке так и для более строгих образов для мамы. Итальянская сумка на бедро имеет одно отделение, которое закрывается клапаном на магнитной кнопке, а также молнией. Внутри есть карман на молнии. Хорошо подойдет для телефона и кошелька удобна для путешествий. Фурнитура сумки багет высокого качества итальянского производства. Цвет фурнитуры - темное серебро. Клач, благодаря регулируемому ремню можно носить как летнюю сумку и на куртку на осень или пальто, как зимний вариант. Внутри есть лейбл с нашим брендом Moranti. Товар качественно упакован в плотную коробку, также прилагается пыльник.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969189/969189657/images/big/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969189/969189657/images/big/1.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969189/969189657/images/big/2.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969189/969189657/images/big/3.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969189/969189657/images/big/4.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969189/969189657/images/big/5.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969189/969189657/images/big/6.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969189/969189657/images/big/7.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969189/969189657/images/big/8.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969189/969189657/images/big/9.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9691/part969189/969189657/images/big/10.webp"
+      ],
+      "marketplaces": [
+        {
+          "url": "https://www.wildberries.ru/catalog/969189657/detail.aspx",
+          "icon": "/images/icons/wb.svg",
+          "name": "Wildberries"
+        }
+      ],
+      "wbArticle": 969189657,
+      "colorName": "черный",
+      "composition": "100% натуральная кожа",
+      "nameAutoGenerated": true,
+      "inStock": true,
+      "wbCreatedAt": "2026-04-16T10:09:12.439Z",
+      "characteristics": [
+        {
+          "options": [
+            {
+              "name": "Ширина предмета",
+              "value": "21.5"
+            },
+            {
+              "name": "Материал подкладки",
+              "value": "текстиль"
+            },
+            {
+              "name": "Вес товара без упаковки (г)",
+              "value": "700"
+            },
+            {
+              "name": "Дата окончания действия сертификата/декларации",
+              "value": "04.03.2031"
+            },
+            {
+              "name": "Дата регистрации сертификата/декларации",
+              "value": "18.03.2026"
+            },
+            {
+              "name": "Комплектация",
+              "value": "1шт - сумка женская, 1 шт - плечевой ремень, 1шт - пыльник"
+            },
+            {
+              "name": "Назначение ремня сумки",
+              "value": "на плечо, на руку, кроссбоди"
+            },
+            {
+              "name": "Назначение",
+              "value": "вечерняя, офис, новый год"
+            },
+            {
+              "name": "Номер декларации соответствия",
+              "value": "ЕАЭС N RU Д-IT.РА02.В.33619/26"
+            },
+            {
+              "name": "Пол",
+              "value": "Женский"
+            },
+            {
+              "name": "Страна производства",
+              "value": "Италия"
+            },
+            {
+              "name": "Упаковка",
+              "value": "картонная коробка"
+            },
+            {
+              "name": "Фактура материала",
+              "value": "зернистая натуральная кожа"
+            },
+            {
+              "name": "Цвет",
+              "value": "черный"
+            },
+            {
+              "name": "Глубина предмета",
+              "value": "6"
+            },
+            {
+              "name": "Карманы",
+              "value": "Внутренний на молнии"
+            },
+            {
+              "name": "Особенности сумки",
+              "value": "клатч кожаный, вечерняя сумка, маленькая сумка"
+            },
+            {
+              "name": "Состав",
+              "value": "100% натуральная кожа"
+            },
+            {
+              "name": "Вид застежки",
+              "value": "молния и магнитная кнопка"
+            },
+            {
+              "name": "Высота предмета",
+              "value": "13"
+            },
+            {
+              "name": "Декоративные элементы",
+              "value": "пряжка"
+            },
+            {
+              "name": "Количество отделений",
+              "value": "1"
+            },
+            {
+              "name": "Коллекция",
+              "value": "модная трендовая сумка"
+            },
+            {
+              "name": "Модель сумки",
+              "value": "кроссбоди"
+            }
+          ],
+          "group_name": "Wildberries"
+        }
+      ],
+      "photoCount": 10,
+      "modelId": "model-wb-1579462421"
     },
     {
       "id": "mor-047",
@@ -2863,15 +3391,183 @@
       "modelId": "model-wb-1579462421"
     },
     {
+      "id": "mor-048",
+      "slug": "sumka-ryukzak-iz-naturalnoj-kozhi-bezhevyj",
+      "sku": "BagPackBeige",
+      "name": "Сумка-рюкзак из натуральной кожи, бежевый",
+      "price": 8832,
+      "originalPrice": 20000,
+      "wbPrice": 8832,
+      "wbOriginalPrice": 20000,
+      "currency": "₽",
+      "category": "backpack",
+      "description": "Сумка-трансформер Moranti из 100% натуральной кожи – это стильное и практичное решение для современной женщины. Изготовленная в Италии из зернистой натуральной кожи, сумка мешок отличается высоким качеством и надежностью.  Крепкие плечевые ремни позволяют носить ее как на плече, так и на спине, превращая ее в удобный рюкзак. Вместительное основное отделение дополнено внутренними карманами на молнии и для документов, что позволяет удобно организовать все необходимые вещи. Сумка-трансформер Moranti – это идеальный выбор для прогулок, поездок, походов в спортзал и повседневного использования. Стилисты рекомендуют эту модель в 2026 году, отмечая ее универсальность и актуальность.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/1.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/2.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/3.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/4.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/5.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/6.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/7.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/8.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/9.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/10.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/11.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/12.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/13.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/14.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/15.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/16.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/17.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/18.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/19.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/20.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/21.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/22.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/23.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol8993/part899315/899315968/images/big/24.webp"
+      ],
+      "marketplaces": [
+        {
+          "url": "https://www.wildberries.ru/catalog/899315968/detail.aspx",
+          "icon": "/images/icons/wb.svg",
+          "name": "Wildberries"
+        }
+      ],
+      "wbArticle": 899315968,
+      "rating": 5,
+      "reviewsCount": 1,
+      "colorName": "бежевый",
+      "composition": "100% натуральная кожа",
+      "nameAutoGenerated": true,
+      "inStock": true,
+      "wbCreatedAt": "2026-03-19T15:56:34.661Z",
+      "characteristics": [
+        {
+          "options": [
+            {
+              "name": "Рисунок",
+              "value": "путешествия"
+            },
+            {
+              "name": "Материал подкладки",
+              "value": "текстиль"
+            },
+            {
+              "name": "Страна производства",
+              "value": "Италия"
+            },
+            {
+              "name": "Вес товара без упаковки (г)",
+              "value": "1100"
+            },
+            {
+              "name": "Вид застежки",
+              "value": "молния"
+            },
+            {
+              "name": "Высота предмета",
+              "value": "37"
+            },
+            {
+              "name": "Декоративные элементы",
+              "value": "без рисунка однотонная"
+            },
+            {
+              "name": "Модель сумки",
+              "value": "трансформер"
+            },
+            {
+              "name": "Пол",
+              "value": "Женский"
+            },
+            {
+              "name": "Упаковка",
+              "value": "картонная коробка"
+            },
+            {
+              "name": "Дата регистрации сертификата/декларации",
+              "value": "18.03.2026"
+            },
+            {
+              "name": "Количество отделений",
+              "value": "1"
+            },
+            {
+              "name": "Комплектация",
+              "value": "1 шт - сумка женская, 1шт - пыльник"
+            },
+            {
+              "name": "Назначение",
+              "value": "офис, в спортзал, на каждый день"
+            },
+            {
+              "name": "Фактура материала",
+              "value": "зернистая натуральная кожа"
+            },
+            {
+              "name": "Глубина предмета",
+              "value": "10"
+            },
+            {
+              "name": "Назначение ремня сумки",
+              "value": "на плечо, на руку, на спину"
+            },
+            {
+              "name": "Особенности сумки",
+              "value": "сумка женская большая, сумка мягкая, сумка вместительная"
+            },
+            {
+              "name": "Состав",
+              "value": "100% натуральная кожа"
+            },
+            {
+              "name": "Ширина предмета",
+              "value": "43"
+            },
+            {
+              "name": "Длина плечевого ремня",
+              "value": "35"
+            },
+            {
+              "name": "Карманы",
+              "value": "Внутренний на молнии, Для документов, Внутренний открытый"
+            },
+            {
+              "name": "Цвет",
+              "value": "бежевый"
+            },
+            {
+              "name": "Дата окончания действия сертификата/декларации",
+              "value": "04.03.2031"
+            },
+            {
+              "name": "Коллекция",
+              "value": "модная трендовая сумка"
+            },
+            {
+              "name": "Номер декларации соответствия",
+              "value": "ЕАЭС N RU Д-IT.РА02.В.33619/26"
+            }
+          ],
+          "group_name": "Wildberries"
+        }
+      ],
+      "photoCount": 24,
+      "modelId": "model-wb-107552947"
+    },
+    {
       "id": "mor-049",
       "slug": "sumka-kross-bodi-iz-naturalnoj-kozhi-taup-2",
       "sku": "GucciTaupZamsh",
       "name": "Сумка кросс-боди из натуральной кожи, тауп",
-      "price": 8790,
-      "originalPrice": 16000,
+      "price": 7642,
+      "originalPrice": 30000,
       "wbPrice": 25000,
       "wbOriginalPrice": 16000,
-      "ozonPrice": 8790,
+      "ozonPrice": 7642,
       "ozonOriginalPrice": 30000,
       "currency": "₽",
       "category": "crossbody",
@@ -3114,11 +3810,11 @@
       "slug": "sumka-na-plecho-iz-zamshi-shokoladnyj",
       "sku": "MiraShoko/Zamsh",
       "name": "Сумка на плечо из замши, шоколадный",
-      "price": 8829,
-      "originalPrice": 15250,
+      "price": 8164,
+      "originalPrice": 30000,
       "wbPrice": 25000,
       "wbOriginalPrice": 15250,
-      "ozonPrice": 8829,
+      "ozonPrice": 8164,
       "ozonOriginalPrice": 30000,
       "currency": "₽",
       "category": "na-plecho",
@@ -3382,6 +4078,155 @@
       "modelId": "model-wb-1578724105"
     },
     {
+      "id": "mor-051",
+      "slug": "sumka-kross-bodi-iz-naturalnoj-kozhi-karamelnyj",
+      "sku": "GucciKaramelZamsh",
+      "name": "Сумка кросс-боди из натуральной кожи, карамельный",
+      "price": 9019,
+      "originalPrice": 25000,
+      "wbPrice": 9019,
+      "wbOriginalPrice": 25000,
+      "currency": "₽",
+      "category": "crossbody",
+      "description": "Сумка через плечо Moranti - это стильный аксессуар, который станет идеальным дополнением к любому образу. Изготовленная из 100% натуральной кожи с ворсистой фактурой, сумка отличается высоким качеством и долговечностью. Ее средний размер делает ее удобной для повседневного использования, позволяя вместить все необходимые мелочи. Модель crossbody, популярная в 2026 году,  позволяет носить сумку как на плече, так и на руке, обеспечивая максимальный комфорт.  Сумка оснащена надежной застежкой на молнии и магнитной кнопкой, а также внутренним карманом на молнии для хранения ценных вещей.  Благодаря своему стильному дизайну, напоминающему модели Gucci и Balenciaga, сумка Moranti станет ярким акцентом вашего образа, будь то прогулка по городу или вечерняя вечеринка. Стилисты рекомендуют носить ее в 2026 году, чтобы подчеркнуть свой индивидуальный стиль.",
+      "image": "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/1.webp",
+      "images": [
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/1.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/2.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/3.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/4.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/5.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/6.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/7.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/8.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/9.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/10.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/11.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/12.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/13.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/14.webp",
+        "https://kgd-basket-cdn-01bl.geobasket.ru/vol9692/part969265/969265618/images/big/15.webp"
+      ],
+      "marketplaces": [
+        {
+          "url": "https://www.wildberries.ru/catalog/969265618/detail.aspx",
+          "icon": "/images/icons/wb.svg",
+          "name": "Wildberries"
+        }
+      ],
+      "wbArticle": 969265618,
+      "colorName": "карамельный, рыжий, молочный шоколад",
+      "composition": "100% натуральная кожа",
+      "nameAutoGenerated": true,
+      "inStock": true,
+      "wbCreatedAt": "2026-04-16T10:36:06.599Z",
+      "characteristics": [
+        {
+          "options": [
+            {
+              "name": "Вид застежки",
+              "value": "молния и магнитная кнопка"
+            },
+            {
+              "name": "Дата окончания действия сертификата/декларации",
+              "value": "04.03.2031"
+            },
+            {
+              "name": "Карманы",
+              "value": "Внутренний на молнии"
+            },
+            {
+              "name": "Упаковка",
+              "value": "картонная коробка"
+            },
+            {
+              "name": "Декоративные элементы",
+              "value": "пряжка"
+            },
+            {
+              "name": "Коллекция",
+              "value": "модная трендовая сумка"
+            },
+            {
+              "name": "Назначение ремня сумки",
+              "value": "на плечо, на руку, кроссбоди"
+            },
+            {
+              "name": "Фактура материала",
+              "value": "зернистая натуральная кожа"
+            },
+            {
+              "name": "Цвет",
+              "value": "карамельный, рыжий, молочный шоколад"
+            },
+            {
+              "name": "Ширина предмета",
+              "value": "26"
+            },
+            {
+              "name": "Высота предмета",
+              "value": "15"
+            },
+            {
+              "name": "Дата регистрации сертификата/декларации",
+              "value": "18.03.2026"
+            },
+            {
+              "name": "Количество отделений",
+              "value": "1"
+            },
+            {
+              "name": "Материал подкладки",
+              "value": "текстиль"
+            },
+            {
+              "name": "Номер декларации соответствия",
+              "value": "ЕАЭС N RU Д-IT.РА02.В.33619/26"
+            },
+            {
+              "name": "Состав",
+              "value": "100% натуральная кожа"
+            },
+            {
+              "name": "Глубина предмета",
+              "value": "7"
+            },
+            {
+              "name": "Комплектация",
+              "value": "1шт - сумка женская, 1 шт - плечевой ремень, 1шт - пыльник"
+            },
+            {
+              "name": "Модель сумки",
+              "value": "кроссбоди"
+            },
+            {
+              "name": "Назначение",
+              "value": "вечерняя, офис, новый год"
+            },
+            {
+              "name": "Особенности сумки",
+              "value": "клатч кожаный, вечерняя сумка, маленькая сумка"
+            },
+            {
+              "name": "Пол",
+              "value": "Женский"
+            },
+            {
+              "name": "Страна производства",
+              "value": "Италия"
+            },
+            {
+              "name": "Вес товара без упаковки (г)",
+              "value": "700"
+            }
+          ],
+          "group_name": "Wildberries"
+        }
+      ],
+      "photoCount": 15,
+      "modelId": "model-wb-1579462421"
+    },
+    {
       "id": "mor-052",
       "slug": "sumka-na-plecho-iz-naturalnoj-kozhi-shokoladnyj",
       "sku": "MiraShoko",
@@ -3523,11 +4368,11 @@
       "slug": "sumka-kross-bodi-iz-naturalnoj-kozhi-shokoladnyj-3",
       "sku": "KellyChoko",
       "name": "Сумка кросс-боди из натуральной кожи, шоколадный",
-      "price": 6820,
-      "originalPrice": 19900,
+      "price": 6370,
+      "originalPrice": 30000,
       "wbPrice": 7426,
       "wbOriginalPrice": 19900,
-      "ozonPrice": 6820,
+      "ozonPrice": 6370,
       "ozonOriginalPrice": 30000,
       "currency": "₽",
       "category": "crossbody",
@@ -3568,7 +4413,7 @@
       "wbArticle": 584838455,
       "ozonArticle": 3825785539,
       "rating": 3.5,
-      "reviewsCount": 2,
+      "reviewsCount": 9,
       "salesCount": 30,
       "colorName": "шоколадный, коричневый",
       "composition": "натуральная кожа",
@@ -3784,11 +4629,11 @@
       "slug": "sumka-kross-bodi-iz-naturalnoj-kozhi-molochnyj",
       "sku": "KvadratMoloch",
       "name": "Сумка кросс-боди из натуральной кожи, молочный",
-      "price": 8569,
-      "originalPrice": 13260,
+      "price": 8404,
+      "originalPrice": 30000,
       "wbPrice": 19500,
       "wbOriginalPrice": 13260,
-      "ozonPrice": 8569,
+      "ozonPrice": 8404,
       "ozonOriginalPrice": 30000,
       "currency": "₽",
       "category": "crossbody",
@@ -3827,7 +4672,7 @@
       "wbArticle": 425318100,
       "ozonArticle": 4203643356,
       "rating": 4.8,
-      "reviewsCount": 15,
+      "reviewsCount": 19,
       "colorName": "молочный, сливочный",
       "composition": "натуральная кожа",
       "nameAutoGenerated": true,
@@ -4042,11 +4887,11 @@
       "slug": "sumka-baget-iz-naturalnoj-kozhi-molochnyj-3",
       "sku": "PlankaMolochnyj",
       "name": "Сумка-багет из натуральной кожи, молочный",
-      "price": 9909,
-      "originalPrice": 22000,
+      "price": 8031,
+      "originalPrice": 30000,
       "wbPrice": 22000,
       "wbOriginalPrice": 22000,
-      "ozonPrice": 9909,
+      "ozonPrice": 8031,
       "ozonOriginalPrice": 30000,
       "currency": "₽",
       "category": "baguette",
@@ -4301,7 +5146,7 @@
       "sku": "PlankaBlack",
       "name": "Сумка-багет из натуральной кожи, черный",
       "price": 10032,
-      "originalPrice": 12100,
+      "originalPrice": 30000,
       "wbPrice": 22000,
       "wbOriginalPrice": 12100,
       "ozonPrice": 10032,
@@ -4567,7 +5412,7 @@
       "slug": "sumka-baget-iz-naturalnoj-kozhi-belyj",
       "sku": "PlankaWhite",
       "name": "Сумка-багет из натуральной кожи, белый",
-      "price": 6503,
+      "price": 7850,
       "originalPrice": 25000,
       "wbPrice": 6503,
       "wbOriginalPrice": 25000,
@@ -4598,7 +5443,7 @@
       "wbArticle": 1141469144,
       "ozonArticle": 4822367046,
       "rating": 1,
-      "reviewsCount": 1,
+      "reviewsCount": 9,
       "colorName": "белый",
       "composition": "натуральная кожа",
       "nameAutoGenerated": true,
@@ -4828,11 +5673,11 @@
       "slug": "sumka-baget-iz-naturalnoj-kozhi-molochnyj",
       "sku": "KosichkaMolochnyj",
       "name": "Сумка-багет из натуральной кожи, молочный",
-      "price": 8584,
+      "price": 7220,
       "originalPrice": 25000,
       "wbPrice": 25000,
       "wbOriginalPrice": 25000,
-      "ozonPrice": 8584,
+      "ozonPrice": 7220,
       "ozonOriginalPrice": 25000,
       "currency": "₽",
       "category": "baguette",
@@ -5074,7 +5919,7 @@
       "name": "Кросс-боди",
       "description": "Сумки через плечо",
       "image": "/images/categories/crossbody.jpg",
-      "count": 9
+      "count": 14
     },
     {
       "slug": "na-plecho",
@@ -5088,14 +5933,14 @@
       "name": "Багет",
       "description": "Сумки-багет",
       "image": "/images/categories/baguette.jpg",
-      "count": 6
+      "count": 7
     },
     {
       "slug": "tote",
       "name": "Тоут",
       "description": "Шоперы и тоуты",
       "image": "/images/categories/tote.jpg",
-      "count": 4
+      "count": 2
     },
     {
       "slug": "saddle",
@@ -5109,7 +5954,7 @@
       "name": "Рюкзак",
       "description": "Рюкзаки",
       "image": "/images/categories/backpack.jpg",
-      "count": 0
+      "count": 1
     }
   ],
   "settings": {
@@ -5134,6 +5979,19 @@
     "updatedAt": "2026-08-20T14:03:33.781Z",
     "ozonApiKey": "",
     "featuredIds": [],
+    "storeRating": {
+      "wb": {
+        "ratingValue": 4.7,
+        "reviewCount": 1783
+      },
+      "ozon": {
+        "ratingValue": 4.8,
+        "reviewCount": 45
+      },
+      "updatedAt": "2026-08-23T17:43:14.800Z",
+      "ratingValue": 4.7,
+      "reviewCount": 1828
+    },
     "catalogOrder": [],
     "contactEmail": "irina.augustan@gmail.com",
     "marketplaces": {
