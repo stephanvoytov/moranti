@@ -14,8 +14,8 @@ interface ProductCardProps {
   priority?: boolean;
 }
 
-const THREE_MONTHS_MS = 90 * 24 * 60 * 60 * 1000;
-// «Сейчас» фиксируется один раз при загрузке модуля (окно новинок — 90 дней,
+const SIX_MONTHS_MS = 183 * 24 * 60 * 60 * 1000;
+// «Сейчас» фиксируется один раз при загрузке модуля (окно новинок — 6 месяцев,
 // точность до перезагрузки бандла/сервера неважна). Прямой вызов Date.now()
 // в теле рендера запрещён правилом react-no-impure-render.
 const NOW = Date.now();
@@ -28,7 +28,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
   const isNew =
     !!product.wbCreatedAt &&
-    NOW - new Date(product.wbCreatedAt).getTime() <= THREE_MONTHS_MS;
+    NOW - new Date(product.wbCreatedAt).getTime() <= SIX_MONTHS_MS;
 
   return (
     <article className={styles.card}>

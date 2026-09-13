@@ -185,7 +185,7 @@ export const Pages: CollectionConfig = {
                 label: 'Откуда брать товары',
                 defaultValue: 'popular',
                 options: [
-                  { value: 'new', label: 'Новинки (за 90 дней)' },
+                  { value: 'new', label: 'Новинки (по дате появления)' },
                   { value: 'popular', label: 'Популярные (по отзывам и рейтингу)' },
                   { value: 'manual', label: 'Ручной выбор' },
                 ],

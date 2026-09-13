@@ -6,7 +6,7 @@ import { blobUrl } from "@/lib/blob";
 import type { Product } from "@/data/products";
 import styles from "./page.module.css";
 
-const THREE_MONTHS_MS = 90 * 24 * 60 * 60 * 1000;
+const SIX_MONTHS_MS = 183 * 24 * 60 * 60 * 1000;
 
 interface HomeBlockImage {
   url?: string;
@@ -46,7 +46,7 @@ export function resolveProducts(block: HomeBlock, products: Product[]): Product[
       .filter(
         (p) =>
           p.wbCreatedAt &&
-          now - new Date(p.wbCreatedAt).getTime() <= THREE_MONTHS_MS,
+          now - new Date(p.wbCreatedAt).getTime() <= SIX_MONTHS_MS,
       )
       .sort(
         (a, b) =>
