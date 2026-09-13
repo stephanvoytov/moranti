@@ -56,14 +56,14 @@ export default async function Home() {
           })
           .slice(0, 8);
 
-  // «Новинки»: товары, появившиеся на WB за последние 3 месяца (wbCreatedAt),
+  // «Новинки»: товары, появившиеся на WB за последние полгода (wbCreatedAt),
   // от свежих к старым. Максимум 8 карточек.
-  const THREE_MONTHS_MS = 90 * 24 * 60 * 60 * 1000;
+  const SIX_MONTHS_MS = 183 * 24 * 60 * 60 * 1000;
   const newArrivals = [...products]
     .filter(
       (p) =>
         p.wbCreatedAt &&
-        NOW - new Date(p.wbCreatedAt).getTime() <= THREE_MONTHS_MS,
+        NOW - new Date(p.wbCreatedAt).getTime() <= SIX_MONTHS_MS,
     )
     .sort(
       (a, b) =>

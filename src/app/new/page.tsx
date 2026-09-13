@@ -7,8 +7,8 @@ import styles from "./page.module.css";
 
 export const revalidate = 3600;
 
-const THREE_MONTHS_MS = 90 * 24 * 60 * 60 * 1000;
-// «Сейчас» фиксируется один раз при загрузке модуля (окно новинок — 90 дней).
+const SIX_MONTHS_MS = 183 * 24 * 60 * 60 * 1000;
+// «Сейчас» фиксируется один раз при загрузке модуля (окно новинок — 6 месяцев).
 const NOW = Date.now();
 
 export const metadata: Metadata = {
@@ -31,7 +31,7 @@ export default async function NewArrivalsPage() {
     .filter(
       (p) =>
         p.wbCreatedAt &&
-        NOW - new Date(p.wbCreatedAt).getTime() <= THREE_MONTHS_MS,
+        NOW - new Date(p.wbCreatedAt).getTime() <= SIX_MONTHS_MS,
     )
     .sort(
       (a, b) =>
