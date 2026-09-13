@@ -142,6 +142,10 @@ function fmtPrice(n) {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ₽";
 }
 
+function jsonSafe(v) {
+  return JSON.stringify(v, (_k, val) => (typeof val === "bigint" ? val.toString() : val));
+}
+
 /**
  * Формирует читаемые описания изменений: "цена: 5 000 → 4 500 ₽"
  * @param {object} db — старая запись из БД
@@ -154,11 +158,12 @@ function formatChanges(db, updates) {
     const label = FIELD_LABELS[key] || key;
     const oldVal = db?.[key];
 
-    if (typeof newVal === "number" && typeof oldVal === "number") {
+    const isNum = (v) => typeof v === "number" || typeof v === "bigint";
+    if (isNum(newVal) && isNum(oldVal)) {
       if (key === "price" || key === "originalPrice" || key === "wbPrice" ||
           key === "wbOriginalPrice" || key === "ozonPrice" || key === "ozonOriginalPrice") {
         changes.push(`${label}: ${fmtPrice(oldVal)} → ${fmtPrice(newVal)}`);
-      } else {
+      } else if (oldVal !== newVal) {
         changes.push(`${label}: ${oldVal} → ${newVal}`);
       }
     } else if (typeof newVal === "boolean" && typeof oldVal === "boolean") {
@@ -172,7 +177,7 @@ function formatChanges(db, updates) {
       } else if (oldVal !== newVal) {
         changes.push(`${label}: «${oldVal || "—"}» → «${newVal}»`);
       }
-    } else if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+    } else if (jsonSafe(newVal) !== jsonSafe(oldVal)) {
       changes.push(`${label}: обновлено`);
     }
   }
