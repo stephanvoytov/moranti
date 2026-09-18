@@ -406,7 +406,7 @@ export async function getModelReviews(product: Product): Promise<Review[]> {
   }, 300_000, 3_600_000);
 }
 
-/** Группа отзывов одного товара для страницы /reviews */
+/** Группа отзывов одной МОДЕЛИ для страницы /reviews */
 export interface ShowcaseReviewGroup {
   slug: string;
   name: string;
@@ -418,7 +418,9 @@ export interface ShowcaseReviewGroup {
 
 /**
  * Отзывы для витрины /reviews: только с текстом и рейтингом ≥4,
- * сгруппированы по товару (как на карточке — негатив остаётся на МП).
+ * сгруппированы по МОДЕЛИ (все цвета линейки), как на карточке —
+ * негатив остаётся на МП. Рейтинг группы — модельный (единый источник
+ * getModelRatingsMap), каждый отзыв подписан своим цветом.
  */
 export async function getShowcaseReviews(): Promise<ShowcaseReviewGroup[]> {
   return cacheGet("reviews-showcase", async () => {
@@ -436,25 +438,53 @@ export async function getShowcaseReviews(): Promise<ShowcaseReviewGroup[]> {
                 rating: true,
                 reviewsCount: true,
                 archivedAt: true,
+                modelId: true,
+                colorName: true,
               },
             },
           },
         }),
       );
+      // Модельные рейтинги — та же цифра, что на карточках и страницах товара
+      const modelRatings = await getModelRatingsMap();
 
+      // «Представитель» модели: вариант с наибольшим числом МП-оценок
+      // (его имя, фото и slug идут в шапку группы)
+      const reps = new Map<string, {
+        slug: string;
+        name: string;
+        image: string;
+        rating?: number;
+        reviewsCount?: number;
+        modelId?: string;
+      }>();
       const groups = new Map<string, ShowcaseReviewGroup>();
+
       for (const r of rows) {
         if (!r.product || r.product.archivedAt) continue;
         if (EXCLUDED_REVIEW_IDS.includes(r.id)) continue; // скрываем негатив с витрины
-        const key = r.product.slug;
-        let g = groups.get(key);
-        if (!g) {
-          g = {
+        const key = r.product.modelId ?? r.product.slug;
+
+        const rep = reps.get(key);
+        if (!rep || (r.product.reviewsCount ?? 0) > (rep.reviewsCount ?? 0)) {
+          reps.set(key, {
             slug: r.product.slug,
             name: r.product.name,
             image: r.product.images[0] ?? "",
             rating: r.product.rating ?? undefined,
             reviewsCount: r.product.reviewsCount ?? undefined,
+            modelId: r.product.modelId ?? undefined,
+          });
+        }
+
+        let g = groups.get(key);
+        if (!g) {
+          g = {
+            slug: "",
+            name: "",
+            image: "",
+            rating: undefined,
+            reviewsCount: undefined,
             reviews: [],
           };
           groups.set(key, g);
@@ -468,10 +498,27 @@ export async function getShowcaseReviews(): Promise<ShowcaseReviewGroup[]> {
           pros: r.pros ?? undefined,
           cons: r.cons ?? undefined,
           reviewedAt: r.reviewedAt?.toISOString(),
+          colorName: r.product.colorName ?? undefined,
         });
       }
-      // Товары с наибольшим числом отзывов — первыми
-      return [...groups.values()].sort((a, b) => b.reviews.length - a.reviews.length);
+
+      // Собираем группы: метаданные из представителя + модельный рейтинг
+      const result: ShowcaseReviewGroup[] = [];
+      for (const [key, g] of groups) {
+        const rep = reps.get(key) ?? { slug: "", name: "", image: "" };
+        let rating = rep.rating;
+        let reviewsCount = rep.reviewsCount;
+        if (rep.modelId) {
+          const agg = modelRatings?.get(rep.modelId);
+          if (agg) {
+            rating = agg.rating;
+            reviewsCount = agg.reviewsCount;
+          }
+        }
+        result.push({ ...g, slug: rep.slug, name: rep.name, image: rep.image, rating, reviewsCount });
+      }
+      // Модели с наибольшим числом отзывов — первыми
+      return result.sort((a, b) => b.reviews.length - a.reviews.length);
     } catch (err) {
       logger.warn("DB unavailable — showcase reviews skipped", {
         error: (err as Error)?.message,

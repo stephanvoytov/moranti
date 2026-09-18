@@ -246,6 +246,13 @@
   font-size: 14px;
 }
 
+.reviewColor {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 4px 0 0;
+}
+
 .reviewText {
   font-family: var(--font-body);
   font-size: 14px;

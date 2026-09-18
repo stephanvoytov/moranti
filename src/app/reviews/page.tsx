@@ -72,6 +72,9 @@ function ReviewCard({ review }: { review: Review }) {
           <span className={styles.reviewSource}>{SOURCE_LABEL[review.source] ?? ""}</span>
         )}
       </header>
+      {review.colorName && (
+        <p className={styles.reviewColor}>Цвет: {review.colorName}</p>
+      )}
       {review.rating != null && (
         <div className={styles.reviewStars}>
           <RatingStars rating={review.rating} />
