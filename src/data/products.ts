@@ -226,6 +226,59 @@ export function applyModelRatings<
   });
 }
 
+/**
+ * Единый источник модельных рейтингов: средневзвешенное по ВСЕМ активным
+ * вариантам модели (включая «нет в наличии») — чтобы цифры совпадали на
+ * витрине, на странице товара и в JSON-LD независимо от наличия варианта.
+ * БД недоступна → null (тогда применяется applyModelRatings по списку).
+ */
+async function getModelRatingsMap(): Promise<
+  Map<string, { rating: number; reviewsCount: number }> | null
+> {
+  return cacheGet("model-ratings-map", async () => {
+    try {
+      const rows = await prismaQuery(() =>
+        prisma.product.findMany({
+          where: { archivedAt: null, price: { gt: 0 } },
+          select: { modelId: true, rating: true, reviewsCount: true },
+        }),
+      );
+      const byModel = new Map<string, { weighted: number; count: number }>();
+      for (const r of rows) {
+        const reviewCount = r.reviewsCount ?? 0;
+        if (!r.modelId || r.rating == null || reviewCount <= 0) continue;
+        const cur = byModel.get(r.modelId) ?? { weighted: 0, count: 0 };
+        cur.weighted += r.rating * reviewCount;
+        cur.count += reviewCount;
+        byModel.set(r.modelId, cur);
+      }
+      return new Map(
+        [...byModel.entries()].map(([id, a]) => [
+          id,
+          { rating: a.weighted / a.count, reviewsCount: a.count },
+        ]),
+      );
+    } catch (err) {
+      logger.warn("DB unavailable — model ratings skipped", {
+        error: (err as Error)?.message,
+      });
+      return null;
+    }
+  }, 60_000, 600_000);
+}
+
+/** Применить модельные рейтинги (единый map) к списку; при недоступности БД — посписочно. */
+async function applyModelRatingsAsync(products: Product[]): Promise<Product[]> {
+  const map = await getModelRatingsMap();
+  if (!map) return applyModelRatings(products);
+  return products.map((p) => {
+    if (!p.modelId) return p;
+    const agg = map.get(p.modelId);
+    if (!agg) return p;
+    return { ...p, rating: agg.rating, reviewsCount: agg.reviewsCount };
+  });
+}
+
 export async function getProducts(): Promise<Product[]> {
   return cacheGet("all-products", async () => {
     try {
@@ -235,8 +288,8 @@ export async function getProducts(): Promise<Product[]> {
           orderBy: { createdAt: "asc" },
         }),
       );
-      // Рейтинги показываем за модель (все цвета), а не за отдельный цвет
-      return applyModelRatings(rows.map(mapProduct));
+      // Рейтинги показываем за модель (все цвета линейки), а не за отдельный цвет
+      return applyModelRatingsAsync(rows.map(mapProduct));
     } catch (err) {
       logger.warn("DB unavailable, fallback to products.json", {
         error: (err as Error)?.message,
@@ -257,7 +310,7 @@ export async function getAllProducts(): Promise<Product[]> {
       const rows = await prismaQuery(() =>
         prisma.product.findMany({ orderBy: { createdAt: "asc" } }),
       );
-      return applyModelRatings(
+      return applyModelRatingsAsync(
         rows
           .filter((p) => !p.archivedAt && (p.price ?? 0) > 0)
           .map(mapProduct),
@@ -287,14 +340,10 @@ export async function getProduct(slug: string): Promise<Product | null> {  // �
       );
       if (row) {
         const mapped = mapProduct(row);
-        // Рейтинг держим модельным и здесь: подтягиваем варианты модели из кеша
+        // Рейтинг держим модельным и здесь (по всей линейке, единый источник)
         if (mapped.modelId) {
-          const all = await getAllProducts();
-          const group = applyModelRatings([
-            mapped,
-            ...all.filter((p) => p.modelId === mapped.modelId),
-          ]);
-          return group.find((p) => p.id === mapped.id) ?? mapped;
+          const [withModel] = await applyModelRatingsAsync([mapped]);
+          return withModel;
         }
         return mapped;
       }
