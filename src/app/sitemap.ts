@@ -3,6 +3,10 @@ import { getAllProducts, getProducts } from "@/data/products";
 import { seoConfig } from "@/config/seo";
 import { buildVariantPages } from "@/lib/variant-pages";
 
+// ISR: новые товары (создаются синком чаще деплоев) попадают в sitemap
+// автоматически, не дожидаясь пересборки на деплое.
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dev/preview окружение — sitemap пустой (см. robots.ts: noindex)
   if (process.env.APP_ENV !== "production") return [];

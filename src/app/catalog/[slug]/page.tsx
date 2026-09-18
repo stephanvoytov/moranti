@@ -47,10 +47,10 @@ export async function generateStaticParams() {
 // данных, а не висеть до следующего деплоя (синк меняет остатки/inStock в БД)
 export const revalidate = 60;
 
-// Слаги вне generateStaticParams (мусорные/несуществующие) — жёсткий 404
-// от Next до рендера страницы. Без этого флага неFound() на ISR-странице
-// в Next 16 отдаёт 200 с not-found контентом (мягкий 404).
-export const dynamicParams = false;
+// Новые товары появляются в БД синком чаще, чем деплои: слаги вне
+// generateStaticParams генерируются по запросу (ISR 60с кеширует дальше),
+// а несуществующие отсекаются notFound() в generateMetadata и page.
+export const dynamicParams = true;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
