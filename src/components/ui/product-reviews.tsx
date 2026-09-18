@@ -70,6 +70,9 @@ export default function ProductReviews({
           <article key={r.id} className={styles.item}>
             <header className={styles.head}>
               <span className={styles.author}>{r.author || "Покупатель"}</span>
+              {r.colorName ? (
+                <span className={styles.color}>Цвет: {r.colorName}</span>
+              ) : null}
               {r.rating ? (
                 <span className={styles.stars} aria-label={`Оценка ${r.rating} из 5`}>
                   {"★".repeat(r.rating)}

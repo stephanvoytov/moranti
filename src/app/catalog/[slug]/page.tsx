@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import type { CharacteristicGroup } from "@/data/products";
-import { getAllProducts, getProducts, getProduct, getReviews } from "@/data/products";import { seoConfig, buildProductSeoMeta } from "@/config/seo";
+import { getAllProducts, getProducts, getProduct, getModelReviews } from "@/data/products";import { seoConfig, buildProductSeoMeta } from "@/config/seo";
 import { buildProductJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo-jsonld";
 import { pluralRu } from "@/lib/plural";
 import { getGlobalVariantPage, buildProductAlt } from "@/lib/variant-pages";
@@ -227,9 +227,10 @@ export default async function CatalogSlugPage({ params }: Props) {
 
   if (!product) notFound();
 
-  // Отзывы с маркетплейсов (единоразовый импорт, кешируются).
+  // Отзывы за модель (единоразовый импорт, кешируются). Цвет каждого отзыва
+  // подписывается в компоненте, чтобы не путать покупателя.
   // На витрине показываем только позитив (≥4★) — негатив остаётся на МП.
-  const reviews = await getReviews(product.id);
+  const reviews = await getModelReviews(product);
   const goodReviews = reviews.filter((r) => r.text.trim() && (r.rating ?? 0) >= 4);
 
   const siteUrl = process.env.SITE_URL || "http://localhost:3001";

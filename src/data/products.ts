@@ -99,6 +99,8 @@ export interface Review {
   pros?: string;
   cons?: string;
   reviewedAt?: string;
+  /** Цвет варианта, к которому относится отзыв (при агрегации отзывов за модель) */
+  colorName?: string;
 }
 
 const CATEGORY_INFO: Record<string, { name: string; description: string }> = {
@@ -198,6 +200,32 @@ function mapProduct(p: PrismaProduct): Product {
   };
 }
 
+/**
+ * Рейтинги за МОДЕЛЬ: заменяет поцветные rating/reviewsCount на
+ * агрегированные по всей линейке (средневзвешенное по числу оценок).
+ * Товар с modelId делит рейтинг модели с остальными цветами; вариант без
+ * modelId или без рейтинга остаётся как есть.
+ */
+export function applyModelRatings<
+  T extends { modelId?: string; rating?: number; reviewsCount?: number },
+>(products: T[]): T[] {
+  const byModel = new Map<string, { weighted: number; count: number }>();
+  for (const p of products) {
+    if (!p.modelId || p.rating == null || (p.reviewsCount ?? 0) <= 0) continue;
+    const cur = byModel.get(p.modelId) ?? { weighted: 0, count: 0 };
+    cur.weighted += p.rating * (p.reviewsCount ?? 0);
+    cur.count += p.reviewsCount ?? 0;
+    byModel.set(p.modelId, cur);
+  }
+  if (byModel.size === 0) return products;
+  return products.map((p) => {
+    if (!p.modelId) return p;
+    const agg = byModel.get(p.modelId);
+    if (!agg || agg.count === 0) return p;
+    return { ...p, rating: agg.weighted / agg.count, reviewsCount: agg.count };
+  });
+}
+
 export async function getProducts(): Promise<Product[]> {
   return cacheGet("all-products", async () => {
     try {
@@ -207,14 +235,16 @@ export async function getProducts(): Promise<Product[]> {
           orderBy: { createdAt: "asc" },
         }),
       );
-      return rows.map(mapProduct);
+      // Рейтинги показываем за модель (все цвета), а не за отдельный цвет
+      return applyModelRatings(rows.map(mapProduct));
     } catch (err) {
       logger.warn("DB unavailable, fallback to products.json", {
         error: (err as Error)?.message,
       });
       const fallback = loadJsonFallback<{ products: Product[] }>("products.json");
       if (!fallback?.products) throw err;
-      return fallback.products;
+      // В JSON fallback товары тоже привязаны к моделям — агрегируем рейтинги
+      return applyModelRatings(fallback.products);
     }
     // 60s свежих + SWR-окно 10 мин: мутации продуктов инвалидируют ключ
   }, 60_000, 600_000);
@@ -227,16 +257,19 @@ export async function getAllProducts(): Promise<Product[]> {
       const rows = await prismaQuery(() =>
         prisma.product.findMany({ orderBy: { createdAt: "asc" } }),
       );
-      return rows
-        .filter((p) => !p.archivedAt && (p.price ?? 0) > 0)
-        .map(mapProduct);
+      return applyModelRatings(
+        rows
+          .filter((p) => !p.archivedAt && (p.price ?? 0) > 0)
+          .map(mapProduct),
+      );
     } catch (err) {
       logger.warn("DB unavailable, fallback to products.json (all)", {
         error: (err as Error)?.message,
       });
       const fallback = loadJsonFallback<{ products: Product[] }>("products.json");
       if (!fallback?.products) throw err;
-      return fallback.products;
+      // В JSON fallback товары тоже привязаны к моделям — агрегируем рейтинги
+      return applyModelRatings(fallback.products);
     }
   }, 60_000, 600_000);
 }
@@ -246,31 +279,62 @@ export async function getProduct(slug: string): Promise<Product | null> {  // �
   const found = all.find((p) => p.slug === slug);
   if (found) return found;
 
-  // ——— Архивный товар? Прямой запрос к БД + JSON fallback ———
+  // ——— Архивный товар / нет в наличии? Прямой запрос к БД + JSON fallback ———
   return cacheGet(`product:${slug}`, async () => {
     try {
       const row = await prismaQuery(() =>
         prisma.product.findUnique({ where: { slug, price: { gt: 0 } } }),
       );
-      if (row) return mapProduct(row);
+      if (row) {
+        const mapped = mapProduct(row);
+        // Рейтинг держим модельным и здесь: подтягиваем варианты модели из кеша
+        if (mapped.modelId) {
+          const all = await getAllProducts();
+          const group = applyModelRatings([
+            mapped,
+            ...all.filter((p) => p.modelId === mapped.modelId),
+          ]);
+          return group.find((p) => p.id === mapped.id) ?? mapped;
+        }
+        return mapped;
+      }
     } catch {
       // DB недоступна — fallback на JSON
     }
     const fallback = loadJsonFallback<{ products: Product[] }>("products.json");
-    return fallback?.products?.find((p) => p.slug === slug && (p.price ?? 0) > 0) ?? null;
+    if (!fallback?.products) return null;
+    return (
+      applyModelRatings(fallback.products).find(
+        (p) => p.slug === slug && (p.price ?? 0) > 0,
+      ) ?? null
+    );
   }, 60_000, 600_000);
 }
 
 /**
- * Отзывы товара с маркетплейсов (единоразовый импорт).
- * Нет БД / нет отзывов → [] — страница работает как раньше.
+ * Отзывы МОДЕЛИ с маркетплейсов (единоразовый импорт).
+ * Собирает отзывы со ВСЕХ цветов линейки (modelId) и помечает цветом —
+ * на странице цветовой вариант подписывается, чтобы не путать покупателя.
+ * Товар без modelId — просто отзывы товара. Нет БД / нет отзывов → [].
  */
-export async function getReviews(productId: string): Promise<Review[]> {
-  return cacheGet(`reviews:${productId}`, async () => {
+export async function getModelReviews(product: Product): Promise<Review[]> {
+  return cacheGet(`reviews:model:${product.modelId ?? product.id}`, async () => {
     try {
+      let productIds = [product.id];
+      let colorById = new Map<string, string>();
+      if (product.modelId) {
+        const variants = await prismaQuery(() =>
+          prisma.product.findMany({
+            where: { modelId: product.modelId },
+            select: { id: true, colorName: true },
+          }),
+        );
+        productIds = variants.map((v) => v.id);
+        colorById = new Map(variants.map((v) => [v.id, v.colorName ?? ""]));
+      }
       const rows = await prismaQuery(() =>
         prisma.review.findMany({
-          where: { productId },
+          where: { productId: { in: productIds } },
           orderBy: [{ reviewedAt: "desc" }, { createdAt: "desc" }],
         }),
       );
@@ -283,6 +347,7 @@ export async function getReviews(productId: string): Promise<Review[]> {
         pros: r.pros ?? undefined,
         cons: r.cons ?? undefined,
         reviewedAt: r.reviewedAt?.toISOString(),
+        colorName: colorById.get(r.productId) || undefined,
       }));
     } catch (err) {
       logger.warn("DB unavailable — reviews skipped", { error: (err as Error)?.message });

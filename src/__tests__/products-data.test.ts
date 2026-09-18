@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { getProducts, getProduct, getCategories } from "@/data/products";
+import {
+  getProducts,
+  getProduct,
+  getCategories,
+  applyModelRatings,
+} from "@/data/products";
 
 describe("products data", () => {
   it("getProducts returns array of products", async () => {
@@ -56,5 +61,44 @@ describe("products data", () => {
       expect(cat.name).toBeTruthy();
       expect(typeof cat.count).toBe("number");
     }
+  });
+});
+
+describe("applyModelRatings", () => {
+  it("aggregates per-color ratings into a weighted model rating", () => {
+    const colors = [
+      { modelId: "m1", rating: 4.0, reviewsCount: 10 },
+      { modelId: "m1", rating: 5.0, reviewsCount: 5 },
+    ];
+    const [a, b] = applyModelRatings(colors);
+    // (4.0*10 + 5.0*5) / 15 = 65/15 ≈ 4.3333
+    expect(a.rating).toBeCloseTo(65 / 15, 5);
+    expect(a.reviewsCount).toBe(15);
+    expect(b.rating).toBeCloseTo(65 / 15, 5);
+    expect(b.reviewsCount).toBe(15);
+  });
+
+  it("assigns the model rating to variants without their own rating", () => {
+    const list = [
+      { modelId: "m1", rating: 4.0, reviewsCount: 2 },
+      { modelId: "m1", rating: undefined, reviewsCount: undefined },
+    ];
+    const [a, b] = applyModelRatings(list);
+    // Цвет без своего рейтинга показывает рейтинг модели (всей линейки)
+    expect(a.rating).toBe(4.0);
+    expect(a.reviewsCount).toBe(2);
+    expect(b.rating).toBe(4.0);
+    expect(b.reviewsCount).toBe(2);
+  });
+
+  it("keeps products without modelId unchanged", () => {
+    const list = [
+      { modelId: undefined, rating: 3.5, reviewsCount: 2 },
+      { modelId: "m2", rating: 5.0, reviewsCount: 1 },
+    ];
+    const [a, b] = applyModelRatings(list);
+    expect(a.rating).toBe(3.5);
+    expect(a.reviewsCount).toBe(2);
+    expect(b.rating).toBe(5.0);
   });
 });
