@@ -43,7 +43,7 @@ export async function syncModels(prisma, wbCards, resolveCategory, log, flags) {
   const allNmIds = [...new Set([...imtGroups.values()].flatMap(g => [...g.nmIDs]))];
   const dbProducts = await prisma.product.findMany({
     where: { wbArticle: { in: allNmIds }, archivedAt: null },
-    select: { id: true, wbArticle: true, sku: true, name: true, modelId: true },
+    select: { id: true, wbArticle: true, sku: true, name: true, modelId: true, category: true },
   });
 
   // Индекс: wbArticle → product

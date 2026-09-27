@@ -665,7 +665,7 @@ async function main() {
   try {
     // ─── Загрузка товаров из БД ───
     log.line("Загрузка товаров из БД...");
-    const existing = await prismaRetry(() => getExistingProducts(prisma));
+    let existing = await prismaRetry(() => getExistingProducts(prisma));
     log.line(`  ${existing.all.length} товаров в БД\n`);
 
     const stats = {
@@ -787,6 +787,12 @@ async function main() {
 
         log.line(`  WB: ${stats.wbCreated} создано, ${stats.wbUpdated} обновлено\n`);
       }
+
+      // PHASE 1 создал/обновил WB-товары — перезагружаем индекс перед PHASE 2 (Ozon),
+      // иначе новые товары не находятся по sku и create падает с P2002 (unique sku)
+      log.line("Перезагрузка индекса товаров после PHASE 1...");
+      existing = await prismaRetry(() => getExistingProducts(prisma));
+      log.line(`  ${existing.all.length} товаров в БД\n`);
     }
 
     // ═══════════════════════════════════════════
@@ -958,6 +964,12 @@ async function main() {
         log.line(`  Ozon: ${stats.ozonUpdated} обновлено\n`);
       }
     }
+
+    // PHASE 2 проставил ozonArticle/стоки — перезагружаем индекс перед PHASE 2.5
+    // (иначе ozon-prices не находит товары с ozonArticle на первом синке)
+    log.line("Перезагрузка индекса товаров после PHASE 2...");
+    existing = await prismaRetry(() => getExistingProducts(prisma));
+    log.line(`  ${existing.all.length} товаров в БД\n`);
 
     // ═══════════════════════════════════════════
     // PHASE 2.5: Ozon Real Prices (через headless браузер)
