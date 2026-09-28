@@ -30,7 +30,7 @@
     "ozon-seller-sdk": "^1.0.3",
     "patchright": "^1.61.1",
     "pg": "^8.22.0",
-    "react": "19.2.7",
+    "react": "19.2.8",
     "react-dom": "19.2.7",
     "zod": "^4.4.3"
   },
