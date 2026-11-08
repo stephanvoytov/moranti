@@ -22,6 +22,11 @@ jobs:
 
       - run: npm ci
 
+      # ВРЕМЕННО: диагностика доступности БД из раннера (удалить вместе с PR)
+      - name: Diagnose DB connectivity
+        continue-on-error: true
+        run: node scripts/diag-db-connect.cjs
+
       - name: Lint
         run: npm run lint
 
