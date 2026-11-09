@@ -111,61 +111,104 @@ export async function getProductPrice(sku) {
 }
 
 /**
+ * Сколько SKU опрашивать одновременно. Запросы — это обычные fetch() со
+ * страницы, навигации нет, поэтому параллелизм безопасен; но Ozon не любит
+ * шквал, так что 3 — разумный компромисс (настраивается OZON_PRICE_CONCURRENCY).
+ */
+const DEFAULT_CONCURRENCY = Number(process.env.OZON_PRICE_CONCURRENCY ?? 3);
+
+/**
+ * После стольких ошибок подряд считаем, что сломан браузер/прокси/Variti,
+ * и обрываем фазу. Иначе каждый SKU стоит секунды и вся фаза — впустую
+ * (в прогоне 2026-11-09 так сгорело 353с при нуле обновлённых цен).
+ */
+const MAX_CONSECUTIVE_ERRORS = 5;
+
+/**
  * Получает цены, рейтинг и отзывы для нескольких SKU Ozon.
  *
- * Последовательные запросы с задержкой 500мс, чтобы не нагружать Ozon.
- * При ошибке одного SKU остальные продолжаются.
+ * Запросы идут пулом (concurrency) с паузой delayMs после каждого, чтобы не
+ * нагружать Ozon. При ошибке одного SKU остальные продолжаются; при
+ * MAX_CONSECUTIVE_ERRORS ошибках подряд фаза прерывается исключением.
  *
  * @param {Array<string|number>} skus — массив артикулов Ozon
  * @param {object} [opts]
- * @param {number} [opts.delayMs=500] — задержка между запросами
+ * @param {number} [opts.delayMs=300] — пауза после каждого запроса
+ * @param {number} [opts.concurrency=3] — сколько запросов одновременно
  * @returns {Promise<Array<{ sku: string, cardPrice: number|null, price: number|null,
  *   oldPrice: number|null, rating: number|null, reviewsCount: number|null }>>}
  */
-export async function getProductsPrices(skus, { delayMs = 500 } = {}) {
+export async function getProductsPrices(
+  skus,
+  { delayMs = 300, concurrency = DEFAULT_CONCURRENCY } = {}
+) {
   if (!isEnabled()) {
     console.error("[OzonPrice] Browser disabled — пропускаем получение цен");
     return [];
   }
 
-  const results = [];
-  let hasError = false;
+  const total = skus.length;
+  const results = new Array(total);
+  let next = 0;
+  let consecutiveErrors = 0;
+  let abortError = null;
 
-  try {
-    for (let i = 0; i < skus.length; i++) {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  const worker = async () => {
+    while (next < total && !abortError) {
+      const i = next++;
       const sku = skus[i];
       try {
         const result = await getProductPrice(sku);
-        results.push(result);
+        results[i] = result;
+        consecutiveErrors = 0;
 
         if (result.cardPrice != null) {
           console.error(
-            `[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: cardPrice=${result.cardPrice} price=${result.price} oldPrice=${result.oldPrice} rating=${result.rating} reviews=${result.reviewsCount}`
+            `[OzonPrice] ${i + 1}/${total} SKU ${sku}: cardPrice=${result.cardPrice} price=${result.price} oldPrice=${result.oldPrice} rating=${result.rating} reviews=${result.reviewsCount}`
           );
         } else {
-          console.error(`[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: нет цен (${result.price ?? "—"})`);
+          console.error(`[OzonPrice] ${i + 1}/${total} SKU ${sku}: нет цен (${result.price ?? "—"})`);
         }
       } catch (err) {
-        hasError = true;
-        console.error(`[OzonPrice] ${i + 1}/${skus.length} SKU ${sku}: ошибка — ${err.message}`);
-        // Продолжаем со следующим
+        consecutiveErrors++;
+        console.error(`[OzonPrice] ${i + 1}/${total} SKU ${sku}: ошибка — ${err.message}`);
+        if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+          abortError = err;
+          console.error(
+            `[OzonPrice] ${MAX_CONSECUTIVE_ERRORS} ошибок подряд — прерываю фазу`
+          );
+        }
       }
 
-      // Задержка между запросами (кроме последнего)
-      if (i < skus.length - 1) {
-        await new Promise((r) => setTimeout(r, delayMs));
-      }
+      if (delayMs > 0 && !abortError) await sleep(delayMs);
     }
+  };
+
+  try {
+    const workers = Math.max(1, Math.min(concurrency, total));
+    await Promise.all(Array.from({ length: workers }, worker));
   } finally {
     // Гарантированно закрываем браузер — даже при исключении в цикле
     await shutdown();
   }
 
-  if (hasError) {
-    console.error(`[OzonPrice] Завершено с ошибками: ${results.length}/${skus.length} успешно`);
-  } else {
-    console.error(`[OzonPrice] Завершено: ${results.length}/${skus.length} товаров`);
+  const collected = results.filter(Boolean);
+
+  if (abortError) {
+    throw new Error(
+      `прервано после ${MAX_CONSECUTIVE_ERRORS} ошибок подряд (${collected.length}/${total} получено): ${abortError.message}`
+    );
   }
 
-  return results;
+  if (collected.length < total) {
+    console.error(
+      `[OzonPrice] Завершено с ошибками: ${collected.length}/${total} успешно`
+    );
+  } else {
+    console.error(`[OzonPrice] Завершено: ${collected.length}/${total} товаров`);
+  }
+
+  return collected;
 }

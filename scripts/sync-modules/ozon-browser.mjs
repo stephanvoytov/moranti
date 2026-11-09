@@ -23,9 +23,14 @@
  */
 
 const HOME = "https://www.ozon.ru/";
+const HOME_ORIGIN = "https://www.ozon.ru";
 const API = "https://www.ozon.ru/api/composer-api.bx/page/json/v2?url=";
 const CHALLENGE_WAIT_MS = 12000; // время на проход JS-челленджа Variti
 const NAV_TIMEOUT_MS = 90000;
+// Сколько раз пробуем пройти челлендж за один запуск. Первая попытка может
+// упасть на разовом сбое прокси (ERR_EMPTY_RESPONSE) — перезапуск браузера
+// обычно лечит, но каждая попытка стоит ~13s, поэтому больше двух не надо.
+const MAX_CHALLENGE_ATTEMPTS = 2;
 
 const LAUNCH_ARGS = [
   "--disable-blink-features=AutomationControlled",
@@ -131,6 +136,92 @@ async function launch() {
   challenged = false;
 }
 
+// Заглушки вместо реальной страницы = челлендж не пройден. Реальный title
+// главной Ozon: «OZON маркетплейс — миллионы товаров...». Сюда же попадает
+// страница ошибки Chromium («Loading https://www.ozon.ru/», ERR_EMPTY_RESPONSE):
+// её title начинается с "Loading", а fetch из неё падает с "Failed to fetch".
+const BAD_TITLE = /antibot|ограничен|доступ|соединени|no internet|offline|^loading\b|^error\b/i;
+
+/**
+ * Открывает главную Ozon и проверяет, что челлендж Variti реально пройден.
+ *
+ * Проверок три, и все обязательны:
+ *  1. origin страницы — именно ozon.ru. Страница ошибки Chromium живёт на
+ *     внутреннем URL, и fetch(composer-api) из неё падает "Failed to fetch"
+ *     (именно так фаза цен потратила 353с в прогоне 2026-11-09, обновив 0 цен);
+ *  2. title не похож на антибот-заглушку;
+ *  3. smoke-запрос к composer-api из страницы реально доходит до Ozon.
+ *
+ * Бросает Error с причиной — вызывающий код решает, ретраить или сдаваться.
+ */
+async function passChallenge() {
+  if (!browser || !browser.isConnected()) await launch();
+
+  mainPage = await context.newPage();
+  log("passing Variti anti-bot challenge…");
+
+  let status = null;
+  let navError = null;
+  try {
+    const resp = await mainPage.goto(HOME, {
+      waitUntil: "domcontentloaded",
+      timeout: NAV_TIMEOUT_MS,
+    });
+    status = resp?.status() ?? null;
+  } catch (err) {
+    navError = String(err?.message ?? err);
+  }
+  log(
+    `homepage status: ${
+      navError ? `ERR: ${navError.slice(0, 80)}` : status ?? "no-response"
+    }`
+  );
+  await mainPage.waitForTimeout(CHALLENGE_WAIT_MS);
+
+  // 1) origin: у страницы ошибки он не ozon.ru → fetch к composer-api бесполезен
+  const url = mainPage.url();
+  let origin = "";
+  try {
+    origin = new URL(url).origin;
+  } catch {
+    origin = "";
+  }
+  if (origin !== HOME_ORIGIN) {
+    throw new Error(
+      `страница не на ozon.ru (url: ${url.slice(0, 80)}, nav: ${navError ?? status})`
+    );
+  }
+  if (status != null && status >= 400) {
+    throw new Error(`homepage HTTP ${status}`);
+  }
+
+  // 2) title: антибот-заглушка / страница ошибки
+  const title = await mainPage.title();
+  if (BAD_TITLE.test(title)) {
+    throw new Error(`челлендж не пройден (title: ${title.slice(0, 60)})`);
+  }
+
+  // 3) smoke: fetch из страницы должен хотя бы дойти до Ozon. Проверяем не
+  // конкретный код ответа (эндпоинт может ответить 4xx), а сам факт ответа:
+  // сетевой сбой даёт status 0.
+  const smoke = await mainPage.evaluate(async (u) => {
+    try {
+      const r = await fetch(u, { headers: { accept: "application/json" } });
+      return { status: r.status };
+    } catch (e) {
+      return { status: 0, error: String(e?.message ?? e) };
+    }
+  }, API + encodeURIComponent("/"));
+  if (!smoke.status) {
+    throw new Error(
+      `composer-api недоступен (${smoke.error ?? "fetch failed"}) — вероятно, не работает прокси`
+    );
+  }
+
+  challenged = true;
+  log(`challenge passed: ${title.slice(0, 40)} (composer-api HTTP ${smoke.status})`);
+}
+
 async function ensureContext() {
   if (!isBrowserAvailable()) {
     throw new Error("patchright/Chromium недоступен (Vercel или production build)");
@@ -147,37 +238,23 @@ async function ensureContext() {
   }
 
   initPromise = (async () => {
-    if (!browser || !browser.isConnected()) await launch();
-
-    // Проходим Variti один раз: загружаем главную, ждём выполнения JS-челленджа.
-    // Страница остаётся открытой — все fetch() идут с неё, наследуя сессию.
-    mainPage = await context.newPage();
-    log("passing Variti anti-bot challenge…");
-    let navStatus = "—";
-    try {
-      const resp = await mainPage.goto(HOME, {
-        waitUntil: "domcontentloaded",
-        timeout: NAV_TIMEOUT_MS,
-      });
-      navStatus = resp?.status() ?? "no-response";
-    } catch (err) {
-      navStatus = `ERR: ${String(err?.message).slice(0, 80)}`;
+    let lastError = null;
+    for (let attempt = 1; attempt <= MAX_CHALLENGE_ATTEMPTS; attempt++) {
+      try {
+        await passChallenge();
+        return;
+      } catch (err) {
+        lastError = err;
+        log(`challenge attempt ${attempt}/${MAX_CHALLENGE_ATTEMPTS}: ${err.message}`);
+        // Полный сброс (браузер + контекст): следующая попытка стартует с нуля.
+        await shutdown();
+      }
     }
-    log(`homepage status: ${navStatus}`);
-    await mainPage.waitForTimeout(CHALLENGE_WAIT_MS);
-
-    const title = await mainPage.title();
-    // Заглушки вместо реальной страницы = челлендж не пройден. Реальный title
-    // главной Ozon: «OZON маркетплейс — миллионы товаров...». Всё остальное —
-    // антибот-заглушка или страница ошибки браузера: распознаём и фатально падаем,
-    // чтобы не гонять ~13s перезапусков на каждый SKU впустую.
-    if (/antibot|ограничен|доступ|соединени|no internet|offline/i.test(title)) {
-      challengeBroken = true; // фатально: дальше ретраить бессмысленно (по ~13s на попытку)
-      throw new Error(`Variti challenge не пройден (title: ${title})`);
-    }
-
-    challenged = true;
-    log("challenge passed:", title.slice(0, 40));
+    // Фатально: дальнейшие SKU стоили бы ~13s перезапусков каждый.
+    challengeBroken = true;
+    throw new Error(
+      `Variti challenge не пройден: ${lastError?.message ?? "неизвестная ошибка"}`
+    );
   })();
 
   try {
