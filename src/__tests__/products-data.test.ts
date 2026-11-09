@@ -20,7 +20,13 @@ describe("products data", () => {
       expect(p.slug).toBeTruthy();
       expect(p.name).toBeTruthy();
       expect(typeof p.price).toBe("number");
-      expect(p.wbArticle).toBeGreaterThan(0);
+      // Товар обязан быть привязан хотя бы к одной площадке. Адаптер отдаёт
+      // wbArticle = 0 для товаров без WB (например, Ozon-only с витрины Ozon),
+      // поэтому проверяем пару: либо WB-артикул, либо Ozon-артикул.
+      expect(typeof p.wbArticle).toBe("number");
+      if (!(p.wbArticle > 0)) {
+        expect(p.ozonArticle ?? 0).toBeGreaterThan(0);
+      }
       // Некоторые товары имеют price=0 (не синхронизированы с маркетплейсом,
       // либо архивные без archivedAt в JSON fallback). Не валидируем цену
       // если товар не привязан ни к одному маркетплейсу.

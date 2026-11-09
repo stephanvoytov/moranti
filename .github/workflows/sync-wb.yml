@@ -6,11 +6,21 @@ on:
     - cron: '0 5,11,17 * * *'
   workflow_dispatch:  # ручной запуск из GitHub UI
 
+# Нужно, чтобы workflow мог закоммитить обновлённый data/products.json
+# (JSON fallback на случай недоступной БД).
+permissions:
+  contents: write
+
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # Цены Ozon через headless Chromium — самая дорогая фаза (~1-6 мин).
+      # Цены не меняются каждые 6 часов, поэтому в расписании её гоняем только
+      # в утреннем прогоне 05:00 UTC; ручной запуск (workflow_dispatch) — полный.
+      SYNC_SKIP_OZON_PRICES: ${{ github.event_name == 'schedule' && github.event.schedule != '0 5 * * *' && '1' || '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -19,7 +29,11 @@ jobs:
           node-version: 24
           cache: 'npm'
 
-      - run: npm ci
+      # Кэш node_modules не используем: он весит ~1.2 ГБ, и распаковка архива
+      # в Actions съедает почти всё, что экономит. npm-кэш (~/.npm) setup-node
+      # уже восстанавливает, поэтому просто просим npm не лезть в сеть зря.
+      - name: Install dependencies
+        run: npm ci --prefer-offline --no-audit --no-fund
 
       - name: Cache Playwright browsers
         id: playwright-cache
@@ -38,6 +52,30 @@ jobs:
 
       - run: npx prisma generate
 
+      # Preflight прокси Ozon: мёртвый прокси раньше проявлялся только внутри
+      # фазы цен — 50 SKU по ~5.7с "Failed to fetch" (≈5 мин) и 0 результата.
+      # Теперь это видно сразу и отдельным предупреждением.
+      - name: Check Ozon proxy
+        if: env.SYNC_SKIP_OZON_PRICES != '1'
+        env:
+          OZON_PROXY_SERVER: ${{ secrets.OZON_PROXY_SERVER }}
+          OZON_PROXY_USER: ${{ secrets.OZON_PROXY_USER }}
+          OZON_PROXY_PASS: ${{ secrets.OZON_PROXY_PASS }}
+        run: |
+          if [ -z "$OZON_PROXY_SERVER" ]; then
+            echo "::warning::OZON_PROXY_SERVER не задан — фаза цен Ozon пойдёт без прокси"
+            exit 0
+          fi
+          args=(--max-time 25 -sS -o /dev/null -w '%{http_code}' -x "$OZON_PROXY_SERVER")
+          if [ -n "$OZON_PROXY_USER" ]; then
+            args+=(-U "$OZON_PROXY_USER:$OZON_PROXY_PASS")
+          fi
+          code=$(curl "${args[@]}" https://www.ozon.ru/ || echo "000")
+          echo "прокси → ozon.ru: HTTP $code"
+          if [ "$code" = "000" ]; then
+            echo "::warning::прокси Ozon не отвечает — фаза цен, скорее всего, не сработает"
+          fi
+
       # sync-all.mjs использует официальные WB API (Content + Pricing + Stocks + Analytics)
       # и Ozon Seller API. Ozon-prices фаза ходит через headless Chromium:
       # IP GitHub runners блокируется Variti → трафик идёт через прокси на свой VPS;
@@ -52,3 +90,17 @@ jobs:
           OZON_PROXY_USER: ${{ secrets.OZON_PROXY_USER }}
           OZON_PROXY_PASS: ${{ secrets.OZON_PROXY_PASS }}
           OZON_HEADLESS: "0"
+
+      # Если БД была недоступна, sync-all.mjs обновляет data/products.json
+      # (JSON fallback) — коммитим его, чтобы сайт получил актуальные цены/стоки.
+      - name: Commit updated JSON fallback
+        run: |
+          if git diff --quiet -- data/products.json; then
+            echo "data/products.json без изменений — коммит не нужен"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/products.json
+          git commit -m "chore(data): обновлён JSON fallback после синка"
+          git push

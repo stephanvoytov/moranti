@@ -19,6 +19,12 @@ try {
  *   node scripts/sync-all.mjs --wb-only              # только WB
  *   node scripts/sync-all.mjs --ozon-only            # только Ozon
  *   node scripts/sync-all.mjs --from-phase wb-prices # рестарт с фазы
+ *   node scripts/sync-all.mjs --json                 # без БД: читать/писать data/products.json
+ *   node scripts/sync-all.mjs --skip-ozon-prices     # без headless-браузера (цены Ozon)
+ *
+ * Если PostgreSQL недоступна, CLI-запуск автоматически переключается в JSON
+ * fallback: синк обновляет data/products.json (актуальные цены/стоки/фото) и
+ * завершается успешно, чтобы workflow мог закоммитить файл.
  *
  * Модули:
  *   sync-modules/transform.mjs   — трансформация данных (чистые функции)
@@ -46,6 +52,7 @@ import {
 } from "./sync-modules/transform.mjs";
 import { mergeProductSources } from "./sync-modules/merge.mjs";
 import { syncModels, syncOzonModels, archiveGoneProducts } from "./sync-modules/models.mjs";
+import { createJsonStore } from "./sync-modules/json-store.mjs";
 
 // --- Зависимости (прямой import — esbuild трассирует его для бандла) ---
 import { PrismaClient } from "@prisma/client";
@@ -61,10 +68,33 @@ const WB_CONTENT_API = "https://content-api.wildberries.ru";
 const ITEMS_PER_WB_CARDS = 100;
 const FETCH_TIMEOUT = 30000;
 
+/** JSON fallback (data/products.json) — файл, который читает сайт при недоступной БД. */
+const PRODUCTS_JSON_PATH = path.join(process.cwd(), "data", "products.json");
+
+/** Сколько ждать ответа БД перед переключением в JSON fallback. */
+const DB_PREFLIGHT_TIMEOUT_MS = 15000;
+
+/**
+ * Сколько записей писать в БД одновременно. Раннер GitHub → Postgres на VPS:
+ * один UPDATE = один round-trip (~200 мс), поэтому последовательный цикл из
+ * 105 товаров упирается в 100+ секунд. Параллельная запись независимых строк
+ * прячет задержку сети (настраивается SYNC_DB_CONCURRENCY).
+ */
+const DB_WRITE_CONCURRENCY = Math.max(1, Number(process.env.SYNC_DB_CONCURRENCY ?? 5));
+
+const isCliRun = process.argv[1] === fileURLToPath(import.meta.url);
+
 const flags = {
   dry: process.argv.includes("--dry"),
   wbOnly: process.argv.includes("--wb-only"),
   ozonOnly: process.argv.includes("--ozon-only"),
+  json: process.argv.includes("--json"),
+  // Фаза ozon-prices — самая дорогая (headless Chromium, ~5 мин). Цены не
+  // меняются каждые 6 часов, поэтому в расписании она запускается раз в сутки,
+  // а в остальных прогонах workflow выставляет SYNC_SKIP_OZON_PRICES=1.
+  skipOzonPrices:
+    process.argv.includes("--skip-ozon-prices") ||
+    process.env.SYNC_SKIP_OZON_PRICES === "1",
   fromPhase: null,
 };
 
@@ -103,6 +133,64 @@ function shouldRun(phase) {
   const fromIdx = PHASES.indexOf(flags.fromPhase);
   if (fromIdx === -1) return true; // неизвестная фаза — выполняем
   return idx >= fromIdx;
+}
+
+/**
+ * Резолвит промис, но не дольше ms миллисекунд.
+ * Нужен для быстрой проверки доступности БД: Prisma-запрос к «молчащему»
+ * сокету может висеть минутами, а синку пора решать — БД или JSON fallback.
+ * @template T
+ * @param {Promise<T>} promise
+ * @param {number} ms
+ * @param {string} label
+ * @returns {Promise<T>}
+ */
+function withTimeout(promise, ms, label) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`${label}: нет ответа за ${ms} мс`));
+    }, ms);
+    Promise.resolve(promise).then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      }
+    );
+  });
+}
+
+/** Короткое описание ошибки для лога (без стектрейса и лишних строк). */
+function shortError(e) {
+  if (!e) return "неизвестная ошибка";
+  const text = [e.code, e.message].filter(Boolean).join(": ");
+  const line = String(text || e).split("\n")[0].trim();
+  return line || e.name || "неизвестная ошибка";
+}
+
+/**
+ * Ограниченный параллелизм: применяет fn к каждому элементу, но не более
+ * limit одновременно, сохраняя порядок запуска. Нужен для записи в БД —
+ * прячет round-trip до удалённого Postgres.
+ * @template T
+ * @param {T[]} items
+ * @param {number} limit
+ * @param {(item: T, index: number) => Promise<void>} fn
+ */
+async function mapLimit(items, limit, fn) {
+  if (items.length === 0) return;
+  const workers = Math.max(1, Math.min(limit, items.length));
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++;
+      await fn(items[i], i);
+    }
+  };
+  await Promise.all(Array.from({ length: workers }, worker));
 }
 
 // ============================================================
@@ -640,9 +728,18 @@ async function main() {
     process.exit(1);
   }
 
-  const prisma = new PrismaClient({
-    adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || "" }),
-  });
+  // ─── Хранилище: PostgreSQL (Prisma) или JSON fallback ───
+  // store — то, что передаётся в getExistingProducts/createProduct/updateProduct:
+  // либо PrismaClient, либо JSON-хранилище с тем же подмножеством API.
+  let prisma = null;
+  let store = null;
+  let usingJsonFallback = flags.json;
+
+  if (!usingJsonFallback) {
+    prisma = new PrismaClient({
+      adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || "" }),
+    });
+  }
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -663,10 +760,36 @@ async function main() {
   }
 
   try {
-    // ─── Загрузка товаров из БД ───
-    log.line("Загрузка товаров из БД...");
-    let existing = await prismaRetry(() => getExistingProducts(prisma));
-    log.line(`  ${existing.all.length} товаров в БД\n`);
+    // ─── Выбор хранилища ───
+    if (!usingJsonFallback) {
+      try {
+        await withTimeout(
+          prisma.$queryRawUnsafe("SELECT 1"),
+          DB_PREFLIGHT_TIMEOUT_MS,
+          "PostgreSQL"
+        );
+        store = prisma;
+      } catch (e) {
+        // Из админки (sync-runner) на Vercel писать в data/products.json нельзя —
+        // там фолбэк не имеет смысла, поэтому пробрасываем ошибку наверх.
+        if (!isCliRun) throw e;
+        usingJsonFallback = true;
+        log.line(`⚠ БД недоступна: ${shortError(e)}`);
+        log.line("→ Переключаюсь в JSON fallback (data/products.json)\n");
+        try { await prisma.$disconnect(); } catch { /* ignore */ }
+        prisma = null;
+      }
+    }
+
+    if (usingJsonFallback) {
+      log.line("Режим JSON fallback: работаем с data/products.json без БД\n");
+      store = createJsonStore({ file: PRODUCTS_JSON_PATH, log });
+    }
+
+    // ─── Загрузка товаров ───
+    log.line(usingJsonFallback ? "Загрузка товаров из JSON fallback..." : "Загрузка товаров из БД...");
+    let existing = await prismaRetry(() => getExistingProducts(store));
+    log.line(`  ${existing.all.length} товаров\n`);
 
     const stats = {
       wbCreated: 0, wbUpdated: 0, wbSkipped: 0,
@@ -720,6 +843,13 @@ async function main() {
 
         log.line("Обработка карточек WB...");
         log.progress("wb-process", 0, wbCards.length);
+
+        // Обновления существующих товаров собираем и пишем пачкой в конце:
+        // каждая запись — отдельный round-trip до БД, последовательно это
+        // ~0.5с на товар (см. DB_WRITE_CONCURRENCY). Создание новых — в цикле,
+        // там важен порядок (уникальность sku/slug).
+        const pendingWbUpdates = [];
+
         for (let i = 0; i < wbCards.length; i++) {
           const card = wbCards[i];
           const article = card.nmID;
@@ -748,19 +878,13 @@ async function main() {
             const updates = mergeProductSources(card, wbPrices, wbRating, null, null, null, db);
             const allUpdates = { ...ensureFields, ...updates };
             if (Object.keys(allUpdates).length > 0) {
-              const ok = await updateProduct(prisma, db.id, allUpdates);
-              if (ok) {
-                stats.wbUpdated++;
-                const changes = formatChanges(db, allUpdates);
-                log.line(`  ${db.id} wb-${article} «${db.name}»: ${changes.join(", ")}`);
-                log.detail("updated", db.id, db.name, changes);
-              }
+              pendingWbUpdates.push({ db, article, updates: allUpdates });
             } else {
               stats.wbSkipped++;
             }
           } else {
             const updates = mergeProductSources(card, wbPrices, wbRating, null, null, null, null);
-            const id = await createProduct(prisma, {
+            const id = await createProduct(store, {
               ...updates,
               sku: vendorCode || null,
               wbArticle: article,
@@ -785,14 +909,27 @@ async function main() {
           }
         }
 
+        await mapLimit(pendingWbUpdates, DB_WRITE_CONCURRENCY, async ({ db, article, updates }) => {
+          const ok = await updateProduct(store, db.id, updates);
+          if (!ok) return;
+          stats.wbUpdated++;
+          const changes = formatChanges(db, updates);
+          log.line(`  ${db.id} wb-${article} «${db.name}»: ${changes.join(", ")}`);
+          log.detail("updated", db.id, db.name, changes);
+        });
+
         log.line(`  WB: ${stats.wbCreated} создано, ${stats.wbUpdated} обновлено\n`);
       }
 
       // PHASE 1 создал/обновил WB-товары — перезагружаем индекс перед PHASE 2 (Ozon),
-      // иначе новые товары не находятся по sku и create падает с P2002 (unique sku)
-      log.line("Перезагрузка индекса товаров после PHASE 1...");
-      existing = await prismaRetry(() => getExistingProducts(prisma));
-      log.line(`  ${existing.all.length} товаров в БД\n`);
+      // иначе новые товары не находятся по sku и create падает с P2002 (unique sku).
+      // Если новых товаров не было, ключи индекса (sku/wbArticle) не изменились —
+      // перезагрузка не нужна.
+      if (stats.wbCreated > 0) {
+        log.line("Перезагрузка индекса товаров после PHASE 1...");
+        existing = await prismaRetry(() => getExistingProducts(store));
+        log.line(`  ${existing.all.length} товаров в БД\n`);
+      }
     }
 
     // ═══════════════════════════════════════════
@@ -841,6 +978,8 @@ async function main() {
           if (p.ozonArticle) ozonLocks.set(Number(p.ozonArticle), p.id);
         }
         const skippedOzonFixes = [];
+        // Обновления существующих товаров — пачкой в конце (см. mapLimit).
+        const pendingOzonUpdates = [];
 
         const totalOzonItems = ozonItems.filter((i) => i.offerId || i.productId).length;
         log.progress("ozon-process", 0, totalOzonItems);
@@ -885,13 +1024,7 @@ async function main() {
             const updates = mergeProductSources(null, null, null, info, attrs, null, db);
             const allUpdates = { ...ensureFields, ...updates };
             if (Object.keys(allUpdates).length > 0) {
-              const ok = await updateProduct(prisma, db.id, allUpdates);
-              if (ok) {
-                stats.ozonUpdated++;
-                const changes = formatChanges(db, allUpdates);
-                log.line(`  ${db.id} offer-${offerId} «${db.name}»: ${changes.join(", ")}`);
-                log.detail("updated", db.id, db.name, changes);
-              }
+              pendingOzonUpdates.push({ db, offerId, updates: allUpdates });
             } else {
               stats.ozonSkipped++;
             }
@@ -909,7 +1042,7 @@ async function main() {
               ? [ozonPrimary, ...ozonImgList.filter((u) => u !== ozonPrimary)]
               : ozonImgList;
 
-            const id = await createProduct(prisma, {
+            const id = await createProduct(store, {
               sku: offerId || null,
               name: info.name || "",
               price: 0,
@@ -944,6 +1077,15 @@ async function main() {
           }
         }
 
+        await mapLimit(pendingOzonUpdates, DB_WRITE_CONCURRENCY, async ({ db, offerId, updates }) => {
+          const ok = await updateProduct(store, db.id, updates);
+          if (!ok) return;
+          stats.ozonUpdated++;
+          const changes = formatChanges(db, updates);
+          log.line(`  ${db.id} offer-${offerId} «${db.name}»: ${changes.join(", ")}`);
+          log.detail("updated", db.id, db.name, changes);
+        });
+
         // Второй проход: фиксы ozonArticle
         if (skippedOzonFixes.length > 0) {
           log.line(`  Второй проход: повтор для ${skippedOzonFixes.length} пропущенных ozonArticle...`);
@@ -952,7 +1094,7 @@ async function main() {
               log.line(`    Всё ещё пропущен ${db.id}: ${newVal} занят ${ozonLocks.get(newVal)}`);
             } else {
               ozonLocks.set(newVal, db.id);
-              const ok = await updateProduct(prisma, db.id, { ozonArticle: toBigInt(newVal) });
+              const ok = await updateProduct(store, db.id, { ozonArticle: toBigInt(newVal) });
               if (ok) {
                 log.line(`    Исправление ozonArticle для ${db.id}: ${oldVal} → ${newVal} (2-й проход)`);
                 stats.ozonUpdated++;
@@ -968,14 +1110,14 @@ async function main() {
     // PHASE 2 проставил ozonArticle/стоки — перезагружаем индекс перед PHASE 2.5
     // (иначе ozon-prices не находит товары с ozonArticle на первом синке)
     log.line("Перезагрузка индекса товаров после PHASE 2...");
-    existing = await prismaRetry(() => getExistingProducts(prisma));
+    existing = await prismaRetry(() => getExistingProducts(store));
     log.line(`  ${existing.all.length} товаров в БД\n`);
 
     // ═══════════════════════════════════════════
     // PHASE 2.5: Ozon Real Prices (через headless браузер)
     // ═══════════════════════════════════════════
 
-    if (shouldRun("ozon-prices") && !flags.wbOnly) {
+    if (shouldRun("ozon-prices") && !flags.wbOnly && !flags.skipOzonPrices) {
       log.progress("ozon-prices", 0, 1);
 
       // Собираем все товары с ozonArticle
@@ -996,6 +1138,9 @@ async function main() {
           const prices = await getProductsPrices(ozonSkuList);
 
           let updated = 0;
+          // Записи цен — пачкой (см. mapLimit): 50 UPDATE по одному на удалённую БД
+          // это ~10с чистого ожидания сети.
+          const pendingPriceUpdates = [];
           for (const { sku, cardPrice, price, oldPrice, rating, reviewsCount } of prices) {
             const numSku = Number(sku);
             const db = existing.byOzonArticle.get(numSku);
@@ -1089,18 +1234,29 @@ async function main() {
             }
 
             if (Object.keys(updates).length > 0) {
-              const ok = await updateProduct(prisma, db.id, updates);
-              if (ok) {
-                updated++;
-                log.line(`  ${db.id} ozon-${sku} «${db.name}»: ${changes.join(", ")}`);
-                log.detail("updated", db.id, db.name, formatChanges(db, updates));
-              }
+              pendingPriceUpdates.push({ db, sku, updates, changes });
             }
           }
+
+          await mapLimit(pendingPriceUpdates, DB_WRITE_CONCURRENCY, async ({ db, sku, updates, changes }) => {
+            const ok = await updateProduct(store, db.id, updates);
+            if (!ok) return;
+            updated++;
+            log.line(`  ${db.id} ozon-${sku} «${db.name}»: ${changes.join(", ")}`);
+            log.detail("updated", db.id, db.name, formatChanges(db, updates));
+          });
 
           const skipped = prices.length - updated;
           log.line(`  Ozon Prices: ${updated} товаров обновлено` +
             (skipped > 0 ? `, ${skipped} без изменений` : ""));
+
+          // Часть SKU не отдала цены — это не «успех»: раньше такая фаза
+          // рапортовала 0 обновлений при 50/50 ошибках и прогон был зелёным.
+          const failed = ozonSkuList.length - prices.length;
+          if (failed > 0) {
+            stats.errors++;
+            log.line(`  [Ozon Prices] ВНИМАНИЕ: ${failed}/${ozonSkuList.length} SKU без цен`);
+          }
         } catch (err) {
           if (
             err.message?.includes("недоступен") ||
@@ -1117,27 +1273,36 @@ async function main() {
       }
 
       log.progress("ozon-prices", 1, 1);
+    } else if (flags.skipOzonPrices && shouldRun("ozon-prices") && !flags.wbOnly) {
+      log.line("[Ozon Prices] Пропущено (SYNC_SKIP_OZON_PRICES) — цены обновляются раз в сутки");
+      log.progress("ozon-prices", 1, 1);
     }
 
     // ═══════════════════════════════════════════
     // PHASE 3: Models
     // ═══════════════════════════════════════════
 
-    if (shouldRun("ozon-models") && !flags.wbOnly) {
+    // Модели живут в отдельной таблице БД — в JSON fallback фазы пропускаем:
+    // в products.json поля модели (modelId) только читаются, но не создаются.
+    if (!usingJsonFallback && shouldRun("ozon-models") && !flags.wbOnly) {
       log.progress("ozon-models", 0, 1);
-      const ozonModelResult = await syncOzonModels(prisma, attrMap || new Map(), log);
+      const ozonModelResult = await syncOzonModels(store, attrMap || new Map(), log);
       if (ozonModelResult.created > 0 || ozonModelResult.assigned > 0) {
         log.line(`  Модели Ozon: ${ozonModelResult.created} создано, ${ozonModelResult.assigned} привязано`);
       }
       log.progress("ozon-models", 1, 1);
+    } else if (usingJsonFallback && shouldRun("ozon-models")) {
+      log.line("Модели Ozon: пропущено (JSON fallback)");
     }
 
-    if (shouldRun("wb-models") && !flags.ozonOnly && wbCards.length > 0) {
+    if (!usingJsonFallback && shouldRun("wb-models") && !flags.ozonOnly && wbCards.length > 0) {
       log.progress("wb-models", 0, 1);
       log.line("Синхронизация моделей из WB imtId...");
-      const modelResult = await syncModels(prisma, wbCards, resolveCategory, log, flags);
+      const modelResult = await syncModels(store, wbCards, resolveCategory, log, flags);
       log.line(`  Модели WB: ${modelResult.created} создано, ${modelResult.assigned} привязано\n`);
       log.progress("wb-models", 1, 1);
+    } else if (usingJsonFallback && shouldRun("wb-models") && !flags.ozonOnly) {
+      log.line("Модели WB: пропущено (JSON fallback)\n");
     }
 
     // ═══════════════════════════════════════════
@@ -1154,7 +1319,7 @@ async function main() {
       } else {
         log.line("Архивация удалённых товаров...");
         const archiveResult = await archiveGoneProducts(
-          prisma, existing.all, wbArticles, ozonItems, trashArticles,
+          store, existing.all, wbArticles, ozonItems, trashArticles,
           !flags.ozonOnly, !flags.wbOnly, log, flags,
         );
         stats.archived = archiveResult.archived;
@@ -1182,7 +1347,7 @@ async function main() {
     log.line(`  Нет в наличии:           ${stats.outOfStock}`);
     log.line(`  Ошибок:                  ${stats.errors}`);
     log.line(`  Длительность:            ${duration}с`);
-    log.line(`  Режим:                   ${flags.dry ? "DRY (без записи)" : "live"}`);
+    log.line(`  Режим:                   ${flags.dry ? "DRY (без записи)" : "live"}${usingJsonFallback ? ", JSON fallback (без БД)" : ""}`);
 
     const skipped = stats.wbSkipped + stats.ozonSkipped;
     const summary = {
@@ -1197,11 +1362,17 @@ async function main() {
     };
     console.log(JSON.stringify(summary));
 
+    // В JSON fallback сохраняем обновлённый data/products.json (если не dry).
+    if (usingJsonFallback && !flags.dry) {
+      const saved = store.save();
+      log.line(`\n[JSON] data/products.json обновлён: ${saved.count} товаров, ${saved.sizeKB} KB`);
+    }
+
     // История синхронизации (только для прямого CLI-запуска)
     await writeCliHistory({
       stats,
       durationMs: Date.now() - startTime,
-      prisma,
+      prisma: store,
     });
 
   } catch (err) {
@@ -1215,11 +1386,12 @@ async function main() {
       },
       durationMs: Date.now() - startTime,
       error: err instanceof Error ? err.message : String(err),
-      prisma,
+      prisma: store,
     });
     process.exit(1);
   } finally {
-    await prisma.$disconnect();
+    if (prisma) await prisma.$disconnect();
+    else if (store?.__jsonStore) await store.$disconnect();
   }
 }
 
@@ -1239,6 +1411,6 @@ export async function runOzonSync() {
   await main();
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (isCliRun) {
   main();
 }
