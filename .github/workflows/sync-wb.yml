@@ -90,7 +90,7 @@ jobs:
       # IP GitHub runners блокируется Variti → трафик идёт через прокси на свой VPS;
       # headless тоже детектится → headful-режим через xvfb (OZON_HEADLESS=0)
       - name: Sync catalog with WB & Ozon
-        run: xvfb-run -a node scripts/sync-all.mjs
+        run: xvfb-run -a -s "-screen 0 1920x1080x24" node scripts/sync-all.mjs
         env:
           WB_API_KEY: ${{ secrets.WB_API_KEY }}
           OZON_CLIENT_ID: ${{ secrets.OZON_CLIENT_ID }}
