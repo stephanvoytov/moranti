@@ -57,7 +57,7 @@ import { createJsonStore } from "./sync-modules/json-store.mjs";
 // --- Зависимости (прямой import — esbuild трассирует его для бандла) ---
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { generateName } from "./name-generator.js";
+import { generateName } from "./name-generator.cjs";
 
 // ============================================================
 // Config
