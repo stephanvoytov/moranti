@@ -178,7 +178,10 @@ async function passChallenge() {
   );
   await mainPage.waitForTimeout(CHALLENGE_WAIT_MS);
 
-  // 1) origin: у страницы ошибки он не ozon.ru → fetch к composer-api бесполезен
+  // 1) origin: у страницы ошибки он не ozon.ru → fetch к composer-api бесполезен.
+  //    HTTP-статус первого захода не проверяем: Ozon отдаёт 403 на заглушку
+  //    Variti, а после JS-челленджа страница становится рабочей (реальный title,
+  //    origin ozon.ru, API отвечает 200) — проверено 10.11.2026.
   const url = mainPage.url();
   let origin = "";
   try {
@@ -191,9 +194,6 @@ async function passChallenge() {
       `страница не на ozon.ru (url: ${url.slice(0, 80)}, nav: ${navError ?? status})`
     );
   }
-  if (status != null && status >= 400) {
-    throw new Error(`homepage HTTP ${status}`);
-  }
 
   // 2) title: антибот-заглушка / страница ошибки
   const title = await mainPage.title();
@@ -201,9 +201,10 @@ async function passChallenge() {
     throw new Error(`челлендж не пройден (title: ${title.slice(0, 60)})`);
   }
 
-  // 3) smoke: fetch из страницы должен хотя бы дойти до Ozon. Проверяем не
-  // конкретный код ответа (эндпоинт может ответить 4xx), а сам факт ответа:
-  // сетевой сбой даёт status 0.
+  // 3) smoke: fetch из страницы должен реально получить данные Ozon.
+  //    status 0 — сетевой сбой (прокси/браузер), 403 — IP заблокирован Variti
+  //    (в ответе incidentId). В обоих случаях скрапинг не заработает — падаем
+  //    сразу, а не 50 SKU по ~5с.
   const smoke = await mainPage.evaluate(async (u) => {
     try {
       const r = await fetch(u, { headers: { accept: "application/json" } });
@@ -212,9 +213,9 @@ async function passChallenge() {
       return { status: 0, error: String(e?.message ?? e) };
     }
   }, API + encodeURIComponent("/"));
-  if (!smoke.status) {
+  if (!smoke.status || smoke.status === 403) {
     throw new Error(
-      `composer-api недоступен (${smoke.error ?? "fetch failed"}) — вероятно, не работает прокси`
+      `composer-api недоступен (HTTP ${smoke.status || "0"}${smoke.error ? `: ${smoke.error}` : ""}) — прокси или IP заблокированы`
     );
   }
 
