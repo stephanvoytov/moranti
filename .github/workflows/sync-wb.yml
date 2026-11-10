@@ -99,6 +99,10 @@ jobs:
           OZON_PROXY_USER: ${{ secrets.OZON_PROXY_USER }}
           OZON_PROXY_PASS: ${{ secrets.OZON_PROXY_PASS }}
           OZON_HEADLESS: "0"
+          # Системный Chrome с раннера вместо Chromium из patchright — под xvfb
+          # Chromium палится Variti. Если Chrome не установлен, модуль
+          # откатится на встроенный Chromium.
+          OZON_CHANNEL: "chrome"
           # Прокси в РФ — держим и таймзону процесса российской: UTC при
           # российском IP для Variti выглядит подозрительно.
           TZ: "Europe/Moscow"

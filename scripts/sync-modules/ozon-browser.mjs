@@ -109,11 +109,21 @@ async function launch() {
   // Обычный playwright здесь НЕ работает (Variti блокирует headless).
   const { chromium } = await import("patchright");
 
-  browser = await chromium.launch({
-    headless: isHeadless(),
-    args: LAUNCH_ARGS,
-  });
-  log(`Chromium ${browser.version()} (headless: ${isHeadless()})`);
+  // Канал браузера: по умолчанию — собранный patchright Chromium. На GitHub
+  // runner он под xvfb палится Variti (отдаёт заглушку «Похоже, нет соединения»),
+  // поэтому можно переключиться на системный Google Chrome (OZON_CHANNEL=chrome).
+  const channel = process.env.OZON_CHANNEL || undefined;
+  const launchOpts = { headless: isHeadless(), args: LAUNCH_ARGS };
+  if (channel) {
+    try {
+      browser = await chromium.launch({ ...launchOpts, channel });
+    } catch (err) {
+      log(`channel "${channel}" недоступен (${String(err?.message).slice(0, 60)}) — беру встроенный Chromium`);
+      browser = null;
+    }
+  }
+  if (!browser) browser = await chromium.launch(launchOpts);
+  log(`Chromium ${browser.version()} (headless: ${isHeadless()}, channel: ${channel ?? "patchright"})`);
 
   browser.on("disconnected", () => {
     log("browser disconnected — будет перезапущен при следующем запросе");
