@@ -95,6 +95,9 @@ const flags = {
   skipOzonPrices:
     process.argv.includes("--skip-ozon-prices") ||
     process.env.SYNC_SKIP_OZON_PRICES === "1",
+  // Только фаза цен Ozon (без WB/Ozon API и без остальных фаз). Нужна для
+  // запуска с обычной машины: GitHub runner Variti блокирует заглушкой.
+  pricesOnly: process.argv.includes("--prices-only"),
   fromPhase: null,
 };
 
@@ -128,6 +131,9 @@ const PHASES = [
  * @returns {boolean}
  */
 function shouldRun(phase) {
+  // --prices-only: только фаза цен Ozon (запускается с машины, где проходит
+  // Variti — GitHub runner он блокирует заглушкой).
+  if (flags.pricesOnly) return phase === "ozon-prices";
   if (!flags.fromPhase) return true;
   const idx = PHASES.indexOf(phase);
   const fromIdx = PHASES.indexOf(flags.fromPhase);
@@ -715,13 +721,13 @@ async function main() {
   const ozonClientId = process.env.OZON_CLIENT_ID;
   const ozonApiKey = process.env.OZON_API_KEY;
 
-  if (!wbApiKey && !flags.ozonOnly) {
+  if (!wbApiKey && !flags.ozonOnly && !flags.pricesOnly) {
     console.error("ERROR: WB_API_KEY не задан.");
     console.error("  Локально: добавь WB_API_KEY=... в .env.local");
     console.error("  Vercel:   добавь WB_API_KEY в Settings → Environment Variables");
     process.exit(1);
   }
-  if ((!ozonClientId || !ozonApiKey) && !flags.wbOnly) {
+  if ((!ozonClientId || !ozonApiKey) && !flags.wbOnly && !flags.pricesOnly) {
     console.error("ERROR: OZON_CLIENT_ID и OZON_API_KEY не заданы.");
     console.error("  Локально: добавь в .env.local");
     console.error("  Vercel:   добавь в Settings → Environment Variables");
