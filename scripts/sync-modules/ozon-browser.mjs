@@ -113,6 +113,7 @@ async function launch() {
     headless: isHeadless(),
     args: LAUNCH_ARGS,
   });
+  log(`Chromium ${browser.version()} (headless: ${isHeadless()})`);
 
   browser.on("disconnected", () => {
     log("browser disconnected — будет перезапущен при следующем запросе");
