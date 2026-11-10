@@ -50,6 +50,15 @@ jobs:
       - name: Install xvfb
         run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb
 
+      # Шрифты и TZ: голый ubuntu-latest без кириллицы рендерит текст иначе,
+      # чем реальная машина — для Variti это сигнал бота (отдаёт заглушку
+      # «Похоже, нет соединения» вместо страницы товара).
+      - name: Install fonts for headful Chromium
+        run: |
+          sudo apt-get install -y -qq fonts-dejavu fonts-liberation fonts-noto-core fonts-noto-color-emoji
+          fc-cache -f >/dev/null
+          fc-list :lang=ru | wc -l
+
       - run: npx prisma generate
 
       # Preflight прокси Ozon: мёртвый прокси раньше проявлялся только внутри
@@ -70,7 +79,7 @@ jobs:
           if [ -n "$OZON_PROXY_USER" ]; then
             args+=(-U "$OZON_PROXY_USER:$OZON_PROXY_PASS")
           fi
-          code=$(curl "${args[@]}" https://www.ozon.ru/ 2>/dev/null) || code=000
+          code=$(curl "${args[@]}" https://www.ozon.ru/ || echo "000")
           echo "прокси → ozon.ru: HTTP $code"
           if [ "$code" = "000" ]; then
             echo "::warning::прокси Ozon не отвечает — фаза цен, скорее всего, не сработает"
@@ -90,6 +99,9 @@ jobs:
           OZON_PROXY_USER: ${{ secrets.OZON_PROXY_USER }}
           OZON_PROXY_PASS: ${{ secrets.OZON_PROXY_PASS }}
           OZON_HEADLESS: "0"
+          # Прокси в РФ — держим и таймзону процесса российской: UTC при
+          # российском IP для Variti выглядит подозрительно.
+          TZ: "Europe/Moscow"
 
       # Если БД была недоступна, sync-all.mjs обновляет data/products.json
       # (JSON fallback) — коммитим его, чтобы сайт получил актуальные цены/стоки.
