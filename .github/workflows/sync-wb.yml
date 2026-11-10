@@ -70,7 +70,7 @@ jobs:
           if [ -n "$OZON_PROXY_USER" ]; then
             args+=(-U "$OZON_PROXY_USER:$OZON_PROXY_PASS")
           fi
-          code=$(curl "${args[@]}" https://www.ozon.ru/ || echo "000")
+          code=$(curl "${args[@]}" https://www.ozon.ru/ 2>/dev/null) || code=000
           echo "прокси → ozon.ru: HTTP $code"
           if [ "$code" = "000" ]; then
             echo "::warning::прокси Ozon не отвечает — фаза цен, скорее всего, не сработает"
