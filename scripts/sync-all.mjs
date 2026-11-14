@@ -53,6 +53,7 @@ import {
 import { mergeProductSources } from "./sync-modules/merge.mjs";
 import { syncModels, syncOzonModels, archiveGoneProducts } from "./sync-modules/models.mjs";
 import { createJsonStore } from "./sync-modules/json-store.mjs";
+import { withDatabaseRetry } from "./sync-modules/db-retry.mjs";
 
 // --- Зависимости (прямой import — esbuild трассирует его для бандла) ---
 import { PrismaClient } from "@prisma/client";
@@ -76,11 +77,11 @@ const DB_PREFLIGHT_TIMEOUT_MS = 15000;
 
 /**
  * Сколько записей писать в БД одновременно. Раннер GitHub → Postgres на VPS:
- * один UPDATE = один round-trip (~200 мс), поэтому последовательный цикл из
- * 105 товаров упирается в 100+ секунд. Параллельная запись независимых строк
- * прячет задержку сети (настраивается SYNC_DB_CONCURRENCY).
+ * Удалённый PostgreSQL периодически отвечает с SocketTimeout/P1008. Низкий
+ * параллелизм уменьшает число одновременных запросов и нагрузку на пул.
+ * Значение можно переопределить через SYNC_DB_CONCURRENCY.
  */
-const DB_WRITE_CONCURRENCY = Math.max(1, Number(process.env.SYNC_DB_CONCURRENCY ?? 5));
+const DB_WRITE_CONCURRENCY = Math.max(1, Number(process.env.SYNC_DB_CONCURRENCY ?? 2));
 
 const isCliRun = process.argv[1] === fileURLToPath(import.meta.url);
 
@@ -527,7 +528,7 @@ import {
 async function getExistingProducts(prisma) {
   // select: тянем только поля, которые реально используются в merge/archive/models —
   // не загружаем тяжёлые поля, которых нет в списке (оптимизация памяти/трафика)
-  const all = await prisma.product.findMany({
+  const all = await withDatabaseRetry(() => prisma.product.findMany({
     orderBy: { id: "asc" },
     select: {
       id: true,
@@ -566,7 +567,7 @@ async function getExistingProducts(prisma) {
       archivedAt: true,
       modelId: true,
     },
-  });
+  }), { label: "product.findMany" });
   return {
     byWbArticle: new Map(all.filter((p) => p.wbArticle).map((p) => [Number(p.wbArticle), p])),
     byOzonArticle: new Map(all.filter((p) => p.ozonArticle).map((p) => [Number(p.ozonArticle), p])),
@@ -577,10 +578,10 @@ async function getExistingProducts(prisma) {
 }
 
 async function generateId(prisma) {
-  const last = await prisma.product.findFirst({
+  const last = await withDatabaseRetry(() => prisma.product.findFirst({
     orderBy: { id: "desc" },
     select: { id: true },
-  });
+  }), { label: "product.findFirst" });
   const num = last ? parseInt(last.id.replace("mor-", ""), 10) + 1 : 1;
   return "mor-" + String(num).padStart(3, "0");
 }
@@ -598,10 +599,10 @@ async function ensureUniqueSlug(prisma, base, excludeId) {
   let candidate = base;
   let n = 2;
   for (;;) {
-    const existing = await prisma.product.findUnique({
+    const existing = await withDatabaseRetry(() => prisma.product.findUnique({
       where: { slug: candidate },
       select: { id: true },
-    });
+    }), { label: "product.findUnique(slug)" });
     if (!existing || existing.id === excludeId) return candidate;
     candidate = `${base}-${n}`;
     n++;
@@ -626,6 +627,8 @@ async function createProduct(prisma, data) {
       )) || id;
 
     try {
+      // Не ретраим create вслепую: при SocketTimeout сервер мог успеть
+      // закоммитить INSERT, а повтор создал бы дубликат с новым ID.
       await prisma.product.create({
         data: {
           id,
@@ -669,7 +672,7 @@ async function createProduct(prisma, data) {
   }
 }
 
-async function updateProduct(prisma, id, data) {
+async function updateProduct(prisma, id, data, currentSlug = null) {
   const updateData = {};
   const fields = [
     "name", "price", "originalPrice", "wbPrice", "wbOriginalPrice",
@@ -689,12 +692,15 @@ async function updateProduct(prisma, id, data) {
   if (Object.keys(updateData).length === 0) return false;
 
   // slug считается из названия/цвета в merge.mjs; здесь гарантируем уникальность
-  if (updateData.slug) {
+  if (updateData.slug && updateData.slug !== currentSlug) {
     updateData.slug = await ensureUniqueSlug(prisma, updateData.slug, id);
   }
 
   if (!flags.dry) {
-    await prisma.product.update({ where: { id }, data: updateData });
+    await withDatabaseRetry(
+      () => prisma.product.update({ where: { id }, data: updateData }),
+      { label: "product.update" },
+    );
   }
   return true;
 }
@@ -741,22 +747,14 @@ async function main() {
     });
   }
 
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-  /** Ретрай на случай если БД временно недоступна */
+  /** Ретрай только для временных ошибок PostgreSQL; постоянные ошибки сразу пробрасываются. */
   async function prismaRetry(fn) {
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      try {
-        return await fn();
-      } catch (e) {
-        if (attempt < 3) {
-          console.log(`  Повтор БД ${attempt}/3 через ${attempt}с...`);
-          await sleep(attempt * 1000);
-        } else {
-          throw e;
-        }
-      }
-    }
+    return withDatabaseRetry(fn, {
+      label: "PostgreSQL query",
+      onRetry: ({ attempt, delayMs, error }) => {
+        log.line(`  Повтор БД ${attempt}/3 через ${delayMs}мс: ${shortError(error)}`);
+      },
+    });
   }
 
   try {
@@ -910,7 +908,7 @@ async function main() {
         }
 
         await mapLimit(pendingWbUpdates, DB_WRITE_CONCURRENCY, async ({ db, article, updates }) => {
-          const ok = await updateProduct(store, db.id, updates);
+          const ok = await updateProduct(store, db.id, updates, db.slug);
           if (!ok) return;
           stats.wbUpdated++;
           const changes = formatChanges(db, updates);
@@ -1078,7 +1076,7 @@ async function main() {
         }
 
         await mapLimit(pendingOzonUpdates, DB_WRITE_CONCURRENCY, async ({ db, offerId, updates }) => {
-          const ok = await updateProduct(store, db.id, updates);
+          const ok = await updateProduct(store, db.id, updates, db.slug);
           if (!ok) return;
           stats.ozonUpdated++;
           const changes = formatChanges(db, updates);
@@ -1239,7 +1237,7 @@ async function main() {
           }
 
           await mapLimit(pendingPriceUpdates, DB_WRITE_CONCURRENCY, async ({ db, sku, updates, changes }) => {
-            const ok = await updateProduct(store, db.id, updates);
+            const ok = await updateProduct(store, db.id, updates, db.slug);
             if (!ok) return;
             updated++;
             log.line(`  ${db.id} ozon-${sku} «${db.name}»: ${changes.join(", ")}`);
