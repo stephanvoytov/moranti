@@ -745,9 +745,7 @@ async function main() {
     });
   }
 
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-  /** Ретрай на случай если БД временно недоступна */
+  /** Ретрай только для временных ошибок PostgreSQL; постоянные ошибки сразу пробрасываются. */
   async function prismaRetry(fn) {
     return withDatabaseRetry(fn, {
       label: "PostgreSQL query",
@@ -908,7 +906,7 @@ async function main() {
         }
 
         await mapLimit(pendingWbUpdates, DB_WRITE_CONCURRENCY, async ({ db, article, updates }) => {
-          const ok = await updateProduct(store, db.id, updates);
+          const ok = await updateProduct(store, db.id, updates, db.slug);
           if (!ok) return;
           stats.wbUpdated++;
           const changes = formatChanges(db, updates);
@@ -1076,7 +1074,7 @@ async function main() {
         }
 
         await mapLimit(pendingOzonUpdates, DB_WRITE_CONCURRENCY, async ({ db, offerId, updates }) => {
-          const ok = await updateProduct(store, db.id, updates);
+          const ok = await updateProduct(store, db.id, updates, db.slug);
           if (!ok) return;
           stats.ozonUpdated++;
           const changes = formatChanges(db, updates);
@@ -1237,7 +1235,7 @@ async function main() {
           }
 
           await mapLimit(pendingPriceUpdates, DB_WRITE_CONCURRENCY, async ({ db, sku, updates, changes }) => {
-            const ok = await updateProduct(store, db.id, updates);
+            const ok = await updateProduct(store, db.id, updates, db.slug);
             if (!ok) return;
             updated++;
             log.line(`  ${db.id} ozon-${sku} «${db.name}»: ${changes.join(", ")}`);
