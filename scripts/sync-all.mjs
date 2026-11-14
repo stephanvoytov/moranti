@@ -627,7 +627,9 @@ async function createProduct(prisma, data) {
       )) || id;
 
     try {
-      await withDatabaseRetry(() => prisma.product.create({
+      // Не ретраим create вслепую: при SocketTimeout сервер мог успеть
+      // закоммитить INSERT, а повтор создал бы дубликат с новым ID.
+      await prisma.product.create({
         data: {
           id,
           slug,
@@ -660,7 +662,7 @@ async function createProduct(prisma, data) {
           wbUpdatedAt: data.wbUpdatedAt ?? null,
           archivedAt: data.archivedAt ?? null,
         },
-      }), { label: "product.create" });
+      });
       return id;
     } catch (err) {
       const code = err?.code;
